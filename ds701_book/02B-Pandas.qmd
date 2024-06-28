@@ -1,0 +1,549 @@
+---
+title: 'Essential Tools: Pandas'
+jupyter: python3
+---
+
+
+
+Pandas is the Python Data Analysis Library. 
+
+Pandas is an extremely versatile tool for manipulating datasets.   
+
+It also produces high quality plots with matplotlib, and integrates nicely with other libraries that expect NumPy arrays.
+
+Use of Pandas is a data science __best practice.__
+
+The most important tool provided by Pandas is the **data frame.**
+
+A data frame is a table in which each row and column is given a label.
+
+Pandas DataFrames are documented at:
+
+http://pandas.pydata.org/pandas-docs/dev/generated/pandas.DataFrame.html
+
+Get in the habit: whenever you load data, place it into a dataframe as your first step.
+
+## Getting started
+
+```{python}
+#| slideshow: {slide_type: fragment}
+import pandas as pd
+import pandas_datareader.data as web
+from pandas import Series, DataFrame
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from datetime import datetime
+
+#pd.__version__
+
+%matplotlib inline
+```
+
+## Fetching, storing and retrieving your data
+
+For demonstration purposes, we'll use a utility library that fetches data from standard online sources, such as Yahoo! Finance.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+import yfinance as yf
+
+yahoo_stocks = pd.DataFrame(yf.download('YELP',start='2015-01-01',end='2015-12-31', progress = False))
+
+yahoo_stocks.head()
+```
+
+This is a typical example of a dataframe.  
+
+Notice how each row has a label and each column has a label.
+
+A dataframe is an object that has __many__ methods associated with it, to do all sorts of useful things.
+
+Here is a simple method: ``.info()``
+
+```{python}
+#| scrolled: true
+#| slideshow: {slide_type: '-'}
+yahoo_stocks.info()
+```
+
+### Reading to/from a ``.csv`` file
+
+Continuing to explore methods, let's write the dataframe out to a ``.csv`` file:
+
+```{python}
+#| slideshow: {slide_type: fragment}
+yahoo_stocks.to_csv('yahoo_data.csv')
+```
+
+```{python}
+!head yahoo_data.csv
+```
+
+And of course we can likewise read a ``.csv`` file into a dataframe.   This is probably the most common way you will get data into Pandas.
+
+```{python}
+#| scrolled: true
+#| slideshow: {slide_type: '-'}
+df = pd.read_csv('yahoo_data.csv')
+df.head()
+```
+
+## Working with data columns
+
+In general, we'll usually organize things so that rows in the dataframe are __items__ and columns are __features__.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+df.columns
+```
+
+Pandas allows you to use standard python __indexing__ to refer to columns (eg features) in your dataframe:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+df['Open']
+```
+
+Pandas also allows you to use a syntax like an object attribute to refer to a column.
+
+But note that the column name cannot include a space in this case.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+df.Open
+```
+
+You can select a list of columns:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+df[['Open','Close']].head()
+```
+
+Putting things together -- make sure this syntax is clear to you:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+df.Date.head(10)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+df.Date.tail(10)
+```
+
+Changing column names is as simple as assigning to the ``.columns`` property.
+
+Let's adjust column names so that none of them include spaces:
+
+```{python}
+#| slideshow: {slide_type: fragment}
+new_column_names = [x.lower().replace(' ','_') for x in df.columns]
+df.columns = new_column_names
+df.info()
+```
+
+(Be sure you understand the __list comprehension__ used above -- it's a common and important way to process a list in python.)
+
+Now **all** columns can be accessed using the **dot** notation:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+df.adj_close.head()
+```
+
+## A sampling of DataFrame methods.
+
+A dataframe object has many useful methods.
+
+Familiarize yourself with dataframe methods -- they are very useful.
+
+These should be self-explanatory.
+
+```{python}
+#| slideshow: {slide_type: slide}
+df[['high', 'low', 'open', 'close', 'volume', 'adj_close']].mean()
+```
+
+```{python}
+#| slideshow: {slide_type: slide}
+df[['high', 'low', 'open', 'close', 'volume', 'adj_close']].std()
+```
+
+```{python}
+#| slideshow: {slide_type: slide}
+df[['high', 'low', 'open', 'close', 'volume', 'adj_close']].median()
+```
+
+```{python}
+#| slideshow: {slide_type: slide}
+df.open.mean()
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+df.high.mean()
+```
+
+### Plotting methods
+
+Pandas has an extensive library of plotting functions, and they are very easy to use.
+
+These are your "first look" functions.
+
+(Later you will use specialized graphics packages for more sophisticated visualizations.)
+
+```{python}
+#| slideshow: {slide_type: fragment}
+df.high.plot(label='High')
+df.low.plot(label='Low')
+plt.title('YELP Stock Price')
+plt.ylabel('Dollars')
+plt.legend(loc='best');
+```
+
+```{python}
+#| slideshow: {slide_type: slide}
+df.adj_close.hist()
+plt.xlabel('Adjusted Closing Price')
+plt.ylabel('Dollars')
+plt.title('YELP');
+```
+
+### Bulk Operations
+
+Methods like ``sum()`` and ``std()`` work on entire columns. 
+
+We can run our own functions across all values in a column (or row) using ``apply()``.
+
+As an example, let's go back to this plot:
+
+```{python}
+df.high.plot(label='High')
+df.low.plot(label='Low')
+plt.title('YELP Stock Price')
+plt.ylabel('Dollars')
+plt.legend(loc='best');
+```
+
+It's __almost__ perfect.  The only problem is the $x$-axis: it should show time.
+
+To fix this, we need to make the dataframe __index__ -- that is, the __row labels__ -- into dates.
+
+We have a problem however: the "dates" in our data are only __strings__.   We need Pandas to understand that they are actually dates.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+df.date.head()
+```
+
+To convert each string in the ``date`` column to an actual date we will use ``.apply()``:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+new_df = df.copy()
+new_df.date = df.date.apply(lambda d: datetime.strptime(d.split()[0], "%Y-%m-%d"))
+new_df.date.head()
+```
+
+Each row in a DataFrame is associated with an index, which is a label that uniquely identifies a row.
+
+The row indices so far have been auto-generated by pandas, and are simply integers starting from 0. 
+
+Fixing this is as easy as assigning to the `index` property of the DataFrame.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+new_df.index = new_df.date
+new_df.head()
+```
+
+Now that we have made an index based on a real date, we can drop the original `date` column.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+new_df = new_df.drop(['date'],axis=1)
+new_df.head()
+```
+
+Now we can see that Pandas handles these dates quite nicely:
+
+```{python}
+new_df.high.plot(label='High')
+new_df.low.plot(label='Low')
+plt.title('YELP Stock Price')
+plt.ylabel('Dollars')
+plt.legend(loc='best');
+```
+
+### Accessing rows of the DataFrame
+
+So far we've seen how to access a column of the DataFrame.  To access a row we use a different notation.
+
+To access a row by its index value, use the **`.loc()`** method.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+new_df.loc[datetime(2015,1,23,0,0)]
+```
+
+To access a row by its sequence number (ie, like an array index), use **`.iloc()`** ('Integer Location')
+
+```{python}
+#| slideshow: {slide_type: '-'}
+new_df.iloc[0,:]
+```
+
+To iterate over the rows, use **`.iterrows()`**
+
+```{python}
+#| slideshow: {slide_type: '-'}
+num_positive_days = 0
+for idx, row in df.iterrows():
+    if row.close > row.open:
+        num_positive_days += 1
+        
+print("The total number of positive-gain days is {}.".format(num_positive_days))
+```
+
+## Filtering
+
+It is easy to select interesting rows from the data.  
+
+All the operations below return a new DataFrame, which itself can be treated the same way as all DataFrames we have seen so far.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+tmp_high = new_df.high > 55
+tmp_high.head()
+```
+
+Summing a Boolean array is the same as counting the number of **`True`** values.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+sum(tmp_high)
+```
+
+Now, let's select only the rows of **`df1`** that correspond to **`tmp_high`**
+
+```{python}
+#| slideshow: {slide_type: '-'}
+new_df[tmp_high]
+```
+
+Putting it all together, we have the following commonly-used patterns:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+positive_days = new_df[new_df.close > new_df.open]
+positive_days.head()
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+very_positive_days = new_df[(new_df.close - new_df.open) > 4]
+very_positive_days.head()
+```
+
+## Creating new columns
+
+To create a new column, simply assign values to it.  Think of the columns as a dictionary:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+new_df['profit'] = (new_df.open < new_df.close)
+new_df.head()
+```
+
+Let's give each row a ``gain`` value as a categorical variable:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+for idx, row in new_df.iterrows():
+    if row.open > row.close:
+        new_df.loc[idx,'gain']='negative'
+    elif (row.close - row.open) < 1:
+        new_df.loc[idx,'gain']='small_gain'
+    elif (row.close - row.open) < 6:
+        new_df.loc[idx,'gain']='medium_gain'
+    else:
+        new_df.loc[idx,'gain']='large_gain'
+new_df.head()
+```
+
+Here is another, more "functional", way to accomplish the same thing.
+
+Define a function that classifies rows, and **`apply`** it to each row.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+def namerow(row):
+    if row.open > row.close:
+        return 'negative'
+    elif (row.close - row.open) < 1:
+        return 'small_gain'
+    elif (row.close - row.open) < 6:
+        return 'medium_gain'
+    else:
+        return 'large_gain'
+
+new_df['test_column'] = new_df.apply(namerow, axis = 1)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+new_df.head()
+```
+
+OK, point made, let's get rid of that extraneous `test_column`:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+new_df.drop('test_column', axis = 1)
+```
+
+## Grouping
+
+An **extremely** powerful DataFrame method is **`groupby()`**. 
+
+This is entirely analagous to **`GROUP BY`** in SQL.
+
+It will group the rows of a DataFrame by the values in one (or more) columns, and let you iterate through each group.
+
+Here we will look at the average gain among the  categories of gains (negative, small, medium and large) we defined above and stored in column `gain`.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+gain_groups = new_df.groupby('gain')
+```
+
+Essentially, **`gain_groups`** behaves like a dictionary:
+* the keys are the unique values found in the `gain` column, and 
+* the values are DataFrames that contain only the rows having the corresponding unique values.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+for gain, gain_data in gain_groups:
+    print(gain)
+    print(gain_data.head())
+    print('=============================')
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+for gain, gain_data in new_df.groupby("gain"):
+    print('The average closing value for the {} group is {}'.format(gain,
+                                                           gain_data.close.mean()))
+```
+
+## Other Pandas Classes
+
+A DataFrame is essentially an annotated 2-D array.
+
+Pandas also has annotated versions of 1-D and 3-D arrays.
+
+A 1-D array in Pandas is called a `Series`.
+
+A 3-D array in Pandas is created using a ``MultiIndex``.
+
+To use these, read the documentation!
+
+## Comparing multiple stocks
+
+As a last task, we will use the experience we obtained so far -- and learn some new things -- in order to compare the performance of different stocks we obtained from Yahoo finance.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+stocks = ['ORCL', 'TSLA', 'IBM','YELP', 'MSFT']
+stock_df = pd.DataFrame()
+for s in stocks:
+    stock_df[s] = pd.DataFrame(yf.download(s,start='2014-01-01',end='2014-12-31', progress = False))['Close']
+stock_df.head()
+```
+
+```{python}
+stock_df.plot();
+```
+
+Next, we will calculate returns over a period of length $T,$ defined as:
+
+$$ r(t) = \frac{f(t)-f(t-T)}{f(t)} $$
+
+The returns can be computed with a simple DataFrame method **`pct_change()`**.  Note that for the first $T$ timesteps, this value is not defined (of course):
+
+```{python}
+#| slideshow: {slide_type: '-'}
+rets = stock_df.pct_change(30)
+rets.iloc[25:35]
+```
+
+Now we'll plot the timeseries of the returns of the different stocks.
+
+Notice that the `NaN` values are gracefully dropped by the plotting function.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+rets.plot();
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+plt.scatter(rets.TSLA, rets.YELP)
+plt.xlabel('TESLA 30-day returns')
+plt.ylabel('YELP 30-day returns');
+```
+
+There appears to be some (fairly strong) correlation between the movement of TSLA and YELP stocks.  Let's measure this.
+
+The correlation coefficient between variables $X$ and $Y$ is defined as follows:
+
+$$ \text{Corr}(X,Y) = \frac{E\left[(X-\mu_X)(Y-\mu_Y)\right]}{\sigma_X\sigma_Y} $$
+
+Pandas provides a dataframe method to compute the correlation coefficient of all pairs of columns: **`corr()`**.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+rets.corr()
+```
+
+It takes a bit of time to examine that table and draw conclusions.  
+
+To speed that process up it helps to visualize the table.
+
+We will learn more about visualization later, but for now this is a simple example.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+sns.heatmap(rets.corr(), annot=True);
+```
+
+Finally, it is important to know that the plotting performed by Pandas is just a layer on top of `matplotlib` (i.e., the `plt` package).  
+
+So Panda's plots can (and often should) be replaced or improved by using additional functions from `matplotlib`.
+
+For example, suppose we want to know both the returns as well as the standard deviation of the returns of a stock (i.e., its risk).  
+
+Here is visualization of the result of such an analysis, and we construct the plot using only functions from `matplotlib`.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+# plt.scatter(rets.mean(), rets.std());
+plt.xlabel('Expected returns')
+plt.ylabel('Standard Deviation (Risk)')
+plt.xlim([-.05,.1])
+plt.ylim([0,.3])
+for label, x, y in zip(rets.columns, rets.mean(), rets.std()):
+    plt.annotate(
+        label, 
+        xy = (x, y), xytext = (30, -30),
+        textcoords = 'offset points', ha = 'right', va = 'bottom',
+        bbox = dict(boxstyle = 'round,pad=0.5', fc = 'yellow', alpha = 0.5),
+        arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'))
+```
+
+To understand what these functions are doing, (especially the `annotate` function), you will need to consult the online documentation for matplotlib.  Just use Google to find it.
+
+

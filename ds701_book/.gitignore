@@ -1,0 +1,6 @@
+/.quarto/
+__pycache__
+_book
+example.txt
+img.jpg
+yahoo_data.csv

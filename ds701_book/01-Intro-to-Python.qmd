@@ -1,0 +1,846 @@
+---
+title: Introduction to Python
+jupyter: python3
+---
+
+
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: skip}
+#| tags: [hide-input]
+%matplotlib inline
+%config InlineBackend.figure_format='retina'
+# import libraries
+import numpy as np
+import matplotlib as mp
+import pandas as pd
+import matplotlib.pyplot as plt
+import pandas as pd
+from importlib import reload
+from datetime import datetime
+from IPython.display import Image
+from IPython.display import display_html
+from IPython.display import display
+from IPython.display import Math
+from IPython.display import Latex
+from IPython.display import HTML;
+```
+
+This chapter will not be covered in lecture.  It's here to refresh the memory of those who haven't used python in a while.  
+
+For those that don't know python -- but do know programming -- this chapter will give you an idea of how python is similar to, and different from, your favorite programming language.  
+
+## How do I run code?
+
+There are four ways to run python code:
+
+1. put your code in a file (say program.py) and run `python program.py`
+ * This is __not a good idea__ when you are first writing your code
+ * Later, once your code is debugged, this is the way to go
+
+2. type your code into the python interpreter
+ * This __can really help in debugging__ since you interact with the interpreter and fix mistakes as they happen
+ * good for writing the first version of some new code
+ * Later you can put the code in a file
+
+3. type in an IDE (Spyder, VStudio) or cut/paste your code in `ipython`
+ * This is a good method if you __really__ use the IDE
+ * learn how to use the debugger!
+ * But otherwise it's not better than option 1
+
+4. run `ipython` in a browser, using the system called `jupyter notebook`
+ * This is even better
+ * All the advantages of `ipython` plus interleaved documentation and graphical output
+ * That is what these slides are written in
+
+## Functions and Methods
+
+Function calls use standard syntax:
+
+    func(argument1, argument2)
+
+However most things you interact with in python are **objects** and they have **methods**.  A method is a function that operates on an object:
+
+    object.method(argument1, argument2)
+    
+Note that the method might modify the object, or it might return a new, different object.   You just have to know the method and keep track of what it does.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+number_list = [1, 3, 5, 7]
+number_list.append(8)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+number_list
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+string = 'This is a string'
+string.split()
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+string
+```
+
+## Printing
+
+From the interactive python environment:
+
+```{python}
+#| slideshow: {slide_type: fragment}
+print("Hello World")
+```
+
+From a file:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+#!/usr/bin/env python
+
+print("Hello World!")
+```
+
+## Data types
+
+Basic data types:
+
+1. Strings
+2. Integers
+3. Floats
+4. Booleans
+
+These are all objects in Python. 
+
+```{python}
+#| slideshow: {slide_type: fragment}
+a = 7
+type(a)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+b = 3
+type(b)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+c = 3.2
+type(c)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+d = True
+type(d)
+```
+
+Python **doesn't require explicitly declared variable types** like C and other languages.  Python is dynamically typed.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+myVar = 'I am a string'
+print(myVar)
+myVar = 2.3
+print(myVar)
+```
+
+## Strings
+
+String manipulation will be very important for many of the tasks we will do. Here are some important string operations.
+
+A string uses either single quotes or double quotes.  Pick one option and be consistent.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+'This is a string'
+```
+
+```{python}
+#| slideshow: {slide_type: '-'}
+"This is also a string"
+```
+
+The '+' operator concatenates strings.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+a = "Hello"  
+b = " World" 
+a + b
+```
+
+Portions of strings are manipulated using indexing (which python calls 'slicing').
+
+```{python}
+#| slideshow: {slide_type: fragment}
+a = "World"
+
+a[0]
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+a[-1]
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+"World"[0:4]
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+a[::-1]
+```
+
+Some important string functions:
+
+```{python}
+#| slideshow: {slide_type: fragment}
+a = "Hello World"
+"-".join(a)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+a.startswith("Wo")
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+a.endswith("rld")
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+a.replace("o","0").replace("d","[)").replace("l","1")
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+a.split()
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+a.split('o')
+```
+
+Strings are an example of an **immutable** data type.  Once you instantiate a string you cannot change any characters in it's set.  
+
+```{python}
+#| slideshow: {slide_type: '-'}
+#| tags: [raises-exception]
+string = "string"
+string[-1] = "y"  # This will generate and error as we attempt to modify the string
+```
+
+To create a string with embedded objects use the `.format()` method:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+course_name = 'CS506'
+enrollment = 90
+percent_full = 100.0
+'The course {} has an enrollment of {} and is {} percent full.'.format(
+    course_name,enrollment,percent_full)
+```
+
+A special formatting called an f-string allows you to print out variables very conveniently:
+
+```{python}
+f'The course {course_name} has an enrollment of {enrollment} and is {percent_full} percent full.'
+```
+
+## Code Structure
+
+Python uses indents and whitespace to group statements together.  To write a short loop in C, you might use:
+
+ ```c
+ for (i = 0, i < 5, i++){
+       printf("Hi! \n");
+    }
+ ```
+
+Python does not use curly braces like C, so the same program as above is written in Python as follows:
+
+```{python}
+#| scrolled: false
+#| slideshow: {slide_type: '-'}
+for i in range(5):
+    print("Hi")
+```
+
+If you have nested for-loops, there is a further indent for the inner loop.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+for i in range(3):
+    for j in range(3):
+        print(i, j)
+    
+    print("This statement is within the i-loop, but not the j-loop")
+```
+
+## File I/O
+
+`open()` and `close()` are used to access files.  However if you use the `with` statement the file close is automatically done for you.   
+
+You should use `with`.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+with open("example.txt", "w") as f:
+    f.write("Hello World! \n")
+    f.write("How are you? \n")
+    f.write("I'm fine. OK.\n")
+```
+
+Reading from a file:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+with open("example.txt", "r") as f:
+    data = f.readlines()
+    for line in data:
+        words = line.split()
+        print(words)
+```
+
+Here is an example of counting the number of lines and words in a file:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+lines = 0
+words = 0
+the_file = "example.txt"
+
+with open(the_file, 'r') as f:
+    for line in f:
+        lines += 1
+        words += len(line.split())
+print(f"There are {lines} lines and {words} words in the {the_file} file.")
+```
+
+## Lists, Tuples, Sets and Dictionaries
+
+Number and strings alone are not enough! We need data types that can hold multiple values.
+
+### Lists 
+
+A list is a collection of data items, which can be of differing types.
+
+Here is an empty list:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+groceries = []
+```
+
+A list is **mutable**, meaning that it can be altered.
+
+Adding to the list:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+groceries.append("oranges")  
+groceries.append("meat")
+groceries.append("asparagus")
+groceries
+```
+
+Accessing list items by index:
+
+```{python}
+#| slideshow: {slide_type: fragment}
+groceries[0]
+```
+
+```{python}
+#| slideshow: {slide_type: '-'}
+groceries[2]
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+len(groceries)
+```
+
+Sort the items in the list:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+groceries.sort()
+groceries
+```
+
+Remove an item from a list:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+groceries.remove('asparagus')
+groceries
+```
+
+Because lists are mutable, you can arbitrarily modify them.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+groceries[0] = 'peanut butter'
+groceries
+```
+
+### List Comprehensions
+
+A **list comprehension** makes a new list from an old list.  
+
+It is __incredibly__ useful (learn how to use it!)
+
+```{python}
+#| slideshow: {slide_type: '-'}
+groceries = ['asparagus', 'meat', 'oranges']
+veggie = [x for x in groceries if x != "meat"]
+veggie
+```
+
+This is the same as:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+newlist = []
+for x in groceries:
+    if x != 'meat':
+        newlist.append(x)
+newlist
+```
+
+Recall the mathematical notation:
+
+$$L_1 = \left\{x^2 : x \in \{0\ldots 9\}\right\}$$
+
+$$L_2 = \left\{1, 2, 4, 8,\ldots, 2^{12}\right\}$$
+
+$$M = \left\{x \mid x \in L_1 \text{ and } x \text{ is even}\right\}$$
+
+```{python}
+#| slideshow: {slide_type: fragment}
+L1 = [x**2 for x in range(10)]
+L2 = [2**i for i in range(13)]
+print(f'L1 is {L1}')
+print(f'L2 is {L2}')
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+M = [x for x in L1 if x % 2 == 0]
+print('M is {}'.format(M))
+```
+
+A sort-of "Sieve of Eratosthenes" in list comprehensions.
+
+Basic idea: generate all composite numbers, remove them from the set of all numbers, and what is left are the prime nnumbers.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+composites = [i*j for i in range(2,8) for j in range(2,8)]
+```
+
+```{python}
+#| slideshow: {slide_type: '-'}
+primes = [x for x in range(1,50) if x not in composites]
+print(primes)
+```
+
+Notice how much more concise and clear the list comprehension is.  It's more efficient too.
+
+### Sets
+
+A set is a collecton of items that cannot contain duplicates.  
+
+Sets handle operations like sets in mathematics.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+numbers = range(10)
+numbers = set(numbers)
+
+evens = {0, 2, 4, 6, 8}
+
+odds = numbers - evens
+odds
+```
+
+Sets also support the use of union (|), and intersection (&)
+
+### Dictionaries
+
+A dictionary is a map of keys to values.  
+
+**Keys must be unique**.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+simple_dict = {}
+
+simple_dict['cs506'] = 'data-mining tools'
+
+simple_dict['cs506']
+```
+
+Creating an already-initialized dictionary.   Note the use of curly braces.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+classes = {
+    'cs506': 'data-mining tools',
+    'cs565': 'data-mining algorithms'
+}
+```
+
+Check if item is in dictionary
+
+```{python}
+#| slideshow: {slide_type: '-'}
+'cs530' in classes
+```
+
+Add new item
+
+```{python}
+#| slideshow: {slide_type: '-'}
+classes['cs530'] = 'algorithms'
+classes['cs530']
+```
+
+Get just the keys
+
+```{python}
+#| slideshow: {slide_type: '-'}
+classes.keys()
+```
+
+Get just the values
+
+```{python}
+#| slideshow: {slide_type: '-'}
+classes.values()
+```
+
+Get the items in the dictionary
+
+```{python}
+#| slideshow: {slide_type: '-'}
+classes.items()
+```
+
+Get dictionary pairs another way
+
+```{python}
+#| slideshow: {slide_type: '-'}
+for key, value in classes.items():
+    print(key, value)
+```
+
+Dictionaries can be combined to make complex (and very useful) data structures.
+
+Here is a list within a dictionary within a dictionary.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+professors = {
+    "prof1": {
+        "name": "Evimaria Terzi",
+        "interests": ["algorithms", "data mining", "machine learning"]
+    },
+    "prof2": {
+        "name": "Mark Crovella",
+        "interests": ["computer networks", "data mining", "biological networks"]
+    },
+    "prof3": {
+        "name": "George Kollios",
+        "interests": ["databases", "data mining"]
+    }
+}
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+for prof in professors:
+    print('{} is interested in {}.'.format(
+            professors[prof]["name"],
+            professors[prof]["interests"][0]))
+```
+
+### Tuples
+
+Tuples are an **immutable** type. Like strings, once you create them, you cannot change them.  
+
+Because they are immutabile you can use them as keys in dictionaries.  
+
+However, they are similar to lists in that they are a collection of data and that data can be of differing types.  
+
+Here is a tuple version of our grocery list.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+groceries = ('orange', 'meat', 'asparagus', 2.5, True)
+groceries
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+groceries[2]
+```
+
+What will happen here?
+
+```{python}
+#| slideshow: {slide_type: '-'}
+#| tags: [raises-exception]
+groceries[2] = 'milk'
+```
+
+### Iterators and Generators
+
+We can loop over the elements of a list using **for**
+
+```{python}
+#| slideshow: {slide_type: '-'}
+for i in range(4):
+    print(i)
+```
+
+When we use **for** for dictionaries it loops over the keys of the dictionary
+
+```{python}
+#| slideshow: {slide_type: '-'}
+for k in {'evimaria': 'terzi', 'george': 'kollios'}:
+    print(k)
+```
+
+When we use **for** for strings it loops over the letters of the string:
+
+```{python}
+#| slideshow: {slide_type: '-'}
+for l in 'python is magic':
+    print(l)
+```
+
+What do these cases all have in common?   All of them are **iterable** objects.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+list({'evimaria': 'terzi', 'george': 'kollios'})
+```
+
+```{python}
+#| slideshow: {slide_type: '-'}
+list('python is magic')
+```
+
+```{python}
+#| slideshow: {slide_type: '-'}
+'-'.join('evimaria')
+```
+
+```{python}
+#| slideshow: {slide_type: '-'}
+'-'.join(['a','b','c'])
+```
+
+## Defining Functions
+
+```{python}
+#| scrolled: true
+#| slideshow: {slide_type: fragment}
+def displayperson(name,age):
+    print("My name is {} and I am {} years old.".format(name,age))
+    return
+    
+displayperson("Larry","40")
+```
+
+## Functional Programming
+
+<img src=figs/Functional-Homer.png width=400px>
+
+Functional programming is particularly valuable and common when working with data.  
+
+We'll see more sophisticated examples of this sort of programming later.
+
+### Lambda functions
+
+Python supports the creation of anonymous functions (i.e. functions that are not bound to a name) at runtime, using a construct called `lambda`.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+def f(x):
+    return x**2
+f(8)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+g = lambda x: x**2
+g(8)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+(lambda x: x**2)(8)
+```
+
+The above pieces of code are all equivalent! Note that there is no `return` statement in the `lambda` function.  Instead there is just a single expression, which defines what the function returns.
+
+A `lambda` function can take multiple arguments.   However it has to get all its work done in a single line of code!
+
+```{python}
+#| slideshow: {slide_type: '-'}
+f = lambda x, y : x + y
+f(2,3)
+```
+
+A `lambda` function does not need to be assigned to variable, but it can be used within the code wherever a function is expected.
+
+Here is an example of 'currying': a function that returns a new function, with some of the original arguments bound.
+
+```{python}
+#| slideshow: {slide_type: '-'}
+def multiply (n): 
+    return lambda x: x*n
+ 
+f = multiply(2)
+g = multiply(6)
+f
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+f(10)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+g(10)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+multiply(3)(30)
+```
+
+### Map
+
+Our first example of functional programming will be the **map** operator:
+
+`r = map(func, s)`
+
+`func` is a function and `s` is a sequence (e.g., a list). 
+
+`map()` returns an object that will apply function `func` to each of the elements of `s`.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+def dollar2euro(x):
+    return 0.89*x
+def euro2dollar(x):
+    return 1.12*x
+
+amounts= (100, 200, 300, 400)
+dollars = map(dollar2euro, amounts)
+list(dollars)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+amounts= (100, 200, 300, 400)
+euros = map(euro2dollar, amounts)
+list(euros)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+list(map(lambda x: 0.89*x, amounts))
+```
+
+**map** can also be applied to more than one list as long as they are of the same size and type
+
+```{python}
+#| slideshow: {slide_type: '-'}
+a = [1,2,3,4,5]
+b = [10, 20 , 30, 40, 50]
+
+l1 = map(lambda x,y: x+y, a,b)
+list(l1)
+```
+
+### Filter
+
+The next functional operator is **filter**.  
+
+`filter(function, list)` returns a new list containing all the elements of `list` for which `function()` evaluates to `True.` 
+
+```{python}
+#| slideshow: {slide_type: '-'}
+nums = [i for i in range(100)]
+even = filter(lambda x: x%2==0 and x!=0, nums)
+print(even)
+list(even)
+```
+
+## Libraries
+
+Python is a high-level open-source language.  But the _Python world_ is inhabited by many packages or libraries that provide useful things like array operations, plotting functions, and much more. 
+
+We can (and we will) import many different libraries of functions to expand the capabilities of Python in our programs.  
+
+```{python}
+#| slideshow: {slide_type: fragment}
+import random
+myList = [2, 109, False, 10, "data", 482, "mining"]
+random.choice(myList)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+from random import shuffle
+x = list(range(10))
+shuffle(x)
+x
+```
+
+## APIs
+
+For example, there are libraries that make it easy to interact with RESTful APIs.  
+
+A RESTful API is a service available on the Internet that uses the HTTP protocol for access.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+import requests
+
+width = '200'
+height = '300'
+response = requests.get('http://loremflickr.com/' + width + '/' + height)
+
+print(response)
+
+with open('img.jpg', 'wb') as f:
+    f.write(response.content)
+    
+```
+
+```{python}
+#| scrolled: true
+#| slideshow: {slide_type: fragment}
+from IPython.display import Image
+Image(filename="img.jpg")
+```
+

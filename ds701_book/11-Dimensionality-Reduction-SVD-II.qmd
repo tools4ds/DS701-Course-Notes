@@ -1,0 +1,713 @@
+---
+title: Dimensionality Reduction and PCA -- SVD II
+jupyter: python3
+---
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: skip}
+#| tags: [hide-cell]
+import numpy as np
+import scipy as sp
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+import matplotlib as mp
+import sklearn
+from IPython.display import Image
+
+%matplotlib inline
+```
+
+
+
+In the last lecture we learned about the SVD as a tool for constructing low-rank matrices.
+
+Today we'll look at it as a way to transform our data objects.
+
+As a reminder, here is what the SVD looks like:
+
+$$ \mbox{objects}\left\{\begin{array}{c}\;\\\;\\\;\\\;\\\;\end{array}\right.\;\;\overbrace{\left[\begin{array}{cccc}\begin{array}{c}\vdots\\\vdots\\{\bf a_1}\\\vdots\\\vdots\end{array}&\begin{array}{c}\vdots\\\vdots\\{\bf a_2}\\\vdots\\\vdots\end{array}&\dots&\begin{array}{c}\vdots\\\vdots\\{\bf a_n}\\\vdots\\\vdots\end{array}\\\end{array}\right]}^{\mbox{features}} =
+\overbrace{\left[\begin{array}{cc}\vdots&\vdots\\\vdots&\vdots\\\sigma_1\mathbf{u}_1&\sigma_k\mathbf{u}_k\\\vdots&\vdots\\\vdots&\vdots\end{array}\right]}^{\large k}
+\times
+\left[\begin{array}{ccccc}\dots&\dots&\mathbf{v}_1&\dots&\dots\\\dots&\dots&\mathbf{v}_k&\dots&\dots\end{array}\right]$$
+
+
+$$ A = U\Sigma V^T$$
+
+Notice that $U$ contains a row for each object.   
+
+In a sense we have transformed objects from an $n$ dimensional space to a $k$ dimensional space, where $k$ is (probably much) smaller than $n$.
+
+This is an example of __dimensionality reduction.__
+
+When we take our data to be the rows of $U\Sigma$ instead of rows of $A$, we are __reducing the dimension__ of our data from $n$ dimensions to $k$ dimensions.
+
+This suggests an idea: is there an __optimal__ transformation of the data into $k$ dimensions?
+    
+What would that mean?
+
+```{note}
+An excellent reference for the following section is 
+https://liorpachter.wordpress.com/2014/05/26/what-is-principal-component-analysis/.
+Some figures and discusion are taken from there.
+```
+
+<!-- https://liorpachter.wordpress.com/2014/05/26/what-is-principal-component-analysis/ -->
+
+Here is a natural criterion for the "best" $k$-dimensional transformation:
+
+__Find the $k$-dimensional hyperplane that is "closest" to the points.__
+
+More precisely:
+
+Given n points in $\mathbb{R}^n$, find the hyperplane (affine space) of dimension $k$ with the property that the squared distance of the points to their orthogonal projection onto the hyperplane is minimized.
+
+<center>
+    
+<img src="figs/pca_figure1.jpeg" alt="Figure" width="40%">
+    
+</center>
+
+<!-- Source: https://liorpachter.wordpress.com/2014/05/26/what-is-principal-component-analysis/ -->
+
+This sounds like an appealing criterion.   
+
+But it also turns out to have a strong statistical guarantee.
+
+In fact, this criterion is a transformation that captures the maximum __variance__ in the data.
+
+That is, the resulting $k$-dimensional dataset is the one with maximum variance.
+
+Let's see why this is the case.
+
+First, let's recall the idea of a dataset __centroid.__
+
+Given a $n\times d$ data matrix $X$ with observations on the rows (as always):
+    
+then 
+
+$$\overline{\mathbf{x}}^T = \frac{1}{n}\mathbf{1}^TX.$$
+
+In words: the centroid -- ie, the mean vector -- is the average over the rows.
+
+It is the "center of mass" of the dataset.
+
+Next, recall the sample variance of a dataset is:
+    
+$$ \operatorname{Var}(X) = \frac{1}{n}\sum_j\Vert \mathbf{x}_j^T - \overline{\mathbf{x}}^T\Vert^2 $$
+
+where $\mathbf{x}_j^T$ is row $j$ of $X$.
+
+In other words, the sample variance of the set of points is the average squared distance from each point to the centroid. 
+
+Consider if we move the points (translate each point by some constant amount).   Clearly, the sample variance does not change.
+
+So, let's move the points to be __centered__ on the __origin.__
+
+$$ \tilde{X} = X - \mathbf{1}\overline{\mathbf{x}}^T $$
+
+The sample variance of the new points $\tilde{X}$ is the same as the old points $X$, but the centroid of the new point set is the origin.
+
+Now that the mean of the points is the zero vector, we can reason geometrically.
+
+Here is a picture to show why the distance-minimizing subspace is variance-maximizing.
+
+In this figure,   
+* the red point is one example point from $\tilde{X}$, 
+* the green point is the origin / centroid, and
+* the blue point is the $k$-dimensional projection of the red point.
+
+<center>
+    
+<img src="figs/pca_figure5.jpeg" alt="Figure" width="40%">
+    
+</center>
+
+<!-- Source: https://liorpachter.wordpress.com/2014/05/26/what-is-principal-component-analysis/ -->
+
+The length of the black line is fixed -- it is the distance of the original point from the origin.
+
+So the squared length of the black line is this point's contribution to the sample variance.
+
+Now, regardless of how we shift the green line, a right triangle is formed because the projection is orthogonal. 
+
+So -- by virtue of the Pythagorean Theorem, the __blue line squared__ plus the __red line squared__ equals the __black line squared.__
+
+Which means that when we shift the subspace (green line) so as to __minimize the squared distances to all the example points__ $\tilde{X}$ (blue lines) we automatically __maximize the squared distance of all the resulting blue points to the origin__ (red lines).
+
+And the squared distance of the blue point from the origin (red dashed line) is its contribution to the new $k$-dimensional sample variance.
+
+In other words, the __distance-minimizing__ projection is the __variance-maximizing__ projection!
+
+```{python}
+#| hide_input: true
+#| tags: [hide-cell]
+def centerAxes(ax):
+    ax.spines['left'].set_position('zero')
+    ax.spines['right'].set_color('none')
+    ax.spines['bottom'].set_position('zero')
+    ax.spines['top'].set_color('none')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+    bounds = np.array([ax.axes.get_xlim(), ax.axes.get_ylim()])
+    ax.plot(bounds[0][0],bounds[1][0],'')
+    ax.plot(bounds[0][1],bounds[1][1],'')
+```
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: slide}
+#| tags: [hide-input]
+n_samples = 500
+C = np.array([[0.1, 0.6], [2., .6]])
+X = np.random.randn(n_samples, 2) @ C + np.array([-6, 3])
+ax = plt.figure(figsize = (7, 7)).add_subplot()
+plt.xlim([-12, 12])
+plt.ylim([-7, 7])
+centerAxes(ax)
+plt.axis('equal')
+plt.scatter(X[:, 0], X[:, 1], s=10, alpha=1);
+```
+
+For example, here is a dataset $X$ in $\mathbb{R}^2$.
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: slide}
+#| tags: [hide-input]
+Xc = X - np.mean(X,axis=0)
+ax = plt.figure(figsize = (7, 7)).add_subplot()
+plt.xlim([-12, 12])
+plt.ylim([-7, 7])
+centerAxes(ax)
+plt.axis('equal')
+plt.scatter(X[:, 0], X[:, 1], s=10, alpha=0.8)
+plt.scatter(Xc[:, 0], Xc[:, 1], s=10, alpha=0.8, color='r');
+```
+
+By taking 
+
+$$ \tilde{X} = X - \mathbf{1}\overline{\mathbf{x}}^T $$
+
+we translate each point so that the new mean is the origin.
+
+Now, the last step is to find the $k$-dimensional subspace that minimizes the distance between the data (red points) and their projection on the subspace.
+
+Remember that $\ell_2$ norm of a vector difference is Euclidean distance.
+
+In other words, what rank $k$ matrix $X^{(k)} \in \mathbb{R}^{n\times k}$ is closest to $\tilde{X}$?
+
+We seek
+
+$$X^{(k)} =\arg \min_{\{B\;|\;\operatorname{Rank} B = k\}} \Vert \tilde{X}-B\Vert_F.$$
+
+We know how to find this matrix -- 
+
+as we showed in the last lecture, we obtain it via the SVD!
+
+So for this case, let's construct the best 1-D approximation of the mean-centered data:
+
+```{python}
+#| slideshow: {slide_type: fragment}
+Xc = X - np.mean(X, axis = 0)
+u, s, vt = np.linalg.svd(Xc, full_matrices=False)
+scopy = s.copy()
+scopy[1] = 0.
+reducedX = u @ np.diag(scopy) @ vt
+```
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: fragment}
+#| tags: [hide-input]
+ax = plt.figure(figsize = (7, 7)).add_subplot()
+centerAxes(ax)
+plt.axis('equal')
+plt.scatter(Xc[:,0],Xc[:,1], color='r')
+plt.scatter(reducedX[:,0], reducedX[:,1])
+endpoints = np.array([[-10],[10]]) @ vt[[0],:]
+plt.plot(endpoints[:,0], endpoints[:,1], 'g-');
+```
+
+This method is called __Principal Component Analysis.__
+
+In summary, PCA consists of:
+
+1. Mean center the data, and
+2. Reduce the dimension of the mean-centered data via SVD.
+
+This is equivalent to projecting the data onto the hyperplane that captures the maximum variance in the data.
+
+It winds up constructing the __best low dimensional linear approximation of the data.__
+
+What are "principal components"?
+
+These are nothing more than the columns of $U$ (or the rows of $V^T$).  Because they capture the direction of maximum variation, they are called "principal" components.
+
+## Uses of PCA/SVD
+
+There are many uses of PCA (and SVD).
+
+We'll cover three of the main uses:
+
+1. Visualization
+2. Denoising
+
+As already mentioned, SVD is also useful for data compression -- we won't discuss it in detail, but it is the principle behind audio and video compression (MP3s, HDTV, etc).
+
+SVD is also useful for anomaly detection, though we won't cover it here.
+
+## Visualization and Denoising -- Extended Example.
+
+We will study both visualization and denoising in the context of text processing.
+
+As we have seen, a common way to work with documents is using the bag-of-words model (perhaps considering n-grams), which results in a term-document matrix.
+
+Entries in the matrix are generally TF-IDF scores.
+
+Often, terms are correlated -- they appear together in combinations that suggest a certain "concept".
+
+That is, term-document matrices often show low effective rank -- many columns can be approximated as combinations of other columns.
+
+When PCA is used for dimensionality reduction of documents, it tends to to extract these "concept" vectors.
+
+The application of PCA to term-document matrices is called __Latent Semantic Analysis (LSA).__
+
+Among other benefits, LSA can improve the performance of clustering of documents.
+
+This happens because the important concepts are captured in the most significant principal components.
+
+## Data: 20 Newsgroups
+
+```{python}
+#| slideshow: {slide_type: fragment}
+from sklearn.datasets import fetch_20newsgroups
+
+categories = ['comp.os.ms-windows.misc', 'sci.space','rec.sport.baseball']
+news_data = fetch_20newsgroups(subset='train', categories=categories)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+print(news_data.target_names)
+print(news_data.target)
+```
+
+### Basic Clustering
+
+To get started, let's compute tf-idf scores.
+
+Notice that we will let the tokenizer compute $n$-grams for $n=$1 and 2.  
+
+An $n$-gram is a set of $n$ consecutive terms.
+
+We'll compute a document-term matrix `dtm`.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+vectorizer = TfidfVectorizer(stop_words='english', min_df=4,max_df=0.8)
+dtm = vectorizer.fit_transform(news_data.data)
+```
+
+```{python}
+#| slideshow: {slide_type: fragment}
+print(type(dtm), dtm.shape)
+terms = vectorizer.get_feature_names_out()
+```
+
+As a comparison case, let's first cluster the documents using the raw tf-idf scores.
+
+(This is without any use of PCA, and so includes lots of noisy or meaningless terms.)
+
+```{python}
+#| slideshow: {slide_type: fragment}
+from sklearn.cluster import KMeans
+k = 3
+kmeans = KMeans(n_clusters=k, init='k-means++', max_iter=100, n_init=10, random_state = 0)
+kmeans.fit_predict(dtm)
+centroids = kmeans.cluster_centers_
+labels = kmeans.labels_
+error = kmeans.inertia_
+```
+
+Let's evaluate the clusters.  We'll assume that the newgroup the article came from is the 'ground truth.'
+
+```{python}
+#| slideshow: {slide_type: fragment}
+#| tags: [hide-input]
+import sklearn.metrics as metrics
+ri = metrics.adjusted_rand_score(labels,news_data.target)
+ss = metrics.silhouette_score(dtm,kmeans.labels_,metric='euclidean')
+print('Rand Index is {}'.format(ri))
+print('Silhouette Score is {}'.format(ss))
+```
+
+### Improvement: Stemming
+
+One source of noise that we can eliminate (before we use LSA) comes from word endings.
+
+For example: a Google search on 'run' will return web pages on 'running.'
+
+This is useful, because the difference between 'run' and 'running' in practice is not enough to matter.
+
+The usual solution taken is to simply 'chop off' the part of the word that indicates a variation from the base word.
+
+(For those of you who studied Latin or Greek, this will sound familiar -- we are removing the 'inflection.')
+
+The process is called 'stemming.'
+
+A very good stemmer is the "Snowball" stemmer.
+
+You can read more at http://www.nltk.org and http://www.nltk.org/howto/stem.html.
+
+Installation Note: From a cell you need to call `nltk.download()` and select the appropriate packages from the interface that appears. In particular you need to download: `stopwords` from _corpora_ and `punkt` and `snowball_data` from _models._
+
+Let's stem the data using the Snowball stemmer:
+
+```{python}
+#| scrolled: false
+#| slideshow: {slide_type: fragment}
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('snowball_data')
+from nltk.stem.snowball import SnowballStemmer
+from nltk.tokenize import word_tokenize, sent_tokenize
+
+
+stemmed_data = [" ".join(SnowballStemmer("english", ignore_stopwords=True).stem(word)  
+         for sent in sent_tokenize(message)
+        for word in word_tokenize(sent))
+        for message in news_data.data]
+
+dtm = vectorizer.fit_transform(stemmed_data)
+terms = vectorizer.get_feature_names_out()
+```
+
+And now let's see how well we can cluster on the stemmed data.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+from sklearn.cluster import KMeans
+k = 3
+kmeans = KMeans(n_clusters=k, init='k-means++', max_iter=100, n_init=10,random_state=0)
+kmeans.fit_predict(dtm)
+centroids = kmeans.cluster_centers_
+labels = kmeans.labels_
+error = kmeans.inertia_
+```
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: fragment}
+#| tags: [hide-input]
+import sklearn.metrics as metrics
+ri = metrics.adjusted_rand_score(labels,news_data.target)
+ss = metrics.silhouette_score(dtm,kmeans.labels_,metric='euclidean')
+print('Rand Index is {}'.format(ri))
+print('Silhouette Score is {}'.format(ss))
+```
+
+So the Rand Index went from 0.816 to 0.846 as a result of stemming.
+
+## Demonstrating PCA
+
+OK.  Now, let's apply PCA.
+
+Our data matrix is in sparse form.
+
+
+First, we mean center the data.
+Note that `vectors` is a sparse matrix, but once it is mean centered it is not sparse any longer.
+
+Then we use PCA to reduce the dimension of the mean-centered data.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+dtm_dense = dtm.todense()
+centered_dtm = dtm_dense - np.mean(dtm_dense, axis=0)
+u, s, vt = np.linalg.svd(centered_dtm)
+```
+
+Note that if you have sparse data, you may want to use `scipy.sparse.linalg.svds()` and for large data it may be advantageous to use `sklearn.decomposition.TruncatedSVD()`.
+
+$$ \mbox{objects}\left\{\begin{array}{c}\;\\\;\\\;\\\;\\\;\end{array}\right.\;\;\overbrace{\left[\begin{array}{cccc}\begin{array}{c}\vdots\\\vdots\\{\bf a_1}\\\vdots\\\vdots\end{array}&\begin{array}{c}\vdots\\\vdots\\{\bf a_2}\\\vdots\\\vdots\end{array}&\dots&\begin{array}{c}\vdots\\\vdots\\{\bf a_n}\\\vdots\\\vdots\end{array}\\\end{array}\right]}^{\mbox{features}} =
+\overbrace{\left[\begin{array}{cc}\vdots&\vdots\\\vdots&\vdots\\\sigma_1\mathbf{u}_1&\sigma_k\mathbf{u}_k\\\vdots&\vdots\\\vdots&\vdots\end{array}\right]}^{\large k}
+\times
+\left[\begin{array}{ccccc}\dots&\dots&\mathbf{v}_1&\dots&\dots\\\dots&\dots&\mathbf{v}_k&\dots&\dots\end{array}\right]$$
+
+
+$$ A = U\Sigma V^T$$
+
+The principal components (rows of $V^T$) encode the extracted concepts.
+
+Each LSA __concept__ is a linear combination of words.
+
+```{python}
+#| slideshow: {slide_type: fragment}
+pd.DataFrame(vt, columns=vectorizer.get_feature_names_out())
+```
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: fragment}
+#| tags: [hide-input]
+names = np.array(vectorizer.get_feature_names_out())
+for cl in range(3):
+    print(f'\nPrincipal Component {cl}:')
+    idx = np.array(np.argsort(vt[cl]))[0][-10:]
+    for i in idx[::-1]:
+        print(f'{names[i]:12s} {vt[cl, i]:0.3f}')
+```
+
+The rows of $U$ correpond to documents, which are linear combinations of __concepts__.
+
+## Denoising
+
+In order to improve our clustering accuracy, we will __exclude__ the less significant concepts from the documents' feature vectors.
+
+That is, we will choose the leftmost $k$ columns of $U$ and the topmost $k$ rows of $V^T$.  
+
+The reduced set of columns of $U$ are our new document encodings, and it is those that we will cluster.
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: fragment}
+#| tags: [hide-input]
+plt.xlim([0,50])
+plt.xlabel('Number of Principal Components (Rank $k$)')
+plt.ylabel('Singular Values')
+plt.plot(range(1,len(s)+1), s);
+```
+
+It looks like 2 is a reasonable number of principal components.
+
+```{python}
+#| slideshow: {slide_type: skip}
+#| tags: [hide-input]
+ri = []
+ss = []
+max = len(u)
+for k in range(1,50):
+    vectorsk = np.asarray(u[:,:k] @ np.diag(s[:k]))
+    kmeans = KMeans(n_clusters=3, init='k-means++', max_iter=100, n_init=10, random_state=0)
+    kmeans.fit_predict(vectorsk)
+    labelsk = kmeans.labels_
+    ri.append(metrics.adjusted_rand_score(labelsk,news_data.target))
+    ss.append(metrics.silhouette_score(vectorsk,kmeans.labels_,metric='euclidean'))
+```
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: fragment}
+#| tags: [hide-input]
+plt.plot(range(1,50),ri)
+plt.ylabel('Rand Score',size=20)
+plt.xlabel('No of Prin Comps',size=20);
+```
+
+```{python}
+#| slideshow: {slide_type: skip}
+news_data.target_names
+```
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: fragment}
+#| tags: [hide-input]
+plt.plot(range(1,50),ss)
+plt.ylabel('Silhouette Score', size=20)
+plt.xlabel('No of Prin Comps', size=20);
+```
+
+Note that we can get good accuracy and coherent clusters with just __two__ principal components.
+
+## Visualization
+
+That's a good thing, because it means that we can also __visualize__ the data well with the help of PCA.
+
+Recall that the challenge of visualization is that the data live in a high dimensional space.  
+
+We can only look at 2 (or maybe 3) dimensions at a time, so it's not clear __which__ dimensions to look at.
+
+The idea behind using PCA for visualization is that since low-numbered principal components capture most of the __variance__ in the data, these are the "directions" from which it is most useful to inspect the data.
+
+We saw that the first two principal components were particularly large -- let's start by using them for visualization.
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: fragment}
+#| tags: [hide-input]
+import seaborn as sns
+Xk = u @ np.diag(s)
+with sns.axes_style("white"):
+    fig, ax = plt.subplots(1,1,figsize=(7,7))
+    cmap = sns.hls_palette(n_colors=3, h=0.35, l=0.4, s=0.9)
+    for i, label in enumerate(set(news_data.target)):
+        point_indices = np.where(news_data.target == label)[0]
+        point_indices = point_indices.tolist()
+        plt.scatter(np.ravel(Xk[point_indices, 0]), np.ravel(Xk[point_indices, 1]), s=20, alpha=0.5, color=cmap[i], marker='D',
+label=news_data.target_names[i])
+        plt.legend(loc = 'best')
+    sns.despine()
+plt.title('Ground Truth Labels', size=20);
+```
+
+Points in this plot have been labelled with their "true" (aka "ground truth") cluster labels.
+
+Notice how clearly the clusters separate and how coherently they present themselves.   This is obvious an excellent visualization that is provided by PCA.
+
+Since this visualization is so clear, we can use it to examine the results of our various clustering methods and get some insight into how they differ.
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: fragment}
+#| tags: [hide-input]
+k = 3
+kmeans = KMeans(n_clusters=k, init='k-means++', max_iter=100, n_init=10,random_state=0)
+kmeans.fit_predict(dtm)
+centroids = kmeans.cluster_centers_
+labels = kmeans.labels_
+error = kmeans.inertia_
+
+with sns.axes_style("white"):
+    fig, ax = plt.subplots(1,1,figsize=(7,7))
+    cmap = sns.hls_palette(n_colors=3, h=0.35, l=0.4, s=0.9)
+    for i in range(k):
+        point_indices = np.where(labels == i)[0]
+        point_indices = point_indices.tolist()
+        plt.scatter(np.ravel(Xk[point_indices, 0]), np.ravel(Xk[point_indices, 1]), s=20, alpha=0.5, color=cmap[i], marker='D',
+label=news_data.target_names[i])
+    sns.despine()
+plt.title('Clusters On Full Dataset, Dimension = {}\nRand Score = {:0.3f}'.format(dtm.shape[1],
+                                                                             metrics.adjusted_rand_score(labels,news_data.target)),
+          size=20);
+```
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: fragment}
+#| tags: [hide-input]
+k = 3
+kmeans = KMeans(n_clusters=k, init='k-means++', max_iter=100, n_init=10,random_state=0)
+kmeans.fit_predict(np.asarray(Xk[:,:2]))
+centroids = kmeans.cluster_centers_
+Xklabels = kmeans.labels_
+error = kmeans.inertia_
+
+with sns.axes_style("white"):
+    fig, ax = plt.subplots(1,1,figsize=(7,7))
+    cmap = sns.hls_palette(n_colors=3, h=0.35, l=0.4, s=0.9)
+    for i, label in enumerate(set(news_data.target)):
+        point_indices = np.where(Xklabels == label)[0]
+        point_indices = point_indices.tolist()
+        plt.scatter(np.ravel(Xk[point_indices,0]), np.ravel(Xk[point_indices,1]), s=20, alpha=0.5, color=cmap[i], marker='D')
+    sns.despine()
+plt.title('Clusters On PCA-reduced Dataset, Dimension = 2\nRand Score = {:0.3f}'.format(
+                                                                                 metrics.adjusted_rand_score(Xklabels,news_data.target)),
+          size=20);
+```
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: fragment}
+#| tags: [hide-input]
+plt.figure(figsize=(8,4))
+plt.subplot(121)
+cmap = sns.hls_palette(n_colors=3, h=0.35, l=0.4, s=0.9)
+for i in range(k):
+        point_indices = np.where(labels == i)[0]
+        point_indices = point_indices.tolist()
+        plt.scatter(np.ravel(Xk[point_indices,0]), np.ravel(Xk[point_indices,1]), s=20, alpha=0.5, color=cmap[i], marker='D')
+sns.despine()
+plt.title('Dimension = {}\nRand Score = {:0.3f}'.format(dtm.shape[1],
+                                                                             metrics.adjusted_rand_score(labels,news_data.target)),
+          size=14)
+plt.subplot(122)
+cmap = sns.hls_palette(n_colors=3, h=0.35, l=0.4, s=0.9)
+for i in range(k):
+        point_indices = np.where(Xklabels == i)[0]
+        point_indices = point_indices.tolist()
+        plt.scatter(np.ravel(Xk[point_indices,0]), np.ravel(Xk[point_indices,1]), s=20, alpha=0.5, color=cmap[i], marker='D')
+sns.despine()
+plt.title('Dimension = 2\n Rand Score = {:0.3f}'.format(
+                                                                                 metrics.adjusted_rand_score(Xklabels,news_data.target)),
+          size=14);
+```
+
+What happens if we misjudge the number of clusters?  Let's form 6 clusters.
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: skip}
+#| tags: [hide-input]
+k = 6
+kmeans = KMeans(n_clusters=k, init='k-means++', max_iter=100, n_init=10,random_state=0)
+kmeans.fit_predict(dtm)
+centroids = kmeans.cluster_centers_
+labels = kmeans.labels_
+error = kmeans.inertia_
+
+with sns.axes_style("white"):
+    fig, ax = plt.subplots(1,1,figsize=(10,10))
+    cmap = sns.hls_palette(n_colors=k, h=0.35, l=0.4, s=0.9)
+    for i in range(k):
+        point_indices = np.where(labels == i)[0]
+        point_indices = point_indices.tolist()
+        plt.scatter(np.ravel(Xk[point_indices,0]), np.ravel(Xk[point_indices,1]), s=20, alpha=0.5, color=cmap[i], marker='D')
+    sns.despine()
+plt.title('Clusters On Full Dataset, Dimension = {}'.format(dtm.shape[1]),size=20)
+    
+plt.title(f'K means with six clusters on full dataset; Rand Score {metrics.adjusted_rand_score(labels,news_data.target):0.2f}');
+```
+
+```{python}
+#| hide_input: false
+#| slideshow: {slide_type: skip}
+#| tags: [hide-input]
+k = 6
+npc = 5
+kmeans = KMeans(n_clusters=k, init='k-means++', max_iter=100, n_init=10,random_state=0)
+kmeans.fit_predict(np.asarray(Xk[:,:npc]))
+centroids = kmeans.cluster_centers_
+labels = kmeans.labels_
+error = kmeans.inertia_
+
+with sns.axes_style("white"):
+    fig, ax = plt.subplots(1,1,figsize=(10,10))
+    cmap = sns.hls_palette(n_colors=k, h=0.35, l=0.4, s=0.9)
+    for i in range(k):
+        point_indices = np.where(labels == i)[0]
+        point_indices = point_indices.tolist()
+        plt.scatter(np.ravel(Xk[point_indices,0]), np.ravel(Xk[point_indices,1]), s=20, alpha=0.5, color=cmap[i], marker='D')
+    sns.despine()
+
+plt.title(f'K means with six clusters on {npc} principal components; Rand Score {metrics.adjusted_rand_score(labels,news_data.target):0.2f}');
+```
+
+What about the other principal components?   Are they useful for visualization?
+
+A common approach is to look at all pairs of (low-numbered) principal components, to look for additional structure in the data.
+
+```{python}
+#| hide_input: true
+#| slideshow: {slide_type: fragment}
+#| tags: [hide-input]
+k = 5
+Xk = u[:,:k] @ np.diag(s[:k])
+X_df = pd.DataFrame(Xk)
+g = sns.PairGrid(X_df)
+def pltColor(x,y,color):
+    cmap = sns.hls_palette(n_colors=3, h=0.35, l=0.4, s=0.9)
+    for i in range(3):
+        point_indices = np.where(news_data.target == i)[0]
+        point_indices = point_indices.tolist()
+        plt.scatter(x[point_indices], y[point_indices], color=cmap[i], s = 3)
+    sns.despine()
+g.map(pltColor);
+```
+
+
