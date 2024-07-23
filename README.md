@@ -10,7 +10,7 @@ The book and slides have been created using [Quarto](https://quarto.org/). In or
 
 To execute the Python code used in the book requires several Python packages. 
 
-This repository includes a conda environment with all the necessary pacakges. To set up this environment use the following terminal commands
+This repository includes a `venv` environment with all the necessary pacakges. To set up this environment use the following terminal commands
 
 ```sh
 python3 -m venv .venv
@@ -23,6 +23,8 @@ pip install -r requirements.txt
 
 > Deprecating the conda environment in favor of pip with a newer version of python and 
 > perhaps better GitHub actions support.
+
+This repository includes a conda environment with all the necessary packages. To set up this environment use the following terminal commands
 
 ```sh
 conda env create -f environment.yml
