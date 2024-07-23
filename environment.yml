@@ -259,7 +259,7 @@ dependencies:
       - pybtex==0.24.0
       - pybtex-docutils==1.0.3
       - pydata-sphinx-theme==0.15.4
-      - python-graphviz==0.20.3
+      - graphviz==0.20.3
       - rise==5.7.1
       - snowballstemmer==2.2.0
       - sphinx==7.3.7

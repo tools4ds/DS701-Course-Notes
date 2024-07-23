@@ -4,5 +4,5 @@ venv/
 env/
 ENV/
 
-# MacOS files
+# Mac OS system files
 .DS_Store
