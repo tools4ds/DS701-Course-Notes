@@ -1,2 +1,8 @@
+# virtual environment folders
+.venv/
+venv/
+env/
+ENV/
+
 # Mac OS system files
 .DS_Store

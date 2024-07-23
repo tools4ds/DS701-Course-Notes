@@ -1,0 +1,39 @@
+# Full install for Jupyter Notebooks
+jupyter
+
+# Used initially by Quarto to read configuration yml
+pyyaml
+
+# 01-Intro-to-Python
+matplotlib
+pandas
+
+# 02B-Pandas
+pandas_datareader
+setuptools
+seaborn
+yfinance
+scipy
+
+# 04-Linear-Algebra-Refresher
+qrcode
+
+# 06-Clustering-I-kmeans
+scikit-learn
+
+# 11-Dimensionality-Reduction-SVD-II
+nltk
+
+# 15-Classification-II-kNN
+pydotplus
+
+# 17-Regression-I-Linear
+statsmodels
+
+# 23-NN-I-Gradient-Descent
+networkx
+
+#24-NN-II-Backprop
+graphviz
+torch
+torchvision
