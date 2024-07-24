@@ -12,13 +12,13 @@ book:
       chapters:
         - 01-Intro-to-Python.qmd
         - 02A-Git-Jupyter.qmd
-        - 02B-Pandas.qmd
-        - 04-Linear-Algebra-Refresher.qmd
-        - 03-Probability-and-Statistics-Refresher.qmd
-    #- part: "Clustering"
-    #  chapters:
-    #    - 05-Distances-Timeseries.qmd
-    #    - 06-Clustering-I-kmeans.qmd
+    #    - 02B-Pandas.qmd
+    #    - 04-Linear-Algebra-Refresher.qmd
+    #    - 03-Probability-and-Statistics-Refresher.qmd
+    - part: "Clustering"
+      chapters:
+        - 05-Distances-Timeseries.qmd
+        - 06-Clustering-I-kmeans.qmd
     #    - 07-Clustering-II-in-practice.qmd
     #    - 08-Clustering-III-hierarchical.qmd
     #    - 09-Clustering-IV-GMM-EM.qmd
