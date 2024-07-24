@@ -42,7 +42,7 @@ jobs:
         shell: sh
         run: |
           echo "Checking dot version"
-          dot --version
+          dot -V
           
       - name: Install Python and Dependencies
         uses: actions/setup-python@v4
