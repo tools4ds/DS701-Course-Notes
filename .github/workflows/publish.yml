@@ -56,6 +56,8 @@ jobs:
         uses: quarto-dev/quarto-actions/render@v2
         with:
           path: ./ds701_book
+        env:
+          QUARTO_DENO_V8_OPTIONS: --stack-size=8192
           
 #      - name: Render and Publish
 #        uses: quarto-dev/quarto-actions/publish@v2
