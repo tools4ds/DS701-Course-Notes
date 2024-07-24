@@ -25,6 +25,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      # Downloads and installs the OS specific version of Quarto
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
@@ -36,10 +37,15 @@ jobs:
       - run: pip install jupyter
       - run: pip install -r requirements.txt
 
-      - name: Render and Publish
-        uses: quarto-dev/quarto-actions/publish@v2
+      - name: Render Quarto Project
+        uses: quarto-dev/quarto-actions/render@v2
         with:
           path: ./ds701_book
-          target: gh-pages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+#      - name: Render and Publish
+#        uses: quarto-dev/quarto-actions/publish@v2
+#        with:
+#          path: ./ds701_book
+#          target: gh-pages
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
