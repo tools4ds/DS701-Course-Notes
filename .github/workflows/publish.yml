@@ -11,8 +11,8 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build-deploy"
-  build-deploy:
+  # Setup environment, render quarto and upload GH pages artifact
+  build-upload:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -71,3 +71,25 @@ jobs:
 #          target: gh-pages
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Deploy pages
+  deploy:
+    # Add a dependecy to the build job
+    needs: build-upload
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 # or specific "vX.X.X" version tag for this action
