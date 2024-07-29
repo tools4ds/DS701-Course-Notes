@@ -15,9 +15,10 @@ book:
         - 02B-Pandas.qmd
         - 04-Linear-Algebra-Refresher.qmd
         - 03-Probability-and-Statistics-Refresher.qmd
+        - 05-Distances-Timeseries.qmd
+        - 05A-Learning.qmd
     - part: "Clustering"
       chapters:
-        - 05-Distances-Timeseries.qmd
         - 06-Clustering-I-kmeans.qmd
         - 07-Clustering-II-in-practice.qmd
         - 08-Clustering-III-hierarchical.qmd

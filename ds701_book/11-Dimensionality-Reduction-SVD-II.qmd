@@ -3,6 +3,8 @@ title: Dimensionality Reduction and PCA -- SVD II
 jupyter: python3
 ---
 
+# Dimensionality Reduction and PCA -- SVD II {#sec-pca-svd}
+
 ```{python}
 #| hide_input: true
 #| slideshow: {slide_type: skip}

@@ -2,6 +2,7 @@
 title: Linear Regression
 jupyter: python3
 ---
+# Linear Regression {#sec-linear-regression}
 
 ```{python}
 #| hide_input: true

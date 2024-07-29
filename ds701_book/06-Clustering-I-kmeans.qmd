@@ -3,6 +3,8 @@ title: $k$-means
 jupyter: python3
 ---
 
+# $k$-means {#sec-kmeans}
+
 ```{python}
 #| hide_input: true
 #| slideshow: {slide_type: skip}

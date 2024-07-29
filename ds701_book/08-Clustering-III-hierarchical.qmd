@@ -3,6 +3,8 @@ title: Hierarchical Clustering
 jupyter: python3
 ---
 
+# Hierarchical Clustering {#sec-hierarchical-clustering}
+
 ```{python}
 #| hide_input: true
 #| slideshow: {slide_type: skip}
