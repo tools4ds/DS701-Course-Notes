@@ -3,6 +3,7 @@ title: $k$-Nearest Neighbors and Model Selection
 jupyter: python3
 ---
 
+# $k$-Nearest Neighbors and Model Selection {#sec-knn}
 ```{python}
 #| hide_input: true
 #| slideshow: {slide_type: skip}

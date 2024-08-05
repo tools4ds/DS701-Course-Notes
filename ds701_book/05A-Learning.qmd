@@ -1,0 +1,67 @@
+---
+title: Machine Learning
+jupyter: python3
+---
+
+The job of a data scientist is to extract valuable information from sets of data. Machine learning algorithms are an important tool to accomplish this task. Machine learning is a branch of computer science which uses algorithms to learn from a set (or sets) of data. The trained algorithm can then generalize to new pieces of data. This allows the algorithm to perform a task, such as making a prediction, without explicitly programmed instructions. This is a very powerful idea. Historically, computer programs had to be given explicit instructions to in order to solve a problem. This is a challenging task. It is extremely difficult to explicitly provide instructions to a computer program to handle every case of new data. This is not a problem with machine learning. The machine learning algorithm is able to handle new data without the program breaking and needing new instruction.
+
+There are several categories of machine learning. In this course, we will focus on the following two:
+
+- unsupervised learning,
+- supervised learning.
+
+## Unsupervised learning
+
+Unsupervised learning is a type of machine learning where the model learns from historical unlabeled data. The model extracts patterns from this data and uses the information it learns to infer properties on new data. Importantly, unsupervised learning does not require user intervention (supervision). Unsupervised machine learning algorithms should be used when it is not clear what you are looking for in the data. 
+
+We cover the following topics in unsupervised learning:
+
+- clustering,
+- dimensionatity reduction.
+
+### Clustering
+
+Clustering is a technique that groups unlabeled data together based upon their similarties (or differences). We cover the following topic in clustering:
+
+- $k$-means clustering, see @sec-kmeans and @sec-clustering-in-practice,
+- hierarchical clustering, see @sec-hierarchical-clustering,
+- Gaussian mixing, see @sec-gaussian-mixture-models.
+
+### Dimensionality reduction
+
+Dimensionality reduction is a technique that compresses high-dimensional data into lower dimensional data with minimal information loss. We cover dimensionality reduction in @sec-low-rank-svd and @sec-pca-svd.
+
+## Supervised learning
+
+Supervised learning is a type of machine learning where model learns from labeled data. In particular, models are trained on input data features and their corresponding labeled output, or target. The model can then be deployed to make predictions based on new input features.
+
+We cover the following topics in supervised learning:
+
+- regression,
+- classification.
+
+### Regression
+
+Regression models in machine learning are used to predict continuous values based on the input features. We cover linear regression models in @sec-linear-regression and logistic regression in @sec-log-regression.
+
+Examples of regression are:
+
+- predicting the price of a house based on its square footage
+- predicting how many points a Celtics player scores based on their minutes played and shots attempted
+- predicting the price of a stock based on previous stock prices and market conditions
+
+### Classification
+
+Classification models in machine learning are used to predict discrete values, or classes, based on the input features. The following topics in classificaion are covered:
+
+- decision tress and random forests, see @sec-decision-trees,
+- $k$-nearest neighbors, see @sec-knn,
+- naive Bayes and support vector machines, see @sec-NB-svm.
+
+Examples of classification are:
+
+- predicting if an email is spam or not spam
+- predicting if a customer purchases a product based on how many ads they have been shown
+- predicting if a picture shows a cat, dog, or other 
+- predicting if an image of a tumor is malignant or not
+- predicting if a student is admitted or not admitted to a college based on their grades
