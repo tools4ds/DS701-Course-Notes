@@ -533,7 +533,7 @@ This emphasizes the fact that the least squares problem is a minimization proble
 
 We can connect the above minimization of the distance between vectors to the minimization of the sum of squared errors. Let $\mathbf{y} = A\mathbf{x}$ and observe that
 
-$$\Vert A\mathbf{x}-\mathbf{b}\Vert_2^2 = $$\Vert \mathbf{y}-\mathbf{b}\Vert_2^2 =  \sum_i (y_i-b_i)^2.$$
+$$\Vert A\mathbf{x}-\mathbf{b}\Vert_2^2 = \Vert \mathbf{y}-\mathbf{b}\Vert_2^2 =  \sum_i (y_i-b_i)^2.$$
 
 The above expression is the sum of squared errors. In statistics, the $y_i$ are the estimated values and the $b_i$ are the measured values. This is the most common measure of error used in statistics and is a key principle. 
 
