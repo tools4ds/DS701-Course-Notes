@@ -3,722 +3,557 @@ title: Linear Algebra Refresher
 jupyter: python3
 ---
 
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [remove-cell]
-%matplotlib inline
-%config InlineBackend.figure_format='retina'
-# %run -i common.py
-# %run -i ln_preamble.py
-import laUtilities as ut
-from importlib import reload
-```
+Linear alegbra is the branch of mathematics involving vectors and matrices. In particular, how vectors are transformed.  Knowledge of linear algebra is essential in data science. This is because linear algebra underpins the representation of data and the algorithms that transform this data.
+
+This lecture is a review of some aspects of linear algebra that are important for data science. Given the prerequisites for this course, I assume that you previously learned this material. 
+
+The goal of this lecture is to refresh the following topics:
+
+- vectors,
+- matrices,
+- operations with vectors and matrices,
+- eigenvectors and eigenvalues,
+- linear systems and least squares,
+- matrix factorizations.
+
+Below is a list of very useful resrouces for learning about linear algebra:
+
+- __Linear Algebra and Its Applications (6th edition)__, David C. Lay, Judi J. McDonald, and Steven R. Lay, Pearson, 2021,
+- __Introduction to Linear Algebra (6th edition)__, Gilbert Strang, Wellesley-Cambridge Press, 2023,
+- __Linear Algebra and Learning from Data__, Gilbert Strang, Wellesley-Cambridge Press, 2019,
+- __Numerical Linear Algebra__, Lloyn N. Trefethen and David Bau, SIAM, 1997.
 
 
+## Vectors
 
-```{python}
-#| hide_input: true
-#| tags: [hide-input]
-import numpy as np
-ax = ut.plotSetup3d(-15,15,-15,15,-15,15,(12,8))
-a2 = np.array([5.0,-13.0,-3.0])
-a1 = np.array([1,-2.0,3])
-b = np.array([6.0, 8.0, -5.0])
-A = np.array([a1, a2]).T
-bhat = A.dot(np.linalg.inv(A.T.dot(A))).dot(A.T).dot(b)
-ax.text(a1[0],a1[1],a1[2],r'$\bf a_1$',size=20)
-ax.text(a2[0],a2[1],a2[2],r'$\bf a_2$',size=20)
-ax.text(b[0],b[1],b[2],r'$\bf b$',size=20)
-ax.text(bhat[0],bhat[1],bhat[2],r'$A\mathbf{\hat{x}} = \mathbf{\hat{b}}$',size=20)
-#ax.text(1,-4,-10,r'Span{$\bf a,b$}',size=16)
-#ax.text(0.2,0.2,-4,r'$\bf 0$',size=20)
-# plotting the span of v
-ut.plotSpan3d(ax,a1,a2,'Green')
-ut.plotPoint3d(ax,a1[0],a1[1],a1[2],'r')
-ut.plotPoint3d(ax,a2[0],a2[1],a2[2],'r')
-ut.plotPoint3d(ax,b[0],b[1],b[2],'b')
-ut.plotPoint3d(ax,bhat[0],bhat[1],bhat[2],'b')
-ax.plot([b[0],bhat[0]],[b[1],bhat[1]],'b--',zs=[b[2],bhat[2]],lw=2)
-#ut.plotPoint3d(ax,0,0,0,'b')
-ax.view_init(azim=26.0,elev=-77.0);
-```
-
-This lecture is a review of some aspects of linear algebra that are important for data science.  
-
-Given the prerequisites for this course, I assume that you learned all of this once.  
-
-What I want to do today is bring the material back into your mind fresh.
-
-## Vectors and Matrices
-
-A __matrix__ is a rectangular array of numbers, for example:
-
-$$X = \left[\begin{array}{rrr}
-    1  & -2  & 1 \\
-    0 & 2 &  - 8 \\
-    6 & 5 &9 
-\end{array}
-\right]$$
-
-A matrix with only one column is called a __column vector__, or simply a __vector__.
-
-Here are some examples.
-
-These are vectors in $\mathbb{R}^2$:
-$$
-\begin{array}{ccc}
-{\bf u} = \left[\begin{array}{r}3\\-1\end{array}\right] &
-{\bf v} = \left[\begin{array}{c}.2\\.3\end{array}\right] &
-{\bf w} = \left[\begin{array}{c}w_1\\w_2\end{array}\right]
-\end{array}
-$$
-
-and these are vectors in $\mathbb{R}^3$:
+A vector of length $n$, $\mathbf{x}\in\mathbb{R}^{n}$, is a 1-dimensional (1-D) array of real numbers
 
 $$
-\begin{array}{ccc}
-{\bf u} = \left[\begin{array}{c}2\\3\\4\end{array}\right] &
-{\bf v} = \left[\begin{array}{r}-1\\0\\2\end{array}\right] &
-{\bf w} = \left[\begin{array}{c}w_1\\w_2\\w_3\end{array}\right]
-\end{array}
+\mathbf{x} =
+\begin{bmatrix}
+x_1 \\
+x_2 \\
+\vdots \\
+x_n
+\end{bmatrix}.
 $$
 
-We will use uppercase letters ($X$) for matrices and lowercase __bold__ leters for vectors ($\mathbf{u}$).
 
-A vector like $\left[\begin{array}{c}-2\\-1\end{array}\right]$ (also denoted $(-2,-1)$) can be thought of as a point on the plane.
+When discussing vectors we will only consider column vectors. A row vector can always be obtained from a column vector via transposition
 
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
-# No need to study this code unless you want to.
-ax = ut.plotSetup(size=(12,6))
-ut.centerAxes(ax)
-ut.plotPoint(ax, -2, -1)
-ut.plotPoint(ax, 2, 2)
-ut.plotPoint(ax, 3, -1)
-ax.plot(0, -2, '')
-ax.plot(-4, 0, '')
-ax.text(3.5, -1.1, '$(3,-1)$', size=20)
-ax.text(2.5, 1.9, '$(2,2)$', size=20)
-ax.text(-3.7, -1.1, '$(-2,-1)$', size=20);
-```
+$$
+\mathbf{x}^{T} = [x_1, x_2, \ldots, x_n].
+$$
 
-Sometimes we draw an arrow from the origin to the point.  This comes from physics, but can be a helpful visualization in any case.
+
+Vectors in $\mathbb{R}^{2}$ can be visualized as points in a 2-D plane, whereas vectors in $\mathbb{R}^{3}$ can be visualized as points in a 3-D space.
+
+Let 
+
+$$\mathbf{x}=\begin{bmatrix} 2 \\ 2 \end{bmatrix},~
+\mathbf{y} = \begin{bmatrix} 3 \\ -1 \end{bmatrix},~
+\mathbf{z} = \begin{bmatrix} -2 \\ -1 \end{bmatrix}.
+$$
+
+These vectors are illustrated in @fig-vector-viz.
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
-ax = ut.plotSetup(size=(12,6))
-ut.centerAxes(ax)
-ax.arrow(0, 0, -2, -1, head_width=0.2, head_length=0.2, length_includes_head = True)
-ax.arrow(0, 0, 2, 2, head_width=0.2, head_length=0.2, length_includes_head = True)
-ax.arrow(0, 0, 3, -1, head_width=0.2, head_length=0.2, length_includes_head = True)
-ax.plot(0, -2, '')
-ax.plot(-4, 0, '')
-ax.plot(0, 2, '')
-ax.plot(4 ,0, '')
-ax.text(3.5, -1.1, '$(3,-1)$', size=20)
-ax.text(2.5, 1.9, '$(2,2)$', size=20)
-ax.text(-3.7, -1.1, '$(-2,-1)$', size=20);
-```
-
-## Vector Addition, Geometrically
-
-A geometric interpretation of vector sum is as a parallelogram.  If ${\bf u}$ and ${\bf v}$ in $\mathbb{R}^2$ are represented as points in the plane, then ${\bf u} + {\bf v}$ corresponds to the fourth vertex of the parallelogram whose other vertices are ${\bf u}, 0,$ and ${\bf v}$.
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
-ax = ut.plotSetup(size=(12,6))
-ut.centerAxes(ax)
-ax.arrow(0, 0, 1, 2, head_width=0.2, head_length=0.2, length_includes_head = True)
-ax.arrow(0, 0, 4, 1, head_width=0.2, head_length=0.2, length_includes_head = True)
-ax.plot([4,5],[1,3],'--')
-ax.plot([1,5],[2,3],'--')
-ax.text(5.25,3.25,r'${\bf u}$+${\bf v}$',size=20)
-ax.text(1.5,2.5,r'${\bf u}$',size=20)
-ax.text(4.75,1,r'${\bf v}$',size=20)
-ut.plotPoint(ax,5,3)
-ax.plot(0,0,'');
-```
-
-## Matrix Multiplication
-
-Using addition and multiplication by scalars, we can create equations using vectors.
-
-Then we make the follow equivalence:
-    
-A vector equation
-$$ x_1{\bf a_1} + x_2{\bf a_2} + ... + x_n{\bf a_n} = {\bf b} $$
-
-Can also be written as
-
-$$ A\mathbf{x} = \mathbf{b}$$
-
-where
-
-$$ A = [{\bf a_1} \; {\bf a_2} \; ... \; {\bf a_n}] $$
-
-and 
-
-$$\mathbf{x} = \left[\begin{array}{c}x_1\\x_2\\\vdots\\x_n\end{array}\right]$$
-
-We then extend this to define matrix multiplication as
-
-__Definition.__  If $A$ is an $m \times n$ matrix and $B$ is $n \times p$ matrix with columns ${\bf b_1},\dots,{\bf b_p},$ then the product $AB$ is defined as the $m \times p$ matrix whose columns are $A{\bf b_1}, \dots, A{\bf b_p}.$  That is,
-
-$$ AB = A[{\bf b_1} \; \dots \; {\bf b_p}] = [A{\bf b_1} \; \dots \; A{\bf b_p}]. $$
-
-Continuing on, we can define the __inverse__ of a matrix.
-    
-We have to recognize that this inverse does not exist for all matrices.
-
-* It only exists for square matrices
-* And not even for all square matrices -- only those that are "invertible."
-
-A matrix that is not invertible is called a __singular__ matrix.
-
-__Definition.__ A matrix $A$ is called __invertible__ if there exists a matrix $C$ such that
-
-$$ AC = I \mbox{  and  } CA = I. $$
-
-In that case $C$ is called the _inverse_ of $A$.   Clearly, $C$ must also be square and the same size as $A$.
-
-The inverse of $A$ is denoted $A^{-1}.$
-
-## Inner Product
-
-Now we introduce the __inner product__, also called the __dot product.__
-
-The inner product is defined for two vectors, in which one is transposed to be a single row.  It returns a single number.   
-
-For example, the expression
-
-$$[3\;5\;1] \left[\begin{array}{c}2\\-1\\4\end{array}\right]$$
-
-is the same as
-
-$$(3\cdot 2) + (5\cdot -1) + (1 \cdot 4)$$
-
-which is the sum of the products of the corresponding entries, and yields the scalar value 5.  
-
-This is the inner product of the two vectors.
-
-Thus the inner product of $\mathbf{x}$ and $\mathbf{y}$ is $\mathbf{x}^T \mathbf{y} = \mathbf{y}^T \mathbf{x}$.
-
-The general definition of the inner product is:
-
-$$[x_1\;x_2\;\dots\;x_n] \left[\begin{array}{c}y_1\\y_2\\\vdots\\y_n\end{array}\right] = \sum_{i=1}^n x_i y_i$$
-
-## Vector Norm
-
-If $\mathbf{v}$ is in $\mathbb{R}^n$, with entries $v_1,\dots,v_n,$ then the square root of $\mathbf{v}^T\mathbf{v}$ is defined because $\mathbf{v}^T\mathbf{v}$ is nonnegative.
-
-__Definition.__ The __$\ell_2$ norm__ of $\mathbf{v}$ is the nonnegative scalar $\Vert\mathbf{v}\Vert_2$ defined by
-
-$$\Vert\mathbf{v}\Vert_2 = \sqrt{\mathbf{v}^T\mathbf{v}} = \sqrt{v_1^2 + v_2^2 + \dots + v_n^2} = \sqrt{\sum_{i=1}^n{v_i}^2}.$$
-
-If we leave the $_2$ subscript off, it is implied.
-
-The ($\ell_2)$ norm of $\mathbf{v}$ is its __length__ in the usual sense.
-
-This follows directly from the Pythagorean theorem:
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
+#| label: fig-vector-viz
+#| fig-cap: "Illustration of vectors"
 import matplotlib.pyplot as plt
-ax = ut.plotSetup(-1,6,-1,4,(12,8))
-ut.centerAxes(ax)
-pt = [4., 3.]
-plt.plot([0,pt[0]],[0,pt[1]],'b-',lw=2)
-plt.plot([pt[0],pt[0]],[0,pt[1]],'b-',lw=2)
-plt.plot([0,pt[0]],[0,0],'b-',lw=2)
-ut.plotVec(ax,pt)
-ax.text(2,-0.75,r'$|v_1|$',size=16)
-ax.text(4.25,1.4,r'$|v_2|$',size=16)
-ax.text(0.5,1.75,r'$\sqrt{v_1^2+v_2^2}$',size=16)
-ax.text(pt[0]+0.1,pt[1]+0.1,r'$\mathbf{v}$',size=20);
+import numpy as np
+fig = plt.figure()
+ax = plt.gca()
+x = np.array([2, 2])
+y = np.array([3, -1])
+z = np.array([-2, -1])
+V = np.array([x, y, z])
+origin = np.array([[0, 0, 0], [0, 0, 0]])
+plt.quiver(*origin, V[:, 0], V[:, 1], 
+           color=['r', 'b', 'g'], 
+           angles='xy', 
+           scale_units='xy', 
+           scale=1)
+ax.set_xlim([-6, 6])
+ax.set_ylim([-2, 4])
+ax.text(3.3, -1.1, '$(3,-1)$', size=16)
+ax.text(2.3, 1.9, '$(2,2)$', size=16)
+ax.text(-3.7, -1.3, '$(-2,-1)$', size=16);
+ax.grid()
+plt.show()
 ```
+
+Recall the following definitions.
+
+ 1. Scalar multiplication: Let $c\in\mathbb{R}$, $\mathbf{x}\in\mathbb{R}^{n}$, then $$c\mathbf{x} = \begin{bmatrix} cx_1 \\ cx_2 \\ \vdots \\ cx_n \end{bmatrix}.$$
+ 1. Vector addition: Let $\mathbf{u},\mathbf{v}\in\mathbb{R}^{n}$ then
+$$ \mathbf{u} + \mathbf{v} = \begin{bmatrix} u_1 + v_1 \\ u_2 + v_2 \\ \vdots \\ u_n + v_n \end{bmatrix}.$$
+1. Dot product: Let $\mathbf{u},\mathbf{v}\in\mathbb{R}^{n}$ then the dot product is defined as
+$$ \mathbf{u}\cdot\mathbf{v} = \sum_{i=0}^n u_i v_i.$$
+1. Vector 2-norm: The 2-norm of a vector $\mathbf{v}\in\mathbb{R}^{n}$ is defined as
+    $$\Vert \mathbf{v}\Vert_2 = \sqrt{\mathbf{v}\cdot\mathbf{v}} = \sqrt{\sum_{i=1}^n v_i^2}.$$ 
+    This norm is referred to as the $\ell_2$ norm. In these notes, the notation $\Vert \mathbf{v} \Vert$, indicates the 2-norm.
+1. A unit vector $\mathbf{v}$ is a vector such that $\Vert \mathbf{v} \Vert_2 = 1$. All vectors of the form $\frac{\mathbf{v}}{\Vert \mathbf{v} \Vert_2 }$ are unit vectors.
+1. Distance: Let $\mathbf{u},\mathbf{v}\in\mathbb{R}^{n}$, the distance between $\mathbf{u}$ and $\mathbf{v}$ is
+$$ \Vert \mathbf{u} - \mathbf{v} \Vert_2.$$
+1. Orthogonality: Two vectors $\mathbf{u},\mathbf{v}\in\mathbb{R}^{n}$ are orthogonal if and only if $\mathbf{u}\cdot\mathbf{v}=0$. 
+1. Angle between vectors:  Let $\mathbf{u},\mathbf{v}\in\mathbb{R}^{n}$, the angle between these vectors is $$\cos{\theta} = \frac{\mathbf{u}\cdot\mathbf{v}}{\Vert \mathbf{u}\Vert_2 \Vert\mathbf{v}\Vert_2}.$$
+1. A set of $n$ vectors $\mathbf{v}_{1}, \ldots, \mathbf{v}_{n}\in\mathbf{R}^n$ is linearly dependent if there exists scalars $c_1,\ldots, c_n$ not all zero such that 
+    $$
+    \sum_{i=1}^{n} a_i \mathbf{v}_i = 0.
+    $$
+
+    The vectors $\mathbf{v}_{1}, \ldots, \mathbf{v}_{n}$ are linearly independent if they are not linearly independent, i.e., the equation
+    $$
+    a_1 \mathbf{v}_1 + \cdots + a_n \mathbf{v}_n = 0,
+    $$
+    is only satisfied if $a_i=0$ for $i=1, \ldots,n$.
+
+### Visualizing vector operations
+
+For helpful visualizations of the above defintions, we'll restrict ourselves to $\mathbb{R}^{2}.$
+
+#### Scalar multiplication
+
+Multiplication by a scalar $c\in\mathbb{R}$. For $c>1$ the vector is lengthened. For $0<c<1$ the vector shrinks. If we negate $c$ the direction of the vector is flipped 180 degrees. This is shown in @fig-vector-scaling. In this figure we show the vector $\mathbf{x} = [2, 2]$ multiplied by the scalar value $c=2$.
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
-ax = ut.plotSetup3d(0,5,0,7,0,9,(12,8))
-f = 1.25
-v = [4*f,4*f,6*f]
-ut.plotCube(ax,v)
-ax.text(v[0]+.1,v[1]+.1,v[2]+.1,r'$\bf v$',size=20)
-ax.plot([0,v[0]],[0,v[1]],'r--',zs=[0,v[2]])
-ax.plot([v[0]],[v[1]],'ro',zs=[v[2]])
-ax.text(0.5,2,-0.5,r'$\sqrt{v_1^2+v_2^2+v_3^2}$',size=16);
+#| label: fig-vector-scaling
+#| fig-cap: "Scalar multiplication of a vector"
+import matplotlib.pyplot as plt
+import numpy as np
+fig = plt.figure()
+ax = plt.gca()
+x = np.array([2, 2])
+y = np.array([4, 4])
+V = np.array([x, y])
+origin = np.array([[0, 0], [0, 0]])
+plt.quiver(*origin, V[:, 0], V[:, 1], 
+           color=['r', 'b'], 
+           angles='xy', 
+           scale_units='xy', 
+           scale=1,
+           alpha= 0.5)
+ax.set_xlim([-5, 5])
+ax.set_ylim([-1, 5])
+ax.text(2.3, 1.9, '$x$', size=16)
+ax.text(4.3, 3.9, '$cx$', size=16)
+ax.grid()
+plt.show()
 ```
 
-A vector of length 1 is called a __unit vector__.  
+#### Vector addition
 
-If we divide a nonzero vector $\mathbf{v}$ by its length -- that is, multiply by $1/\Vert\mathbf{v}\Vert$ -- we obtain a unit vector $\mathbf{u}$.
-
-We say that we have _normalized_ $\mathbf{v}$, and that $\mathbf{u}$ is _in the same direction_ as $\mathbf{v}.$
-
-## Distance in $\mathbb{R}^n$
-
-It's very useful to be able to talk about the __distance__ between two points (or vectors) in $\mathbb{R}^n$.
-
-__Definition.__  For $\mathbf{u}$ and $\mathbf{v}$ in $\mathbb{R}^n,$ the __distance between $\mathbf{u}$ and $\mathbf{v}$,__ written as $\mbox{dist}(\mathbf{u},\mathbf{v}),$ is the length of the vector $\mathbf{u}-\mathbf{v}$.  That is,
-
-$$\mbox{dist}(\mathbf{u},\mathbf{v}) = \Vert\mathbf{u}-\mathbf{v}\Vert.$$
-
-This definition agrees with the usual formulas for the Euclidean distance between two points.  The usual formula is
-
-$$\mbox{dist}(\mathbf{u},\mathbf{v}) = \sqrt{(v_1-u_1)^2 + (v_2-u_2)^2 + \dots + (v_n-u_n)^2}.$$
-
-Which you can see is equal to 
-
-$$\Vert\mathbf{u}-\mathbf{v}\Vert = \sqrt{(\mathbf{u}-\mathbf{v})^T(\mathbf{u}-\mathbf{v})} = \sqrt{\left[\begin{array}{cccc}u_1-v_1&u_2-v_2&\dots&u_n-v_n\end{array}\right]\left[\begin{array}{c}u_1-v_1\\u_2-v_2\\\vdots\\u_n-v_n\end{array}\right]}$$
-
-There is another important reformulation of distance.    Consider the squared distance:
-
-$$\Vert\mathbf{u}-\mathbf{v}\Vert^2 = (\mathbf{u}-\mathbf{v})^T(\mathbf{u}-\mathbf{v})$$
-
-Expanding this out, we get:
-
-$$\Vert\mathbf{u}-\mathbf{v}\Vert^2 = \mathbf{u}^T\mathbf{u} + \mathbf{v}^T\mathbf{v} - 2\mathbf{u}^T\mathbf{v}.$$
-
-$$= \Vert\mathbf{u}\Vert^2 + \Vert\mathbf{v}\Vert^2 - 2\mathbf{u}^T\mathbf{v}.$$
-
-This is an important formula because it relates __distance__ between two points to their __lengths__ and __inner product.__
-
-## Orthogonal Vectors
-
-Now we turn to another familiar notion from 2D geometry, which we'll generalize to $\mathbb{R}^n$: the notion of being __perpendicular.__  
-
-We will generally use the fancier term __orthogonal__ -- which means the same thing as perpendicular.
-
-We will say that two vectors are orthogonal if they form a right angle at the origin.
+We plot the sum of $\mathbf{u} = [1, 2]$ and $\mathbf{v} = [4, 1]$ in @fig-vector-addition. The sum $\mathbf{u} + \mathbf{v} = [5, 3]$ is obtained by placing the tip of one vector to the tail of the other vector. The sum is the vector that connects the unconnected tip to the unconnected tail. 
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
-ax = ut.plotSetup(-1,4,-2,3)
-ax.set_aspect('equal')
-# ut.noAxes(ax)
-u = np.array([2, 2])
-v = np.array([1, -1])
-# v
-ut.plotLinEqn(u[0], u[1], 0, '-', 'b')
-ut.plotLinEqn(v[0], v[1], 0, '-', 'g')
-ax.text(v[0]-0.5,v[1]-0.5,r'$\bf v$',size=16)
-ut.plotVec(ax,v,'b')
-# u
-ut.plotVec(ax,u,'g')
-ax.text(u[0]+0.25,u[1],r'$\bf u$',size=16)
-# origin
-ut.plotVec(ax, np.array([0, 0]), 'k')
-ax.text(0-0.1, 0-0.5, r'$\bf 0$', size=16);
-# symbol
-perpline1, perpline2 = ut.perp_sym(np.array([0, 0]), u, v, 0.4)
-plt.plot(perpline1[0], perpline1[1], 'k', lw = 1)
-plt.plot(perpline2[0], perpline2[1], 'k', lw = 1);
+#| label: fig-vector-addition
+#| fig-cap: "Vector addition"
+import matplotlib.pyplot as plt
+import numpy as np
+fig = plt.figure()
+ax = plt.gca()
+u = np.array([1, 2])
+v = np.array([4, 1])
+w = np.array([5, 3])
+V = np.array([u, v, w])
+origin = np.array([[0, 0, 0], [0, 0, 0]])
+plt.quiver(*origin, V[:, 0], V[:, 1], 
+           color=['b', 'b', 'r'], 
+           angles='xy', 
+           scale_units='xy', 
+           scale=1)
+ax.set_xlim([-1, 6])
+ax.set_ylim([-1, 4])
+ax.text(1.3, 1.9, '$u$', size=16)
+ax.text(4.3, 1.2, '$v$', size=16)
+ax.text(5.3, 2.9, '$u+v$', size=16)
+plt.plot([1, 5], [2, 3], 'g--')
+plt.plot([4, 5], [1, 3], 'g--')
+ax.grid()
+plt.show()
 ```
 
-Draw the line connecting $\mathbf{u}$ and $\mathbf{v}$.
+#### Dot prodcut
 
-Then $\mathbf{u}$ and $\mathbf{v}$ are orthogonal if and only if they make a right triangle with the origin.
-
-So $\mathbf{u}$ and $\mathbf{v}$ are orthogonal if and only if the Pythagorean Theorem is satisified for this triangle.
+The dot product of two vectors $\mathbf{u}, \mathbf{v}$ can be used to project $\mathbf{u}$ onto $\mathbf{v}$. This is illustrated in Figure @fig-dot-product.
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
-ax = ut.plotSetup(-1,4,-2,3)
-ax.set_aspect('equal')
-# ut.noAxes(ax)
-u = np.array([2, 2])
-v = np.array([1, -1])
-plt.plot([v[0],u[0]],[v[1],u[1]],'r-',lw=2)
-# v
-ut.plotLinEqn(u[0], u[1], 0, '-', 'b')
-ut.plotLinEqn(v[0], v[1], 0, '-', 'g')
-ax.text(v[0]-0.5,v[1]-0.5,r'$\bf v$',size=16)
-ut.plotVec(ax,v,'b')
-# u
-ut.plotVec(ax,u,'g')
-ax.text(u[0]+0.25,u[1],r'$\bf u$',size=16)
-# origin
-ut.plotVec(ax, np.array([0, 0]), 'k')
-ax.text(0-0.1, 0-0.5, r'$\bf 0$', size=16);
+#| label: fig-dot-product
+#| fig-cap: "Dot product"
+import matplotlib.pyplot as plt
+import numpy as np
+fig = plt.figure()
+ax = plt.gca()
+u = np.array([1, 2])
+v = np.array([4, 1])
+w = np.dot(u, v) * v / np.dot(v, v)
+V = np.array([u, v, w])
+origin = np.array([[0, 0, 0], [0, 0, 0]])
+plt.quiver(*origin, V[:, 0], V[:, 1], 
+           color=['b', 'b', 'r'], 
+           angles='xy', 
+           scale_units='xy', 
+           scale=1)
+ax.set_xlim([-1, 6])
+ax.set_ylim([-1, 4])
+ax.text(1.3, 1.9, '$u$', size=16)
+ax.text(4.3, 1.2, '$v$', size=16)
+ax.text(0.4, -0.3, r'$\frac{u\cdot v}{\Vert v \Vert}$', size=16)
+plt.plot([u[0], w[0]], [u[1], w[1]], 'g--')
+# plt.plot([4, 5], [1, 3], 'g--')
+ax.grid()
+plt.show()
 ```
 
-What is the length of the red side of the triangle?
-
-According to the definition of length based on norm, it is $\Vert \mathbf{u} - \mathbf{v} \Vert$.
-
-```{python}
-#| hide_input: true
-#| tags: [hide-input]
-ax = ut.plotSetup(-1,4,-2,3)
-ax.set_aspect('equal')
-# ut.noAxes(ax)
-u = np.array([2, 2])
-v = np.array([1, -1])
-plt.plot([v[0],u[0]],[v[1],u[1]],'r-',lw=2)
-# v
-ut.plotLinEqn(u[0], u[1], 0, '-', 'b')
-ut.plotLinEqn(v[0], v[1], 0, '-', 'g')
-ax.text(v[0]/2-0.5,v[1]/2-0.5,r'$\Vert\bf v\Vert$',size=16)
-ut.plotVec(ax,v,'b')
-# u
-ut.plotVec(ax,u,'g')
-ax.text(u[0]/2-.75,u[1]/2,r'$\Vert\bf u\Vert$',size=16)
-# origin
-ut.plotVec(ax, np.array([0, 0]), 'k')
-#
-mm = (u + v) / 2
-ax.text(mm[0]+0.3,mm[1],r'$\Vert\bf u - v\Vert$',size=16);
-```
-
-So the blue and green lines are perpendicular if and only if:
-
-$$ \Vert \mathbf{u} - \mathbf{v} \Vert^2 = \Vert \mathbf{u} \Vert^2 + \Vert \mathbf{v} \Vert^2$$
-
-First let's simplify the expression for squared distance from $\mathbf{u}$ to $\mathbf{v}$:
-
-$$ \Vert\mathbf{u}-\mathbf{v}\Vert^2 = (\mathbf{u}-\mathbf{v})^T(\mathbf{u}-\mathbf{v}) $$
-
-$$ = \mathbf{u}^T\mathbf{u} - \mathbf{u}^T\mathbf{v} - \mathbf{v}^T\mathbf{u} + \mathbf{v}^T\mathbf{v}$$
-
-$$ = \Vert\mathbf{u}\Vert^2 + \Vert\mathbf{v}\Vert^2 - 2\mathbf{u}^T\mathbf{v}$$
-
-Now, let's go back to the Pythagorean Theorem.  
-
-$  \mathbf{u}$ and $ \mathbf{v} $ are perpendicular if and only if:
-
-$$ \Vert \mathbf{u} - \mathbf{v} \Vert^2 = \Vert \mathbf{u} \Vert^2 + \Vert \mathbf{v} \Vert^2$$
-
-But we've seen that this means:
-
-$$ \Vert\mathbf{u}\Vert^2 + \Vert\mathbf{v}\Vert^2 - 2\mathbf{u}^T\mathbf{v}= \Vert \mathbf{u} \Vert^2 + \Vert \mathbf{v} \Vert^2$$
-
-So now we can define perpendicularity in $\mathbb{R}^n$:
-
-__Definition.__  Two vectors $\mathbf{u}$ and $\mathbf{v}$ in $\mathbb{R}^n$ are __orthogonal__ to each other if $\mathbf{u}^T\mathbf{v} = 0.$
-
-This gives us a very simple rule for determining whether two vectors are orthogonal: if and only if their inner product is zero.
-
-## The Angle Between Two Vectors
-
-There is a further connection between the inner product of two vectors and the __angle__ between them.
-
-This connection is very useful (eg, in visualizing data mining operations).
-
-We start from the __law of cosines:__
-
-$$ c^2 = a^2 + b^2 - 2ab\cos\theta$$
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
-ax = ut.plotSetup(-6,6,-1,4,(12,6))
-u = np.array([4.,1])
-v = np.array([-4.,3])
-pt = u + v
-plt.plot([u[0],v[0]],[u[1],v[1]],'b-',lw=2)
-plt.plot([0,u[0]],[0,u[1]],'b-',lw=2)
-plt.plot([0,v[0]],[0,v[1]],'b-',lw=2)
-m = (u-v)/2.0
-mm = v + m
-ax.text(mm[0]+0.25,mm[1]+0.25,r'${\bf c}$',size=16)
-ax.text(2,0.15,r'${\bf a}$',size=16)
-ax.text(-3,1,r'${\bf b}$',size=16)
-ax.annotate('', xy=(0.2*v[0], 0.2*v[1]),  xycoords='data',
-                xytext=(0.3*u[0], 0.3*u[1]), textcoords='data',
-                size=15,
-                #bbox=dict(boxstyle="round", fc="0.8"),
-                arrowprops={'arrowstyle': 'simple',
-                                'fc': '0', 
-                                'ec': 'none',
-                                'connectionstyle' : 'arc3,rad=0.5'},
-                )
-ax.text(0.9,0.8,r'$\theta$',size=20)
-plt.axis('off');
-```
-
-Now let's interpret this law in terms of vectors $\mathbf{u}$ and $\mathbf{v}$.
-
-Once again, it is the angle that these vectors make at the origin that we are concerned with:
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
-ax = ut.plotSetup(-6,6,-1,4,(12,6))
-ut.centerAxes(ax)
-u = np.array([4.,1])
-v = np.array([-4.,3])
-pt = u + v
-plt.plot([u[0],v[0]],[u[1],v[1]],'b-',lw=2)
-plt.plot([0,u[0]],[0,u[1]],'b-',lw=2)
-plt.plot([0,v[0]],[0,v[1]],'b-',lw=2)
-ut.plotVec(ax,u)
-ut.plotVec(ax,v)
-m = (u-v)/2.0
-mm = v + m
-ax.text(mm[0]+0.25,mm[1]+0.25,r'$\Vert{\bf u-v}\Vert$',size=16)
-ax.text(2,0.15,r'$\Vert{\bf u}\Vert$',size=16)
-ax.text(-3,1,r'$\Vert{\bf v}\Vert$',size=16)
-ax.annotate('', xy=(0.2*v[0], 0.2*v[1]),  xycoords='data',
-                xytext=(0.3*u[0], 0.3*u[1]), textcoords='data',
-                size=15,
-                #bbox=dict(boxstyle="round", fc="0.8"),
-                arrowprops={'arrowstyle': 'simple',
-                                'fc': '0', 
-                                'ec': 'none',
-                                'connectionstyle' : 'arc3,rad=0.5'},
-                )
-ax.text(0.9,0.8,r'$\theta$',size=20);
-```
+Observe that a right angle forms between the vectors $\mathbf{u}$ and $\mathbf{v}$ when $\mathbf{u}\cdot \mathbf{v} = 0$. 
+
+## Matrices
+
+A matrix $A\in\mathbb{R}^{m\times n}$ is a 2-D array of numbers
+
+$$
+A = 
+\begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1n} \\
+a_{21} & a_{22} & \cdots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{m1} &a_{m2} & \cdots & a_{mn} \\
+\end{bmatrix},
+$$
+
+with $m$ rows and $n$ columns. The element at row $i$ and column $j$ is denoted $a_{ij}$. If $m=n$ we call it a square matrix.
+
+Similar to vectors, we can multiply matrices by scalar values and add matrices of the same dimension, i.e.,
+
+1. Let $c\in\mathbb{R}$ and $A\in\mathbb{R}^{m\times n}$, then
+$$
+cA =
+\begin{bmatrix}
+ca_{11} & ca_{12} & \cdots & ca_{1n} \\
+ca_{21} & ca_{22} & \cdots & ca_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+ca_{m1} & ca_{m2} & \cdots & ca_{mn} \\
+\end{bmatrix}.
+$$
+1. Let $A, B\in\mathbb{R}^{m\times n}$, then 
+$$
+A + B =
+\begin{bmatrix}
+a_{11} + b_{11} & a_{12} + b_{12} & \cdots & a_{1n} + b_{1n} \\
+a_{21} + b_{21} & a_{22} + b_{22} & \cdots & a_{2n} + b_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{m1} + b_{m1} & a_{m2} + b_{m2} & \cdots & a_{mn} + b_{mn} \\
+\end{bmatrix}
+$$
+
+The transpose $A^{T}$ is defined as
+
+$$
+A^{T} = 
+\begin{bmatrix}
+a_{11} & a_{21} & \cdots & a_{m1} \\
+a_{12} & a_{22} & \cdots & a_{m2} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{1n} &a_{2n} & \cdots & a_{nm} \\
+\end{bmatrix}.
+$$
+
+The transpose turns columns of the matrix into rows (equivalently rows into columns). A square matrix is called symmetric if $A=A^{T}$.
+
+## Matrix multiplication
+
+We discuss the following two important matrix multiplication operations
+
+- matrix-vector multiplication,
+- matrix-matrix multiplication.
+
+### Matrix-vector multiplication
+
+Let $A\in\mathbb{R}^{m\times n}$ and $\mathbf{x}\in\mathbb{R}^{n}$, then $A\mathbf{x}\in\mathbb{R}^{m}$ is defined as 
+
+$$
+A\mathbf{x} = 
+\begin{bmatrix}
+x_1a_{11} + x_2 a_{12} + \cdots + x_na_{1n} \\
+x_1a_{21} + x_2 a_{22} + \cdots + x_na_{2n} \\
+\vdots \\
+x_1a_{m1} + x_2 a_{m2} + \cdots + x_na_{mn} \\
+\end{bmatrix}.
+$$
+
+Equivalently, this means that $A\mathbf{x}$ is a linear combination of the columns of $A$, i.e.,
+
+$$
+A\mathbf{x} = 
+x_1 \begin{bmatrix} a_{11} \\ a_{21} \\ \vdots \\ a_{m1}  \end{bmatrix} 
++ 
+x_2  \begin{bmatrix} a_{12} \\ a_{22} \\ \vdots \\ a_{m2}  \end{bmatrix}
++
+\cdots
++
+x_n \begin{bmatrix} a_{1n} \\ a_{2n} \\ \vdots \\ a_{mn}  \end{bmatrix}.
+$$
+
+Observe that the matrix $A$ is a linear transformation that maps vectors in $R^{n}$ to $\mathbb{R}^{m}$.
+
+### Matrix-matrix multiplication
+
+Let $A\in\mathbb{R}^{m\times n}$ and $B\in\mathbb{R}^{n\times p}$, then the elements of $C=AB\in\mathbb{R}^{m\times p}$ are
+
+$$
+c_{ij} = \sum_{k=1}^{n} a_{ik}b_{kj},
+$$
+
+for $i=1,\ldots, m$ and $j=1, \ldots, p$.
+
+## Important matrices
 
-Applying the law of cosines we get:
-    
-$$\Vert\mathbf{u}-\mathbf{v}\Vert^2 = \Vert\mathbf{u}\Vert^2 + \Vert\mathbf{v}\Vert^2 - 2\Vert\mathbf{u}\Vert\Vert\mathbf{v}\Vert\cos\theta$$
+We introduce notation for some commonly used and important matrices.
 
-And by definition:
+The $n \times n$ identity matrix is
 
-$$ \Vert\mathbf{u}-\mathbf{v}\Vert^2 = \Vert\mathbf{u}\Vert^2 + \Vert\mathbf{v}\Vert^2 - 2\mathbf{u}^T\mathbf{v}$$
+$$
+I = 
+\begin{bmatrix}
+1 & 0 & \cdots & 0 \\
+0 & 1 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & 1 \\
+\end{bmatrix}.
+$$.
 
-So 
+For every $A\in\mathbb{R}^{n\times n}$, then $AI = IA$. 
 
-$$ \mathbf{u}^T\mathbf{v} = \Vert\mathbf{u}\Vert\Vert\mathbf{v}\Vert\cos\theta$$
+The inverse $A^{-1}\in\mathbb{R}^{n\times n}$ is defined as the matrix for which $AA^{-1} = A^{-1}A = I$. When $A^{-1}$ exists the matrix is said to be invertible. Note that $(AB)^{-1} = B^{-1}A^{-1}$ for invertible $B\in\mathbb{R}^{n\times n}$.
 
-This is a __very__ important connection between the notion of inner product and trigonometry.
+A diagonal matrix $D\in\mathbb{R}^{n\times n}$ has entries $d_{ij}=0$ if $i\neq j$, i.e.,
 
-One implication in particular concerns __unit vectors.__
+$$
+D =
+\begin{bmatrix}
+d_{11} & 0 & \cdots & 0 \\
+0 & d_{22} & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & d_{nn} \\
+\end{bmatrix}.
+$$
 
-$$ \mathbf{u}^T\mathbf{v} = \Vert\mathbf{u}\Vert\Vert\mathbf{v}\Vert\cos\theta$$
+A square matrix $Q\in\mathbb{R}^{n}$ is orthogonal if $QQ^{T}=Q^{T}Q=I$. In particular, the inverse of an orthogonal matrix is it's transpose.
 
-So 
+A lower triangular matrix $L\in\mathbb{R}^{n\times n}$ is a matrix where all the entries above the main diagonal are zero
 
-$$ \frac{\mathbf{u}^T\mathbf{v}}{\Vert\mathbf{u}\Vert\Vert\mathbf{v}\Vert} = \cos\theta$$
+$$
+L =
+\begin{bmatrix}
+l_{11} & 0 & \cdots & 0 \\
+l_{12} & l_{22} & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+l_{1n} & l_{n2} & \cdots & l_{nn} \\
+\end{bmatrix}.
+$$
 
-$$ \frac{\mathbf{u}^T}{\Vert\mathbf{u}\Vert}\frac{\mathbf{v}}{\Vert\mathbf{v}\Vert} = \cos\theta$$
+An upper triangular matrix $U\in\mathbb{R}^{n\times n}$ is a matrix where all the entries below the main diagonal are zero
 
-So we have the very simple rule, that for two unit vectors, their inner product is the cosine of the angle between them!
+$$
+U = 
+\begin{bmatrix}
+u_{11} & u_{12} & \cdots & u_{1n} \\
+0 & u_{22} & \cdots & u_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & u_{nn} \\
+\end{bmatrix}.
+$$
 
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
-u = np.array([0.95, np.sin(np.arccos(0.95))])
-theta = (np.pi/3)+np.arccos(0.95)
-v = np.array([np.cos(theta), np.sin(theta)])
-ax = ut.plotSetup(-1.3,1.3,-1.3,1.3,(12,6))
-ut.centerAxes(ax)
-plt.axis('equal')
-angles = 2.0*np.pi * np.array(range(101))/100.0
-plt.plot(np.cos(angles),np.sin(angles),'r-')
-ax.arrow(0,0,u[0],u[1],head_width=0.07, head_length=0.1,length_includes_head = True)
-ax.arrow(0,0,v[0],v[1],head_width=0.07, head_length=0.1,length_includes_head = True)
-ax.annotate('', xy=(0.2*v[0], 0.2*v[1]),  xycoords='data',
-                xytext=(0.3*u[0], 0.3*u[1]), textcoords='data',
-                size=15,
-                #bbox=dict(boxstyle="round", fc="0.8"),
-                arrowprops={'arrowstyle': 'simple',
-                                'fc': '0', 
-                                'ec': 'none',
-                                'connectionstyle' : 'arc3,rad=0.5'})
-mid = 0.4*(u+v)/2.0
-ax.text(mid[0],mid[1],r'$\theta$',size=20)
-ax.text(u[0]+.1,u[1]+.1,r'$(%0.2f,%0.2f)$'% (u[0],u[1]),size=16)
-ax.text(v[0]+.1,v[1]+.1,r'$(%0.2f,%0.2f)$'% (v[0],v[1]),size=16);
-```
+The inverse of a lower triangular matrix is itself a lower triangular matrix. This is also true for upper triangular matrices, i.e., the inverse is also upper triangular.
 
-Here $\mathbf{u} = \left[\begin{array}{c}0.95\\0.31\end{array}\right],$ and $\mathbf{v} = \left[\begin{array}{c}0.20\\0.98\end{array}\right].$
+## Eigenvalues and eigenvectors
 
-So $\mathbf{u}^T\mathbf{v} = (0.95\cdot 0.20) + (0.31 \cdot 0.98) = 0.5$
-
-So $\cos\theta = 0.5.$
-
-So $\theta = 60$ degrees.
-
-## Least Squares
-
-In many cases we have a linear system 
-
-$$ A \mathbf{x} = \mathbf{b}$$ 
-
-that has no solution -- perhaps due to noise or measurement error.
-
-In such as case, we generally look for an $\mathbf{x}$ such that $A\mathbf{x}$ makes a good __approximation__ to $\mathbf{b}.$
-
-We can think of the quality of the approximation of $A\mathbf{x}$ to $\mathbf{b}$ as the distance from $A\mathbf{x}$ to $\mathbf{b},$ which is
-
-$$\Vert A\mathbf{x} - \mathbf{b}\Vert.$$
-
-The __general least-squares problem__ is to find an $\mathbf{x}$ that makes $\Vert A\mathbf{x}-\mathbf{b}\Vert$ as small as possible.
-
-Just to make this explicit: say that we denote $A\mathbf{x}$ by $\mathbf{y}$.    Then
-
-$$\Vert A\mathbf{x}-\mathbf{b}\Vert^2 = \sum_i (y_i-b_i)^2$$
-
-Where we interpret $y_i$ as the _estimated value_ and $b_i$ as the _measured value._
-
-So this expression is the __sum of squared error.__   This is the most common measure of error used in statistics.   Note that we could also say we are minimizing the $\ell_2$ norm of the error.
-
-This is a key principle!  
-
-__Minimizing the length of $A\mathbf{x} - \mathbf{b}$ is the same as minimizing the sum of squared error.__
-
-An equivalent (and more common) way to express this is:
-
-$$\hat{\mathbf{x}} = \arg\min_\mathbf{x} \Vert A\mathbf{x} - \mathbf{b}\Vert.$$
-
-which emphasizes that this is a minimization problem, also called an _optimization_ problem.
-
-We can find $\hat{\mathbf{x}}$ using either 
-
-* geometric arguments (based on projecting $\mathbf{b}$ on the column space of $A$), or
-* by calculus (taking the derivative of the rhs expression above and setting it equal to zero).
-
-Either way, we get the result that:
-
-$\hat{\mathbf{x}}$ is the solution of:
-    
-$$A^TA\mathbf{x} = A^T\mathbf{b}$$
-
-And we can then prove that these equations always have at least one solution. 
-
-When $A^TA$ is invertible, we call the system "overdetermined."  This means that there is just one solution, and so we then solve $A^TA\mathbf{x} = A^T\mathbf{b}$ as
-
-$$\hat{x} = (A^TA)^{-1}A^T\mathbf{b}$$
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
-ax = ut.plotSetup3d(-15,15,-15,15,-15,15,(12,8))
-a2 = np.array([5.0,-13.0,-3.0])
-a1 = np.array([1,-2.0,3])
-b = np.array([6.0, 8.0, -5.0])
-A = np.array([a1, a2]).T
-bhat = A.dot(np.linalg.inv(A.T.dot(A))).dot(A.T).dot(b)
-ax.text(a1[0],a1[1],a1[2],r'$\bf a_1$',size=20)
-ax.text(a2[0],a2[1],a2[2],r'$\bf a_2$',size=20)
-ax.text(b[0],b[1],b[2],r'$\bf b$',size=20)
-ax.text(bhat[0],bhat[1],bhat[2],r'$A\mathbf{\hat{x}} = \mathbf{\hat{b}}$',size=20)
-#ax.text(1,-4,-10,r'Span{$\bf a,b$}',size=16)
-#ax.text(0.2,0.2,-4,r'$\bf 0$',size=20)
-# plotting the span of v
-ut.plotSpan3d(ax,a1,a2,'Green')
-ut.plotPoint3d(ax,a1[0],a1[1],a1[2],'r')
-ut.plotPoint3d(ax,a2[0],a2[1],a2[2],'r')
-ut.plotPoint3d(ax,b[0],b[1],b[2],'b')
-ut.plotPoint3d(ax,bhat[0],bhat[1],bhat[2],'b')
-ax.plot([b[0],bhat[0]],[b[1],bhat[1]],'b--',zs=[b[2],bhat[2]],lw=2)
-#ut.plotPoint3d(ax,0,0,0,'b')
-ax.view_init(azim=26.0,elev=-77.0);
-```
-
-## Eigendecomposition
-
-Consider a square matrix $A$.   An __eigenvector__ of $A$ is a special vector which __does not change its direction__ when multiplied by $A$.
-
-__Example.__
-
-Let $A = \left[\begin{array}{rr}3&-2\\1&0\end{array}\right], \mathbf{u} = \left[\begin{array}{r}-1\\1\end{array}\right], \mathbf{v}=\left[\begin{array}{r}2\\1\end{array}\right].$  The images of $\mathbf{u}$ and $\mathbf{v}$ under multiplication by $A$ are shown here:
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
-ax = ut.plotSetup(size=(12,8))
-ut.centerAxes(ax)
-A = np.array([[3,-2],[1,0]])
-u = np.array([-1,1])
-v = np.array([2,1])
-#
-ut.plotArrowVec(ax, v, [0,0], color='Blue')
-ut.plotArrowVec(ax, A.dot(v), [0,0], color='Blue')
-ax.text(v[0],v[1]+0.2,r'${\bf v}$',size=20)
-ax.text(A.dot(v)[0],A.dot(v)[1]+0.2,r'$A{\bf v}$',size=20)
-#
-ut.plotArrowVec(ax, u, [0,0], color='Red')
-ut.plotArrowVec(ax, A.dot(u), [0,0], color='Red')
-ax.text(u[0]-0.5,u[1]+0.1,r'${\bf u}$',size=20)
-ax.text(A.dot(u)[0]-0.7,A.dot(u)[1]+0.3,r'$A{\bf u}$',size=20);
-```
-
-__Definition.__  
-
-An __eigenvector__ of an $n\times n$ matrix $A$ is a nonzero vector $\mathbf{x}$ such that $A\mathbf{x} = \lambda\mathbf{x}$ for some scalar $\lambda.$  
-
-A scalar $\lambda$ is called an __eigenvalue__ of $A$ if there is a nontrivial solution $\mathbf{x}$ of $A\mathbf{x} = \lambda\mathbf{x}.$  
-
-Such an $\mathbf{x}$ is called an _eigenvector corresponding to $\lambda.$_
+An eigenvector of an $n\times n$ matrix $A$ is a nonzero vector $\mathbf{x}$ such that $A\mathbf{x} = \lambda\mathbf{x}$ for some scalar $\lambda.$  The scalar $\lambda$ is called an eigenvalue.
 
 An $n \times n$ matrix has at most $n$ distinct eigenvectors and at most $n$ distinct eigenvalues.
 
-In some cases, the matrix may be __factorable__ using it eigenvectors and eigenvalues. 
+## Matrix decompositions
 
-This is called __diagonalization.__
+We introduce here important matrix decompositions. These are useful in solving linear equations. Furthermore they play an important role in various data science applications.
 
-A square matrix $A$ is said to be __diagonalizable__ if it can be expressed as:
+### LU factorization
 
-$$A = PDP^{-1}$$ 
+An LU decomposition of a square matrix $A\in\mathbb{R}^{n\times n}$ is a factorization of $A$ into a product of matrices
 
-for some invertible matrix $P$ and some diagonal matrix $D$.
+$$ 
+A = LU,
+$$
 
-In fact, $A = PDP^{-1},$ with $D$ a diagonal matrix, if and only if the columns of $P$ are $n$ __linearly independent eigenvectors__ of $A.$  
+where $L$ is a lower triangular square matrix and $U$ is an triangular square matrix. For example, when $n=3$, we have
 
-In that case, $D$ holds the corresponding eigenvalues of $A$.
+$$ 
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13} \\
+a_{21} & a_{22} & a_{23} \\
+a_{31} & a_{32} & a_{33} \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+l_{11} & 0 & 0 \\
+l_{21} & l_{22} & 0\\
+l_{31} & l_{32} & a_{33} \\
+\end{bmatrix}
+\begin{bmatrix}
+u_{11} & u_{12} & u_{13} \\
+0 & u_{22} & u_{23} \\
+0 & 0 & u_{33} \\
+\end{bmatrix}
+$$
 
-That is, 
 
-$$D = \left[\begin{array}{cccc}\lambda_1&0&\cdots&0\\0&\lambda_2&\cdots&0\\\vdots&\vdots&\ddots&\vdots\\0&0&\cdots&\lambda_n\end{array}\right]$$
+### QR decomposition
 
-and 
+A QR decomposition of a square matrix $A\in\mathbb{R}^{n\times n}$ is a factorization of $A$ into a product of matrices
 
-$$ P = [\mathbf{v}_1\;\mathbf{v}_2\;\cdots\;\mathbf{v}_n].$$
+$$
+A=QR,
+$$
+where $Q$ is an orthogonal square matrix and $R$ is an upper-triangular square matrix.
 
-A special case occurs when $A$ is __symmetric,__ i.e., $A = A^T.$
+### Eigendecomposition
 
-In that case, the eigenvectors of $A$ are all mutually __orthogonal.__
+Let $A\in\mathbb{R}^{n}$ have n linearly independent eigenvectors $\mathbf{x}_i$ for $i=1,\ldots, n$, then $A$ can be factorized as
 
-That is, any two distinct eigenvectors have inner product zero.
+$$
+A = X\Lambda X^{-1},
+$$
+where $X$ is a matrix of the eigenvectors, and 
 
-Furthermore, we can scale each eigenvector to have unit norm, in which case we say that the eigenvectors are __orthonormal.__
+$$
+\Lambda =
+\begin{bmatrix}
+\lambda_{1} & 0 & \cdots & 0 \\
+0 & \lambda_{2} & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & \lambda_{n}  \\
+\end{bmatrix},
+$$
+is a diagonal matrix of the eigenvalues. 
 
-So, let's put this all together.
+In this case, the matrix $A$ is said to be diagonalizable.
 
-* The diagonal of $D$ are the eigenvalues of $A$.
-* The columns of $P$ are the eigenvectors of $A$.
+A special case occurs when $A$ is symmetric. Recall that a matrix is symmetric when $A = A^T.$
 
-For a symmetric matrix $A$:
+In this case, it can be shown that the eigenvectors of $A$ are all mutually orthogonal. Consequently, $X^{-1} = X^{T}$ and we can decompose $A$ as:
 
-* distinct columns of $P$ are orthogonal
-* each column of $P$ has unit norm
+$$A = XDX^T.$$
 
-Hence, we find that the diagonal elements of $PP^T$ are 1, and the off-diagonal elements are 0.
+This amazing fact is known as the spectral theorem and this decomposition of $A$ is its spectral decomposition. The eigenvalues of a matrix are also called its spectrum.
 
-Hence $PP^T = I$.
+### Singular value decomposition
 
-So $P^{-1} = P^T.$
+Let $A\in\mathbb{R}^{m\times n}$ with $m>n$, then $A$ admits a decomposition
 
-So, in the special case of a symmetric matrix, we can decompose $A$ as:
+$$
+A = U\Sigma V^{T}.
+$$
+The matrices $U\in\mathbb{R}^{m\times m}$ and $V\in\mathbb{R}^{n\times n}$ are orthogonal. The columns of $U$ are the left singular vectors and the columns of $V$ are the right singular vectors.
 
-$$A = PDP^T.$$
+The matrix $\Sigma\in\mathbb{R}^{m\times n}$ is a diagonal matrix of the form
 
-This amazing fact is known as the __spectral theorem.__
+$$
+\Sigma = 
+\begin{bmatrix}
+\sigma_{11} & 0 & \cdots & 0 \\
+0 & \sigma_{22} & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & \sigma_{mn} \\
+0 & 0 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & 0 \\
+\end{bmatrix}.
+$$
+The values $\sigma_{ij}$ are the singular values of the matrix $A$. Amazingly, it can be proven that every matrix $A\in\mathbb{R}^{m\times n}$ has a singular value decomposition.
 
-This decomposition of $A$ is its __spectral decomposition.__
+## Linear systems of equations
 
-(The eigenvalues of a matrix are also called its __spectrum.__)
+A system of $m$ linear equations in $n$ unknowns can be written as
 
-These facts will be key to understanding the __Singular Value Decomposition,__ which we will study later on.
+$$
+\begin{align*}
+a_{11} x_{1} + a_{12} x_{2} + \cdots + a_{1n} x_{n} &= b_1 \\
+a_{21} x_{1} + a_{22} x_{2} + \cdots + a_{2n} x_{n} &= b_2 \\
+\vdots  \qquad \qquad \quad \\
+a_{m1} x_{1} + a_{m2} x_{2} + \cdots + a_{mn} x_{n} &= b_m,\\
+\end{align*}
+$$
+is simply the matrix vector equation
 
+$$
+A\mathbf{x}=\mathbf{b}.
+$$
+
+A linear system of equations may have:
+
+- infinitely many solutions,
+- a unique solution,
+- no solutions.
+
+When $m > n$, the system is said to be overdetermined and in general has infinitely many solutions. When $m<n$ the system is underdetermined and in general has no solution. For the case when $m=n$ and the matrix has $n$ linearly dependent columns, the solution is always unique.
+
+For an invertible square matrix $A\mathbf{x}=\mathbf{b}$, the solution is always $\mathbf{x}=A^{-1}\mathbf{b}$. 
+
+Matrix factorizations to help us solve linear systems of equations 
+For square matrices, we can use 
+
+We can use matrix factorizations to help us solve a linear system of equation. We demonstrate how to do this with the LU decomposition. Observe that $A\mathbf{x} = LU\mathbf{x} = \mathbf{b}$. Then 
+
+$$
+\mathbf{x} = U^{-1}L^{-1}\mathbf{b}.
+$$ 
+
+The process of inverting $L$ and $U$ is called backward and forward substitution.
+
+
+## Least squares
+
+In data science it is often the case that we have to solve the linear system 
+
+$$ A \mathbf{x} = \mathbf{b},$$ 
+
+This problem may have no solution -- perhaps due to noise or measurement error.
+
+In such a case, we look for a vector $\mathbf{x}$ such that $A\mathbf{x}$ is a good approximation to $\mathbf{b}.$
+
+The quality of the approximation can be measured using the distance from $A\mathbf{x}$ to $\mathbf{b},$ i.e.,
+
+$$\Vert A\mathbf{x} - \mathbf{b}\Vert_2.$$
+
+The general least-squares problem is given $A\in\mathbb{R}^{m\times n}$ and and $\mathbf{b}\in\mathbb{R}^{m}$, find a vector $\hat{\mathbf{x}}\in\mathbb{R}^{n}$ such that $\Vert A\mathbf{x}-\mathbf{b}\Vert_2$ is minimized, i.e. 
+
+$$\hat{\mathbf{x}} = \arg\min_\mathbf{x} \Vert A\mathbf{x} - \mathbf{b}\Vert.$$
+
+This emphasizes the fact that the least squares problem is a minimization problem. Minimizations problems are an example of a broad class of problems called _optimization_ problems. In optimization problems we attempt to find an optimal solution that minimizes (or maximizes) a set particular set of equations (and possibly constraints). 
+
+We can connect the above minimization of the distance between vectors to the minimization of the sum of squared errors. Let $\mathbf{y} = A\mathbf{x}$ and observe that
+
+$$\Vert A\mathbf{x}-\mathbf{b}\Vert_2^2 = \Vert \mathbf{y}-\mathbf{b}\Vert_2^2 =  \sum_i (y_i-b_i)^2.$$
+
+The above expression is the sum of squared errors. In statistics, the $y_i$ are the estimated values and the $b_i$ are the measured values. This is the most common measure of error used in statistics and is a key principle. 
+
+Minimizing the length of $A\mathbf{x} - \mathbf{b}$ is equivalent to minimizing the sum of the squared errors. 
+
+We can find $\hat{\mathbf{x}}$ using either 
+
+* geometric arguments based on projections of the vector $\mathbf{b}$,
+* by calculus (taking the derivative of the right-hand-side expression above and setting it equal to zero).
+
+Either way, we obtain the result that $\hat{\mathbf{x}}$ is the solution of:
+    
+$$A^TA\mathbf{x} = A^T\mathbf{b}.$$
+
+This system of equations is called the normal equations.
+
+We can prove that these equations always have at least one solution. 
+
+When $A^TA$ is invertible, the system is said to be overdetermined.  This means that there is a unique solution
+
+$$\hat{\mathbf{x}} = (A^TA)^{-1}A^T\mathbf{b}.$$
+
+Be aware that computing the solution using $(A^TA)^{-1}A^T$ can be numerically unstable. A more stable method is to use the QR decomposition of $A$, i.e., $\hat{\mathbf{x}} = R^{-1}Q^T\mathbf{b}$.
