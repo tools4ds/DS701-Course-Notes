@@ -10,6 +10,8 @@ For those that don't know Python -- but do know programming -- this chapter will
 
 Python is a fully object oriented programming language. It was originally created by Dutch programmer Guido van Rossum as a hobby project during his 1989 Christmas vacation. The name was inspired by Monty Python's Flying circus.
 
+To install Python, we recommend using the free [Anaconda Scientific Python](https://anaconda.org/) distribution.
+
 ## How do I run code?
 
 Python can be run interactively or via a script. For interactive versions of Python you can use Python interpreter `ipython`. [Jupyter](https://jupyter.org/) notebooks (.ipynb extension) run `ipython` in a browser. This is a great way to test out the code you are writing, demonstrate algorithms, and show visualizations. It allows for you to interact with the interpreter and fix mistakes as they happen. It has all the advantages of `ipython` plus interleaved documentation and graphical output.
@@ -737,3 +739,12 @@ with open('img.jpg', 'wb') as f:
 from IPython.display import Image
 Image(filename="img.jpg")
 ```
+
+## Resources
+
+Here are some handy Python resources.
+
+- The official Python [webpage](https://www.python.org/).
+- Wes McKinney's [Python for Data Anaylsis, 3E](https://wesmckinney.com/book/).
+
+For a quick hands-on refresher of Python you can always attend the (free) Python tutorials offered by Boston University's [Research Computing Services](https://www.bu.edu/tech/support/research/) (RCS). The tutorial schedule is at this [link](https://www.bu.edu/tech/about/training/classroom/rcs-tutorials/). In addition to Python, RCS offers tutorials on a variety of relevant topics in this course, such as machine learning, natural language processing, and using Pytorch. 
