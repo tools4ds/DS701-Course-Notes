@@ -1,6 +1,12 @@
-/.quarto/
 __pycache__
-_book
+
+# Quarto generated files
+/.quarto/
+_book/
+_site/
+_revealjs/
+_jupyter/
+
 example.txt
 img.jpg
 yahoo_data.csv
