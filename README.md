@@ -72,11 +72,13 @@ Alternatively you can run `quarto preview` from a terminal prompt in the `ds701_
 
 ## Rendering Slides
 
-To render the slides, run `./cmd-render-slides.sh` from the `ds701_book` folder.
+To render the slides, run `./cmd-render-slides.sh` from the `ds701_book` folder. It renders the slides into a 
+`_revealjs` folder which is listed in `.gitignore` and shouldn't be checked into the repo.
 
 ## Creating Jupyter Notebooks
 
 To create Jupyter notebook versions of each of the lecture
 notes, run `./cmd-cnvt-jupyter.sh` from the `ds701_book`
-folder.
+folder. It renders the Jupyter notebooks into the `_jupyter` folder which is
+listed in `.gitignore` and shouldn't be checked into the repo.
 
