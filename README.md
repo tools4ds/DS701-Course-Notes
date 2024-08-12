@@ -25,9 +25,8 @@ pip install -r requirements.txt
 
 We use [Quarto Projects](https://quarto.org/docs/projects/quarto-projects.html)
 to manage the YAML configurations specific to the 
-output type (e.g. website or lecture slides). Ideally, we could do this with
-[project profiles](https://quarto.org/docs/projects/profiles.html), but we
-find the behavior a bit inconsistent as we explain below.
+output type (e.g. website or lecture slides) using 
+[project profiles](https://quarto.org/docs/projects/profiles.html).
 
 Per profiles documentation, we define YAML configuration files for each project
 type:
@@ -38,10 +37,6 @@ type:
 
 along with a base `_quarto.yml` configuration.
 
-
-> TODO: Investigate and debug project profiles further. For example, it is not
-> clear if all the YAML configurations are actually employed when selecting a 
-> profile.
 
 ## Building the Site Locally
 
