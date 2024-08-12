@@ -23,10 +23,11 @@ pip install -r requirements.txt
 
 ## Quarto Project Selection
 
-We use [Quarto Projects] to manage the YAML configurations specific to the 
+We use [Quarto Projects](https://quarto.org/docs/projects/quarto-projects.html)
+to manage the YAML configurations specific to the 
 output type (e.g. website or lecture slides). Ideally, we could do this with
 [project profiles](https://quarto.org/docs/projects/profiles.html), but we
-find the behavior a bit inconsistent.
+find the behavior a bit inconsistent as we explain below.
 
 Per profiles documentation, we define YAML configuration files for each project
 type:
@@ -62,22 +63,30 @@ export QUARTO_DENO_V8_OPTIONS=--stack-size=8192
 Once this environment variable has been set you can render the entire site using the terminal commands:
 
 ```sh
-cd ds701_book
-quarto render .
+# From ds701_book/ dir
+quarto render
 ```
 
 The html files are all located in the `_site` directory. The `_site` directory is not committed in the repository.
 
-## Previewing Notes
+### Previewing the Lecture Notes Website
 
-To preview and individual chapter using VSCode, open that chapter's qmd file in VSCode and run `Shift-Command-K` in the terminal.
+To preview and individual chapter using VSCode, open that chapter's qmd file in 
+VSCode and run `Shift-Command-K` in the terminal or click on the preview icon
+on the upper right of the code window,.
 
 Alternatively you can run `quarto preview` from a terminal prompt in the `ds701_book` directory.
+To exit preview, hit `Ctl-c` in the same terminal window.
 
 ## Rendering Slides
 
-To render the slides, run `./cmd-render-slides.sh` from the `ds701_book` folder. It renders the slides into a 
-`_revealjs` folder which is listed in `.gitignore` and shouldn't be checked into the repo.
+To render slides for each lecture run
+```sh
+quarto render --profile slides
+```
+from `ds701_book/`. The resulting slides are writtein to `_revealjs` which
+is ignored by git.
+
 
 ## Creating Jupyter Notebooks
 
@@ -86,3 +95,14 @@ notes, run `./cmd-cnvt-jupyter.sh` from the `ds701_book`
 folder. It renders the Jupyter notebooks into the `_jupyter` folder which is
 listed in `.gitignore` and shouldn't be checked into the repo.
 
+## (deprecated) Rendering the Book
+
+> Rendering a Quarto book has been deprecated and replaced by rendering to
+> a website. This might still be useful, for example to render to a PDF.
+
+To render the the book run
+```sh
+quarto render --profile book
+```
+
+This will render an HTML book format to `_book` which is ignored by git.
