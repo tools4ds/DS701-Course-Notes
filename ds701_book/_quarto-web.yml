@@ -1,6 +1,7 @@
 project:
   type: website
   output-dir: _site
+  pre-render: print_quarto_config.py
 
 website:
   title: "Tools for data science"
@@ -44,7 +45,7 @@ website:
         - 19-Regression-III-More-Linear.qmd
     - section: "Neural Networks"
       contents:
-        - 23-NN-I-Gradient-Descent.qmd
+      #  - 23-NN-I-Gradient-Descent.qmd
         - 24-NN-II-Backprop.qmd
         - 25-NN-III-CNNs.qmd
     - section: "Selected Topics"

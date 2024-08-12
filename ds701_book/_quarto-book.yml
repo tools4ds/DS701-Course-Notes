@@ -1,6 +1,7 @@
 project:
   type: book
   output-dir: _book
+  pre-render: print_quarto_config.py
 
 book:
   title: "Tools for data science"
