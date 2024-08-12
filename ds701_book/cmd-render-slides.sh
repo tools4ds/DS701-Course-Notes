@@ -21,6 +21,3 @@ for file in *.ipynb; do
     quarto render "$file" --to revealjs --output-dir _revealjs
   fi
 done
-
-# revealjs slideshow
-#quarto render --to revealjs --output-dir _revealjs
