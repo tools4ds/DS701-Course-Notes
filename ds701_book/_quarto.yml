@@ -11,7 +11,7 @@ website:
     contents:
     - href: index.qmd
       text: Home
-    - section: "Preliminaires"
+    - section: "Preliminaries"
       contents:
         - 01-Intro-to-Python.qmd
         - 02A-Git-Jupyter.qmd
