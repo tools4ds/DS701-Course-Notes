@@ -1,8 +1,8 @@
 # DS701 Course Book
 
-This is the repository for DS701. It contains the course book and course lecture slides. The slides are derived from the book. 
+This is the repository for DS701 course notes and lecture slides. The slides are derived from the same source content. 
 
-The book and slides have been created using [Quarto](https://quarto.org/). In order to build the book and slides you need to install Quarto. You can install quarto from this [link](https://quarto.org/docs/get-started/). Follow the instructions in the *Get Started* section for VSCode. For VSCode you need to also install the Quarto extension. This allows you to preview the content you have created in VSCode.
+The site and slides are created using [Quarto](https://quarto.org/). In order to build the site and slides you need to install Quarto. You can install quarto from this [link](https://quarto.org/docs/get-started/). Follow the instructions in the *Get Started* section for VSCode. For VSCode you need to also install the Quarto extension. This allows you to preview the content you have created in VSCode.
 
 ## Python environment
 
@@ -34,11 +34,14 @@ conda env create -f environment.yml
 conda activate ds701_dev_env
 ```
 
-## Building the book
+## Building the Site
 
 > Tested with Quarto 1.5.55 on MacOS Sonoma 14.5.
 
-To build the book you need to be in the `ds701_book` directory. Since the book is many chapters you need to set the following environment variable using the terminal command:
+To build the site you need to be in the `ds701_book` directory. Since the site is many chapters you may need to set the following environment variable using the terminal command:
+
+> Note: Although the environment variable needs to be set when rendering the book,
+it may not be needed when rendering the website or the slides.
 
 ```
 export QUARTO_DENO_EXTRA_OPTIONS=--v8-flags=--stack-size=8192
@@ -52,15 +55,30 @@ export QUARTO_DENO_EXTRA_OPTIONS=
 export QUARTO_DENO_V8_OPTIONS=--stack-size=8192
 ```
 
-Once this environment variable has been set you can render the entirebook using the terminal commands:
+Once this environment variable has been set you can render the entire site using the terminal commands:
 
 ```sh
 cd ds701_book
 quarto render .
 ```
 
-The html files are all located in the `_books` directory. The `_books` directory is not committed in the repository.
+The html files are all located in the `_site` directory. The `_site` directory is not committed in the repository.
 
-## Previewing chapters
+## Previewing Notes
 
 To preview and individual chapter using VSCode, open that chapter's qmd file in VSCode and run `Shift-Command-K` in the terminal.
+
+Alternatively you can run `quarto preview` from a terminal prompt in the `ds701_book` directory.
+
+## Rendering Slides
+
+To render the slides, run `./cmd-render-slides.sh` from the `ds701_book` folder. It renders the slides into a 
+`_revealjs` folder which is listed in `.gitignore` and shouldn't be checked into the repo.
+
+## Creating Jupyter Notebooks
+
+To create Jupyter notebook versions of each of the lecture
+notes, run `./cmd-cnvt-jupyter.sh` from the `ds701_book`
+folder. It renders the Jupyter notebooks into the `_jupyter` folder which is
+listed in `.gitignore` and shouldn't be checked into the repo.
+
