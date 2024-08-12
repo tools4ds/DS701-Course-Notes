@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script to render all .qmd and .ipynb files to Reveal.js HTML slides.
-# Note: this script is deprecated and you should use the `quarto render` command directly.
+# Note: this script is deprecated and you should use the `quarto render --profile slides` command instead.
 
 # Check if _revealjs directory exists, if not, create it
 if [ ! -d "_revealjs" ]; then
