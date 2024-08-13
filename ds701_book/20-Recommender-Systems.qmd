@@ -133,10 +133,12 @@ This data is a subset of the data presented in: "From amateurs to connoisseurs: 
 #| slideshow: {slide_type: skip}
 #| tags: [hide-cell]
 # This is a 1.7 GB file, delete it after use
+import gdown
+url = "https://drive.google.com/uc?export=download&id=1rcCG5MqLweM9JwN68yfsiPQZUgf42iIF"
+output = "train.csv"
 import os.path
-if not os.path.exists('train.csv'):
-    os.system('kaggle competitions download -c cs-506-midterm-a1-b1')
-    os.system('unzip cs-506-midterm-a1-b1.zip')
+if not os.path.exists(output):
+    gdown.download(url, output)
 ```
 
 ```{python}

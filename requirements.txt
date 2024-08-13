@@ -30,6 +30,9 @@ pydotplus
 # 17-Regression-I-Linear
 statsmodels
 
+# 20-Recommender-Systems
+gdown
+
 # 23-NN-I-Gradient-Descent
 networkx
 
