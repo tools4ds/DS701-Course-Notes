@@ -374,6 +374,7 @@ Let's stem the data using the Snowball stemmer:
 #| slideshow: {slide_type: fragment}
 import nltk
 nltk.download('punkt')
+nltk.download('punkt_tab')
 nltk.download('stopwords')
 nltk.download('snowball_data')
 from nltk.stem.snowball import SnowballStemmer
