@@ -312,7 +312,8 @@ We use the rules of derivatives. See for example the derivative
 $$ \frac{d}{dx} x^a = ax^{a-1}, 
   \quad \textrm{e.g.} \quad \frac{d}{dx} 3x^2 = 6x 
   \quad \textrm{,} \quad \frac{d}{dx} 6x = 6
-  \quad \textrm{,} \quad \frac{d}{dx} 6 = 0 $$
+  \quad \textrm{,} \quad \frac{d}{dx} 6 = 0 
+$$
 
 so
 
