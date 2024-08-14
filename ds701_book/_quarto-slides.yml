@@ -34,4 +34,9 @@ project:
 
 format:
   revealjs:
+    footer: "DS701 -- Gardos/Ladenheim"
     scrollable: true
+    slide-number: c/t
+    show-slide-number: all
+    chalkboard: true
+    smaller: true

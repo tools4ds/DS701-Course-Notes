@@ -29,13 +29,17 @@ Today we'll look at it as a way to transform our data objects.
 
 As a reminder, here is what the SVD looks like:
 
-$$ \mbox{objects}\left\{\begin{array}{c}\;\\\;\\\;\\\;\\\;\end{array}\right.\;\;\overbrace{\left[\begin{array}{cccc}\begin{array}{c}\vdots\\\vdots\\{\bf a_1}\\\vdots\\\vdots\end{array}&\begin{array}{c}\vdots\\\vdots\\{\bf a_2}\\\vdots\\\vdots\end{array}&\dots&\begin{array}{c}\vdots\\\vdots\\{\bf a_n}\\\vdots\\\vdots\end{array}\\\end{array}\right]}^{\mbox{features}} =
+$$ 
+\mbox{objects}\left\{\begin{array}{c}\;\\\;\\\;\\\;\\\;\end{array}\right.\;\;\overbrace{\left[\begin{array}{cccc}\begin{array}{c}\vdots\\\vdots\\{\bf a_1}\\\vdots\\\vdots\end{array}&\begin{array}{c}\vdots\\\vdots\\{\bf a_2}\\\vdots\\\vdots\end{array}&\dots&\begin{array}{c}\vdots\\\vdots\\{\bf a_n}\\\vdots\\\vdots\end{array}\\\end{array}\right]}^{\mbox{features}} =
 \overbrace{\left[\begin{array}{cc}\vdots&\vdots\\\vdots&\vdots\\\sigma_1\mathbf{u}_1&\sigma_k\mathbf{u}_k\\\vdots&\vdots\\\vdots&\vdots\end{array}\right]}^{\large k}
 \times
-\left[\begin{array}{ccccc}\dots&\dots&\mathbf{v}_1&\dots&\dots\\\dots&\dots&\mathbf{v}_k&\dots&\dots\end{array}\right]$$
+\left[\begin{array}{ccccc}\dots&\dots&\mathbf{v}_1&\dots&\dots\\\dots&\dots&\mathbf{v}_k&\dots&\dots\end{array}\right]
+$$
 
 
-$$ A = U\Sigma V^T$$
+$$
+A = U\Sigma V^T
+$$
 
 Notice that $U$ contains a row for each object.   
 
@@ -190,7 +194,9 @@ plt.scatter(Xc[:, 0], Xc[:, 1], s=10, alpha=0.8, color='r');
 
 By taking 
 
-$$ \tilde{X} = X - \mathbf{1}\overline{\mathbf{x}}^T $$
+$$
+\tilde{X} = X - \mathbf{1}\overline{\mathbf{x}}^T 
+$$
 
 we translate each point so that the new mean is the origin.
 
