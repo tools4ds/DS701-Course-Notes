@@ -82,6 +82,15 @@ quarto render --profile slides
 from `ds701_book/`. The resulting slides are writtein to `_revealjs` which
 is ignored by git.
 
+Any easy way to select slides to preview is to open the folder in a browser
+such as `file:///<path-to-project-parent-folder>/DS701-Course-Notes/ds701_book/_revealjs/`.
+Then you can just click on one of the `.html` files to view the slides.
+
+You can render just one slide with a command like
+```sh
+quarto render 05-Distances-Timeseries.qmd --profile slides
+```
+
 
 ## Creating Jupyter Notebooks
 
