@@ -3,8 +3,6 @@ title: Logistic Regression
 jupyter: python3
 ---
 
-# Logistic Regression {#sec-log-regression}
-
 ```{python}
 #| hide_input: true
 #| slideshow: {slide_type: skip}

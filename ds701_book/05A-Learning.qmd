@@ -21,15 +21,15 @@ We cover the following topics in unsupervised learning:
 
 ### Clustering
 
-Clustering is a technique that groups unlabeled data together based upon their similarties (or differences). We cover the following topic in clustering:
+Clustering is a technique that groups unlabeled data together based upon their similarties (or differences). We cover the following topics in clustering:
 
-- $k$-means clustering, see @sec-kmeans and @sec-clustering-in-practice,
-- hierarchical clustering, see @sec-hierarchical-clustering,
-- Gaussian mixing, see @sec-gaussian-mixture-models.
+- [k-means](06-Clustering-I-kmeans.qmd),
+- [hierarchical clustering](08-Clustering-III-hierarchical.qmd)
+- [Gaussian mixing](09-Clustering-IV-GMM-EM.qmd).
 
 ### Dimensionality reduction
 
-Dimensionality reduction is a technique that compresses high-dimensional data into lower dimensional data with minimal information loss. We cover dimensionality reduction in @sec-low-rank-svd and @sec-pca-svd.
+Dimensionality reduction is a technique that compresses high-dimensional data into lower dimensional data with minimal information loss. We cover dimensionality reduction when discussing the [Singular Value Decompositin](11-Dimensionality-Reduction-SVD-II.qmd).
 
 ## Supervised learning
 
@@ -42,7 +42,7 @@ We cover the following topics in supervised learning:
 
 ### Regression
 
-Regression models in machine learning are used to predict continuous values based on the input features. We cover linear regression models in @sec-linear-regression and logistic regression in @sec-log-regression.
+Regression models in machine learning are used to predict continuous values based on the input features. We cover [linear regression](17-Regression-I-Linear.qmd) models and [logistic regression](18-Regression-II-Logistic.qmd).
 
 Examples of regression are:
 
@@ -54,9 +54,9 @@ Examples of regression are:
 
 Classification models in machine learning are used to predict discrete values, or classes, based on the input features. The following topics in classificaion are covered:
 
-- decision tress and random forests, see @sec-decision-trees,
-- $k$-nearest neighbors, see @sec-knn,
-- naive Bayes and support vector machines, see @sec-NB-svm.
+- [decision tress and random forests](14-Classification-I-Decision-Trees.qmd),
+- [k-nearest neighbors](15-Classification-II-kNN.qmd),
+- [naive Bayes and support vector machines](16-Classification-III-NB-SVM.qmd).
 
 Examples of classification are:
 

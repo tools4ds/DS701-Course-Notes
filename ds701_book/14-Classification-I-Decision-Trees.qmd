@@ -3,7 +3,6 @@ title: Decision Trees
 jupyter: python3
 ---
 
-# Decision Trees {#sec-decision-trees}
 ```{python}
 #| hide_input: true
 #| slideshow: {slide_type: skip}

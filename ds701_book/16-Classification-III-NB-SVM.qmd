@@ -3,8 +3,6 @@ title: Naive Bayes and Support Vector Machines
 jupyter: python3
 ---
 
-# Naive Bayes and Support Vector Machines {#sec-NB-svm}
-
 ```{python}
 #| hide_input: true
 #| tags: [hide-cell]

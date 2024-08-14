@@ -3,8 +3,6 @@ title: Low Rank Approximation and the SVD
 jupyter: python3
 ---
 
-# Low Rank Approximation and the SVD {#sec-low-rank-svd}
-
 ```{python}
 #| hide_input: true
 #| slideshow: {slide_type: skip}

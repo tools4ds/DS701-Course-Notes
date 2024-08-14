@@ -3,8 +3,6 @@ title: Clustering In Practice
 jupyter: python3
 ---
 
-# Clustering In Practice {#sec-clustering-in-practice}
-
 ...featuring $k$-means
 
 
