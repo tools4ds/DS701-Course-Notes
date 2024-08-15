@@ -5,6 +5,7 @@ project:
     - 01-Intro-to-Python.qmd
     - 02A-Git-Jupyter.qmd
     - 02B-Pandas.qmd
+    - 02C-Sklearn.qmd
     - 03-Probability-and-Statistics-Refresher.qmd
     - 04-Linear-Algebra-Refresher.qmd
     - 05-Distances-Timeseries.qmd
