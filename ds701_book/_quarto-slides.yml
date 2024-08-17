@@ -40,3 +40,4 @@ format:
     show-slide-number: all
     chalkboard: true
     smaller: true
+    html-math-method: mathjax
