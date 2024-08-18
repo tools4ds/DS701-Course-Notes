@@ -4,9 +4,6 @@ jupyter: python3
 ---
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [remove-cell]
 %matplotlib inline
 %config InlineBackend.figure_format='retina'
 import numpy as np
@@ -16,6 +13,7 @@ import seaborn as sns
 from IPython.display import Image, display_html, display, Math, HTML;
 ```
 
+# Victorian England
 
 ## 1854 Cholera Outbreak
 
@@ -38,7 +36,7 @@ from IPython.display import Image, display_html, display, Math, HTML;
 
 ## John Snow
 
-::: {.columns }
+:::: {.columns }
 
 ::: {.column width="60%" .incremental}
 - John Snow, a local physician, extensively studied the patterns of illness across Soho due to cholera.
@@ -50,7 +48,7 @@ from IPython.display import Image, display_html, display, Math, HTML;
 ![John Snow](./figs/L06-John-Snow-Portrait.png)
 :::
 
-:::
+::::
 
 ## John's Snow Map
 
@@ -99,6 +97,8 @@ Images and information taken from [wikipedia](https://en.wikipedia.org/wiki/1854
 
 John Snow's original data is recreated [here](https://blog.rtwilson.com/john-snows-cholera-data-in-more-formats/).
 :::
+
+# Clustering
 
 ## Clustering
 
@@ -217,6 +217,7 @@ in a partitional clustering, the points are divided into a set of __non-overlapp
 ![](figs/L06-partitional-clustering.png){width=600 fig-align="center"}
     
 In a partitional clustering:
+
 * Each object belongs to __one__, and only one, cluster
 * The set of clusters covers all the objects
 
@@ -224,36 +225,53 @@ We are going to assume for now that the number of clusters is given in advance.
 
 We will denote the number of clusters as $k$.
 
-## The $k$-means Problem
+# The $k$-means Algorithm
+
+## Assumptions
 
 Now, we are ready to state our first formalization of the clustering problem.
 
 We will assume that 
-* data items are represented by points in $\mathbb{R}^d$.   (In other words, each data item has $d$ features.)
-* $n$ points are given
+
+* data items are represented by points in $d$-dimensional space, $\mathbb{R}^d$.
+    * Stated another way, each data item has $d$ features.
+* the number of points, $n$, is given
 * the number of clusters $k$ is given
 
-__$k$-means Problem:__
+## Minimizing a Cost Function
 
-Find $k$ points $c_1, \dots, c_k$ (called <font color="blue"> _centers_, _centroids_,</font> or <font color = "blue"> _means_,</font> so that the cost
+Find $k$ points $c_1, \dots, c_k$ (called <font color="blue"> _centers_, _centroids_,</font> or <font color = "blue"> _means_,</font> so that the _cost_
 
-$$ \sum_{i=1}^n \min_j \Vert x_i-c_j\Vert^2_2 $$
+$$
+\sum_{i=1}^n \Vert x_i-c_j\Vert^2_2 
+$$
 
 is minimized.
 
-__Equivalently:__ we can think in terms of the partition itself.
+::: aside
+See [Useful Norms](./05-Distances-Timeseries.html#useful-norms) in
+[Distances and Timeseries](./05-Distances-Timeseries.html) for a refresher.
+:::
 
-Consider the set $X = \{x_1, \dots, x_n\}$ where $x_i \in \mathbb{R}^n$.
+## Minimizing a Partition Cost Function
+
+**Equivalently:** we can think in terms of the partition itself.
+
+Consider the set $X = \{x_1, \dots, x_n\}$ where $x_i \in \mathbb{R}^d$.
     
-Find $k$ points $c_1, \dots, c_k$ 
-
-and partition $X$ into subsets $\{X_1, \dots, X_k\}$ by assigning each point $x_i$ in $X$ to its nearest cluster center,
+Find $k$ points $c_1, \dots, c_k$ and partition $X$ into subsets
+$\{X_1, \dots, X_k\}$ by assigning each point $x_i$ in $X$ to its nearest
+cluster center,
 
 so that the cost
 
-$$ \sum_{i=1}^n \min_j \Vert x_i-c_j\Vert^2_2 = \sum_{j=1}^k \sum_{x \in X_j} \Vert x - c_j \Vert^2_2 $$
+$$
+\sum_{i=1}^n \Vert x_i-c_j\Vert^2_2 = \sum_{j=1}^k \sum_{x \in X_j} \Vert x - c_j \Vert^2_2 
+$$
 
 is minimized.
+
+---
 
 We now have a <font color="blue">formal</font> definition of a clustering.
 
@@ -269,28 +287,40 @@ __Nonetheless,__ there is a simple algorithm that works quite well in practice!
 
 ## The $k$-means Algorithm
 
-There is a "classic" algorithm for this problem.
+:::: {.columns }
 
-It was voted among the __top-10 algorithms__ in data mining!
-
-It is such a good idea that it has been independently discovered multiple times.
-
-It was first discovered by Lloyd in 1957, so it is often called Lloyd's algorithm.
-
-It is called the "$k$-means algorithm"
-
-(not to be confused with the $k$-means problem!)
-
+::: {.column width="40%"}
 ![](figs/L06-top-ten-algorithms-cover.png){width=300 fig-align="center"}
-    
-The $k$-means algorithm:
+:::
 
-1. Pick $k$ cluster centers $\{c_1, \dots, c_k\}$.  These can be chosen randomly, or by some other method.
-2. For each $j$, define the cluster $X_j$ as the set of points in $X$ that are <font color="blue">closest to center</font> $c_k$.  
-(Nearer to $c_k$ than to any other center.)
-3. For each $j$, let $c_j$ be <font color="blue">the center of mass of cluster</font> $X_j$.  
-(In other words, $c_j$ is the mean of the vectors in $X_j$.)
-4. Repeat (ie, go to Step 2) until convergence.
+::: {.column width="60%"}
+* There is a "classic" algorithm for this problem.
+* It was voted among the __top-10 algorithms__ in data mining!^[As determined at the 2006 IEEE International Conference on Data Mining]
+* It is such a good idea that it has been independently discovered multiple times.
+* It was first discovered by Lloyd in 1957, so it is often called Lloyd's algorithm.
+* It is called the "$k$-means algorithm"
+* (not to be confused with the $k$-means problem!)
+:::
+
+::::
+
+::: aside
+The other from the top 10 were SVM, Apriori, EM, PageRank, AdaBoost, kNN, Naive Bayes and CART.
+:::
+
+::: {.content-hidden when-profile="web"}    
+## The $k$-means algorithm
+:::
+
+1. Pick $k$ cluster centers $\{c_1, \dots, c_k\}$.  
+    - These can be chosen randomly, or by some other method.
+2. For each $j$, define the cluster $X_j$ as the set of points in $X$ that are <font color="blue">closest to center</font> $c_j$.  
+    - Nearer to $c_j$ than to any other center.
+3. For each $j$, update $c_j$ to be <font color="blue">the center of mass of cluster</font> $X_j$.  
+    - In other words, $c_j$ is the mean of the vectors in $X_j$.
+4. Repeat (ie, go to Step 2) until convergence^[Convergence to be defined].
+
+---
 
 Let's see this in practice:
 
@@ -304,11 +334,15 @@ However, we don't have any guarantees on the performance of $k$-means.
 
 In particular, there are various settings in which $k$-means can fail to do a good job.
 
+---
+
 1. __$k$-means tries to find spherical clusters__.
 
 Because each point is assigned to its closest center, the points in a cluster are implicitly assumed to be arranged in a sphere around the center.
 
 ![](figs/L06-kmeans-nonspherical-clusters.png){width=600 fig-align="center"}
+
+---
 
 2. __$k$-means tries to find equal-sized clusters.__
 
@@ -316,25 +350,23 @@ For the same reason, the sizes of clusters are implicitly assumed to be approxim
     
 ![](figs/L06-kmeans-cluster-size.png){width=600 fig-align="center"}
 
+---
+
 3. __$k$-means is sensitive to the starting cluster centers.__
 
 If the initial guess (Step 1) is a bad one, $k$-means may get "stuck" in a bad solution.
     
 ![](figs/L06-kmeans-bad-initialization.png){width=600 fig-align="center"}
 
-### Choosing a Good Initialization
+## Choosing a Good Initialization
 
-How can we avoid the kind of bad initialization we just saw?
+* How can we avoid the kind of bad initialization we just saw?
+* A good strategy is to pick points that are distant to each other.
+* This strategy is called "$k$-means++".  
+* It works very well in practice, and the `scikit-learn` implementation uses it by default.
+* (We will explore it in the next lecture.)
 
-A good strategy is to pick points that are distant to each other.
-
-This strategy is called "$k$-means++".  
-
-It works very well in practice, and the `scikit-learn` implementation uses it by default.
-
-(We will explore it in the next lecture.)
-
-### Choosing the right $k$
+## Choosing the right $k$
 
 Generally, we would say that, given some $k$, the $k$-means algorithm "learns" the cluster centers -- that is, the parameters of the model.
 
@@ -343,18 +375,24 @@ But we have not yet considered how to choose the right number of clusters.
 That's typically __not__ something one knows in advance.
 
 As an aside:
+
 * This parameter ($k$) is the first example we have seen of a __hyperparameter__.
 * A hyperparameter is a parameter that must be set before the model parameters can be learned.
 
 Our basic strategy will be to
+
 * Iterate through different $k$ and use some criterion to decide which $k$ is most appropriate.
 * We will discuss this more in the next lecture.
 
-### Feature Scaling
+## Feature Scaling
 
-Finally, given the tendency of $k$-means to look for spherical clusters, we should consider the scales of the various features.
+Finally, given the tendency of $k$-means to look for spherical clusters, we
+should consider the scales of the various features.
 
-In fact, in general when constructing or selecting a distance metric, one needs to think carefully about the scale of the features being used.
+In fact, in general when constructing or selecting a distance metric, one needs
+to think carefully about the scale of the features being used.
+
+---
 
 For example, consider the case where we are clustering people based on their age, income, and gender.
 
@@ -367,7 +405,11 @@ Thus, the following records:
 
 Would be encoded in feature space as:
 
-$$\begin{bmatrix}27\\75000\\0\end{bmatrix},\begin{bmatrix}45\\42000\\1\end{bmatrix} $$
+$$
+\begin{bmatrix}27\\75000\\0\end{bmatrix},\begin{bmatrix}45\\42000\\1\end{bmatrix} 
+$$
+
+---
 
 What would happen if we used Euclidean distance as our dissimilarity metric in this feature space?
 
@@ -379,7 +421,10 @@ We are unlikely to expose gender-based differences if we cluster using this repr
 
 The most common way to handle this is __feature scaling.__
 
-The basic idea is to rescale each feature separately, so that its range of values is about the same as all other features.
+---
+
+The basic idea is to rescale each feature separately, so that its range of
+values is about the same as all other features.
 
 For example, one may choose to:
     
@@ -388,7 +433,12 @@ For example, one may choose to:
 * then rescale each feature so that the standard deviation overall observed values is 1.
     * This means that the feature will have about the same range of values as all the others.
 
-For example, let's work with Bortkiewicz's famous horse-kick data:
+## Feature Scaling Example
+
+For example, let's work with Bortkiewicz's famous
+[horse-kick data](http://www.randomservices.org/random/data/HorseKicks.html)
+which is the the number of soilders in the Prussian cavalry killed by horse kicks
+over the 20 years between 1875 and 1894, inclusive.
 
 ```{python}
 # source: http://www.randomservices.org/random/data/HorseKicks.html
@@ -399,20 +449,24 @@ counts
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 counts.hist(bins=25,xlabelsize=16);
+plt.xlabel('Year #')
+plt.ylabel('# of Deaths')
+plt.title('Histogram of Kick Deaths')
+plt.show()
 ```
 
 ```{python}
 counts.mean()
 ```
+--- 
 
 To standardize to zero mean and unit standard deviation, we can use tools from the `scikit-learn` library.
 
 (We will discuss scikit-learn more in upcoming lectures.)
 
 ```{python}
-#| slideshow: {slide_type: fragment}
+#| echo: true
 from sklearn import preprocessing
 counts_scaled = pd.DataFrame(preprocessing.scale(counts))
 counts_scaled.hist(bins=25,xlabelsize=16);
@@ -421,6 +475,8 @@ counts_scaled.hist(bins=25,xlabelsize=16);
 ```{python}
 counts_scaled.mean().values
 ```
+
+---
 
 Notice that values that used to be zero have now become negative.
 
@@ -434,7 +490,7 @@ counts_minmax = pd.DataFrame(counts_minmax)
 counts_minmax.hist(bins=25,xlabelsize=16);
 ```
 
-__Example Application of k-means.__
+## Example Application of k-means
 
 Here is a simple example of how $k$-means can be used for data compression.
 
@@ -449,14 +505,20 @@ Because there are a smaller number of colors used, we can use fewer bits for eac
 Here, we use 4 bits (16 colors) for a compression ratio around 6$\times$.
     
 ![](figs/L6-annie_016.png){width=500 fig-align="center"}
-    
+
+---
+
 Here, we use 3 bits (8 colors) for a compression ratio around 8$\times$.
     
 ![](figs/L6-annie_008.png){width=500 fig-align="center"}
 
+---
+
 Here, we use 2 bits (4 colors) for a compression ratio around 12$\times$.
     
 ![](figs/L6-annie_004.png){width=500 fig-align="center"}
+
+---
 
 Finally, we use 1 bit (2 colors) for a compression ratio around 24$\times$.
     
