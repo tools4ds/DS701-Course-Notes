@@ -1,12 +1,9 @@
 ---
-title: $k$-means
+title: $k$-Means Clustering
 jupyter: python3
 ---
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [remove-cell]
 %matplotlib inline
 %config InlineBackend.figure_format='retina'
 import numpy as np
@@ -16,80 +13,128 @@ import seaborn as sns
 from IPython.display import Image, display_html, display, Math, HTML;
 ```
 
+# Victorian England
 
+## 1854 Cholera Outbreak
 
-<center>
+:::: {.columns }
 
-<img src="figs/L6-John_Snow_memorial_and_pub.png" alt="Figure" width="400px">
-    
-</center>
+::: {.column width="40%"}
+![London cholera outbreak](./figs/Punch-A_Court_for_King_Cholera.png){width=400}
+^[Public Domain, https://commons.wikimedia.org/w/index.php?curid=680455]
+:::
 
-<div style = "float: left; width: 55%;">
-    
-__1854__ saw a horrific cholera outbreak in Soho, London.   
+::: {.column width="60%" .incremental}
+- There was a horrific cholera outbreak in **1854** Soho, London.
+- Common wisdom at the time was that disease spread by breathing "foul air" (miasma).  
+- The London sewer system had not yet reached Soho.  
+- Most homes had cesspits under the floor, which often overflowed
+- "Night Soil Men" would regularly collect and sell to farmers or dump in the Thames
+:::
 
-Common wisdom at the time was that disease spread by breathing "foul air" (miasma).  
-    
-The London sewer system had not yet reached Soho.  Most homes had cesspits under the floor.
+::::
 
-John Snow, a local physician, extensively studied the patterns of illness across Soho due to cholera.
-    
-</div>
+## John Snow
 
-<img src="figs/L06-John-Snow-Portrait.png" alt="Figure" width="30%" float = "right">
+:::: {.columns }
 
-In the course of his studies, his attention was drawn to one neighborhood around Broad Street.
+::: {.column width="60%" .incremental}
+- John Snow, a local physician, extensively studied the patterns of illness across Soho due to cholera.
+- In the course of his studies, his attention was drawn to one neighborhood around Broad Street.
+- In 10 days, 500 people in the area died. 
+:::
 
-In 10 days, 500 people in the area died. 
+::: {.column width="40%"}
+![John Snow](./figs/L06-John-Snow-Portrait.png)
+:::
 
-In uncovering the source of this outbreak, Snow prepared this map:
+::::
 
-<center>
-    
-<img src="figs/L6-Snow-cholera-map-1.png" alt="Figure" width="500px">
-    
-</center>
+## John's Snow Map
 
-By John Snow - Published by C.F. Cheffins, Lith, Southhampton Buildings, London, England, 1854 in Snow, John. On the Mode of Communication of Cholera, 2nd Ed, John Churchill, New Burlington Street, London, England, 1855.
+:::: {.columns }
 
-(This image was originally from <a class="external text" href="http://en.wikipedia.org">en.wikipedia</a>; description page is/was <a class="external text" href="http://en.wikipedia.org/w/index.php?title=Image%3ASnow-cholera-map-1.jpg">here</a>. Image copied from <a rel="nofollow" class="external free" href="http://matrix.msu.edu/~johnsnow/images/online_companion/chapter_images/fig12-5.jpg">http://matrix.msu.edu/~johnsnow/images/online_companion/chapter_images/fig12-5.jpg</a>), Public Domain, <a href="https://commons.wikimedia.org/w/index.php?curid=2278605">https://commons.wikimedia.org/w/index.php?curid=2278605</a>
+::: {.column width="60%"}
+![London cholera outbreak](figs/L6-Snow-cholera-map-1.png)
+:::
 
-<center>
-    
-<img src="figs/L6-John_Snow_memorial_and_pub.png" alt="Figure" width="400px">
+::: {.column width="40%" .incremental}
+- In uncovering the source of this outbreak, Snow prepared this map
+- From this map he could clearly see the deaths were clustered around an area
+- The neighborhood was all served by a water pump on Broad St.
+- The pump handle was removed and illnesses decreased dramatically
 
+::: {.fragment}
+![Broad St. water pump](./figs/L6-John_Snow_memorial_and_pub.png){width=180}
+:::
 
-</center>
+:::
 
-<a href="http://creativecommons.org/licenses/by-sa/2.0" title="Creative Commons Attribution-Share Alike 2.0">CC BY-SA 2.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=357998">https://commons.wikimedia.org/w/index.php?curid=357998</a>
+::::
 
-John Snow's original data is available here: http://blog.rtwilson.com/john-snows-cholera-data-in-more-formats/
+---
 
-## Clustering is Unsupervised Learning
+:::: {.columns}
+::: {.column width="50%"}
+![J. Snow Book](figs/L06-snow-book-cover.png){height=500}
+:::
+::: {.column width="50%" .incremental}
+- He later published his results^[By John Snow - Published by C.F. Cheffins, Lith, Southhampton Buildings, London, England, 1854 in Snow, John. On the Mode of Communication of Cholera, 2nd Ed, John Churchill, New Burlington Street, London, England, 1855.]
+- Results from the cluster map
+- Results from a double blind study of two neighborhoods drawing water upriver
+and downriver of the polluted portion of the Thames
+- Other anecdotes of visitors to Soho, etc.
+:::
+::::
 
+::: {.content-hidden when-profile="slides"}
+## References and Further Reading 
+
+Images and information taken from [wikipedia](https://en.wikipedia.org/wiki/1854_Broad_Street_cholera_outbreak), 
+[National Library of Medicine](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7150208/) and the 
+[Internet Archive](https://archive.org/details/b28985266/page/n3/mode/2up) and
+[MSU's John Snow Archive](https://johnsnow.matrix.msu.edu/).
+
+John Snow's original data is recreated [here](https://blog.rtwilson.com/john-snows-cholera-data-in-more-formats/).
+:::
+
+# Clustering
+
+## Clustering
+
+::: {.fragment}
 Clustering is a very important way of discovering __structure__ in data.
+:::
 
+::: {.fragment}
 It is so important because it is __common__ for data to show clusters.
+:::
 
+::: {.incremental}
 * Locations where millionaires live
 * The number of hours people work each week
-* Demographics ("soccer moms", "bored retirees", "unemployed millenials", etc)
+* Demographics ("soccer parents", "bored retirees", "unemployed millenials", etc)
+:::
 
-We can often simplify or compress our data if we recognize the existence of clusters.
+::: {.content-hidden when-profile="web"}
+## Clustering Continued
+:::
 
-Further, we can often interpret clusters by assigning them labels.
+::: {.incremental}
+* We can often simplify or compress our data if we recognize the existence of clusters.
+* Further, we can often interpret clusters by assigning them labels.
+* However, note that these categories or "labels" are assigned __after__ the fact.
+* And, we may __not__ be able to interpret clusters or assign them labels in some cases.
+* That is, clustering represents the first example we will see of __unsupervised__ learning.
+:::
 
-However, note that these categories or "labels" are assigned __after__ the fact.
-
-And, we may __not__ be able to interpret clusters or assign them labels in some cases.
-
-That is, clustering represents the first example we will see of __unsupervised__ learning.
+## Supervised vs Unsupervised
 
 __Supervised__ methods:  Data items have labels, and we want to learn a function that correctly assigns labels to new data items.
 
 __Unsupervised__ methods:  Data items do not have labels, and we want to learn a function that extracts  important patterns from the data.
 
-__Applications of Clustering:__
+## Applications of Clustering
 
 * Image Processing
     * Cluster images based on their visual content
@@ -104,30 +149,43 @@ __Applications of Clustering:__
 
 ## The Clustering Problem
 
-When we do clustering, what problem are we trying to solve?
+When we apply clustering, what problem are we trying to solve?
 
+::: {.fragment}
 We will answer this question informally at first. 
+:::
 
+::: {.fragment}
 (But soon we will look at formal criteria!)
+:::
 
+::: {.fragment .fade-in}
 Informally, a __clustering__ is:
     
 > a grouping of data objects, such that the objects within a group are similar (or near) to one another and dissimilar (or far) from the objects in other groups.
 
 (keep in mind that if we use a distance function as a dissimilarity measure, then "far" implies "different")
+:::
 
-<center>
-    
-<img src="figs/L06-clustering-1.png" alt="Figure" width="350px">
-    
-</center>
+::: {.content-hidden when-profile="web"}
+## The Clustering Problem, continued
+:::
 
+![](figs/L06-clustering-1.png){width=350 fig-align="center"}
+    
 So we want our clustering algorithm to:
+
 * <font color = "blue">minimize</font> intra-cluster distances
 * <font color = "red">maximize</font> inter-cluster distances
 
+
+::: {.content-hidden when-profile="web"}
+## The Clustering Problem, continued
+
+![](figs/L06-clustering-1.png){width=350 fig-align="center"}
+:::
 Here are the basic questions we need to ask about clustering:
-    
+
 * What is the right kind of <font color = "blue">"similarity"</font> to use?
 * What is a <font color="blue">"good" partition</font> of objects?
     * ie, how is the quality of a solution measured?
@@ -135,13 +193,14 @@ Here are the basic questions we need to ask about clustering:
     * are there efficient algorithms?  
     * are there algorithms that are guaranteed to find good clusters?
 
-Now note that even with our more-formal discussion, the criteria for deciding on a "best" clustering can still be ambiguous.
+::: {.content-hidden when-profile="web"}
+## The Clustering Problem, continued
+:::
 
-<center>
+Now note that even with our more-formal discussion, the criteria for deciding on
+a "best" clustering can still be ambiguous.
     
-<img src="figs/L06-clustering-2.png" alt="Figure" width="600px">
-    
-</center>
+![](figs/L06-clustering-2.png){width=600 fig-align="center"}
 
 To accommodate the ambiguity here, one approach is to seek a __hierarchical__ clustering:
 
@@ -149,17 +208,16 @@ That is, as set of nested clusters organized in a tree.
 
 We'll discuss hierarchical cluster in an upcoming lecture.
 
+---
+
 For today, we'll focus on __partitional__ clustering:  
 
 in a partitional clustering, the points are divided into a set of __non-overlapping__ groups.
-
-<center>
     
-<img src="figs/L06-partitional-clustering.png" alt="Figure" width="600px">
+![](figs/L06-partitional-clustering.png){width=600 fig-align="center"}
     
-</center>
-
 In a partitional clustering:
+
 * Each object belongs to __one__, and only one, cluster
 * The set of clusters covers all the objects
 
@@ -167,36 +225,53 @@ We are going to assume for now that the number of clusters is given in advance.
 
 We will denote the number of clusters as $k$.
 
-## The $k$-means Problem
+# The $k$-means Algorithm
+
+## Assumptions
 
 Now, we are ready to state our first formalization of the clustering problem.
 
 We will assume that 
-* data items are represented by points in $\mathbb{R}^d$.   (In other words, each data item has $d$ features.)
-* $n$ points are given
+
+* data items are represented by points in $d$-dimensional space, $\mathbb{R}^d$.
+    * Stated another way, each data item has $d$ features.
+* the number of points, $n$, is given
 * the number of clusters $k$ is given
 
-__$k$-means Problem:__
+## Minimizing a Cost Function
 
-Find $k$ points $c_1, \dots, c_k$ (called <font color="blue"> _centers_, _centroids_,</font> or <font color = "blue"> _means_,</font> so that the cost
+Find $k$ points $c_1, \dots, c_k$ (called <font color="blue"> _centers_, _centroids_,</font> or <font color = "blue"> _means_,</font> so that the _cost_
 
-$$ \sum_{i=1}^n \min_j \Vert x_i-c_j\Vert^2_2 $$
+$$
+\sum_{i=1}^n \Vert x_i-c_j\Vert^2_2 
+$$
 
 is minimized.
 
-__Equivalently:__ we can think in terms of the partition itself.
+::: aside
+See [Useful Norms](./05-Distances-Timeseries.html#useful-norms) in
+[Distances and Timeseries](./05-Distances-Timeseries.html) for a refresher.
+:::
 
-Consider the set $X = \{x_1, \dots, x_n\}$ where $x_i \in \mathbb{R}^n$.
+## Minimizing a Partition Cost Function
+
+**Equivalently:** we can think in terms of the partition itself.
+
+Consider the set $X = \{x_1, \dots, x_n\}$ where $x_i \in \mathbb{R}^d$.
     
-Find $k$ points $c_1, \dots, c_k$ 
-
-and partition $X$ into subsets $\{X_1, \dots, X_k\}$ by assigning each point $x_i$ in $X$ to its nearest cluster center,
+Find $k$ points $c_1, \dots, c_k$ and partition $X$ into subsets
+$\{X_1, \dots, X_k\}$ by assigning each point $x_i$ in $X$ to its nearest
+cluster center,
 
 so that the cost
 
-$$ \sum_{i=1}^n \min_j \Vert x_i-c_j\Vert^2_2 = \sum_{j=1}^k \sum_{x \in X_j} \Vert x - c_j \Vert^2_2 $$
+$$
+\sum_{i=1}^n \Vert x_i-c_j\Vert^2_2 = \sum_{j=1}^k \sum_{x \in X_j} \Vert x - c_j \Vert^2_2 
+$$
 
 is minimized.
+
+---
 
 We now have a <font color="blue">formal</font> definition of a clustering.
 
@@ -212,40 +287,44 @@ __Nonetheless,__ there is a simple algorithm that works quite well in practice!
 
 ## The $k$-means Algorithm
 
-There is a "classic" algorithm for this problem.
+:::: {.columns }
 
-It was voted among the __top-10 algorithms__ in data mining!
+::: {.column width="40%"}
+![](figs/L06-top-ten-algorithms-cover.png){width=300 fig-align="center"}
+:::
 
-It is such a good idea that it has been independently discovered multiple times.
+::: {.column width="60%"}
+* There is a "classic" algorithm for this problem.
+* It was voted among the __top-10 algorithms__ in data mining!^[As determined at the 2006 IEEE International Conference on Data Mining]
+* It is such a good idea that it has been independently discovered multiple times.
+* It was first discovered by Lloyd in 1957, so it is often called Lloyd's algorithm.
+* It is called the "$k$-means algorithm"
+* (not to be confused with the $k$-means problem!)
+:::
 
-It was first discovered by Lloyd in 1957, so it is often called Lloyd's algorithm.
+::::
 
-It is called the "$k$-means algorithm"
+::: aside
+The other from the top 10 were SVM, Apriori, EM, PageRank, AdaBoost, kNN, Naive Bayes and CART.
+:::
 
-(not to be confused with the $k$-means problem!)
+::: {.content-hidden when-profile="web"}
+## The $k$-means algorithm
+:::
 
-<center>
-    
-<img src="figs/L06-top-ten-algorithms-cover.png" alt="Figure" width="300px">
-    
-</center>
+1. Pick $k$ cluster centers $\{c_1, \dots, c_k\}$.  
+    - These can be chosen randomly, or by some other method.
+2. For each $j$, define the cluster $X_j$ as the set of points in $X$ that are <font color="blue">closest to center</font> $c_j$.  
+    - Nearer to $c_j$ than to any other center.
+3. For each $j$, update $c_j$ to be <font color="blue">the center of mass of cluster</font> $X_j$.  
+    - In other words, $c_j$ is the mean of the vectors in $X_j$.
+4. Repeat (ie, go to Step 2) until convergence^[Convergence to be defined].
 
-The $k$-means algorithm:
-
-1. Pick $k$ cluster centers $\{c_1, \dots, c_k\}$.  These can be chosen randomly, or by some other method.
-2. For each $j$, define the cluster $X_j$ as the set of points in $X$ that are <font color="blue">closest to center</font> $c_k$.  
-(Nearer to $c_k$ than to any other center.)
-3. For each $j$, let $c_j$ be <font color="blue">the center of mass of cluster</font> $X_j$.  
-(In other words, $c_j$ is the mean of the vectors in $X_j$.)
-4. Repeat (ie, go to Step 2) until convergence.
+---
 
 Let's see this in practice:
 
-<center>
-    
-<img src="figs/L06-kmeans-example.png" alt="Figure" width="600px">
-    
-</center>
+![](figs/L06-kmeans-example.png){width=600 fig-align="center"}
 
 ## Limitations of $k$-means
 
@@ -255,49 +334,39 @@ However, we don't have any guarantees on the performance of $k$-means.
 
 In particular, there are various settings in which $k$-means can fail to do a good job.
 
+---
+
 1. __$k$-means tries to find spherical clusters__.
 
 Because each point is assigned to its closest center, the points in a cluster are implicitly assumed to be arranged in a sphere around the center.
 
-<center>
-    
-<img src="figs/L06-kmeans-nonspherical-clusters.png" alt="Figure" width="600px">
-    
-</center>
+![](figs/L06-kmeans-nonspherical-clusters.png){width=600 fig-align="center"}
+
+---
 
 2. __$k$-means tries to find equal-sized clusters.__
 
 For the same reason, the sizes of clusters are implicitly assumed to be approximately equal.
+    
+![](figs/L06-kmeans-cluster-size.png){width=600 fig-align="center"}
 
-<center>
-    
-<img src="figs/L06-kmeans-cluster-size.png" alt="Figure" width="600px">
-    
-</center>
+---
 
 3. __$k$-means is sensitive to the starting cluster centers.__
 
 If the initial guess (Step 1) is a bad one, $k$-means may get "stuck" in a bad solution.
-
-<center>
     
-<img src="figs/L06-kmeans-bad-initialization.png" alt="Figure" width="600px">
-    
-</center>
+![](figs/L06-kmeans-bad-initialization.png){width=600 fig-align="center"}
 
-### Choosing a Good Initialization
+## Choosing a Good Initialization
 
-How can we avoid the kind of bad initialization we just saw?
+* How can we avoid the kind of bad initialization we just saw?
+* A good strategy is to pick points that are distant to each other.
+* This strategy is called "$k$-means++".  
+* It works very well in practice, and the `scikit-learn` implementation uses it by default.
+* (We will explore it in the next lecture.)
 
-A good strategy is to pick points that are distant to each other.
-
-This strategy is called "$k$-means++".  
-
-It works very well in practice, and the `scikit-learn` implementation uses it by default.
-
-(We will explore it in the next lecture.)
-
-### Choosing the right $k$
+## Choosing the right $k$
 
 Generally, we would say that, given some $k$, the $k$-means algorithm "learns" the cluster centers -- that is, the parameters of the model.
 
@@ -306,18 +375,24 @@ But we have not yet considered how to choose the right number of clusters.
 That's typically __not__ something one knows in advance.
 
 As an aside:
+
 * This parameter ($k$) is the first example we have seen of a __hyperparameter__.
 * A hyperparameter is a parameter that must be set before the model parameters can be learned.
 
 Our basic strategy will be to
+
 * Iterate through different $k$ and use some criterion to decide which $k$ is most appropriate.
 * We will discuss this more in the next lecture.
 
-### Feature Scaling
+## Feature Scales
 
-Finally, given the tendency of $k$-means to look for spherical clusters, we should consider the scales of the various features.
+Finally, given the tendency of $k$-means to look for spherical clusters, we
+should consider the scales of the various features.
 
-In fact, in general when constructing or selecting a distance metric, one needs to think carefully about the scale of the features being used.
+In fact, in general when constructing or selecting a distance metric, one needs
+to think carefully about the scale of the features being used.
+
+## Unscaled Features
 
 For example, consider the case where we are clustering people based on their age, income, and gender.
 
@@ -330,19 +405,28 @@ Thus, the following records:
 
 Would be encoded in feature space as:
 
-$$\begin{bmatrix}27\\75000\\0\end{bmatrix},\begin{bmatrix}45\\42000\\1\end{bmatrix} $$
+$$
+\begin{bmatrix}27\\75000\\0\end{bmatrix},\begin{bmatrix}45\\42000\\1\end{bmatrix} 
+$$
+
+## Unscaled Features, Continued
 
 What would happen if we used Euclidean distance as our dissimilarity metric in this feature space?
 
 (This is what $k$-means uses.)
 
-Clearly, the influence of income would dominate the other two features.  For example, a difference of gender is about as significant as a difference of one dollar of yearly income.
+Clearly, the influence of income would dominate the other two features.  For
+example, a difference of gender is about as significant as a difference of one
+dollar of yearly income.
 
 We are unlikely to expose gender-based differences if we cluster using this representation.
 
 The most common way to handle this is __feature scaling.__
 
-The basic idea is to rescale each feature separately, so that its range of values is about the same as all other features.
+## Feature Scaling
+
+The basic idea is to rescale each feature separately, so that its range of
+values is about the same as all other features.
 
 For example, one may choose to:
     
@@ -351,7 +435,31 @@ For example, one may choose to:
 * then rescale each feature so that the standard deviation overall observed values is 1.
     * This means that the feature will have about the same range of values as all the others.
 
-For example, let's work with Bortkiewicz's famous horse-kick data:
+## Feature Scaling Example
+
+For example, let's work with Bortkiewicz's famous
+[horse-kick data](http://www.randomservices.org/random/data/HorseKicks.html)
+which is the the number of soilders in the Prussian cavalry killed by horse kicks
+over the 20 years between 1875 and 1894, inclusive.
+
+## Ladislaus Bortkiewicz
+
+:::: {.columns}
+::: {.column width="40%"}
+![Ladislaus Bortkiewicz](figs/Ladislaus_Bortkiewicz.jpg){width=150}^[By no conegut - MacTutor History of Mathematics: http://www-history.mcs.st-andrews.ac.uk/PictDisplay/Bortkiewicz.html, Public Domain, https://commons.wikimedia.org/w/index.php?curid=79219622] ![Law of Small Numbers Book](figs/Bortkiewicz%20LSN%20Book.png){width=200}^[Law of Small Numbers]
+:::
+::: {.column width="60%"}
+* Ladislaus Bortkiewicz (1868 -- 1931)
+* Wrote book ["Law of Small Numbers"](https://archive.org/details/dasgesetzderklei00bortrich/mode/2up) in 1898
+* Showed how the horse kick data fits the
+[Poisson model](03-Probability-and-Statistics-Refresher.html#the-poisson-distribution)
+* More generally that rare events in large populations can be statistically modeled using the Poisson distribution
+:::
+::::
+
+## Feature Scaling Example, Continued
+
+Here is the horse kick data:
 
 ```{python}
 # source: http://www.randomservices.org/random/data/HorseKicks.html
@@ -361,87 +469,107 @@ counts = df.sum(axis=1)
 counts
 ```
 
+And here is the histogram by year number.
+
 ```{python}
-#| slideshow: {slide_type: fragment}
 counts.hist(bins=25,xlabelsize=16);
+plt.xlabel('# of Kick Deaths')
+plt.ylabel('Count')
+plt.title('Histogram of Kick Deaths')
+plt.show()
 ```
+
+The average:
 
 ```{python}
 counts.mean()
 ```
+::: {.content-hidden when-profile="web"}
+## Feature Scaling Example, Continued
+:::
 
-To standardize to zero mean and unit standard deviation, we can use tools from the `scikit-learn` library.
+To standardize to zero mean and unit standard deviation, we can use pre-processing
+tools from
+the [scikit-learn](https://scikit-learn.org/stable/modules/preprocessing.html)
+library.
 
 (We will discuss scikit-learn more in upcoming lectures.)
 
+The distribution after rescaling:
+
 ```{python}
-#| slideshow: {slide_type: fragment}
 from sklearn import preprocessing
 counts_scaled = pd.DataFrame(preprocessing.scale(counts))
 counts_scaled.hist(bins=25,xlabelsize=16);
 ```
 
+With a new mean:
+
 ```{python}
 counts_scaled.mean().values
 ```
 
+::: {.content-hidden when-profile="web"}
+## Feature Scaling Example, Continued
+:::
+
 Notice that values that used to be zero have now become negative.
 
-In some situations it may not be sensible to change zeros into something else.  It may make more sense to map all values into a fixed range, for example $[0, 1]$.
+In some situations it may not be sensible to change zeros into something else.
+It may make more sense to map all values into a fixed range, for example $[0, 1]$.
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 min_max_scaler = preprocessing.MinMaxScaler()
 counts_minmax = min_max_scaler.fit_transform(counts.values.reshape(-1,1))
 counts_minmax = pd.DataFrame(counts_minmax)
 counts_minmax.hist(bins=25,xlabelsize=16);
 ```
 
-__Example Application of k-means.__
+## Example Application of k-means
 
-Here is a simple example of how $k$-means can be used for data compression.
+Here is a simple example of how $k$-means can be used to reduce
+color space and compress data.
 
-Consider the following image.  Each color in the image is represented by an integer.  Typically we might use 24 bits for each integer (8 bits for R, G, and B).
+Consider the following image.  
 
-<center>
+* Each color in the image is represented by an integer.  
+* Typically we might use 24 bits for each integer (8 bits for R, G, and B).
     
-<img src="figs/L6-annie19980405.jpg" alt="Figure" width="350px">
+![](figs/L6-annie19980405.jpg){width=350 fig-align="center"}
+
+::: {.content-hidden when-profile="web"}
+## Example, Continued
+:::
+
+Now find $k=16$ clusters of pixels in three dimensional $(R, G, B)$ space
+and replace each pixel by its cluster center.
+
+Because there are 16 centroids, we can represent by a 4-bit mapping 
+for a compression ratio of $24/4=6\times$.
     
-</center>
+![](figs/L6-annie_016.png){width=500 fig-align="center"}
 
-Now cluster the pixels by their color value, and replace each pixel by its cluster center.
+::: {.content-hidden when-profile="web"}
+## Example, Continued
+:::
 
-Because there are a smaller number of colors used, we can use fewer bits for each pixel.
-
-Here, we use 4 bits (16 colors) for a compression ratio around 6$\times$.
-
-<center>
+Here we cluster into 8 groups (3 bits) for a compression ratio $24/3=8\times$.
     
-<img src="figs/L6-annie_016.png" alt="Figure" width="500px">
-    
-</center>
+![](figs/L6-annie_008.png){width=500 fig-align="center"}
 
-Here, we use 3 bits (8 colors) for a compression ratio around 8$\times$.
+::: {.content-hidden when-profile="web"}
+## Example, Continued
+:::
 
-<center>
+Here we cluster into 4 groups (2 bits) for a compression ratio around $24/2=12\times$.
     
-<img src="figs/L6-annie_008.png" alt="Figure" width="500px">
-    
-</center>
+![](figs/L6-annie_004.png){width=500 fig-align="center"}
 
-Here, we use 2 bits (4 colors) for a compression ratio around 12$\times$.
+::: {.content-hidden when-profile="web"}
+## Example, Continued
+:::
 
-<center>
+Finally, we use 1 bit (2 color groups) for a compression ratio of $24\times$.
     
-<img src="figs/L6-annie_004.png" alt="Figure" width="500px">
-    
-</center>
-
-Finally, we use 1 bit (2 colors) for a compression ratio around 24$\times$.
-
-<center>
-    
-<img src="figs/L6-annie_002.png" alt="Figure" width="500px">
-    
-</center>
+![](figs/L6-annie_002.png){width=500 fig-align="center"}
 
