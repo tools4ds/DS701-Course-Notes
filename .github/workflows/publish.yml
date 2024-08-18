@@ -51,6 +51,7 @@ jobs:
           cache: 'pip'
       - run: pip install jupyter
       - run: pip install -r requirements.txt
+      - run: pip list
 
       - name: Render Quarto Project
         uses: quarto-dev/quarto-actions/render@v2
