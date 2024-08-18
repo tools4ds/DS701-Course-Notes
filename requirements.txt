@@ -22,7 +22,7 @@ qrcode
 scikit-learn
 
 # 11-Dimensionality-Reduction-SVD-II
-nltk
+nltk==3.8.1
 
 # 15-Classification-II-kNN
 pydotplus
