@@ -308,7 +308,7 @@ __Nonetheless,__ there is a simple algorithm that works quite well in practice!
 The other from the top 10 were SVM, Apriori, EM, PageRank, AdaBoost, kNN, Naive Bayes and CART.
 :::
 
-::: {.content-hidden when-profile="web"}    
+::: {.content-hidden when-profile="web"}
 ## The $k$-means algorithm
 :::
 
@@ -384,7 +384,7 @@ Our basic strategy will be to
 * Iterate through different $k$ and use some criterion to decide which $k$ is most appropriate.
 * We will discuss this more in the next lecture.
 
-## Feature Scaling
+## Feature Scales
 
 Finally, given the tendency of $k$-means to look for spherical clusters, we
 should consider the scales of the various features.
@@ -392,7 +392,7 @@ should consider the scales of the various features.
 In fact, in general when constructing or selecting a distance metric, one needs
 to think carefully about the scale of the features being used.
 
----
+## Unscaled Features
 
 For example, consider the case where we are clustering people based on their age, income, and gender.
 
@@ -409,19 +409,21 @@ $$
 \begin{bmatrix}27\\75000\\0\end{bmatrix},\begin{bmatrix}45\\42000\\1\end{bmatrix} 
 $$
 
----
+## Unscaled Features, Continued
 
 What would happen if we used Euclidean distance as our dissimilarity metric in this feature space?
 
 (This is what $k$-means uses.)
 
-Clearly, the influence of income would dominate the other two features.  For example, a difference of gender is about as significant as a difference of one dollar of yearly income.
+Clearly, the influence of income would dominate the other two features.  For
+example, a difference of gender is about as significant as a difference of one
+dollar of yearly income.
 
 We are unlikely to expose gender-based differences if we cluster using this representation.
 
 The most common way to handle this is __feature scaling.__
 
----
+## Feature Scaling
 
 The basic idea is to rescale each feature separately, so that its range of
 values is about the same as all other features.
@@ -440,6 +442,25 @@ For example, let's work with Bortkiewicz's famous
 which is the the number of soilders in the Prussian cavalry killed by horse kicks
 over the 20 years between 1875 and 1894, inclusive.
 
+## Ladislaus Bortkiewicz
+
+:::: {.columns}
+::: {.column width="40%"}
+![Ladislaus Bortkiewicz](figs/Ladislaus_Bortkiewicz.jpg){width=150}^[By no conegut - MacTutor History of Mathematics: http://www-history.mcs.st-andrews.ac.uk/PictDisplay/Bortkiewicz.html, Public Domain, https://commons.wikimedia.org/w/index.php?curid=79219622] ![Law of Small Numbers Book](figs/Bortkiewicz%20LSN%20Book.png){width=200}^[Law of Small Numbers]
+:::
+::: {.column width="60%"}
+* Ladislaus Bortkiewicz (1868 -- 1931)
+* Wrote book ["Law of Small Numbers"](https://archive.org/details/dasgesetzderklei00bortrich/mode/2up) in 1898
+* Showed how the horse kick data fits the
+[Poisson model](03-Probability-and-Statistics-Refresher.html#the-poisson-distribution)
+* More generally that rare events in large populations can be statistically modeled using the Poisson distribution
+:::
+::::
+
+## Feature Scaling Example, Continued
+
+Here is the horse kick data:
+
 ```{python}
 # source: http://www.randomservices.org/random/data/HorseKicks.html
 import pandas as pd
@@ -448,42 +469,56 @@ counts = df.sum(axis=1)
 counts
 ```
 
+And here is the histogram by year number.
+
 ```{python}
 counts.hist(bins=25,xlabelsize=16);
-plt.xlabel('Year #')
-plt.ylabel('# of Deaths')
+plt.xlabel('# of Kick Deaths')
+plt.ylabel('Count')
 plt.title('Histogram of Kick Deaths')
 plt.show()
 ```
 
+The average:
+
 ```{python}
 counts.mean()
 ```
---- 
+::: {.content-hidden when-profile="web"}
+## Feature Scaling Example, Continued
+:::
 
-To standardize to zero mean and unit standard deviation, we can use tools from the `scikit-learn` library.
+To standardize to zero mean and unit standard deviation, we can use pre-processing
+tools from
+the [scikit-learn](https://scikit-learn.org/stable/modules/preprocessing.html)
+library.
 
 (We will discuss scikit-learn more in upcoming lectures.)
 
+The distribution after rescaling:
+
 ```{python}
-#| echo: true
 from sklearn import preprocessing
 counts_scaled = pd.DataFrame(preprocessing.scale(counts))
 counts_scaled.hist(bins=25,xlabelsize=16);
 ```
 
+With a new mean:
+
 ```{python}
 counts_scaled.mean().values
 ```
 
----
+::: {.content-hidden when-profile="web"}
+## Feature Scaling Example, Continued
+:::
 
 Notice that values that used to be zero have now become negative.
 
-In some situations it may not be sensible to change zeros into something else.  It may make more sense to map all values into a fixed range, for example $[0, 1]$.
+In some situations it may not be sensible to change zeros into something else.
+It may make more sense to map all values into a fixed range, for example $[0, 1]$.
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 min_max_scaler = preprocessing.MinMaxScaler()
 counts_minmax = min_max_scaler.fit_transform(counts.values.reshape(-1,1))
 counts_minmax = pd.DataFrame(counts_minmax)
@@ -492,34 +527,49 @@ counts_minmax.hist(bins=25,xlabelsize=16);
 
 ## Example Application of k-means
 
-Here is a simple example of how $k$-means can be used for data compression.
+Here is a simple example of how $k$-means can be used to reduce
+color space and compress data.
 
-Consider the following image.  Each color in the image is represented by an integer.  Typically we might use 24 bits for each integer (8 bits for R, G, and B).
+Consider the following image.  
+
+* Each color in the image is represented by an integer.  
+* Typically we might use 24 bits for each integer (8 bits for R, G, and B).
     
 ![](figs/L6-annie19980405.jpg){width=350 fig-align="center"}
 
-Now cluster the pixels by their color value, and replace each pixel by its cluster center.
+::: {.content-hidden when-profile="web"}
+## Example, Continued
+:::
 
-Because there are a smaller number of colors used, we can use fewer bits for each pixel.
+Now find $k=16$ clusters of pixels in three dimensional $(R, G, B)$ space
+and replace each pixel by its cluster center.
 
-Here, we use 4 bits (16 colors) for a compression ratio around 6$\times$.
+Because there are 16 centroids, we can represent by a 4-bit mapping 
+for a compression ratio of $24/4=6\times$.
     
 ![](figs/L6-annie_016.png){width=500 fig-align="center"}
 
----
+::: {.content-hidden when-profile="web"}
+## Example, Continued
+:::
 
-Here, we use 3 bits (8 colors) for a compression ratio around 8$\times$.
+Here we cluster into 8 groups (3 bits) for a compression ratio $24/3=8\times$.
     
 ![](figs/L6-annie_008.png){width=500 fig-align="center"}
 
----
+::: {.content-hidden when-profile="web"}
+## Example, Continued
+:::
 
-Here, we use 2 bits (4 colors) for a compression ratio around 12$\times$.
+Here we cluster into 4 groups (2 bits) for a compression ratio around $24/2=12\times$.
     
 ![](figs/L6-annie_004.png){width=500 fig-align="center"}
 
----
+::: {.content-hidden when-profile="web"}
+## Example, Continued
+:::
 
-Finally, we use 1 bit (2 colors) for a compression ratio around 24$\times$.
+Finally, we use 1 bit (2 color groups) for a compression ratio of $24\times$.
     
 ![](figs/L6-annie_002.png){width=500 fig-align="center"}
+
