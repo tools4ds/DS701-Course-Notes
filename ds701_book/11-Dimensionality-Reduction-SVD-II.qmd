@@ -381,6 +381,7 @@ nltk.download('punkt')
 nltk.download('punkt_tab')
 nltk.download('stopwords')
 nltk.download('snowball_data')
+mltk.download('wordnet')
 from nltk.stem.snowball import SnowballStemmer
 from nltk.tokenize import word_tokenize, sent_tokenize
 
