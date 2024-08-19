@@ -43,3 +43,7 @@ format:
     html-math-method: mathjax
     echo: true
     code-fold: true
+
+execute: 
+  freeze: auto # see https://quarto.org/docs/projects/code-execution.html#freeze
+  cache: true  # see https://quarto.org/docs/projects/code-execution.html#cache
