@@ -4,6 +4,9 @@ jupyter
 # Used initially by Quarto to read configuration yml
 pyyaml
 
+# Enabled when execute: cache: true
+jupyter-cache
+
 # 01-Intro-to-Python
 matplotlib
 pandas
