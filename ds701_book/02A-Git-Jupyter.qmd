@@ -1,37 +1,20 @@
 ---
-title: 'Essential Tools: Git and Jupyter'
+title: 'Essential Tools: Git'
 jupyter: python3
 format: html
 ---
-
-
-
-```{python}
-#| hide_input: true
-#| nbpresent: {id: 5a4b2ca5-894e-4f77-aaf0-556fff477982}
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
-%matplotlib inline
-%config InlineBackend.figure_format='retina'
-# %run -i common.py
-# %run -i ln_preamble.py
-from importlib import reload
-from datetime import datetime
-```
-
-## Critical Course Tools
 
 This course focuses on developing practical skills in working with data and providing students with a hands-on understanding of classical data analysis techniques. 
 
 This will be a coding-intensive course. 
 
-Instruction in this course will use [Python](https://www.python.org/), since it allows for fast prototyping and is supported by a great variety of scientific (and, specifically, data related) libraries.
+Instruction in this course uses [Python](https://www.python.org/), since it allows for fast prototyping and is supported by a great variety of scientific (and, specifically, data related) libraries. See the [Introduction to Python](01-Intro-to-Python.qmd) lecture for a Python refresher.
 
-The materials of this course can be found under [this GitHub account](https://github.com/mcrovella/DS701-Tools-for-Data-Science). 
+The course notes can be found under [this GitHub account](https://github.com/tools4ds/DS701-Course-Notes). Rendered versions of the course notes can be found [here](https://tools4ds.github.io/DS701-Course-Notes/). 
 
-Both the lectures and the homeworks of this course are in the format of [Jupyter notebooks](https://jupyter.org).
+The lecture notes of this course are rendered from [Quarto](https://quarto.org/) markdown files. The homeworks of this course are [Jupyter notebooks](https://jupyter.org).
 
-__Today's Agenda__ is a quick review of essential tools you will need for this course.
+__Today's Agenda__ is a review of the essential tools you will need for this course.
 
 We are __not__ providing a comprehensive introduction to these tools.
 
@@ -40,108 +23,94 @@ They are all __extensively__ documented online and you will need to familiarize 
 Stack overflow, etc, is also your friend -- but as a reference, not as a way to solve homework problems!
 
 __The key tools you will need__ are:
+
 1. Git
-2. Jupyter
-3. Pandas 
-
-## Python
-
-We will not be teaching you python in this course.  
-
-You are assumed to be proficient in python.
-
-If you need to refresh your memory, there is a quick review of Python in the online lecture notes.
-
-There are many ways to install Python.  
-
-The biggest challenge in installing Python is configuring the many different packages that can be used.
-
-For that reason, I recommend the free **Anaconda Scientific Python** distribution, which you can find via Google. This Python distribution contains most of the packages that we will be using throughout the course. It also includes an easy-to-use but powerful package install/update system, **`conda`**.
-
-Note that we are using Python 3 (get the latest version, which should be 3.9 or later).  
+1. Pandas
+1. Scikit-Learn 
 
 ## Git
 
 One of the goals of this course is make you familiar with the modern workflow of code-versioning and collaboration. 
 
-
-
 If you don't have it already, download **git** from [here](http://git-scm.com/downloads). 
 
 If you don't already have one, you __must__ also create an account on GitHub.
 
-You can find extensive documentation on how to use **git** on the [Help Pages of Github](https://docs.github.com/en/get-started/quickstart), on [Atlassian](https://www.atlassian.com/git/tutorials/setting-up-a-repository), and many other sites.
+You can find extensive documentation on how to use **git** on the [Git home page](https://git-scm.com/), the [Help Pages of Github](https://docs.github.com/en/get-started/quickstart), on [Atlassian](https://www.atlassian.com/git/tutorials/setting-up-a-repository), and many other sites.
+
+## Importance of using Git
+
+In software development, the use of Git is crucial for several reasons.
+
+1. **Version Control**: Git allows you to track changes in your codebase over time. This means you can revert to previous versions if something goes wrong, compare changes, and understand the history of your project.
+1. **Collaboration**: Multiple developers can work on the same project simultaneously without interfering with each other’s work. Git manages and merges changes efficiently.
+1. **Backup**: Your code is stored in a repository, which can be hosted on platforms like GitHub, GitLab, or Bitbucket. This provides a backup in case your local files are lost or corrupted.
+1. **Branching**: Git’s branching model allows you to create separate branches for new features, bug fixes, or experiments. This keeps the main codebase stable and clean.
+1. **Integration**: Git integrates well with various CI/CD (continuous integration/continuous development) tools, enhancing automated testing, deployment, and overall DevOps practices.
+
 
 ## Working with Git
+
+We will now introduce the following topics:
+
+- Git configuration
+- Repository creationg
+- Staging and committing files
+- Modifying files
+- Recovering old versions
+- Branching
+- Pull requests
 
 ### Configuration
 
 The first time we use *git* on a new machine, we need to configure our name and email
 
+```{sh}
+$ git config --global user.name "Taylor Swift"
+$ git config --global user.mail "tswift@bu.edu"
 ```
-$ git config --global user.name "Mark Crovella"
-$ git config --global user.mail "crovella@bu.edu"
-```
+
 Use the email that you used for your GitHub account.
 
 ### Creating a Repository
 
-```{python}
-#| cell_style: split
-#| hide_input: true
-#| scrolled: false
-#| tags: [remove-cell]
-def showGitTerm(title="Command Line"):
-  return None
-    # return showTerm(EDITORTERM, title, "100%", 1000)
-showGitTerm()
-```
-
 After installing Git, we can configure our first repository. First, let's create a new directory.
 
-```
+```{sh}
 $ mkdir thoughts
 $ cd thoughts
 ```
 
 Now, we can create a *git* repository in this directory.
 
-```
+```{sh}
 $ git init
 ```
 
 We can check that everything is set up correctly by asking *git* to tell us the status of our project.
 
-```
+```{sh}
 $ git status
-On branch master
+On branch main
 
 No commits yet
 
 nothing to commit (create/copy files and use "git add" to track)
 ```
 
+### Staging 
 
+Now, create a file named ```science.txt```, edit it with your favorite text editor and add the following lines.
 
-```{python}
-#| cell_style: split
-#| hide_input: true
-#| scrolled: false
-#| tags: [remove-cell]
-showGitTerm()
-```
-
-
-Now, create a file named ```science.txt```, edit it with your favorite text editor and add the following lines
-
-```
+```{sh}
 Starting to think about data
 ```
 
-If we check the status of our repository again, *git* tells us that there is a new file:
-```
+If we check the status of our repository again, *git* tells us that there is a new file.
+
+```{sh}
 $ git status
-On branch master
+On branch main
 
 No commits yet
 
@@ -157,31 +126,19 @@ To give you precise control about what changes are included in each revision, *g
 
 In the staging area it keeps track of things that you have added to the current change set but not yet committed. 
 
-```git add``` puts things in this area, and ```git commit``` then copies them to long-term storage (as a commit):
+```git add``` puts things in this area.
 
-![Alt text](./figs/git-staging-area.png)
+The "untracked files" message means that there's a file in the directory that *git* isn't keeping track of. We can tell *git* that it should do so using ```git add```
 
-
-```{python}
-#| cell_style: split
-#| hide_input: true
-#| scrolled: false
-#| slideshow: {slide_type: '-'}
-#| tags: [remove-cell]
-showGitTerm()
-```
-
-The "untracked files" message means that there's a file in the directory that *git* isn't keeping track of. We can tell *git* that it should do so using ```git add```:
-
-```
+```{sh}
 $ git add science.txt
 ```
 
-and then check that the file is now being tracked:
+and then check that the file is now being tracked
 
-```
+```{sh{}}
 $ git status
-On branch master
+On branch main
 
 No commits yet
 
@@ -192,24 +149,21 @@ Changes to be committed:
 
 ```
 
-*git* now knows that it's supposed to keep track of ```science.txt```, but it hasn't yet recorded any changes for posterity as a commit. 
+*git* now knows that it's supposed to keep track of ```science.txt```, but it hasn't yet recorded any changes. 
 
-To get it to do that, we need to run one more command:
+### Committing
 
-```
-$ git commit -m "Preparing for science"
-[master (root-commit) f516d22] Preparing for science
+The command ```git commit```  copies the staged changes to long-term storage (as a commit). The graphic below illustrates this process.
+
+![Alt text](./figs/git-staging-area.png)
+
+To commit our file, we run the command.
+
+```{sh}
+$ git commit -m "Added initial science text file"
+[main (root-commit) f516d22] Added initial science text file
  1 file changed, 1 insertion(+)
  create mode 100644 science.txt
-```
-
-
-```{python}
-#| cell_style: split
-#| hide_input: true
-#| scrolled: false
-#| tags: [remove-cell]
-showGitTerm()
 ```
 
 When we run ```git commit```, *git* takes everything we have told it to save by using ```git add``` and stores a copy permanently inside the special ```.git``` directory. 
@@ -220,45 +174,49 @@ We use the -m flag (for "message") to record a comment that will help us remembe
 
 If we just run ```git commit``` without the ```-m``` option, *git* will launch an editor such as ```vim``` (or whatever other editor we configured at the start) so that we can write a longer message. 
 
-If we run git status now:
-```
+If we run git status now
+
+```{sh}
 $ git status
-On branch master
+On branch main
 nothing to commit, working tree clean
 ```
 
-it tells us everything is up to date. If we want to know what we've done recently, we can ask *git* to show us the project's history using ```git log```:
+it tells us everything is up to date. If we want to know what we've done recently, we can ask *git* to show us the project's history using ```git log```.
 
-```
+```{sh}
 $ git log
-Author: Mark Crovella <crovella@bu.edu>
+Author: Taylor Swift <tswift@bu.edu>
 Date:   Sun Jan 25 12:48:44 2015 -0500
 
-    Preparing for science
+    Added initial science text file
 ```
+
+### Commit messages
+
+When working on software engineering projects you will need to write good committ messages. Good commit messages are essential for maintaining a clear project history. A good commit message provides context for the changes in the code. The changes themselves can be seend in the committ. 
+
+Here are some tips that are detailed further in this [blog post](https://cbea.ms/git-commit/). 
+
+1. **Be Descriptive**: Clearly explain what changes were made and why. This helps others (and your future self) understand the purpose of the commit.
+1. **Use the Imperative Mood**: Start with a verb, like “Add,” “Fix,” “Update,” etc. For example, “Fix login bug” or “Add user authentication.”
+1. **Keep It Concise**: The first line should be a brief summary (50 characters or less). If more detail is needed, add a blank line followed by a more detailed explanation.
+1. **Reference Issues or Tickets**: If your commit addresses a specific issue or ticket, reference it in the message. For example, “Fix login bug (#123).”
 
 ### Changing a file
 
-```{python}
-#| cell_style: split
-#| hide_input: true
-#| scrolled: false
-#| tags: [remove-cell]
-showGitTerm()
-```
+Now, suppose that we edit the file.
 
-Now, suppose that we edit the file:
-
-```
+```{sh}
 Starting to think about data
-I need to attend CS506
+I need to attend ds701
 ```
 
 Now if we run ```git status```, *git* will tell us that a file that it is tracking has been modified:
 
-```
+```{sh}
 $ git status
-On branch master
+On branch main
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git checkout -- <file>..." to discard changes in working directory)
@@ -272,9 +230,9 @@ The last line is the key phrase: *"no changes added to commit"*.
 
 We have changed this file, but we haven't told *git* we will want to save those changes (which we do with ```git add```) much less actually saved them. 
 
-Let's double-check our work using ```git diff```, which shows us the differences between the current state of the file and the most recently saved version:
+Let's double-check our work using ```git diff```, which shows us the differences between the current state of the file and the most recently saved version.
 
-```
+```{sh}
 $ git diff
 diff --git a/science.txt b/science.txt
 index 0ac4b7b..c5b1b05 100644
@@ -282,33 +240,26 @@ index 0ac4b7b..c5b1b05 100644
 +++ b/science.txt
 @@ -1 +1,2 @@
  Starting to think about data
-+I need to attend CS506
++I need to attend ds701
 ```
 
+OK, we are happy with that, so let's commit our change.
 
-```{python}
-#| cell_style: split
-#| hide_input: true
-#| scrolled: false
-#| tags: [remove-cell]
-showGitTerm()
-```
-
-OK, we are happy with that, so let's commit our change:
-```
-$ git commit -m "Related course"
-On branch master
+```{sh}
+$ git commit -m "Added line about related course"
+On branch main
 Changes not staged for commit:
         modified:   science.txt
 
 no changes added to commit
 ```
 
-*Whoops!* *Git* won't commit the file because we didn't use ```git add``` first. Let's fix that:
-```
+*Whoops!* *Git* won't commit the file because we didn't use ```git add``` first. Let's fix that.
+
+```{sh}
 $ git add science.txt
-$ git commit -m "Related course"
-[master 1bd7277] Related course
+$ git commit -m "Added line about related course"
+[main 1bd7277] Added line about related course
  1 file changed, 1 insertion(+)
 ```
 
@@ -318,26 +269,18 @@ For example, suppose we're adding a few citations to our project. We might want 
 
 ### Recovering old versions
 
-```{python}
-#| cell_style: split
-#| hide_input: true
-#| scrolled: true
-#| tags: [remove-cell]
-showGitTerm()
-```
+We can save changes to files and see what we have changed. How can we restore older versions however? Let's suppose we accidentally overwrite the file.
 
-We can save changes to files and see what we have changed. How can we restore older versions however? Let's suppose we accidentally overwrite the file:
-
-```
+```{sh}
 $ cat science.txt
 Despair! Nothing works
 ```
 
-Now, ```git status``` tells us that the file has been changed, but those changes haven't been staged:
+Now, ```git status``` tells us that the file has been changed, but those changes haven't been staged.
 
-```
+```{sh}
 $ git status
-On branch master
+On branch main
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git checkout -- <file>..." to discard changes in working directory)
@@ -347,14 +290,74 @@ Changes not staged for commit:
 no changes added to commit (use "git add" and/or "git commit -a")
 ```
 
-We can put things back the way they were by using ```git checkout```:
+We can put things back the way they were by using ```git checkout```.
 
-```
+```{sh}
 $ git checkout HEAD science.txt
 $ cat science.txt
 Starting to think about data
-I need to attend CS506
+I need to attend ds701
 ```
+
+### Branching
+
+Branches in Git are like parallel universes for your code. They allow you to:
+
+1. **Develop Features Independently**: You can create a new branch for each feature or bug fix. This isolates your work from the main codebase until it’s ready to be merged.
+1. **Experiment Safely**: You can try out new ideas without affecting the main project. If the experiment fails, you can simply delete the branch.
+1. **Collaborate Efficiently**: Team members can work on different branches simultaneously. Once their work is complete, branches can be merged back into the main branch (often called main or master).
+
+It is a best practice when working on large software engineering projects to adopt a branching convention. A very well-used and widely adopted branching model is described in this fantastic [blog post](https://nvie.com/posts/a-successful-git-branching-model/) by Vincent Driessen.
+
+To create a branch called develop that branches off of main, you run the command
+
+```{sh}
+$ git checkout -b develop main
+Switched to a new branch "branch"
+```
+
+If you are already on the main branch you can also run the command
+
+```{sh}
+$ git checkout -b develop
+Switched to a new branch "branch"
+```
+
+Don't forget to add the "-b" flag when you create the branch.
+
+The main idea behind a branching model is to collaborate efficiently and avoid merge conflicts. You will in general have the following branches:
+
+- **Main branch**: Contains production ready code. This branch is only ever modified through pull requests from the develop branch.
+- **Develop branch**: Branches off from main and contains code that reflects latest delivered development changes. This branch is only ever modified through pull requests from feature branches.
+- **Feature branches**: Branch off from develop and contain code that develop new features. These branches are eventually merged back into the develop branch.
+
+### Pull requests
+
+A pull request is a way to propose changes to a codebase. When you create a pull request, you’re asking the repository maintainers to review and merge your changes into the main branch. It’s a formal way to submit your work for consideration.
+
+#### Key Components of a Pull Request
+
+1. **Title and Description**: Clearly describe what the pull request does. This helps reviewers understand the purpose and scope of the changes.
+1. **Commits**: A pull request includes one or more commits that contain the actual changes. Each commit should have a meaningful message.
+1. *Diff*: This shows the differences between the source branch (where the changes were made) and the target branch (where the changes will be merged). Reviewers can see exactly what lines of code were added, modified, or deleted.
+1. **Reviewers**: You can request specific team members to review your pull request. They can leave comments, suggest changes, and approve or reject the PR.
+1. **Checks and Statuses**: Automated tests and other checks can be run on the pull request to ensure the changes don’t break anything. The status of these checks is visible in the PR.
+
+#### Why Pull Requests are Important
+
+1. **Code Review**: Pull requests facilitate code reviews, which are essential for maintaining code quality. Reviewers can catch bugs, suggest improvements, and ensure that the code adheres to the project’s standards.
+1. **Collaboration**: They provide a structured way for team members to collaborate on code. Discussions can happen directly in the pull request, making it easier to track feedback and changes.
+1 **Documentation**: Pull requests serve as a historical record of changes. They document why certain changes were made and who approved them, which is valuable for future reference.
+1 **Integration**: Pull requests can be integrated with CI/CD pipelines to automatically run tests and deploy code, ensuring that only high-quality code is merged into the main branch.
+
+#### Creating a Pull Request
+
+1. **Branching**: First, create a new branch for your changes.
+1. **Commit Changes**: Make your changes and commit them to your branch.
+1. **Open a PR**: Go to the repository on GitHub, navigate to the “Pull requests” tab, and click “New pull request.” Select your branch and the branch you want to merge into, then fill out the title and description.
+1. **Request Review**: Add reviewers and any necessary labels or milestones.
+1. **Address Feedback**: Reviewers will leave comments and request changes if needed. Make the necessary updates and push them to your branch.
+1. **Merge**: Once the PR is approved and all checks pass, you can merge it into the main branch.
 
 ## GitHub
 
@@ -383,102 +386,31 @@ And when you first copy a remote repository, you will use:
 
 ### Course repositories
 
-The material of the course is hosted on GitHub, under [this account](https://github.com/mcrovella/CS506-Computational-Tools-for-Data-Science).
+The material of the course is hosted on GitHub, under [this account](https://github.com/tools4ds/DS701-Course-Notes).
 
 In order to download a copy of the lectures and run them locally on your computer, you need to clone the lecture repository. To do that:
 
 1. Create a new folder for the course.
 ```
-$ mkdir cs506
-$ cd cs506
+$ mkdir ds701
+$ cd ds701
 ```
-2. Copy the clone url from the [repository's website](https://github.com/mcrovella/CS506-Computational-Tools-for-Data-Science).
+2. Copy the clone url from the [repository's website](https://github.com/tools4ds/DS701-Course-Notes).
 3. Clone the repository from *git*.
 ```
-$ git clone https://github.com/mcrovella/CS506-Computational-Tools-for-Data-Science.git
+$ git clone https://github.com/tools4ds/DS701-Course-Notes.git
 ```
 
 You should now have a directory with the course material.
 
 To update the repository and download the **new material**, type
-```
+
+```{sh}
 $ git pull
 ```
 
-### Create a private homework repository
+### Homework repositories
 
-Each assignment will have its own private repository, on GitHub shared only by you and the instructors.  
+Each assignment will have its own private repository on GitHub that we share with you.  
 
 The last commit time on the repo will be used as the submission time.
-
-## Jupyter Notebook
-
-You should get used to developing your code _incrementally._
-
-If you typically are writing files that you then run from the command line, e.g., `python code.py`, then you are not getting one of the main benefits of working in python.
-
-Instead you should __interact with the interpreter.__  
-
-An ideal way to do this is to use `Jupyter notebook`.   This puts a browser front-end on `ipython`.  
-
-In fact, these slides are actually just a Jupyter notebook.
-
-To run the Jupyter Notebook server from the command line, type ```jupyter notebook```. Your web browser will open and load the environment.
-
-In the notebook, you can type and run code:
-
-```{python}
-#| nbpresent: {id: c82fac99-51ab-41f4-af0d-b272bee62cdc}
-#| slideshow: {slide_type: '-'}
-print("whatever!")
-```
-
-### Ideal Use of Jupyter Notebook
-
-The Jupyter Notebook environment is beneficially used as follows:
-* Documentation Cell(s)
-* Computation Cell(s)
-* Visualization Cell(s)
-
-For example, let's say you are studying correlation in stock prices.
-
-First, you document what you are doing:
-
-We are interested in asking "how similar" are two stock prices.
-
-The tool for this purpose is __correlation__, ie, normalized covariance:
-
-$$\rho(X,Y) = \frac{E\left[(X-\mu_X)(Y-\mu_Y)\right]}{\sigma_X \sigma_Y}$$
-
-Then, you perform the computation:
-
-```{python}
-#| slideshow: {slide_type: fragment}
-import pandas as pd
-import yfinance as yf
-
-stocks = ['TSLA', 'YELP']
-df = pd.DataFrame()
-for s in stocks:
-    df[s] = pd.DataFrame(yf.download(s,start='2014-01-01',end='2014-12-31', progress = False))['Close']
-
-rets = df.pct_change(30)
-
-df.corr()
-```
-
-Then, you visualize the results:
-
-```{python}
-import matplotlib.pyplot as plt
-#| slideshow: {slide_type: fragment}
-rets[['TSLA', 'YELP']].plot(lw=2)
-plt.legend(loc='best');
-```
-
-As you use the Jupyter notebook, this will become a natural cycle:
-    
-* Document
-* Compute
-* Visualize
-
