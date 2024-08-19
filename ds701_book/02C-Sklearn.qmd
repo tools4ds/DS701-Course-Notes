@@ -1,0 +1,128 @@
+---
+title: 'Essential Tools: Scikit-Learn'
+jupyter: python3
+---
+
+In this chapter we discuss the second of two important Python packages, Scikit-Learn (sklearn).
+
+# Scikit-Learn
+
+Scikit-Learn (sklearn) is a powerful Python package for machine learning. The theoretical underpinnings of the methods introduced in this lecture will be covered in later lectures. The intent of this lecture is to demonstrate
+
+1. how to implement a few machine learning models using Scikit-Learn and
+1. understand the structure of the Scikit-Learn API.
+
+The 2nd point is key, because understanding the generality of the API, will allow you to easily work with different sklearn machine learning models.
+
+The general framework for implementing a machine learning models in sklearn is
+
+1. Import the sklearn objects you need.
+1. Prepare the dataset.
+1. Instatiate a machine learning object.
+1. Train your model on the dataset.
+1. Use the trained model to make predictions.
+1. Evaluate the performance of the model. 
+
+We will demonstrate the sklearn machine learning framework by working with the sklearn `LinearRegression` object. This object can be used to train a linear model that predicts continuous values. 
+
+In this example we will work with the california housing dataset. We will see how to predict the median house price based on features, such as the age of the house, average number of bedrooms, etc. 
+
+We will cover theoretical details of linear regression in the [Linear regression](17-Regression-I-Linear.qmd) lecture.
+
+## Import sklearn
+
+Let's first import all sklearn module and submodules that will be used in the following demonstrations.
+
+```{python}
+import sklearn
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+
+print(sklearn.__version__)
+```
+
+## Prepare the dataset
+
+Scikit-Learn provides a variety of datasets in the `datasets` submodule. These can be used to train simple models. Below we import the california housing dataset. We store the data features as a NumPy arrays called $X$ (2-D) and the target (labels) $y$ (1D). We can see a description of the dataset by using the `.DESCR` attribute.
+
+```{python}
+# Fetch data
+housing_dataset = fetch_california_housing()
+X = housing_dataset["data"]
+y = housing_dataset["target"]
+print(housing_dataset.DESCR)
+```
+
+We are going to train a model to predict the median house value. To train and test the model we are going to split the dataset into 80% training data and 20% test data. We use the `train_test_split` function from sklearn.
+
+```{python}
+# Split data into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20 ,random_state=42)
+```
+
+As part of the data preparation we will want to scale the dataset. Datasets often contain data with different orders of magnitude. Scaling the dataset prevents data with a large magnitude from potentially dominating the model. 
+
+We will use the `StandardScaler` object which scales data to have zero-mean and unit variance (i.e, standard deviation is 1). There are of course other scaling objects. See this [link](https://scikit-learn.org/stable/modules/preprocessing.html) for documentation. For this exmaple we are not going to scale the target variables because they represent a price in dollars. Depending on the application, you may need to scale your target variable.
+
+
+```{python}
+# Scale the data 
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.fit_transform(X_test)
+```
+
+## Instantiate and train the machine learning object
+
+With our scaled dataset, we are now in a position to instantiate and train our model. The following code accomplishes this.
+
+```{python}
+# Create regression model
+reg = LinearRegression()
+# Train
+reg.fit(X_train, y_train)
+```
+
+We instantiate a `LinearRegression()` object and store it in a variable called `reg`. We then call the `fit((X_train, y_train)` method to train the model. The `fit()` method is a common function to train a variety of models in sklearn. 
+
+## Prediction with the model
+
+The linear regression model has now been trained. To make predictions we use the `predict()` method. This function is also shared across many machine learning model classes.
+
+```{python}
+# Predict on test set
+y_pred = reg.predict(X_test)
+```
+
+The values in `y_pred` are the models predictions of the median house prices based on the input features of `X_test`.
+
+## Evaluating the performance of the model
+
+To evaluate the performance of the model, we can use the `score()` method, which is also shared across most model objects in sklearn. 
+
+In addition, we can use specific functions to evaluate the error in our predictions. 
+
+Below is code that computes the $R^2$ value of the model and the mean squared error. This will be discussed in more detail in the linear regression lecture. 
+
+The $R^2$ value is a number between [0, 1] and provides a measure of how good the fit of the model is. A value of 1 means the model fits the data perfectly, while a value of 0 indicates there is no linear relatinoship between the observed and predicted values.
+
+The mean squared error is given by the formula
+
+$$ 
+\frac{1}{n}\sum_{i}^{n} (y_i - \hat{y}_i)^2,
+$$
+
+where $n$ is the number of data points in the target vector, $y_i$ are the true values of the test set (`y_test`), and $\hat{y}_i$ are the predicted values (`y_pred`).
+
+```{python}
+# R^2 value
+r2 = reg.score(X_test, y_test)
+print("The R^2 score is : ", r2)
+
+# Report Mean Square Error (mse)
+mse = mean_squared_error(y_test, y_pred)
+print("Mean squared error: ", mse)
+```
