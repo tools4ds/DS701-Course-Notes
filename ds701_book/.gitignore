@@ -6,6 +6,7 @@ _book/
 _site/
 _revealjs/
 _jupyter/
+.jupyter_cache/
 
 example.txt
 img.jpg
