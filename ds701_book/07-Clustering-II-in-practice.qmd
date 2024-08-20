@@ -5,13 +5,13 @@ jupyter: python3
 
 ...featuring $k$-means
 
-
 Today we'll do an extended example showing $k$-means clustering in practice and in the context of the python libraries
 __`scikit-learn.`__
 
 `scikit-learn` is the main python library for machine learning functions.
 
 Our goals are to learn:
+
 * How clustering is used in practice
 * Tools for evaluating the quality of a clustering
 * Tools for assigning meaning or labels to a cluster
@@ -20,33 +20,59 @@ Our goals are to learn:
 
 ## Training wheels: Synthetic data
 
-Generally, when learning about or developing a new unsupervised method, it's a good idea to try it out on a dataset in which you already know the "right" answer.
+Generally, when learning about or developing a new unsupervised method, it's a 
+good idea to try it out on a dataset in which you already know the "right" answer.
 
 One way to do that is to generate synthetic data that has some known properties.
-
+ 
 Among other things, `scikit-learn` contains tools for generating synthetic data for testing.
 
 ```{python}
-#| slideshow: {slide_type: fragment}
+#| code-fold: false
 import sklearn.datasets as sk_data
 X, y = sk_data.make_blobs(n_samples=100, centers=3, n_features=30,
                           center_box=(-10.0, 10.0), random_state=0)
 ```
 
+Let's check the shapes of the returned values:
+```{python}
+#| code-fold: false
+print("X.shape: ", X.shape)
+print("y.shape: ", y.shape)
+```
+
+---
+
 To get a sense of the raw data we can inspect it.
 
 For statistical visualization, a good library is `seaborn`, imported as `sns`.
+Let's plot the `X` data as a matrix
+[heatmap](https://seaborn.pydata.org/generated/seaborn.heatmap.html), 
+where every row is a data point and the columns are the features.
 
 ```{python}
-#| slideshow: {slide_type: '-'}
 import seaborn as sns
-sns.heatmap(X, xticklabels = False, yticklabels = False, linewidths = 0, cbar = False);
+import matplotlib.pyplot as plt
+
+# Set the figure size to make the plot smaller
+plt.figure(figsize=(8, 6))  # Adjust the width and height as needed
+sns.heatmap(X, xticklabels = False, yticklabels = False, linewidths = 0, cbar = False)
+plt.show()
 ```
 
-That plot shows all the data.   
+---
 
-As usual, each row is a data item and the columns correspond to features (which are simply coordinates here).
+::: {.content-hidden when-profile="web"}
+```{python}
+import seaborn as sns
+import matplotlib.pyplot as plt
 
+# Set the figure size to make the plot smaller
+plt.figure(figsize=(4, 3))  # Adjust the width and height as needed
+sns.heatmap(X, xticklabels = False, yticklabels = False, linewidths = 0, cbar = False)
+plt.show()
+```
+::: 
 Geometrically, these points live in a __30 dimensional__ space, so we cannot directly visualize their geometry.  
 
 This is a __big problem__ that you will run into time and again!
@@ -55,18 +81,24 @@ We will discuss methods for visualizing high dimensional data later on.
 
 For now, we will use a method that can turn a set of pairwise distances into an approximate 2-D representation __in some cases.__
 
+---
+
 So let's compute the pairwise distances for visualization purposes.
 
-We can compute all pairwise distances in a single step using a `scikit-learn` function:
+We can compute all pairwise distances in a single step using the `scikit-learn` [`metrics.euclidean_distances`](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.euclidean_distances.html) function:
 
 ```{python}
-#| slideshow: {slide_type: fragment}
+#| code-fold: false
 import sklearn.metrics as metrics
 euclidean_dists = metrics.euclidean_distances(X)
 euclidean_dists
 ```
 
-### Visualizing with Multidimensional Scaling
+```{python}
+print(euclidean_dists.shape)
+```
+
+## Visualizing with Multidimensional Scaling
 
 The idea behind Multidimensional Scaling (MDS) is: 
 
@@ -83,8 +115,6 @@ Note that there are many ways that this can fail!
 * It may be necessary to use more than 2 dimensions to capture any clustering via euclidean distances
 
 ```{python}
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 import sklearn.manifold
 import matplotlib.pyplot as plt
 mds = sklearn.manifold.MDS(n_components=2, max_iter=3000, eps=1e-9, random_state=0,
@@ -97,15 +127,17 @@ plt.axis('square');
 
 So we can see that, although the data lives in 30 dimensions, we can get a sense of how the points are clustered by approximately placing the points into two dimensions.
 
+---
+
 A second way to visualize the data is by using a heatmap on the set of pairwise distances.
 
 ```{python}
-#| slideshow: {slide_type: '-'}
+#| code-fold: false
 sns.heatmap(euclidean_dists, xticklabels=False, yticklabels=False, linewidths=0, 
             square=True );
 ```
 
-## Applying  $k$-Means 
+## Applying  $k$-Means
 
 The Python package `scikit-learn` has a huge set of tools for unsupervised learning generally, and clustering specifically.  
 
@@ -125,8 +157,11 @@ There are 3 functions in all the clustering classes,
             
 `fit_predict()` does both in a single step.
 
+---
+
+Find the centroids of the distance matrix.
+
 ```{python}
-#| slideshow: {slide_type: fragment}
 from sklearn.cluster import KMeans
 kmeans = KMeans(init = 'k-means++', n_clusters = 3, n_init = 100)
 kmeans.fit_predict(X)
@@ -141,14 +176,12 @@ Thus, the general sequence for using a tool from `scikit-learn` is:
 * Examine the results, which are generally property variables of the object.
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 centroids = kmeans.cluster_centers_
 labels = kmeans.labels_
 error = kmeans.inertia_
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 print(f'The total error of the clustering is: {error:0.1f}.')
 print('\nCluster labels:')
 print(labels)
@@ -156,13 +189,11 @@ print('\nCluster centroids:')
 print(centroids)
 ```
 
-### Visualizing the Results of Clustering
+## Visualizing the Results of Clustering
 
 Let's visualize the results.  We'll do that by reordering the data items according to their cluster.
 
 ```{python}
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 import numpy as np
 idx = np.argsort(labels)
 rX = X[idx, :]
@@ -170,8 +201,6 @@ sns.heatmap(rX, xticklabels = False, yticklabels = False, linewidths = 0);
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 rearranged_dists = euclidean_dists[idx,:][:,idx]
 sns.heatmap(rearranged_dists, xticklabels = False, yticklabels = False, linewidths = 0, square = True);
 ```
@@ -183,7 +212,6 @@ How do we know whether the clusters we get represent "real" structure in our dat
 Consider this dataset, which we have clustered using $k$-means:
 
 ```{python}
-#| tags: [hide-input]
 import pandas as pd
 unif_X = np.random.default_rng().uniform(0, 1, 100)
 unif_Y = np.random.default_rng().uniform(0, 1, 100)
@@ -211,27 +239,29 @@ There is often no definitive answer to either of these questions.
 
 You will often need to use your judgment in answering them.
 
-### Rand Index
+## Rand Index
 
-One tool we may be able to use in some settings is __external__ information about the data.
+One tool we may be able to use in some settings is __external__ information
+about the data.
 
-In particular, we may have knowledge from some other source about the nature of the clusters in the data.
+In particular, we may have knowledge from some other source about the nature of
+the clusters in the data.
 
-In that case, what we need is a way to compare a proposed clustering with some externally-known, "ground truth" clustering.
+In that case, what we need is a way to compare a proposed clustering with some
+externally-known, "ground truth" clustering.
 
-The Rand Index is a __similarity measure__ for __clusterings.__   We can use it to compare two clusterings.
+The Rand Index is a __similarity measure__ for __clusterings.__   We can use it
+to compare two clusterings.
 
 Or, if we are testing an algorithm on data for which we know ground truth, we can use it to assess the algorithm's accuracy.
 
-__Defining the Rand Index.__
+## Defining the Rand Index
 
 Each item in our dataset is assumed to have two labelings, one for each clustering.
 
 For example, we could have a ground truth label assignment $T$ and a comparison clustering $C$. 
 
 ```{python}
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
 X_rand, y_rand = sk_data.make_blobs(n_samples=[100, 250, 150], centers = [[1, 2],[1.5, 3], [2, 4]], n_features = 2,
                           center_box = (-10.0, 10.0), cluster_std = [.2, .3, .2], random_state = 0)
 df_rand_gt = pd.DataFrame(np.column_stack([X_rand[:, 0], X_rand[:, 1], y_rand]), columns = ['X', 'Y', 'label'])
@@ -241,9 +271,6 @@ df_rand_clust['label'] = kmeans.fit_predict(df_rand_gt[['X', 'Y']])
 ```
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 figs, axs = plt.subplots(1, 2, figsize = (12, 5))
 df_rand_gt.plot('X', 'Y', kind = 'scatter', c = 'label', colormap='viridis', ax = axs[0],
                    colorbar = False)
@@ -265,7 +292,9 @@ Let $b$ be: the number of pairs that have different labels in $T$ and different 
 
 Then the Rand Index is: 
 
-$$ \text{RI}(T,C) = \frac{a+b}{n \choose 2} $$
+$$
+\text{RI}(T,C) = \frac{a+b}{n \choose 2}
+$$
 
 How do we know whether a particular Rand Index (RI) score is significant?
 
@@ -273,7 +302,7 @@ We might compare it to the RI for a __random__ assignment of points to labels.
 
 This leads to the __Adjusted Rand Index.__
 
-__Definition of Adjusted Rand Index.__
+## Definition of Adjusted Rand Index
 
 To "calibrate" the Rand Index this way, we use the expected Rand Index of random labelings, denoted $E[\text{RI}]$.   
 
@@ -287,21 +316,19 @@ Using that, we define the adjusted Rand index as a simple __rescaling__ of RI:
 
 The computation of the $E[\text{RI}]$ and the $\max(\text{RI})$ are simple combinatorics (we'll omit the derivation).
 
+---
+
 __Example.__
 
 Let's consider again our 3-cluster dataset with known labels `y`.
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 sns.heatmap(rX, xticklabels = False, yticklabels = False, linewidths = 0);
 ```
 
 Here is the adjusted Rand Index, when using $k$-means to cluster this dataset for 1 to 10 clusters:
 
 ```{python}
-#| hide_input: false
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
 def ri_evaluate_clusters(X,max_clusters,ground_truth):
     ri = np.zeros(max_clusters+1)
     ri[0] = 0;
@@ -324,7 +351,7 @@ The second question we face in evaluating a clustering is how many clusters are 
 
 In practice, to use $k$-means or most other clustering methods, one must choose $k$, the number of clusters, via some process.
 
-### Inspecting Clustering Error
+## Inspecting Clustering Error
 
 The first thing you might do is to look at the $k$-means objective function  and see if it levels off after a certain point.
 
@@ -333,8 +360,6 @@ Recall that the $k$-means objective can be considered the clustering "error".
 If the error stops going down, that would suggest that the clustering is not improving as the number of clusters is increased.
 
 ```{python}
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 error = np.zeros(11)
 for k in range(1,11):
     kmeans = KMeans(init='k-means++', n_clusters = k, n_init = 10)
@@ -345,9 +370,6 @@ for k in range(1,11):
 For our synthetic data, here is the $k$-means objective, as a function of $k$:
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 plt.plot(range(1, len(error)), error[1:], 'o-')
 plt.xlabel('Number of clusters')
 plt.title(r'$k$-means clustering performance of synthetic data')
@@ -359,9 +381,6 @@ __Warning__: This synthetic data is not at all typical.   You will almost never 
 Let's create a function for later use.
 
 ```{python}
-#| hide_input: false
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
 def evaluate_clusters(X,max_clusters):
     error = np.zeros(max_clusters+1)
     error[0] = 0;
@@ -372,7 +391,7 @@ def evaluate_clusters(X,max_clusters):
     return error
 ```
 
-### Silhouette Coefficient
+## Silhouette Coefficient
 
 Of course, normally, the ground truth labels are not known.
 
@@ -400,15 +419,11 @@ s = \frac{b-a}{\max(a, b)}
 $$
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 sc = metrics.silhouette_score(X, labels, metric='euclidean')
 print(sc)
 ```
 
 ```{python}
-#| hide_input: false
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 def sc_evaluate_clusters(X, max_clusters, n_init, seed):
     s = np.zeros(max_clusters+1)
     s[0] = 0;
@@ -461,11 +476,10 @@ print(news_data.target_names)
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 news_data.data[0]
 ```
 
-### Feature Extraction
+## Feature Extraction
 
 We've discussed a bit the challenges of feature engineering.   
 
@@ -508,52 +522,50 @@ Hence, the definition of tf-idf is as follows.
 
 First:
 
-$$\text{tf}(t,d) = \text{Number of times term }t \text{ occurs in document } d$$
+$$
+\text{tf}(t,d) = \text{Number of times term }t \text{ occurs in document } d
+$$
 
 Next, if $N$ is the total number of documents in the corpus $D$ then:
 
-$$\text{idf}(t,D)=\frac{N}{|\{d\in D : t\in d \}|}$$
+$$
+\text{idf}(t,D)=\frac{N}{|\{d\in D : t\in d \}|}
+$$
 
 where the denominator is the number of documents in which the term $t$ appears.
 
 And finally:
 
-$$\text{tf-idf}(t,d)=\text{tf}(t,d)\times \text{idf}(t,D)$$
+$$
+\text{tf-idf}(t,d)=\text{tf}(t,d)\times \text{idf}(t,D)
+$$
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 from sklearn.feature_extraction.text import TfidfVectorizer
 vectorizer = TfidfVectorizer(stop_words = 'english', min_df = 4, max_df = 0.8)
 data = vectorizer.fit_transform(news_data.data)
 ```
 
-### Getting to know the Data
+## Getting to know the Data
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 print(type(data), data.shape)
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 fig, ax1 = plt.subplots(1,1,figsize=(15,10))
 dum = sns.heatmap(data[1:100,1:200].todense(), xticklabels=False, yticklabels=False, 
             linewidths=0, cbar=False, ax=ax1)
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 print(news_data.target)
 print(news_data.target_names)
 ```
 
-### Selecting the Number of Clusters
+## Selecting the Number of Clusters
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 error = evaluate_clusters(data, 10)
 plt.plot(range(1, len(error)), error[1:])
 plt.title('$k$-means Clustering Performance on Newsgroup Articles')
@@ -562,9 +574,6 @@ plt.ylabel('Error');
 ```
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 ri = ri_evaluate_clusters(data, 10, news_data.target)
 plt.plot(range(1, len(ri)), ri[1:], 'o-')
 plt.xlabel('Number of clusters')
@@ -573,9 +582,6 @@ plt.ylabel('Adjusted Rand Index');
 ```
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 s = sc_evaluate_clusters(data, 10, 100, 3)
 plt.plot(range(2, len(s)), s[2:], 'o-')
 plt.xlabel('Number of Clusters')
@@ -583,17 +589,15 @@ plt.title('$k$-means clustering performance on Newsgroup Articles')
 plt.ylabel('Silhouette Score');
 ```
 
-### Looking into the clusters
+## Looking into the clusters
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 k = 4
 kmeans = KMeans(n_clusters = k, init = 'k-means++', max_iter = 100, n_init = 25, random_state = 3)
 kmeans.fit_predict(data)
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 print('Top terms per cluster:')
 asc_order_centroids = kmeans.cluster_centers_.argsort()#[:, ::-1]
 order_centroids = asc_order_centroids[:,::-1]
@@ -606,8 +610,6 @@ for i in range(k):
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 euclidean_dists = metrics.euclidean_distances(data)
 labels = kmeans.labels_
 idx = np.argsort(labels)
@@ -619,8 +621,6 @@ dum = sns.heatmap(clustered_dists, xticklabels=False, yticklabels=False, linewid
 Let's visualize with MDS.   Note that MDS is a slow algorithm and we can't do all 1700+ data points quickly, so we will take a random sample.
 
 ```{python}
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 import random
 n_items = euclidean_dists.shape[0]
 subset = random.sample(range(n_items),500)
@@ -634,8 +634,6 @@ labels
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 cols = [['y', 'b', 'g', 'r', 'c'][l] for l in labels[subset]]
 plt.scatter(pos[:, 0], pos[:, 1], s = 12, c = cols)
 plt.title('MDS Embedding of Newsgroup Articles');
