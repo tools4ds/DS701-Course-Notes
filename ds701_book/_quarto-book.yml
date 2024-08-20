@@ -12,7 +12,7 @@ book:
     - part: "Preliminaires"
       chapters:
         - 01-Intro-to-Python.qmd
-        - 02A-Git-Jupyter.qmd
+        - 02A-Git.qmd
         - 02B-Pandas.qmd
         - 02C-Sklearn.qmd
         - 04-Linear-Algebra-Refresher.qmd
