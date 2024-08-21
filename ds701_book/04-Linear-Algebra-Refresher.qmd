@@ -5,16 +5,26 @@ jupyter: python3
 
 Linear alegbra is the branch of mathematics involving vectors and matrices. In particular, how vectors are transformed.  Knowledge of linear algebra is essential in data science. This is because linear algebra underpins the representation of data and the algorithms that transform this data.
 
+::: {.content-hidden when-profile="slides"}
 This lecture is a review of some aspects of linear algebra that are important for data science. Given the prerequisites for this course, I assume that you previously learned this material. 
+:::
 
+:::: {.fragment}
 The goal of this lecture is to refresh the following topics:
 
+:::: {.incremental}
 - vectors,
 - matrices,
 - operations with vectors and matrices,
 - eigenvectors and eigenvalues,
 - linear systems and least squares,
 - matrix factorizations.
+::::
+::::
+
+::: {.content-hidden when-profile="web"}
+## References
+:::
 
 Below is a list of very useful resrouces for learning about linear algebra:
 
@@ -45,8 +55,13 @@ $$
 \mathbf{x}^{T} = [x_1, x_2, \ldots, x_n].
 $$
 
+::: {.content-hidden when-profile="web"}
+## Vectors continued 
+:::
 
+::: {.content-hidden when-profile="slides"}
 Vectors in $\mathbb{R}^{2}$ can be visualized as points in a 2-D plane, whereas vectors in $\mathbb{R}^{3}$ can be visualized as points in a 3-D space.
+:::
 
 Let 
 
@@ -55,7 +70,9 @@ $$\mathbf{x}=\begin{bmatrix} 2 \\ 2 \end{bmatrix},~
 \mathbf{z} = \begin{bmatrix} -2 \\ -1 \end{bmatrix}.
 $$
 
+::: {.content-hidden when-profile="slides"}
 These vectors are illustrated in @fig-vector-viz.
+:::
 
 ```{python}
 #| label: fig-vector-viz
@@ -78,10 +95,14 @@ ax.set_xlim([-6, 6])
 ax.set_ylim([-2, 4])
 ax.text(3.3, -1.1, '$(3,-1)$', size=16)
 ax.text(2.3, 1.9, '$(2,2)$', size=16)
-ax.text(-3.7, -1.3, '$(-2,-1)$', size=16);
+ax.text(-3.7, -1.3, '$(-2,-1)$', size=16)
 ax.grid()
 plt.show()
 ```
+
+::: {.content-hidden when-profile="web"}
+## Vectors continued
+:::
 
 Recall the following definitions.
 
@@ -109,11 +130,23 @@ $$ \Vert \mathbf{u} - \mathbf{v} \Vert_2.$$
     $$
     is only satisfied if $a_i=0$ for $i=1, \ldots,n$.
 
+::: {.content-hidden when-profile="slides"}
 ### Visualizing vector operations
 
 For helpful visualizations of the above defintions, we'll restrict ourselves to $\mathbb{R}^{2}.$
+:::
 
+::: {.content-visible when-profile="slides"}
+# Visualizing vector operations
+:::
+
+::: {.content-hidden when-profile="slides"}
 #### Scalar multiplication
+:::
+
+::: {.content-visible when-profile="slides"}
+## Scalar multiplication
+:::
 
 Multiplication by a scalar $c\in\mathbb{R}$. For $c>1$ the vector is lengthened. For $0<c<1$ the vector shrinks. If we negate $c$ the direction of the vector is flipped 180 degrees. This is shown in @fig-vector-scaling. In this figure we show the vector $\mathbf{x} = [2, 2]$ multiplied by the scalar value $c=2$.
 
@@ -141,8 +174,13 @@ ax.text(4.3, 3.9, '$cx$', size=16)
 ax.grid()
 plt.show()
 ```
-
+::: {.content-hidden when-profile="slides"}
 #### Vector addition
+:::
+
+::: {.content-visible when-profile="slides"}
+## Vector addition
+:::
 
 We plot the sum of $\mathbf{u} = [1, 2]$ and $\mathbf{v} = [4, 1]$ in @fig-vector-addition. The sum $\mathbf{u} + \mathbf{v} = [5, 3]$ is obtained by placing the tip of one vector to the tail of the other vector. The sum is the vector that connects the unconnected tip to the unconnected tail. 
 
@@ -174,9 +212,15 @@ ax.grid()
 plt.show()
 ```
 
-#### Dot prodcut
+::: {.content-hidden when-profile="slides"}
+#### Dot product
+:::
 
-The dot product of two vectors $\mathbf{u}, \mathbf{v}$ can be used to project $\mathbf{u}$ onto $\mathbf{v}$. This is illustrated in Figure @fig-dot-product.
+::: {.content-visible when-profile="slides"}
+## Dot product
+:::
+
+The dot product of two vectors $\mathbf{u}, \mathbf{v}$ can be used to project $\mathbf{u}$ onto $\mathbf{v}$. This is illustrated in @fig-dot-product.
 
 ```{python}
 #| label: fig-dot-product
@@ -224,6 +268,10 @@ $$
 
 with $m$ rows and $n$ columns. The element at row $i$ and column $j$ is denoted $a_{ij}$. If $m=n$ we call it a square matrix.
 
+::: {.content-hidden when-profile="web"}
+## Matrices continued
+:::
+
 Similar to vectors, we can multiply matrices by scalar values and add matrices of the same dimension, i.e.,
 
 1. Let $c\in\mathbb{R}$ and $A\in\mathbb{R}^{m\times n}$, then
@@ -265,10 +313,18 @@ The transpose turns columns of the matrix into rows (equivalently rows into colu
 
 We discuss the following two important matrix multiplication operations
 
+:::: {.incremental}
 - matrix-vector multiplication,
 - matrix-matrix multiplication.
+::::
 
+::: {.content-hidden when-profile="slides"}
 ### Matrix-vector multiplication
+:::
+
+::: {.content-visible when-profile="slides"}
+## Matrix-vector multiplication
+:::
 
 Let $A\in\mathbb{R}^{m\times n}$ and $\mathbf{x}\in\mathbb{R}^{n}$, then $A\mathbf{x}\in\mathbb{R}^{m}$ is defined as 
 
@@ -281,6 +337,10 @@ x_1a_{21} + x_2 a_{22} + \cdots + x_na_{2n} \\
 x_1a_{m1} + x_2 a_{m2} + \cdots + x_na_{mn} \\
 \end{bmatrix}.
 $$
+
+::: {.content-visible when-profile="slides"}
+## Matrix-vector multiplication continued
+:::
 
 Equivalently, this means that $A\mathbf{x}$ is a linear combination of the columns of $A$, i.e.,
 
@@ -297,7 +357,13 @@ $$
 
 Observe that the matrix $A$ is a linear transformation that maps vectors in $R^{n}$ to $\mathbb{R}^{m}$.
 
+::: {.content-hidden when-profile="slides"}
 ### Matrix-matrix multiplication
+:::
+
+::: {.content-visible when-profile="slides"}
+## Matrix-matrix multiplication
+:::
 
 Let $A\in\mathbb{R}^{m\times n}$ and $B\in\mathbb{R}^{n\times p}$, then the elements of $C=AB\in\mathbb{R}^{m\times p}$ are
 
@@ -307,9 +373,15 @@ $$
 
 for $i=1,\ldots, m$ and $j=1, \ldots, p$.
 
+::: {.content-visible when-profile="web"}
 ## Important matrices
 
 We introduce notation for some commonly used and important matrices.
+:::
+
+::: {.content-visible when-profile="slides"}
+## Identity matrix
+:::
 
 The $n \times n$ identity matrix is
 
@@ -321,12 +393,24 @@ I =
 \vdots & \vdots & \ddots & \vdots \\
 0 & 0 & \cdots & 1 \\
 \end{bmatrix}.
-$$.
+$$
 
 For every $A\in\mathbb{R}^{n\times n}$, then $AI = IA$. 
 
-The inverse $A^{-1}\in\mathbb{R}^{n\times n}$ is defined as the matrix for which $AA^{-1} = A^{-1}A = I$. When $A^{-1}$ exists the matrix is said to be invertible. Note that $(AB)^{-1} = B^{-1}A^{-1}$ for invertible $B\in\mathbb{R}^{n\times n}$.
+::: {.content-visible when-profile="slides"}
+## Matrix inverse
+:::
 
+The inverse $A^{-1}\in\mathbb{R}^{n\times n}$ is defined as the matrix for which 
+$$AA^{-1} = A^{-1}A = I,$$ 
+
+When $A^{-1}$ exists the matrix is said to be invertible. 
+
+Note that $(AB)^{-1} = B^{-1}A^{-1}$ for invertible $B\in\mathbb{R}^{n\times n}$.
+
+::: {.content-visible when-profile="slides"}
+## Diagonal matrices
+:::
 A diagonal matrix $D\in\mathbb{R}^{n\times n}$ has entries $d_{ij}=0$ if $i\neq j$, i.e.,
 
 $$
@@ -339,8 +423,18 @@ d_{11} & 0 & \cdots & 0 \\
 \end{bmatrix}.
 $$
 
-A square matrix $Q\in\mathbb{R}^{n}$ is orthogonal if $QQ^{T}=Q^{T}Q=I$. In particular, the inverse of an orthogonal matrix is it's transpose.
+::: {.content-visible when-profile="slides"}
+## Orthogonal matrices
+:::
+A square matrix $Q\in\mathbb{R}^{n}$ is orthogonal if 
 
+$$QQ^{T}=Q^{T}Q=I.$$ 
+
+In particular, the inverse of an orthogonal matrix is it's transpose.
+
+::: {.content-visible when-profile="slides"}
+## Lower triangular matrices
+:::
 A lower triangular matrix $L\in\mathbb{R}^{n\times n}$ is a matrix where all the entries above the main diagonal are zero
 
 $$
@@ -353,6 +447,9 @@ l_{1n} & l_{n2} & \cdots & l_{nn} \\
 \end{bmatrix}.
 $$
 
+::: {.content-visible when-profile="slides"}
+## Upper triangular matrices
+:::
 An upper triangular matrix $U\in\mathbb{R}^{n\times n}$ is a matrix where all the entries below the main diagonal are zero
 
 $$
@@ -365,19 +462,39 @@ u_{11} & u_{12} & \cdots & u_{1n} \\
 \end{bmatrix}.
 $$
 
+::: {.content-visible when-profile="web"}
 The inverse of a lower triangular matrix is itself a lower triangular matrix. This is also true for upper triangular matrices, i.e., the inverse is also upper triangular.
+:::
 
 ## Eigenvalues and eigenvectors
 
-An eigenvector of an $n\times n$ matrix $A$ is a nonzero vector $\mathbf{x}$ such that $A\mathbf{x} = \lambda\mathbf{x}$ for some scalar $\lambda.$  The scalar $\lambda$ is called an eigenvalue.
+An eigenvector of an $n\times n$ matrix $A$ is a nonzero vector $\mathbf{x}$ such that 
+
+$$A\mathbf{x} = \lambda\mathbf{x}$$ 
+
+for some scalar $\lambda.$ 
+
+The scalar $\lambda$ is called an eigenvalue.
 
 An $n \times n$ matrix has at most $n$ distinct eigenvectors and at most $n$ distinct eigenvalues.
 
+::: {.content-visible when-profile="slides"}
+# Matrix decompositions
+:::
+
+::: {.content-visible when-profile="web"}
 ## Matrix decompositions
 
 We introduce here important matrix decompositions. These are useful in solving linear equations. Furthermore they play an important role in various data science applications.
+:::
 
+::: {.content-visible when-profile="web"}
 ### LU factorization
+:::
+
+::: {.content-visible when-profile="slides"}
+## LU factorization
+:::
 
 An LU decomposition of a square matrix $A\in\mathbb{R}^{n\times n}$ is a factorization of $A$ into a product of matrices
 
@@ -406,8 +523,13 @@ u_{11} & u_{12} & u_{13} \\
 \end{bmatrix}
 $$
 
-
+::: {.content-visible when-profile="web"}
 ### QR decomposition
+:::
+
+::: {.content-visible when-profile="slides"}
+## QR factorization
+:::
 
 A QR decomposition of a square matrix $A\in\mathbb{R}^{n\times n}$ is a factorization of $A$ into a product of matrices
 
@@ -416,7 +538,13 @@ A=QR,
 $$
 where $Q$ is an orthogonal square matrix and $R$ is an upper-triangular square matrix.
 
+::: {.content-visible when-profile="web"}
 ### Eigendecomposition
+:::
+
+::: {.content-visible when-profile="slides"}
+## Eigendecomposition
+:::
 
 Let $A\in\mathbb{R}^{n}$ have n linearly independent eigenvectors $\mathbf{x}_i$ for $i=1,\ldots, n$, then $A$ can be factorized as
 
@@ -438,6 +566,9 @@ is a diagonal matrix of the eigenvalues.
 
 In this case, the matrix $A$ is said to be diagonalizable.
 
+::: {.content-visible when-profile="slides"}
+## Spectral decomposition
+:::
 A special case occurs when $A$ is symmetric. Recall that a matrix is symmetric when $A = A^T.$
 
 In this case, it can be shown that the eigenvectors of $A$ are all mutually orthogonal. Consequently, $X^{-1} = X^{T}$ and we can decompose $A$ as:
@@ -446,7 +577,15 @@ $$A = XDX^T.$$
 
 This amazing fact is known as the spectral theorem and this decomposition of $A$ is its spectral decomposition. The eigenvalues of a matrix are also called its spectrum.
 
+
+::: {.content-visible when-profile="web"}
 ### Singular value decomposition
+:::
+
+::: {.content-visible when-profile="slides"}
+## Singular value decomposition
+:::
+
 
 Let $A\in\mathbb{R}^{m\times n}$ with $m>n$, then $A$ admits a decomposition
 
@@ -464,9 +603,6 @@ $$
 0 & \sigma_{22} & \cdots & 0 \\
 \vdots & \vdots & \ddots & \vdots \\
 0 & 0 & \cdots & \sigma_{mn} \\
-0 & 0 & \cdots & 0 \\
-\vdots & \vdots & \ddots & \vdots \\
-0 & 0 & \cdots & 0 \\
 \end{bmatrix}.
 $$
 The values $\sigma_{ij}$ are the singular values of the matrix $A$. Amazingly, it can be proven that every matrix $A\in\mathbb{R}^{m\times n}$ has a singular value decomposition.
@@ -477,32 +613,44 @@ A system of $m$ linear equations in $n$ unknowns can be written as
 
 $$
 \begin{align*}
-a_{11} x_{1} + a_{12} x_{2} + \cdots + a_{1n} x_{n} &= b_1 \\
-a_{21} x_{1} + a_{22} x_{2} + \cdots + a_{2n} x_{n} &= b_2 \\
+a_{11} x_{1} + a_{12} x_{2} + \cdots + a_{1n} x_{n} &= b_1, \\
+a_{21} x_{1} + a_{22} x_{2} + \cdots + a_{2n} x_{n} &= b_2, \\
 \vdots  \qquad \qquad \quad \\
-a_{m1} x_{1} + a_{m2} x_{2} + \cdots + a_{mn} x_{n} &= b_m,\\
+a_{m1} x_{1} + a_{m2} x_{2} + \cdots + a_{mn} x_{n} &= b_m.\\
 \end{align*}
 $$
-is simply the matrix vector equation
+
+Observe that this is simply the matrix vector equation
 
 $$
 A\mathbf{x}=\mathbf{b}.
 $$
 
+::: {.content-visible when-profile="slides"}
+## Linear systems of equations continued
+:::
+
 A linear system of equations may have:
 
+:::: {.incremental}
 - infinitely many solutions,
 - a unique solution,
 - no solutions.
+::::
 
+:::: {.fragment}
 When $m > n$, the system is said to be overdetermined and in general has infinitely many solutions. When $m<n$ the system is underdetermined and in general has no solution. For the case when $m=n$ and the matrix has $n$ linearly dependent columns, the solution is always unique.
 
 For an invertible square matrix $A\mathbf{x}=\mathbf{b}$, the solution is always $\mathbf{x}=A^{-1}\mathbf{b}$. 
+::::
 
-Matrix factorizations to help us solve linear systems of equations 
-For square matrices, we can use 
+::: {.content-visible when-profile="slides"}
+## Linear systems of equations continued
+:::
+We can use matrix factorizations to help us solve a linear system of equation. We demonstrate how to do this with the LU decomposition. Observe that 
+$$A\mathbf{x} = LU\mathbf{x} = \mathbf{b}.$$ 
 
-We can use matrix factorizations to help us solve a linear system of equation. We demonstrate how to do this with the LU decomposition. Observe that $A\mathbf{x} = LU\mathbf{x} = \mathbf{b}$. Then 
+Then 
 
 $$
 \mathbf{x} = U^{-1}L^{-1}\mathbf{b}.
@@ -515,7 +663,7 @@ The process of inverting $L$ and $U$ is called backward and forward substitution
 
 In data science it is often the case that we have to solve the linear system 
 
-$$ A \mathbf{x} = \mathbf{b},$$ 
+$$ A \mathbf{x} = \mathbf{b}.$$ 
 
 This problem may have no solution -- perhaps due to noise or measurement error.
 
@@ -525,35 +673,59 @@ The quality of the approximation can be measured using the distance from $A\math
 
 $$\Vert A\mathbf{x} - \mathbf{b}\Vert_2.$$
 
+::: {.content-visible when-profile="slides"}
+## Least squares continued
+:::
 The general least-squares problem is given $A\in\mathbb{R}^{m\times n}$ and and $\mathbf{b}\in\mathbb{R}^{m}$, find a vector $\hat{\mathbf{x}}\in\mathbb{R}^{n}$ such that $\Vert A\mathbf{x}-\mathbf{b}\Vert_2$ is minimized, i.e. 
 
 $$\hat{\mathbf{x}} = \arg\min_\mathbf{x} \Vert A\mathbf{x} - \mathbf{b}\Vert.$$
 
-This emphasizes the fact that the least squares problem is a minimization problem. Minimizations problems are an example of a broad class of problems called _optimization_ problems. In optimization problems we attempt to find an optimal solution that minimizes (or maximizes) a set particular set of equations (and possibly constraints). 
+This emphasizes the fact that the least squares problem is a minimization problem.
 
+::: {.content-visible when-profile="web"}
+Minimizations problems are an example of a broad class of problems called _optimization_ problems. In optimization problems we attempt to find an optimal solution that minimizes (or maximizes) a set particular set of equations (and possibly constraints). 
+:::
+
+::: {.content-visible when-profile="slides"}
+## Least squares continued
+:::
 We can connect the above minimization of the distance between vectors to the minimization of the sum of squared errors. Let $\mathbf{y} = A\mathbf{x}$ and observe that
 
 $$\Vert A\mathbf{x}-\mathbf{b}\Vert_2^2 = \Vert \mathbf{y}-\mathbf{b}\Vert_2^2 =  \sum_i (y_i-b_i)^2.$$
 
+::: {.content-visible when-profile="web"}
 The above expression is the sum of squared errors. In statistics, the $y_i$ are the estimated values and the $b_i$ are the measured values. This is the most common measure of error used in statistics and is a key principle. 
+:::
 
 Minimizing the length of $A\mathbf{x} - \mathbf{b}$ is equivalent to minimizing the sum of the squared errors. 
 
+::: {.content-visible when-profile="slides"}
+## Least squares continued
+:::
 We can find $\hat{\mathbf{x}}$ using either 
 
+:::: {.incremental}
 * geometric arguments based on projections of the vector $\mathbf{b}$,
 * by calculus (taking the derivative of the right-hand-side expression above and setting it equal to zero).
+::::
 
+:::: {.fragment}
 Either way, we obtain the result that $\hat{\mathbf{x}}$ is the solution of:
     
 $$A^TA\mathbf{x} = A^T\mathbf{b}.$$
 
 This system of equations is called the normal equations.
+::::
 
+::: {.content-visible when-profile="slides"}
+## Least squares continued
+:::
 We can prove that these equations always have at least one solution. 
 
-When $A^TA$ is invertible, the system is said to be overdetermined.  This means that there is a unique solution
+When $A^TA$ is invertible, the system is said to be overdetermined. This means that there is a unique solution
 
 $$\hat{\mathbf{x}} = (A^TA)^{-1}A^T\mathbf{b}.$$
 
+::: {.content-visible when-profile="web"}
 Be aware that computing the solution using $(A^TA)^{-1}A^T$ can be numerically unstable. A more stable method is to use the QR decomposition of $A$, i.e., $\hat{\mathbf{x}} = R^{-1}Q^T\mathbf{b}$.
+:::
