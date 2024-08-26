@@ -129,6 +129,7 @@ $$ \Vert \mathbf{u} - \mathbf{v} \Vert_2.$$
     a_1 \mathbf{v}_1 + \cdots + a_n \mathbf{v}_n = 0,
     $$
     is only satisfied if $a_i=0$ for $i=1, \ldots,n$.
+1. Given a set of vectors $V = \{\mathbf{v}_{1}, \ldots, \mathbf{v}_{n}\}$, where $\mathbf{v}_i\in\mathbf{R}^n$, the span(V) is the set of all linear combinations of vectors in $V$.
 
 ::: {.content-hidden when-profile="slides"}
 ### Visualizing vector operations
@@ -372,6 +373,39 @@ c_{ij} = \sum_{k=1}^{n} a_{ik}b_{kj},
 $$
 
 for $i=1,\ldots, m$ and $j=1, \ldots, p$.
+
+## Vector spaces
+
+An essential concept in linear algebra is the notion of a **vector space**.
+
+A vector space is a set $V$ such that for any 2 elements in the set, say $\mathbf{u},\mathbf{v}\in V$, and any scalars, $c$ and $d$, then $c\mathbf{u} + d\mathbf{v}\in V$. 
+
+In addition, a vector space must satisfy the following properties
+
+:::: {.incremental}
+1. $\mathbf{u} + (\mathbf{v} + \mathbf{w}) = (\mathbf{u} + \mathbf{v}) + \mathbf{w}$ (associativity).
+1. $\mathbf{u} + \mathbf{v} = \mathbf{v} + \mathbf{u}$ (commutativity).
+1. There exists $\mathbf{0}\in V$ such that $\mathbf{v} + \mathbf{0} = \mathbf{v}$ for all $\mathbf{v}\in V$ (identity element).
+1. For every $\mathbf{v}\in V$, there exists $-\mathbf{v}\in V$ such that $\mathbf{v} + (-\mathbf{v}) = \mathbf{0}$ (inverse).
+1. $c(d\mathbf{v}) = (cd)\mathbf{v}$
+1. $1\mathbf{v} = \mathbf{v}$
+1. $c(\mathbf{u} + \mathbf{v}) = c\mathbf{u} + c\mathbf{v}$
+1. $(c + d)\mathbf{v} = c\mathbf{v} + d\mathbf{v}$
+::::
+
+::: {.content-hidden when-profile="web"}
+## Vector spaces continued
+:::
+
+Some examples of vector spaces are:
+
+:::: {.incremental}
+- The set of n-dimensional vectors with real numbers, i.e., $\mathbb{R}^n$.
+- Given a matrix $A\in\mathbb{R}^{m\times n}$, the column space $col(A)$, which is the span of all columns in the matrix $A$ is a vector space. The similarly defined row space is also a vector space.
+- Given a matrix $A\in\mathbb{R}^{n\times n}$, the set of all solutions to the equation $A\mathbf{x} = \mathbf{0}$ is a vector space. This space is called the null space of matrix $A$.
+- The set of all $m\times n$ matrices with real numbers is also a vector space.
+- The set of all polynomials of degreen $n$ is a vector space.
+::::
 
 ::: {.content-visible when-profile="web"}
 ## Important matrices
@@ -726,6 +760,37 @@ When $A^TA$ is invertible, the system is said to be overdetermined. This means t
 
 $$\hat{\mathbf{x}} = (A^TA)^{-1}A^T\mathbf{b}.$$
 
-::: {.content-visible when-profile="web"}
-Be aware that computing the solution using $(A^TA)^{-1}A^T$ can be numerically unstable. A more stable method is to use the QR decomposition of $A$, i.e., $\hat{\mathbf{x}} = R^{-1}Q^T\mathbf{b}$.
+::: {.content-visible when-profile="slides"}
+## Least squares beware
 :::
+Be aware that computing the solution using $(A^TA)^{-1}A^T$ can be numerically unstable. A more stable method is to use the QR decomposition of $A$, i.e., $\hat{\mathbf{x}} = R^{-1}Q^T\mathbf{b}$. 
+
+The NumPy function `np.linalg.lstsq()` solves the least squares problem in a stable way. 
+
+Consider the following example where the solution to the least squares problem is `x=np.array([1, 1])`.
+
+```{python}
+#| code-fold: false
+import numpy as np
+A = np.array([[-1.42382504, -1.4238264 ],
+              [ 1.26372846,  1.26372911], 
+              [-0.87066174, -0.87066138]])
+b = A @ np.array([1, 1])
+
+# Pseudoinverse
+x1 = np.linalg.inv(A.T @ A) @ A.T @ b
+print(x1)
+# QR
+[Q, R] = np.linalg.qr(A)
+x2 = np.linalg.solve(R, Q.T @ b)
+print(x2)
+# np.linalg.lstsq
+x3, _, _, _ = np.linalg.lstsq(A, b, rcond=None)
+print(x3) 
+print(np.linalg.norm(x1-np.array([1, 1])))
+print(np.linalg.norm(x2-np.array([1, 1])))
+print(np.linalg.norm(x3-np.array([1, 1])))
+```
+
+
+
