@@ -4,6 +4,7 @@ jupyter: python3
 ---
 
 ```{python}
+#| echo: false
 %matplotlib inline
 %config InlineBackend.figure_format='retina'
 import numpy as np
@@ -235,18 +236,20 @@ We will assume that
 
 * data items are represented by points in $d$-dimensional space, $\mathbb{R}^d$.
     * Stated another way, each data item has $d$ features.
-* the number of points, $n$, is given
-* the number of clusters $k$ is given
+* the number of points, $N$, is given
+* the number of clusters $K$ is given
 
 ## Minimizing a Cost Function
 
-Find $k$ points $c_1, \dots, c_k$ (called <font color="blue"> _centers_, _centroids_,</font> or <font color = "blue"> _means_,</font> so that the _cost_
+Find $K$ disjoint clusters $C_k$, each described by points $c_1, \dots, c_K$
+(called <font color="blue"> _centers_, _centroids_,</font> or <font color = "blue"> _means_)</font>
+that minimizes
 
 $$
-\sum_{i=1}^n \Vert x_i-c_j\Vert^2_2 
+\sum_{k=1}^K \sum_{x\in C_k} \Vert x-c_k\Vert^2. 
 $$
 
-is minimized.
+The literature sometimes calls this the _Inertia_ of the clustering.
 
 ::: aside
 See [Useful Norms](./05-Distances-Timeseries.html#useful-norms) in
@@ -285,6 +288,30 @@ How hard is it to solve this problem?
 
 __Nonetheless,__ there is a simple algorithm that works quite well in practice!
 
+::: {.content-hidden when-profile="slides"}
+## $k$-means as NP-hard
+
+For context, **NP-hard** is a term used in the study of
+[computational complexity](https://en.wikipedia.org/wiki/Computational_complexity_theory).
+
+Problems in [**P**](https://en.wikipedia.org/wiki/P_(complexity)) are those that can be solved in polynomial time.
+
+Problems in [**NP**](https://en.wikipedia.org/wiki/NP_(complexity)) are those that
+can be _verified_ in polynomial time but not necessarily _solved_ in polynomial time.
+
+[**NP-hard**](https://en.wikipedia.org/wiki/NP-hardness) problems are those that are at least as hard as the hardest problems in **NP**.
+
+[**NP-complete**](https://en.wikipedia.org/wiki/NP-complete) problems are those that are both NP-hard and in NP.
+
+You can prove that the $k$-means problem is NP-hard by finding a reduction from a known NP-hard
+problem such as the [**Partition Problem**](https://en.wikipedia.org/wiki/Partition_problem).
+
+::: {.callout-note}
+The $k$-means problem is NP-hard.
+:::
+
+:::
+
 ## The $k$-means Algorithm
 
 :::: {.columns }
@@ -299,7 +326,7 @@ __Nonetheless,__ there is a simple algorithm that works quite well in practice!
 * It is such a good idea that it has been independently discovered multiple times.
 * It was first discovered by Lloyd in 1957, so it is often called Lloyd's algorithm.
 * It is called the "$k$-means algorithm"
-* (not to be confused with the $k$-means problem!)
+* (not to be confused with the $k$-means problem of which this is a heuristic solution)
 :::
 
 ::::
@@ -312,13 +339,14 @@ The other from the top 10 were SVM, Apriori, EM, PageRank, AdaBoost, kNN, Naive 
 ## The $k$-means algorithm
 :::
 
-1. Pick $k$ cluster centers $\{c_1, \dots, c_k\}$.  
-    - These can be chosen randomly, or by some other method.
-2. For each $j$, define the cluster $X_j$ as the set of points in $X$ that are <font color="blue">closest to center</font> $c_j$.  
+1. Pick $K$ cluster centers $\{c_1, \dots, c_K\}$.  
+    - These can be randomly chosen datapoints, or by some other method such as[$k$-means++](https://en.wikipedia.org/wiki/K-means%2B%2B)
+2. For each $j$, define the cluster $C_j$ as the set of points in $X$ that are <font color="blue">closest to center</font> $c_j$.  
     - Nearer to $c_j$ than to any other center.
 3. For each $j$, update $c_j$ to be <font color="blue">the center of mass of cluster</font> $X_j$.  
     - In other words, $c_j$ is the mean of the vectors in $X_j$.
-4. Repeat (ie, go to Step 2) until convergence^[Convergence to be defined].
+4. Repeat (ie, go to Step 2) until convergence
+    - either the cluster centers change below a threshold, or inertia changes below a threshold or a maximum number of iterations is reached.
 
 ---
 
