@@ -3,6 +3,8 @@ title: Clustering In Practice
 jupyter: python3
 ---
 
+## Clustering in Practice
+
 ...featuring $k$-means
 
 Today we'll do an extended example showing $k$-means clustering in practice and in the context of the python libraries
@@ -12,11 +14,13 @@ __`scikit-learn.`__
 
 Our goals are to learn:
 
+::: {.incremental}
 * How clustering is used in practice
 * Tools for evaluating the quality of a clustering
 * Tools for assigning meaning or labels to a cluster
 * Important visualizations
 * A little bit about feature extraction for text
+:::
 
 ## Training wheels: Synthetic data
 
@@ -25,13 +29,16 @@ good idea to try it out on a dataset in which you already know the "right" answe
 
 One way to do that is to generate synthetic data that has some known properties.
  
-Among other things, `scikit-learn` contains tools for generating synthetic data for testing.
+Among other things, `scikit-learn` contains tools for generating synthetic data
+for testing.
+
+We'll use [datasets.make_blobs](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_blobs.html).
 
 ```{python}
 #| code-fold: false
 import sklearn.datasets as sk_data
-X, y = sk_data.make_blobs(n_samples=100, centers=3, n_features=30,
-                          center_box=(-10.0, 10.0), random_state=0)
+X, y, gt_centers = sk_data.make_blobs(n_samples=100, centers=3, n_features=30,
+                          center_box=(-10.0, 10.0), random_state=0, return_centers=True)
 ```
 
 Let's check the shapes of the returned values:
@@ -39,13 +46,26 @@ Let's check the shapes of the returned values:
 #| code-fold: false
 print("X.shape: ", X.shape)
 print("y.shape: ", y.shape)
+print("gt_centers: ", gt_centers.shape)
 ```
 
----
+::: {.notes}
+`datasets.makeblobs` takes as arguments:
+
+- `n_samples`: the number of samples to generate,
+- `n_features`: the number of features, or in other words the dimensionality of
+each sample
+- `center_box`: the bounds of the cluster centers
+- `random_state`: random seed
+- `return_centers`: We also choose the option to return the centers so we have ground truth
+:::
+
+## Visualize the Data
 
 To get a sense of the raw data we can inspect it.
 
-For statistical visualization, a good library is `seaborn`, imported as `sns`.
+For statistical visualization, a good library is [seaborn](https://seaborn.pydata.org/).
+
 Let's plot the `X` data as a matrix
 [heatmap](https://seaborn.pydata.org/generated/seaborn.heatmap.html), 
 where every row is a data point and the columns are the features.
@@ -55,15 +75,18 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Set the figure size to make the plot smaller
-plt.figure(figsize=(8, 6))  # Adjust the width and height as needed
+plt.figure(figsize=(7, 5))  # Adjust the width and height as needed
 sns.heatmap(X, xticklabels = False, yticklabels = False, linewidths = 0, cbar = False)
 plt.show()
 ```
 
 ---
 
-::: {.content-hidden when-profile="web"}
+:::: {.columns}
+::: {.column width="40%"}
+
 ```{python}
+#| echo: false
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -72,7 +95,9 @@ plt.figure(figsize=(4, 3))  # Adjust the width and height as needed
 sns.heatmap(X, xticklabels = False, yticklabels = False, linewidths = 0, cbar = False)
 plt.show()
 ```
-::: 
+
+:::
+::: {.column width="60%"}
 Geometrically, these points live in a __30 dimensional__ space, so we cannot directly visualize their geometry.  
 
 This is a __big problem__ that you will run into time and again!
@@ -80,10 +105,12 @@ This is a __big problem__ that you will run into time and again!
 We will discuss methods for visualizing high dimensional data later on.
 
 For now, we will use a method that can turn a set of pairwise distances into an approximate 2-D representation __in some cases.__
+:::
+::::
 
 ---
 
-So let's compute the pairwise distances for visualization purposes.
+So let's compute the pairwise distances, _in 30 dimensions_, for visualization purposes.
 
 We can compute all pairwise distances in a single step using the `scikit-learn` [`metrics.euclidean_distances`](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.euclidean_distances.html) function:
 
@@ -91,30 +118,104 @@ We can compute all pairwise distances in a single step using the `scikit-learn` 
 #| code-fold: false
 import sklearn.metrics as metrics
 euclidean_dists = metrics.euclidean_distances(X)
-euclidean_dists
+# euclidean_dists
 ```
 
 ```{python}
-print(euclidean_dists.shape)
+#| echo: false
+print("Matrix shape is: ", euclidean_dists.shape)
 ```
 
-## Visualizing with Multidimensional Scaling
-
-The idea behind Multidimensional Scaling (MDS) is: 
-
-* given a distance (or dissimilarity) matrix, 
-* find a set of coordinates for the points that approximates those distances as well as possible.
-
-Usually we are looking for points in 2D or maybe 3D for visualization purposes.
-
-The algorithm works using an algorithm that starts with random positions, and then moves points in a way that reduces the disparity between true distance and euclidean distance.
-
-Note that there are many ways that this can fail!  
-
-* Perhaps the dissimilarities are not well modeled as euclidean distances
-* It may be necessary to use more than 2 dimensions to capture any clustering via euclidean distances
+Let's look at the upper left and lower right corners of the distances matrix.
 
 ```{python}
+#| echo: false
+import sklearn.metrics as metrics
+import numpy as np
+
+euclidean_dists = metrics.euclidean_distances(X)
+
+# Function to print the matrix in the desired format
+def print_matrix(matrix):
+    # Upper left 3x3
+    upper_left = matrix[:3, :3]
+    # Lower right 3x3
+    lower_right = matrix[-3:, -3:]
+    
+    # Print the upper left 3x3
+    print("Upper left 3x3:")
+    print(np.round(upper_left, 2))
+    
+    print("\n...")
+    
+    # Print the lower right 3x3
+    print("Lower right 3x3:")
+    print(np.round(lower_right, 2))
+
+print_matrix(euclidean_dists)
+```
+
+Note that this produces a $100\times100$ symmetric matrix where the diagonal
+is all zeros (distance from itself)
+
+---
+
+Let's look at a histogram of the distances.
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+import sklearn.metrics as metrics
+
+# Compute the pairwise distances
+euclidean_dists = metrics.euclidean_distances(X)
+
+# Extract the lower triangular part of the matrix, excluding the diagonal
+lower_triangular_values = euclidean_dists[np.tril_indices_from(euclidean_dists, k=-1)]
+
+# Plot the histogram
+plt.figure(figsize=(10, 6))
+plt.hist(lower_triangular_values, bins=30, edgecolor='black')
+plt.title('Histogram of Lower Diagonal Values of Euclidean Distances')
+plt.xlabel('Distance')
+plt.ylabel('Frequency')
+plt.show()
+```
+
+::: {.notes}
+Remember that these are the pairwise distances, _in 30 dimensions_. So at least
+with this dataset we see a clean separation presumably between inter-cluster
+distances and intra-cluster distances.
+
+How would the curse of dimensionality affect this? We discuss the curse of
+dimensionality later in the course.
+:::
+## Visualizing with MDS
+
+The idea behind [Multidimensional Scaling (MDS)](https://en.wikipedia.org/wiki/Multidimensional_scaling) is: 
+
+* given a pairwise distance (or dissimilarity) matrix, 
+* find a set of coordinates in 1, 2 or 3-D space that approximates those distances as well as possible.
+* points that are close (or far) in high dimensional space are close (or far) in the reduced dimension space
+
+::: {.fragment}
+Note that there are two forms of MDS:
+
+* Metric MDS, of which Classical MDS is a special case, and has a closed form solution
+  based on the eigenvectors of the centered distance matrix
+* Non-Metric MDS, which tries to find a non-parametric monotonic relationship
+  between the dissimilarities and the target coordinates through an iterative approach
+:::
+
+::: {.fragment}
+Also note that MDS may not always work well if, for example the dissimilarities
+are not well modeled by a metric like euclidean distance
+:::
+
+## MDS Visualization Result
+
+```{python}
+#| label: code-mds
 import sklearn.manifold
 import matplotlib.pyplot as plt
 mds = sklearn.manifold.MDS(n_components=2, max_iter=3000, eps=1e-9, random_state=0,
@@ -125,17 +226,23 @@ plt.scatter(pos[:, 0], pos[:, 1], s=8)
 plt.axis('square');
 ```
 
-So we can see that, although the data lives in 30 dimensions, we can get a sense of how the points are clustered by approximately placing the points into two dimensions.
+So we can see that, although our data lives in 30 dimensions, we can get a
+sense of how the points are clustered by approximately placing the points into
+two dimensions.
 
 ---
 
-A second way to visualize the data is by using a heatmap on the set of pairwise distances.
+Out of curiosity, we can visualize the pairwise distance matrix using a heatmap.
 
 ```{python}
 #| code-fold: false
 sns.heatmap(euclidean_dists, xticklabels=False, yticklabels=False, linewidths=0, 
             square=True );
 ```
+
+::: {.fragment}
+Perhaps not as useful a visualization however.
+:::
 
 ## Applying  $k$-Means
 
@@ -145,27 +252,62 @@ These are in __`sklearn.cluster.`__
 
 There are 3 functions in all the clustering classes, 
 
-* __`fit()`__, 
-* __`predict()`__, and 
-* __`fit_predict()`__. 
-
-`fit()` builds the model from the training data (e.g. for $k$-means, it finds the
-            centroids), 
-            
-`predict()` assigns labels to the data after building
-            the model, and
-            
-`fit_predict()` does both in a single step.
+* **`fit()`**: builds the model from the training data
+    * e.g. for $k$-means, find the centroids
+* **`predict()`**: assigns labels to the data after building the models 
+    * e.g. cluster number for $k$-means
+* **`fit_predict()`**: does both in a single step 
 
 ---
 
-Find the centroids of the distance matrix.
+Let's go back to the original 30-D synthetic dataset and apply $k$-means and
+show the cluster numbers.
 
 ```{python}
 from sklearn.cluster import KMeans
-kmeans = KMeans(init = 'k-means++', n_clusters = 3, n_init = 100)
-kmeans.fit_predict(X)
+kmeans = KMeans(init = 'k-means++', n_clusters = 3, n_init = 100, random_state=0)
+y_prime = kmeans.fit_predict(X)
+print(y_prime)
 ```
+
+For comparisons, here are the original cluster numbers.
+```{python}
+print(y)
+```
+
+Note that the $k$-means labels are different than the ground truth labels. They
+would have to be remapped with
+
+$$
+\begin{align*}
+0 &\rightarrow 0 \\
+1 &\rightarrow 2 \\
+2 &\rightarrow 1
+\end{align*}
+$$
+
+```{python}
+# Remap y_prime
+remap = {0: 0, 1: 2, 2: 1}
+y_prime_remapped = np.vectorize(remap.get)(y_prime)
+print("Remapped y_prime:")
+print(y_prime_remapped)
+```
+
+```{python}
+# Calculate the number of mismatched entries
+mismatches = np.sum(y != y_prime_remapped)
+
+# Calculate the percentage of mismatched entries
+total_entries = len(y)
+percentage_mismatched = (mismatches / total_entries) * 100
+
+print(f"Percentage of mismatched entries: {percentage_mismatched:.2f}%")
+```
+
+To reiterate, mismatches are 0.00%.
+
+---
 
 All the tools in `scikit-learn` are implemented as python objects.
 
@@ -176,17 +318,16 @@ Thus, the general sequence for using a tool from `scikit-learn` is:
 * Examine the results, which are generally property variables of the object.
 
 ```{python}
+#| code-fold: false
 centroids = kmeans.cluster_centers_
 labels = kmeans.labels_
-error = kmeans.inertia_
+inertia = kmeans.inertia_
 ```
 
+And we see the resulting cluster inertia.
+
 ```{python}
-print(f'The total error of the clustering is: {error:0.1f}.')
-print('\nCluster labels:')
-print(labels)
-print('\nCluster centroids:')
-print(centroids)
+print(f'Clustering inertia: {inertia:0.1f}.')
 ```
 
 ## Visualizing the Results of Clustering
@@ -200,131 +341,250 @@ rX = X[idx, :]
 sns.heatmap(rX, xticklabels = False, yticklabels = False, linewidths = 0);
 ```
 
+You can clearly see the feature similarities of the samples in the same cluster.
+
+---
+
+We can also sort the pairwise distance matrix.
+
 ```{python}
 rearranged_dists = euclidean_dists[idx,:][:,idx]
 sns.heatmap(rearranged_dists, xticklabels = False, yticklabels = False, linewidths = 0, square = True);
 ```
 
+Here again, you can see the inter-cluster sample distances are small.
+
 ## Cluster Evaluation
 
 How do we know whether the clusters we get represent "real" structure in our data?
 
-Consider this dataset, which we have clustered using $k$-means:
+:::: {.fragment}
+Consider a dataset of 100 points _uniformly distirbuted_ in the unit square.
 
 ```{python}
 import pandas as pd
-unif_X = np.random.default_rng().uniform(0, 1, 100)
-unif_Y = np.random.default_rng().uniform(0, 1, 100)
+np.random.seed(42)
+unif_X = np.random.default_rng().uniform(0, 1, 500)
+unif_Y = np.random.default_rng().uniform(0, 1, 500)
 df = pd.DataFrame(np.column_stack([unif_X, unif_Y]), columns = ['X', 'Y'])
-kmeans = KMeans(init = 'k-means++', n_clusters = 3, n_init = 100)
-df['label'] = kmeans.fit_predict(df[['X', 'Y']])
-df.plot('X', 'Y', kind = 'scatter', c = 'label', colormap='viridis', colorbar = False)
-plt.axis('equal')
-plt.axis('off');
+df.plot('X', 'Y', kind = 'scatter', 
+        colorbar = False, xlim = (0, 1), ylim = (0, 1), 
+        figsize = (4, 4))
 ```
 
-In fact, this dataset was generated using uniform random numbers for the coordinates.
+::::
 
-So ... it truly has __no__ clusters.
+---
 
-The point is: any clustering algorithm will always output some "clustering" of the data.
+After running $k$-means on this data:
+
+```{python}
+kmeans = KMeans(init = 'k-means++', n_clusters = 3, n_init = 500, random_state=0)
+df['label'] = kmeans.fit_predict(df[['X', 'Y']])
+df.plot('X', 'Y', kind = 'scatter', c = 'label', 
+        colormap='viridis', colorbar = False, 
+        xlim = (0, 1), ylim = (0, 1), 
+        figsize = (4, 4))
+```
+
+
+:::: {.fragment}
+The point is: many clustering algorithms will usually output some "clustering" of the data.
+::::
+
+---
 
 The question is, does the clustering reflect __real__ structure?
 
+:::: {.fragment}
 Generally we encounter two problems:
+::::
+
+::: {.incremental}
 * Are there "real" clusters in the data?
 * if so, __how many__ clusters are there?
+:::
 
+:::: {.fragment}
 There is often no definitive answer to either of these questions.
 
 You will often need to use your judgment in answering them.
+::::
+
+::: {.content-hidden}
+
+## Cluster Evaluations
+
+(Under Development)
+
+### With Ground Truth Data
+
+* How to evaluate clustering algos when you have ground truth data
+    * how do you align labels?
+    * different accuracy measures
+
+### Without Ground Truth Data
+
+* Can you make guesses to the underlying probability distributions to show that
+  it is non-uniform?
+
+## Clustering Metrics
+
+[sklearn clustering examples](https://scikit-learn.org/stable/auto_examples/cluster/index.html)
+
+- [sklearn performance evaluation guide](https://scikit-learn.org/stable/modules/clustering.html#clustering-performance-evaluation)
+- [sklearn metrics](https://scikit-learn.org/stable/api/sklearn.metrics.html)
+    - [sklearn clustering metrics](https://scikit-learn.org/stable/api/sklearn.metrics.html#module-sklearn.metrics.cluster)
+        - [sklearn rand score](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.rand_score.html)
+- [sklearn example: adjustment for chance in clustering performance evaluation](https://scikit-learn.org/stable/auto_examples/cluster/plot_adjusted_for_chance_measures.html)
+
+:::
+
+## Clustering Metrics
+
+Broadly separated into two categories:
+
+:::: {.fragment}
+**Ground truth based metrics**
+
+We'll look at (Adjusted) Rand Index.
+
+::::
+
+:::: {.fragment}
+Even with ground truth labels, we can't apply accuracy measures like we will
+see in supervised learning approaches since clustering algorithms don't try to
+match exact labels, but rather group similar items together.
+
+::::
+
+:::: {.fragment}
+**Internal cluster metrics (no ground truth external labels)**
+
+We'll look at Silhouette Coefficient.
+::::
+
 
 ## Rand Index
 
-One tool we may be able to use in some settings is __external__ information
-about the data.
+::: aside
+Named after William M. Rand.
+:::
 
-In particular, we may have knowledge from some other source about the nature of
-the clusters in the data.
+In some cases we'll have ground truth cluster labels, call them $T$.
 
-In that case, what we need is a way to compare a proposed clustering with some
-externally-known, "ground truth" clustering.
+In that case, what we need is a way to compare a proposed clustering, $C$, with $T$.
 
-The Rand Index is a __similarity measure__ for __clusterings.__   We can use it
-to compare two clusterings.
+The _Rand Index_ counts:
 
-Or, if we are testing an algorithm on data for which we know ground truth, we can use it to assess the algorithm's accuracy.
+- the number of pairs of points that are in the same cluster in both $T$ and $C$, and
+- the number of pairs of points that are in different clusters in both $T$ and $C$.
+
+normalized by the combinatoric number of pairs of points, $n \choose 2$.
 
 ## Defining the Rand Index
 
-Each item in our dataset is assumed to have two labelings, one for each clustering.
+Let's proceed by way of example.
 
-For example, we could have a ground truth label assignment $T$ and a comparison clustering $C$. 
+We'll create another synthetic dataset of 3 clusters, so we have ground truth
+labels $T$.
 
 ```{python}
-X_rand, y_rand = sk_data.make_blobs(n_samples=[100, 250, 150], centers = [[1, 2],[1.5, 3], [2, 4]], n_features = 2,
-                          center_box = (-10.0, 10.0), cluster_std = [.2, .3, .2], random_state = 0)
+X_rand, y_rand = sk_data.make_blobs(n_samples=[100, 250, 150], 
+                                    centers = [[1, 2],[1.5, 3], [2, 4]], 
+                                    n_features = 2,
+                                    center_box = (-10.0, 10.0), 
+                                    cluster_std = [.2, .3, .2], 
+                                    random_state = 0)
 df_rand_gt = pd.DataFrame(np.column_stack([X_rand[:, 0], X_rand[:, 1], y_rand]), columns = ['X', 'Y', 'label'])
 df_rand_clust = df_rand_gt.copy()
-kmeans = KMeans(init = 'k-means++', n_clusters = 3, n_init = 100)
+kmeans = KMeans(init = 'k-means++', n_clusters = 3, n_init = 100, random_state=0)
 df_rand_clust['label'] = kmeans.fit_predict(df_rand_gt[['X', 'Y']])
 ```
 
+We then run $k$-meaans with 3 clusters to on the datasets to get labels $C$ and plot the results:
+
 ```{python}
 figs, axs = plt.subplots(1, 2, figsize = (12, 5))
-df_rand_gt.plot('X', 'Y', kind = 'scatter', c = 'label', colormap='viridis', ax = axs[0],
-                   colorbar = False)
+df_rand_gt.plot('X', 'Y', 
+                kind = 'scatter', 
+                c = 'label', 
+                colormap='viridis', 
+                ax = axs[0],
+                colorbar = False)
 axs[0].set_title('Ground Truth (T)')
 axs[0].set_axis_off()
-df_rand_clust.plot('X', 'Y', kind = 'scatter', c = 'label', colormap='viridis', ax = axs[1],
-                  colorbar = False)
+
+df_rand_clust.plot('X', 'Y', 
+                    kind = 'scatter', 
+                    c = 'label', 
+                    colormap='viridis', 
+                    ax = axs[1],
+                    colorbar = False)
 axs[1].set_title('Clustering (C)')
 axs[1].set_axis_off();
 ```
 
-Intuitively, the idea behind Rand Index is to consider __pairs__ of points, and ask whether pairs that fall into the same cluster in $T$ also fall into the same cluster in $C$.
+## Rand Index Defined
 
 Specifically:
 
-Let $a$ be the number of pairs that have the same label in $T$ and the same label in $C$. 
+::: {.incremental}
+- Let $a$ be the number of pairs that have the same label in $T$ and the same label in $C$. 
+- Let $b$ be: the number of pairs that have different labels in $T$ and different labels in $C$. 
+:::
 
-Let $b$ be: the number of pairs that have different labels in $T$ and different labels in $C$. 
-
+:::: {.fragment}
 Then the Rand Index is: 
 
 $$
 \text{RI}(T,C) = \frac{a+b}{n \choose 2}
 $$
 
+::::
+
+:::: {.fragment}
 How do we know whether a particular Rand Index (RI) score is significant?
 
 We might compare it to the RI for a __random__ assignment of points to labels.
 
 This leads to the __Adjusted Rand Index.__
+::::
 
 ## Definition of Adjusted Rand Index
 
-To "calibrate" the Rand Index this way, we use the expected Rand Index of random labelings, denoted $E[\text{RI}]$.   
+To "calibrate" the Rand Index this way, we use the expected Rand Index of random labelings,
+denoted $E[\text{RI}]$.   
 
 The Expected Rand Index considers $C$ to be a clustering that has the same cluster sizes as $T$, but labels are assigned at random.
 
+:::: {.fragment}
 Using that, we define the adjusted Rand index as a simple __rescaling__ of RI:
 
-\begin{equation}
+$$
 \text{ARI} = \frac{\text{RI} - E[\text{RI}]}{\max(\text{RI}) - E[\text{RI}]}
-\end{equation}
+$$
 
 The computation of the $E[\text{RI}]$ and the $\max(\text{RI})$ are simple combinatorics (we'll omit the derivation).
+::::
 
----
+## Rand Index Example
 
-__Example.__
-
-Let's consider again our 3-cluster dataset with known labels `y`.
-
+:::: {.columns}
+::: {.column width="40%"}
 ```{python}
-sns.heatmap(rX, xticklabels = False, yticklabels = False, linewidths = 0);
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(4, 3))  # Adjust the width and height as needed
+sns.heatmap(X, xticklabels = False, yticklabels = False, linewidths = 0);
+plt.show()
 ```
+:::
+::: {.column width="60%"}
+Let's consider again our 3-cluster dataset with known labels `y`.
+:::
+::::
+
 
 Here is the adjusted Rand Index, when using $k$-means to cluster this dataset for 1 to 10 clusters:
 
@@ -359,13 +619,20 @@ Recall that the $k$-means objective can be considered the clustering "error".
 
 If the error stops going down, that would suggest that the clustering is not improving as the number of clusters is increased.
 
+Let's calculate the error for 1-11 clusters.
+
 ```{python}
+#| code-fold: false
 error = np.zeros(11)
 for k in range(1,11):
     kmeans = KMeans(init='k-means++', n_clusters = k, n_init = 10)
     kmeans.fit_predict(X)
     error[k] = kmeans.inertia_
 ```
+
+::: {.content-visible when-profile="slides"}
+## Inspecting Clustering Error
+:::
 
 For our synthetic data, here is the $k$-means objective, as a function of $k$:
 
@@ -376,11 +643,16 @@ plt.title(r'$k$-means clustering performance of synthetic data')
 plt.ylabel('Error');
 ```
 
-__Warning__: This synthetic data is not at all typical.   You will almost never see such a sharp change in the error function as we see here.
+::: {.callout-warning}
+This synthetic data is not at all typical.   You will almost never see such a sharp change in the error function as we see here.
+:::
 
-Let's create a function for later use.
+---
+
+Let's create a function to evaluate clusters for later use.
 
 ```{python}
+#| code-fold: false
 def evaluate_clusters(X,max_clusters):
     error = np.zeros(max_clusters+1)
     error[0] = 0;
@@ -393,35 +665,65 @@ def evaluate_clusters(X,max_clusters):
 
 ## Silhouette Coefficient
 
-Of course, normally, the ground truth labels are not known.
+Usually, the ground truth labels are not known.
 
-In that case, evaluation must be performed using the model itself. |
+:::: {.fragment}
+In that case, evaluation must be performed using the model itself.
+::::
 
+:::: {.fragment}
 Recall our definition of clustering: 
+::::
 
-> a grouping of data objects, such that the objects within a group are similar (or near) to one another and dissimilar (or far) from the objects in other groups.
+:::: {.fragment}
+> a grouping of data objects, such that the objects within a group are similar (or near) to one another and dissimilar
+> (or far) from the objects in other groups.
+::::
 
-This suggests a metric that could evaluate a clustering: comparing the distances between points within a cluster, to the distances between points in different clusters.
+:::: {.fragment}
+This suggests a metric that could evaluate a clustering: comparing the distances between points within a cluster, to the
+distances between points in different clusters.
+::::
 
-The Silhouette Coefficient is an example of such an evaluation, where a higher Silhouette Coefficient score relates to a model with "better defined" clusters. 
+::: {.content-visible when-profile="slides"}
+## Silhouette Coefficient
+:::
 
-(__`sklearn.metrics.silhouette_score`__)
+The Silhouette Coefficient is an example of such an evaluation, where a higher Silhouette Coefficient score relates to a
+model with "better defined" clusters. 
 
-Let $a$ be the mean distance between a data point and all other points in the same cluster.
+We'll use [`sklearn.metrics.silhouette_score`](https://scikit-learn.org/stable/modules/clustering.html#silhouette-coefficient)
 
-Let $b$ be the mean distance between a data point and all other points in the next nearest cluster. 
+::: {.incremental}
+- Let $a$ be the mean distance between a data point and all other points in the same cluster.
+- Let $b$ be the mean distance between a data point and all other points in the next nearest cluster. 
+:::
 
-Then the 
-**Silhouette Coefficient** for a clustering is:
+
+:::: {.fragment}
+Then the **Silhouette Coefficient** for a clustering is:
 
 $$ 
 s = \frac{b-a}{\max(a, b)} 
 $$
+::::
+
+::: {.content-visible when-profile="slides"}
+## Silhouette Coefficient
+:::
+
+We can calcute the Silhouette Score for our synthetic data:
 
 ```{python}
 sc = metrics.silhouette_score(X, labels, metric='euclidean')
-print(sc)
+print('Silhouette Score:', sc)
 ```
+
+::: {.content-visible when-profile="slides"}
+## Silhouette Coefficient
+:::
+
+We can also evaluate it for 2-10 clusters and plot the results:
 
 ```{python}
 def sc_evaluate_clusters(X, max_clusters, n_init, seed):
@@ -441,15 +743,19 @@ plt.title('$k$-means clustering performance on synthetic data')
 plt.ylabel('Silhouette Score');
 ```
 
+:::: {.fragment}
 Again, these results are more perfect than typical. 
 
 But the general idea is to look for a local maximum in the Silhouette Coefficient as the potential number of clusters.
+::::
+
+# Real Data Clustering Example
 
 ## Taking the Training Wheels Off: Real Data
 
-As a "real world" example, we'll use the "20 Newsgroup" data provided as example data in sklearn.
-
-(http://scikit-learn.org/stable/datasets/twenty_newsgroups.html).
+As a classic "real world" example, we'll use the 
+["20 Newsgroup" data](https://scikit-learn.org/stable/datasets/real_world.html#the-20-newsgroups-text-dataset)
+provided as example data in scikit-learn.
 
 ```{python}
 from sklearn.datasets import fetch_20newsgroups
@@ -620,7 +926,7 @@ dum = sns.heatmap(clustered_dists, xticklabels=False, yticklabels=False, linewid
 
 Let's visualize with MDS.   Note that MDS is a slow algorithm and we can't do all 1700+ data points quickly, so we will take a random sample.
 
-```{python}
+```{.python}
 import random
 n_items = euclidean_dists.shape[0]
 subset = random.sample(range(n_items),500)
@@ -629,11 +935,11 @@ fit = mds.fit(euclidean_dists[subset][:,subset])
 pos = fit.embedding_
 ```
 
-```{python}
+```{.python}
 labels
 ```
 
-```{python}
+```{.python}
 cols = [['y', 'b', 'g', 'r', 'c'][l] for l in labels[subset]]
 plt.scatter(pos[:, 0], pos[:, 1], s = 12, c = cols)
 plt.title('MDS Embedding of Newsgroup Articles');
