@@ -502,7 +502,7 @@ kmeans = KMeans(init = 'k-means++', n_clusters = 3, n_init = 100, random_state=0
 df_rand_clust['label'] = kmeans.fit_predict(df_rand_gt[['X', 'Y']])
 ```
 
-We then run $k$-meaans with 3 clusters to on the datasets to get labels $C$ and plot the results:
+We then run $k$-means with 3 clusters to on the datasets to get labels $C$ and plot the results:
 
 ```{python}
 figs, axs = plt.subplots(1, 2, figsize = (12, 5))
@@ -757,72 +757,95 @@ As a classic "real world" example, we'll use the
 ["20 Newsgroup" data](https://scikit-learn.org/stable/datasets/real_world.html#the-20-newsgroups-text-dataset)
 provided as example data in scikit-learn.
 
+We borrow code from this sklearn
+[example](https://scikit-learn.org/stable/auto_examples/text/plot_document_clustering.html).
+
+Let's load the data and count the number of documents and categories.
+
 ```{python}
 from sklearn.datasets import fetch_20newsgroups
 
-"""
-categories = [
- 'comp.windows.x',
- 'misc.forsale',
- 'rec.autos',
- 'rec.motorcycles',
- 'rec.sport.baseball',
- 'rec.sport.hockey',
- 'talk.religion.misc',
- 'comp.graphics',
- 'sci.space',
- 'rec.autos',
- 'rec.sport.baseball'
-]
-"""
+# just use the following categories
 categories = ['comp.os.ms-windows.misc', 'sci.space', 'rec.sport.baseball']
-news_data = fetch_20newsgroups(subset = 'train', categories = categories)
-print(news_data.target, len(news_data.target))
-print(news_data.target_names)
+
+news_data = fetch_20newsgroups(
+    remove = ('headers', 'footers', 'quotes'),
+    subset = 'train', 
+    categories = categories,
+    shuffle = True,
+    random_state = 42)
+
+labels = news_data.target
+unique_labels, category_sizes = np.unique(labels, return_counts=True)
+true_k = unique_labels.shape[0]
+
+print(f"{len(news_data.data)} documents - {true_k} categories")
 ```
+---
+
+Here is an example of one of the documents:
 
 ```{python}
-news_data.data[0]
+print(news_data.data[0])
 ```
 
 ## Feature Extraction
 
 We've discussed a bit the challenges of feature engineering.   
 
-One of the most basic issues concerns how to encode categorical or text data in a form usable by algorithms that expect numeric input.
+One of the most basic issues concerns how to encode categorical or text data in a form usable by algorithms that expect
+numeric input.
 
-The starting point is to note that one can encode a set using a binary vector with one component for each potential set member.  
+The starting point is to note that one can encode a set using a binary vector with one component for each potential set
+member.  
 
-The so-called _bag of words_ encoding for a document is to treat the document as a **multi**set of words.
+---
 
-That is, we simply count how many times each word occurs.   It is a "bag" because all the order of the words in the document is lost.
+The so-called _bag of words_ encoding for a document is to treat the document as a multiset of words.
+
+::: aside
+A _multiset_ is like a set but allows for multiple instances of each element.
+:::
+
+That is, we simply count how many times each word occurs.   It is a "bag" because all the order of the words in the
+document is lost.
 
 Surprisingly, we can still tell a lot about the document even without knowing its word ordering.
 
+---
+
 Counting the number of times each word occurs in a document yields a vector of __term frequencies.__
 
-However, simply using the "bag of words" directly has a number of drawbacks.   First of all, large documents will have more words than small documents.   
+However, simply using the "bag of words" directly has a number of drawbacks.   First of all, large documents will have
+more words than small documents.   
 
 Hence it often makes sense to normalize the frequency vectors.
 
 $\ell_1$ or $\ell_2$ normalization are common.
 
+---
+
 Next, as noted in __scikit-learn__:
 
->In a large text corpus, some words will be very [frequent] (e.g. “the”, “a”, “is” in English) hence carrying very little meaningful information about the actual contents of the document. 
-
->If we were to feed the direct count data directly to a classifier those very frequent terms would shadow the frequencies of rarer yet more interesting terms.
-
-
->In order to re-weight the count features into floating point values suitable for usage by a classifier it is very common to use the tf–idf transform.
-
+> In a large text corpus, some words will be very [frequent] (e.g. “the”, “a”, “is” in English) hence carrying very
+> little meaningful information about the actual contents of the document. 
+>
+> If we were to feed the direct count data directly to a classifier those very frequent terms would overshadow the
+> frequencies of rarer yet more interesting terms.
+>
+> In order to re-weight the count features into floating point values suitable for usage by a classifier it is very
+> common to use the **tf–idf transform.**
+>
 >__Tf__ means __term-frequency__ while __tf–idf__ means __term-frequency times inverse document-frequency.__
-
->This is a originally a term weighting scheme developed for information retrieval (as a ranking function for search engines results), that has also found good use in document classification and clustering.
+>
+>This is a originally a term weighting scheme developed for information retrieval (as a ranking function for search
+> engines results), that has also found good use in document classification and clustering.
 
 The idea is that rare words are more informative than common words.  
 
 (This has connections to information theory).
+
+---
 
 Hence, the definition of tf-idf is as follows.
 
@@ -855,11 +878,12 @@ data = vectorizer.fit_transform(news_data.data)
 ## Getting to know the Data
 
 ```{python}
-print(type(data), data.shape)
+print(f'The datas type is {type(data)} and the shape is {data.shape}')
 ```
+For what it's worth we can look at the data feature matrix:
 
 ```{python}
-fig, ax1 = plt.subplots(1,1,figsize=(15,10))
+fig, ax1 = plt.subplots(1,1,figsize=(8,4))
 dum = sns.heatmap(data[1:100,1:200].todense(), xticklabels=False, yticklabels=False, 
             linewidths=0, cbar=False, ax=ax1)
 ```
@@ -871,6 +895,8 @@ print(news_data.target_names)
 
 ## Selecting the Number of Clusters
 
+Now let's look at the different cluster measures versus number of clusters.
+
 ```{python}
 error = evaluate_clusters(data, 10)
 plt.plot(range(1, len(error)), error[1:])
@@ -879,6 +905,8 @@ plt.xlabel('Number of clusters')
 plt.ylabel('Error');
 ```
 
+---
+
 ```{python}
 ri = ri_evaluate_clusters(data, 10, news_data.target)
 plt.plot(range(1, len(ri)), ri[1:], 'o-')
@@ -886,6 +914,8 @@ plt.xlabel('Number of clusters')
 plt.title('$k$-means Clustering Compared to Known Labels\nNewsgroup Articles')
 plt.ylabel('Adjusted Rand Index');
 ```
+
+---
 
 ```{python}
 s = sc_evaluate_clusters(data, 10, 100, 3)
@@ -897,14 +927,17 @@ plt.ylabel('Silhouette Score');
 
 ## Looking into the clusters
 
+Run $k$-means with 4 clusters:
+
 ```{python}
 k = 4
 kmeans = KMeans(n_clusters = k, init = 'k-means++', max_iter = 100, n_init = 25, random_state = 3)
 kmeans.fit_predict(data)
 ```
 
+Find the top 10 terms per cluster:
+
 ```{python}
-print('Top terms per cluster:')
 asc_order_centroids = kmeans.cluster_centers_.argsort()#[:, ::-1]
 order_centroids = asc_order_centroids[:,::-1]
 terms = vectorizer.get_feature_names_out()
@@ -915,18 +948,27 @@ for i in range(k):
     print('')
 ```
 
+## Pairwise Distances Matrix
+
+Let's calculate the pairwise distances matrix.
+
 ```{python}
 euclidean_dists = metrics.euclidean_distances(data)
 labels = kmeans.labels_
 idx = np.argsort(labels)
 clustered_dists = euclidean_dists[idx][:,idx]
-fig, ax1 = plt.subplots(1,1,figsize=(15,15))
+fig, ax1 = plt.subplots(1,1,figsize=(6,6))
 dum = sns.heatmap(clustered_dists, xticklabels=False, yticklabels=False, linewidths=0, square=True,cbar=False, ax=ax1)
 ```
 
-Let's visualize with MDS.   Note that MDS is a slow algorithm and we can't do all 1700+ data points quickly, so we will take a random sample.
+## MDS Embedding
 
-```{.python}
+Let's visualize with MDS.   
+
+Note that MDS is a slow algorithm and we can't do all 1700+ data points quickly, so we will
+take a random sample.
+
+```{python}
 import random
 n_items = euclidean_dists.shape[0]
 subset = random.sample(range(n_items),500)
@@ -935,13 +977,31 @@ fit = mds.fit(euclidean_dists[subset][:,subset])
 pos = fit.embedding_
 ```
 
-```{.python}
+We have the labels:
+
+```{python}
 labels
 ```
 
-```{.python}
+## MDS Embedding
+
+```{python}
 cols = [['y', 'b', 'g', 'r', 'c'][l] for l in labels[subset]]
 plt.scatter(pos[:, 0], pos[:, 1], s = 12, c = cols)
 plt.title('MDS Embedding of Newsgroup Articles');
 ```
 
+## Recap and Next
+
+We've covered
+
+* How clustering is used in practice
+* Tools for evaluating the quality of a clustering
+* Tools for assigning meaning or labels to a cluster
+* Important visualizations
+* A little bit about feature extraction for text
+
+Next time, we'll look at 
+
+* Hierarchical clustering
+* Gaussian mixture models
