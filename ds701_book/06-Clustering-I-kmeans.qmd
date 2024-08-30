@@ -911,7 +911,7 @@ Today we covered:
 
 * $k$-means clustering
 * strengths and weaknesses
-* Importance of initialization and cluster numberr
+* Importance of initialization and cluster number
 * Feature scaling
 * Example application
 

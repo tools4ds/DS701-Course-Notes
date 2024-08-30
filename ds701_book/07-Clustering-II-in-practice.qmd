@@ -209,7 +209,7 @@ Note that there are two forms of MDS:
 
 ::: {.fragment}
 Also note that MDS may not always work well if, for example the dissimilarities
-are not well modeled by a metric like euclidean distance
+are not well modeled by a metric like Euclidean distance
 :::
 
 ## MDS Visualization Result
@@ -359,7 +359,7 @@ Here again, you can see the inter-cluster sample distances are small.
 How do we know whether the clusters we get represent "real" structure in our data?
 
 :::: {.fragment}
-Consider a dataset of 100 points _uniformly distirbuted_ in the unit square.
+Consider a dataset of 100 points _uniformly distributed_ in the unit square.
 
 ```{python}
 import pandas as pd
@@ -531,7 +531,7 @@ Specifically:
 
 ::: {.incremental}
 - Let $a$ be the number of pairs that have the same label in $T$ and the same label in $C$. 
-- Let $b$ be: the number of pairs that have different labels in $T$ and different labels in $C$. 
+- Let $b$ be the number of pairs that have different labels in $T$ and different labels in $C$. 
 :::
 
 :::: {.fragment}
@@ -644,7 +644,7 @@ plt.ylabel('Error');
 ```
 
 ::: {.callout-warning}
-This synthetic data is not at all typical.   You will almost never see such a sharp change in the error function as we see here.
+This synthetic data is not at all typical. You will almost never see such a sharp change in the error function as we see here.
 :::
 
 ---
@@ -807,7 +807,7 @@ The so-called _bag of words_ encoding for a document is to treat the document as
 A _multiset_ is like a set but allows for multiple instances of each element.
 :::
 
-That is, we simply count how many times each word occurs.   It is a "bag" because all the order of the words in the
+That is, we simply count how many times each word occurs. It is a "bag" because all the order of the words in the
 document is lost.
 
 Surprisingly, we can still tell a lot about the document even without knowing its word ordering.
@@ -816,7 +816,7 @@ Surprisingly, we can still tell a lot about the document even without knowing it
 
 Counting the number of times each word occurs in a document yields a vector of __term frequencies.__
 
-However, simply using the "bag of words" directly has a number of drawbacks.   First of all, large documents will have
+However, simply using the "bag of words" directly has a number of drawbacks. First of all, large documents will have
 more words than small documents.   
 
 Hence it often makes sense to normalize the frequency vectors.
