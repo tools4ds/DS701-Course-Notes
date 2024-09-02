@@ -95,9 +95,12 @@ quarto render 05-Distances-Timeseries.qmd --profile slides
 ## Creating Jupyter Notebooks
 
 To create Jupyter notebook versions of each of the lecture
-notes, run `./cmd-cnvt-jupyter.sh` from the `ds701_book`
-folder. It renders the Jupyter notebooks into the `_jupyter` folder which is
-listed in `.gitignore` and shouldn't be checked into the repo.
+notes, run `./cmd-cnvt-to-jupyter.sh` from the `ds701_book`
+folder. It renders the Jupyter notebooks into the `jupyter_notebooks` folder
+if the associated .qmd file has been modified.
+
+> Whenever you change in any `.qmd` file that has python in it, re-run
+> `./cmd-cnvt-to-jupyter.sh` and commit `jupyter_notebooks`.
 
 ## (deprecated) Rendering the Book
 

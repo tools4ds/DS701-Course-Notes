@@ -1,0 +1,124 @@
+---
+title: Introduction to Clustering
+---
+
+## Introduction to Clustering
+
+For the next four lectures, we'll be looking at clustering -- namely $k$-means
+clustering and hierarchical clustering as well as Gaussian Mixture Models which
+is a probabilistic approach to clustering.
+
+We'll also look at evaluation approaches for clustering.
+
+
+## Overview of K-Means Clustering
+
+K-means is one of the most popular and widely used clustering algorithms. Here's a brief overview:
+
+- **Objective**: Partition n observations into k clusters, where each observation belongs to the cluster with the nearest mean (centroid).
+
+- **Key Concept**: Minimize the within-cluster sum of squares (WCSS).
+
+- **Algorithm Steps**:
+  1. Initialize k centroids randomly
+  2. Assign each data point to the nearest centroid
+  3. Recalculate centroids based on assigned points
+  4. Repeat steps 2-3 until convergence
+
+- **Advantages**:
+  - Simple and fast for large datasets
+  - Guaranteed to converge
+
+- **Limitations**:
+  - Requires specifying k in advance
+  - Sensitive to initial centroid placement
+  - Assumes spherical cluster shapes
+
+K-means is particularly effective for datasets with well-separated, roughly spherical clusters of similar sizes.
+
+
+## Overview of Hierarchical Clustering
+
+Hierarchical clustering is another popular clustering method that builds a hierarchy of clusters. Here's a brief overview:
+
+- **Objective**: Create a tree-like structure of clusters, allowing for multiple levels of granularity.
+
+- **Key Concept**: Iteratively merge (agglomerative) or split (divisive) clusters based on similarity.
+
+- **Types**:
+  1. Agglomerative (bottom-up): Start with individual points and merge
+  2. Divisive (top-down): Start with one cluster and divide
+
+- **Algorithm Steps** (for agglomerative):
+  1. Treat each data point as a single cluster
+  2. Compute pairwise distances between clusters
+  3. Merge the closest pair of clusters
+  4. Repeat steps 2-3 until only one cluster remains
+
+- **Advantages**:
+  - No need to specify number of clusters in advance
+  - Produces a dendrogram for easy visualization
+  - Can uncover hierarchical relationships in data
+
+- **Limitations**:
+  - Can be computationally expensive for large datasets
+  - Sensitive to noise and outliers
+  - Difficult to determine where to "cut" the dendrogram
+
+Hierarchical clustering is particularly useful when the underlying structure of the data is hierarchical or when you want to explore different levels of clustering granularity.
+
+
+## Overview of Gaussian Mixture Models (GMM)
+
+Gaussian Mixture Models are a probabilistic model-based clustering method. Here's a brief overview:
+
+- **Objective**: Model the data as a mixture of Gaussian distributions.
+
+- **Key Concept**: Assume data points are generated from a mixture of a finite number of Gaussian distributions with unknown parameters.
+
+- **Algorithm Steps**:
+  1. Initialize parameters (means, covariances, and mixing coefficients)
+  2. Expectation step: Compute the probability of each point belonging to each Gaussian
+  3. Maximization step: Update parameters based on these probabilities
+  4. Repeat steps 2-3 until convergence (EM algorithm)
+
+- **Advantages**:
+  - Flexible, can model clusters of different shapes and sizes
+  - Provides probabilistic cluster assignments
+  - Can be used for density estimation
+
+- **Limitations**:
+  - Sensitive to initialization
+  - May converge to local optima
+  - Requires specifying number of components (clusters) in advance
+
+GMMs are particularly useful when dealing with continuous data and when you expect the underlying distributions to be Gaussian-like.
+
+
+## Overview of Clustering Evaluation Techniques
+
+Evaluating the quality of clustering results is crucial. Here are some common techniques:
+
+- **Internal Evaluation Metrics**:
+  1. Silhouette Score: Measures how similar an object is to its own cluster compared to other clusters
+  2. Calinski-Harabasz Index: Ratio of between-cluster dispersion to within-cluster dispersion
+  3. Davies-Bouldin Index: Ratio of within-cluster distances to between-cluster distances
+
+- **External Evaluation Metrics** (when true labels are known):
+  1. Adjusted Rand Index (ARI): Measures similarity between two clusterings
+  2. Normalized Mutual Information (NMI): Quantifies the mutual dependence between the clustering and true labels
+  3. Purity: Proportion of the majority class in each cluster
+
+- **Visual Inspection**:
+  - Scatter plots or dimensionality reduction techniques (e.g., PCA, t-SNE) for visualization
+  - Dendrograms for hierarchical clustering
+
+- **Elbow Method**:
+  - Plot the within-cluster sum of squares (WCSS) against the number of clusters
+  - Look for the "elbow" point where the rate of decrease sharply shifts
+
+- **Gap Statistic**:
+  - Compares the total within intra-cluster variation with their expected values under null reference distribution
+
+Remember, the choice of evaluation metric often depends on the specific clustering algorithm and the nature of your data.
+

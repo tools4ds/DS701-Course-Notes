@@ -4,9 +4,9 @@ jupyter: python3
 code-fold: false
 ---
 
-::: {.content-visible when-profile="web"}
-In this chapter we discuss the second of two important Python packages, Scikit-Learn (sklearn).
-:::
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/02C-Sklearn.ipynb)
+
+In this chapter we discuss another important Python package, Scikit-Learn (sklearn).
 
 ::: {.content-visible when-profile="slides"}
 ## Scikit-Learn

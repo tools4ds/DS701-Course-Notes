@@ -16,7 +16,10 @@ from IPython.display import Image, display_html, display, Math, HTML;
 
 # Victorian England
 
+
 ## 1854 Cholera Outbreak
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/06-Clustering-I-kmeans.ipynb)
 
 :::: {.columns }
 

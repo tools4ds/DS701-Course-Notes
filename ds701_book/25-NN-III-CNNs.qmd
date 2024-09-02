@@ -20,6 +20,8 @@ from IPython.display import Image, HTML
 
 ## Recap
 
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/25-NN-III-CNNs.ipynb)
+
 So far we covered
 * Gradients, gradient descent and back propagation
 * Fully connected neural networks (Multi-Layer Perceptron)

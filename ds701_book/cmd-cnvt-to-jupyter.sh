@@ -2,13 +2,11 @@
 
 qmd_files=(
   "01-Intro-to-Python.qmd"
-  "02A-Git.qmd"
   "02B-Pandas.qmd"
   "02C-Sklearn.qmd"
   "04-Linear-Algebra-Refresher.qmd"
   "03-Probability-and-Statistics-Refresher.qmd"
   "05-Distances-Timeseries.qmd"
-  "05A-Learning.qmd"
   "06-Clustering-I-kmeans.qmd"
   "07-Clustering-II-in-practice.qmd"
   "08-Clustering-III-hierarchical.qmd"
@@ -34,13 +32,22 @@ if [ ! -d "jupyter_notebooks" ]; then
   mkdir jupyter_notebooks
 fi
 
-# Convert all .qmd files to Jupyter notebooks and move to jupyter_notebooks directory
+# Convert .qmd files to Jupyter notebooks if they are newer than existing .ipynb files
 for file in "${qmd_files[@]}"; do
-  echo "Converting $file"
+  echo "  "
+  echo "Processing $file"
   
   if [ -f "$file" ]; then
-    quarto convert "$file"
-    mv "${file%.qmd}.ipynb" jupyter_notebooks/
+    qmd_file="$file"
+    ipynb_file="jupyter_notebooks/${file%.qmd}.ipynb"
+    
+    if [ ! -f "$ipynb_file" ] || [ "$qmd_file" -nt "$ipynb_file" ]; then
+      # echo "Converting $file"
+      quarto convert "$qmd_file"
+      mv "${qmd_file%.qmd}.ipynb" "$ipynb_file"
+    else
+      echo "Skipping $file (up to date)"
+    fi
   else
     echo "File not found: $file"
   fi

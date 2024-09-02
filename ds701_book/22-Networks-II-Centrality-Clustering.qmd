@@ -3,6 +3,8 @@ title: Network Centrality and Clustering
 jupyter: python3
 ---
 
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/22-Networks-II-Centrality-Clustering.ipynb)
+
 ```{python}
 #| hide_input: true
 #| slideshow: {slide_type: skip}

@@ -1,0 +1,23 @@
+---
+title: MDS and t-SNE
+---
+
+This is a placeholder for additional material on MDS and t-SNE
+
+Maybe talk about SVD, PCA, MDS and t-SNE all fit together.
+
+- [Scikit-Learn Manifold Learning](https://scikit-learn.org/stable/modules/manifold.html)
+
+## MDS
+
+- [sklearn MDS](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html#sklearn.manifold.MDS)
+- [sklearn SMACOF](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.smacof.html#sklearn.manifold.smacof)
+- https://en.wikipedia.org/wiki/Multidimensional_scaling
+- [Modern Multidimensional Scaling - Theory and Applications](https://link.springer.com/book/10.1007/0-387-28981-X)
+
+
+
+
+## t-SNE
+
+- t-SNE: The effect of various perplexity values on the shape

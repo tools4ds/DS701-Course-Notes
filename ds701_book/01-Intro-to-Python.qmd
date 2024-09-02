@@ -4,6 +4,8 @@ jupyter: python3
 code-fold: false
 ---
 
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/01-Intro-to-Python.ipynb)
+
 This chapter will not be covered in lecture. It's here to refresh the memory of those who haven't used Python in a while.
 
 For those that don't know Python -- but do know programming -- this chapter will give you an idea of how Python is similar to, and different from, your favorite programming language.
