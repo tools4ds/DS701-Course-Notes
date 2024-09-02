@@ -135,7 +135,7 @@ In general, we'll typically describe the rows in the dataframe as **items**
 df.columns
 ```
 
-Pandas allows you to reference column similar to a python dictionary key,
+Pandas allows you to reference a column similar to a python dictionary key,
 using column names in square brackets.
 
 ```{python}
