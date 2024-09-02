@@ -3,7 +3,7 @@ title: Welcome to DS701
 jupyter: python3
 ---
 
-## Course overview
+## Course overview {.center}
 
 Welcome to DS701 Tools for Data Science.
 
@@ -16,51 +16,97 @@ In this course you will:
 - work with a wide range of data analysis techniques
 ::::
 
-## Course overview
+## Professors {.center}
 
-There are two sections of this course:
+:::: {.columns}
+::: {.column width="45%"}
 
-:::: {.incremental}
-- A1 lecture - Tu,Th 9:30am - 10:45am, 665 Comm Ave CDS B62, Prof Thomas Gardos
-- A1 discussion - We 12:20pm - 1:10pm, 750 Comm Ave EPC 205
-- C1 lecture - Mo,We 4:40pm - 5:55pm, 595 Comm Ave HAR 324, Prof Scott Ladenheim
-- C2 discussion - Fr 10:00am - 11:00am 685-725 Comm Ave CAS 313
+**Prof Thomas Gardos** (Section A1)
+
+![](figs/people/gardos.jpg){width="150px"}
+
+* **Office Hours:** Thursday 11:00am - 12:00pm and by appointment
+* **Office Location:** CDS 1635
+* **Email:** tgardos &lt;at&gt; bu &lt;dot&gt; edu
+
+:::
+::: {.column width="45%"}
+
+**Prof Scott Ladenheim** (Section C1)
+
+![](figs/people/ladenheim.jpg){width="200px"}
+
+* **Office Hours:** We,Fr 11:00am - 12:00 pm
+* **Office Location:** CDS 1545
+* **Email:** saladenh &lt;at&gt; bu &lt;dot&gt; edu
+
+:::
 ::::
 
-## Professors
-
-Contact information:
-
-:::: {.incremental}
-* Prof Thomas Gardos
-    * Office Hours: TBD
-    * Office Location: CDS 1635
-    * Email: tgardos@bu.edu
-
-* Prof Scott Ladenheim
-    * Office Hours: We,Fr 11:00am - 12:00 pm
-    * Office Location: CDS 1545
-    * Email: saladenh@bu.edu
-::::
-
-## Teaching assistants
+## Teaching assistants {.center}
 
 We have the following teaching assistants:
 
-:::: {.fragment}
-* Name: TBD
-    * Office Hours: TBD
-    * Office Hours Location: CCDS TBD
-    * Email: name <at>\ bu <dot>\ edu
-* Name: TBD
-    * Office Hours: TBD
-    * Office Hours Location: CCDS TBD
-    * Email: name <at>\ bu <dot>\ edu
-* Name: TBD
-    * Office Hours: TBD
-    * Office Hours Location: CCDS TBD
-    * Email: name <at>\ bu <dot>\ edu
+:::: {.columns}
+::: {.column width="33%"}
+
+**Chandrahas Aroori**
+
+![](figs/people/chandrahas.jpeg){width="150px"}
+
+* **Office Hours:** Thu 11:00am - 12:00pm and by appointment
+* **Office Hours Location:** CCDS 1623
+* **Email:** charoori &lt;at&gt; bu &lt;dot&gt; edu
+
+:::
+::: {.column width="33%"}
+
+**Farid Karimli**
+
+![](figs/people/farid.jpeg){width="150px"}
+
+* **Office Hours:** TBD
+* **Office Hours Location:** CCDS TBD
+* **Email:** faridkar &lt;at&gt; bu &lt;dot&gt; edu
+
+:::
+::: {.column width="33%"}
+
+**Shreyas Venkatadhri**
+
+![](figs/people/shreyas.jpeg){width="150px"}
+
+* **Office Hours:** TBD
+* **Office Hours Location:** CCDS TBD
+* **Email:** shreyas9 &lt;at&gt; bu &lt;dot&gt; edu
+
+:::
 ::::
+
+
+## Course overview {.center}
+
+There are two sections of this course:
+
+:::: {.columns}
+::: {.column width="50%"}
+- **A1 lecture** (Prof Gardos)
+  - Tu,Th 9:30am -- 10:45am
+  - 665 Comm Ave CDS B62
+- **A2 discussion** (TAs)
+  - We 12:20pm -- 1:10pm
+  - 750 Comm Ave EPC 205
+:::
+::: {.column width="50%"}
+- **C1 lecture** (Prof Ladenheim)
+  - Mo,We 4:40pm - 5:55pm
+  - 595 Comm Ave HAR 324
+- **C2 discussion** (TAs)
+  - Fr 10:00am - 11:00am 
+  - 685-725 Comm Ave CAS 313
+:::
+::::
+
 
 ## Learning outcomes
 
@@ -120,7 +166,8 @@ The textbook used in the course is published at
 
 This online text will evolve as the course progresses, but we will work to keep it up-to-date.
 
-The slides used in the lecture are [Quarto](https://quarto.org/) RevealJS presentations. You can run the code demonstrated in lecture on your own. 
+The slides used in the lecture are [Quarto](https://quarto.org/) RevealJS presentations. You can run the code 
+demonstrated in lecture on your own. 
 
 Feel free to explore, experiment, and modify this code as you see fit.
 
@@ -132,9 +179,12 @@ The lecture slides and everything else used in lecture are published on github. 
 
 
 :::: {.notes}
-If you want to clone or fork the repository using git, please feel free. If you find a bug, feel free to submit a pull request. Some of the lectures are based on Introduction to Data Mining, by Tan, Steinbach and Kumar. This is a good place to go for more detail if some methodological aspect is not clear. 
+If you want to clone or fork the repository using git, please feel free. If you find a bug, feel free to submit a pull
+request. Some of the lectures are based on Introduction to Data Mining, by Tan, Steinbach and Kumar. This is a good 
+place to go for more detail if some methodological aspect is not clear. 
 
-For up-to-date reference on Pandas, scikit-learn, or any of the other software tools we use, there is no substitute for online resources. Google will quickly bring you to the authoritative (and current) references on software tools.
+For up-to-date reference on Pandas, scikit-learn, or any of the other software tools we use, there is no substitute for 
+online resources. Google will quickly bring you to the authoritative (and current) references on software tools.
 :::: 
 
 ## Tools and platforms
@@ -146,9 +196,9 @@ We will use:
 1. Gradescope for grading and grade management, and
 1. Kaggle for the midterm.
 
-You should already be signed up for Gradescope (if not, enroll using code TBD).
+You should already be signed up for Gradescope (if not, enroll using code sent via welcome email).
 
-You can add yourself to Piazza if you are not already enrolled.
+You can add yourself to Piazza if you are not already enrolled (again, use the code sent via welcome email).
 
 You will need an account on Github. Please tell us your Github user name on this form.
 
@@ -195,7 +245,7 @@ Assignments will be submitted using Github and Gradescope.
 
 Please review the instructions for submitting homeworks, on the Resources page of Piazza.
 
-> NOTE: IMPORTANT: Late assignments WILL NOT be accepted. However, you may submit one homework up to 3 days late. You must email TBD before the deadline if you intend to submit a homework late.
+> NOTE: IMPORTANT: Late assignments WILL NOT be accepted. However, you may submit one homework up to 3 days late. You must post a note to "Instructors" on Piazza before _the deadline_ if you intend to submit a homework late.
 
 :::: {.fragment}
 Final grades will be computed based on the following:
@@ -291,6 +341,27 @@ Spark! has partnered with DS701 to offer a diverse selection of external data sc
 Your project team will be led by one of the Spark! Project managers. Their role is to support the student team’s work plan, manage client communication and expectations, organize weekly and biweekly meetings, and to oversee project deliverable grading.
 
 Spark! projects are a great opportunity for students to get real-world project experience to highlight on their github and CV. 
+
+## Generative AI Assistance (GAIA) Policy
+
+In general, we follow the policy outlined in the
+[CDS GAIA Policy](https://www.bu.edu/cds-faculty/culture-community/gaia-policy/).
+
+In particular students shall:
+
+::: {.incremental}
+1. When using GenAI on _written_ assignments, **unless prohibited**, add an appendix  citing which model was used and prompts used.
+2. When using AI tools on _coding_ assignments, **unless prohibited**:
+    1. If generating several lines of code or entire functions, add the prompt text and tool used as comments before the generated code.
+    2. If auto-completing function syntax, no need to cite the tool, but add a comment at the top of the file citing tool used (e.g. "This file was written with help of Copilot")
+:::
+
+::: {.fragment .callout-note}
+For foundational concepts, as are taught in this course, it is in your
+best interest and worth it to struggle some in creating your answers and solutions. It is just as important
+to learn what doesn't work, and which paths are dead ends, as it is to learn what does work. 
+:::
+
 
 ## Academic honesty
 
