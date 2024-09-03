@@ -6,21 +6,17 @@ jupyter: python3
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/03-Probability-and-Statistics-Refresher.ipynb)
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [hide-cell]
-%matplotlib inline
-%config InlineBackend.figure_format='retina'
+#| echo: false
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from IPython.display import Image, display_html, display, Math, HTML;
 ```
 
-
-
+::: {.content-visible when-profile="web"}
 Today we'll review the essentials of probability and statistics that we'll need for this course.
+:::
+
 
 ## Probability
 
@@ -30,55 +26,88 @@ We all have a general sense of what is meant by probability.
 
 However, when we look closely, we see that there are at least two different ways to interpret the notion of "the probability of an event."
 
-The first view is summarized by this quote from the first pages of a probability textbook:
+These views are:
 
->Suppose an experiment under consideration can be repeated any number of times, so that, in principle at least, we can produce a whole series of “independent trials under identical conditions” in each of which, depending on chance, a particular event $A$ of interest either occurs or does not occur. 
+:::: {.incremental}
+- frequentist
+- Bayesian
+::::
 
+::: {.content-visible when-profile="slides"}
+## Frequentist interpretation
+:::
+The first view is summarized by this quote from the first pages of Y. A. Rozanov. Probability Theory: A Concise Course. Dover Publications, Inc., 1969.
+
+>Suppose an experiment under consideration can be repeated any number of times, so that, in principle at least, we can produce a whole series of “independent trials under identical conditions” in each of which, depending on chance, a particular event $A$ of interest either occurs or does not occur.
+> 
 >Let $n$ be the total number of experiments in the whole series of trials, and let $n(A)$ be the number of experiement in which $A$ occurs. Then the ratio $n(A)/n$ is called the relative frequency of the event $A.$ 
-
+>
 > It turns out that the relative frequencies observed in different series of trials are virtually the same for large $n,$ clustering about some constant $P[A],$ which is called the **probability of the event $A.$**
 
-Y. A. Rozanov. Probability Theory: A Concise Course. Dover Publications, Inc., 1969.
-
+::: {.content-visible when-profile="web"}
 This is called the **frequentist** intepretation of probability.
+:::
 
+::: {.content-visible when-profile="web"}
 You can think of it as treating each event as a sort of idealized coin-flip.
+:::
+
+::: {.content-visible when-profile="slides"}
+## Bayesian interpretation
+:::
 
 The key idea in the above definition is to be able to:
 
+:::: {.fragment}
 > produce a whole series of “independent trials under identical conditions” 
+::::
 
+:::: {.fragment}
 However, we often use probability in another setting.
 
 On a visit to the doctor, we may ask, "What is the probability that I have disease X?"
 
 Or, before digging a well, we may ask, "What is the probability that I will strike water?"
+::::
 
+:::: {.fragment}
 These questions are __totally incompatible__ with the notion of "independent trials under identical conditions"!
+::::
 
-Rather, it seems that we are really asking:
->"How certain should I be that I have disease X?" 
+:::: {.fragment}
+In this setting, we are using probability to encode "degree of belief" or a "state of knowledge." We are asking instead:
 
-> "How certain should I be that I will strike water?"
+:::: {.incremental}
+- "How certain should I be that I have disease X?" 
+- "How certain should I be that I will strike water?"
+::::
+::::
 
-In this setting, we are using probability to encode "degree of belief" or a "state of knowledge."
-
+::: {.content-visible when-profile="web"}
 This is called the __Bayesian__ interpretation of probability.
+:::
 
+::: {.content-visible when-profile="web"}
 > ... the probability emerging in the time of Pascal is essentially dual.
 > It has to do both with stable frequencies and with degrees of belief.
 > It is, as I shall put it, both aleatory and epistemological.
 > 
 > The Emergence of Probability, Ian Hacking, 2006
+:::
+
+::: {.content-visible when-profile="slides"}
+## Frequentist vs Bayes
+:::
 
 Somewhat amazingly, it turns out that whichever way we think of probability (frequentist or Bayesian),
 
-... the __rules__ that we use for computing probabilities should be __exactly the same.__
+... the __rules__ that we use for computing probabilities are __exactly the same.__
 
 In most cases in this course we will use frequentist language and examples when talking about probability.
 
-But in point of fact, it's often really a "state of knowledge" that we are really talking about when we use probability models in this course.
+However, it's often really a "state of knowledge" that we are really talking about when we use probability models in this course.
 
+::: {.content-visible when-profile="web"}
 > A thing appears random only through the incompleteness of our knowledge 
 
 -- Spinoza
@@ -86,16 +115,17 @@ But in point of fact, it's often really a "state of knowledge" that we are reall
 In other words, we use probability as an abstraction that __hides details__ we don't want to deal with.  
 
 (This is a time-honored use of probability.)
+:::
 
-So it's important to recognize that both frequentist and Bayesian views are __valid__ and __useful__ views of probability.
+It's important to recognize that both frequentist and Bayesian views are __valid__ and __useful__ views of probability.
 
-<center>
+::: {.content-visible when-profile="slides"}
+## Frequentist vs Bayes
+:::
 
-<img src="./figs/Bayes-Frequentism.png" width="500px">
+![](figs/Bayes-Frequentism.png){fig-align="center" width="30%"} 
 
-</center>
-
-
+::: {.content-visible when-profile="web"}
 So, now, let's talk about rules for computing probabilities.
 
 >Any simple idea is approximate; as an illustration, consider an object ... what is an object? Philosophers are always 
@@ -115,8 +145,25 @@ Here is an illustration of this principle applied to probability:
 >only probabilistic models have so far given good results.”
 
 Georges Matheron, _Estimating and Choosing: An Essay on Probability in Practice_
+:::
 
+::: {.content-visible when-profile="web"}
+### Events and Sample Space
+
+The sample space $\Omega$ may be continuous or discrete, and bounded or unbounded.
+:::
+
+::: {.content-visible when-profile="slides"}
+## Events and Sample Space
+:::
+
+::: {.content-visible when-profile="web"}
 ### Probability and Conditioning
+:::
+
+::: {.content-visible when-profile="slides"}
+## Probability Rules
+:::
 
 __Definition.__  Consider a set $\Omega$, referred to as the
 _sample space._  A _probability
@@ -128,12 +175,17 @@ _sample space._  A _probability
 3. For any events $A, B \subset \Omega$ where $A \cap B =
     \emptyset$, $P[A \cup B] = P[A] + P[B]$.
 
-
+::: {.content-visible when-profile="web"}
 Often we want to ask how a probability measure changes if we restrict the sample space to be some subset of $\Omega$.  
 
 This is called __conditioning.__
 
 __Here and throughout we need examples.__
+:::
+
+::: {.content-visible when-profile="slides"}
+## Conditional probability
+:::
 
 __Definition.__ The _conditional probability_ of an event $A$ given that
 event $B$ (having positive probability) is known to occur, is 
@@ -147,9 +199,109 @@ Note that in the expression $P[A|B]$, $A$ is random but $B$ is fixed.
 
 Now if $B$ is a proper subset of $\Omega,$ then $P[B] < 1$.   So $P[\cdot|B]$ is a rescaling of the quantity $P[A\cap B]$ so that $P[B|B] = 1.$ 
 
-The sample space $\Omega$ may be continuous or discrete, and bounded or unbounded.
+::: {.content-visible when-profile="web"}
+### Bayes' Rule
+:::
 
-__Independent Events.__
+::: {.content-visible when-profile="slides"}
+## Bayes' Rule
+:::
+
+Bayes' Rule is a simple way of manipulating conditional probabilities in a way that can be very useful.
+
+Start with a situation in which we are interested in two events, $A_1$ and $A_2$.  
+
+These are exhaustive, meaning that in any experiment either $A_1$ or $A_2$ must occur. (That is, they form a partition of $\Omega$.)
+
+Now, according to the rules of probability:
+
+$$ P[A_1|B] = \frac{P[A_1 \cap B]}{P[B]}$$
+
+$$ = \frac{P[A_1 \cap B]}{P[B|A_1] + P[B|A_2]}$$
+
+$$ = \frac{P[B|A_1]\,P[A_1]}{P[B|A_1] + P[B|A_2]}$$
+
+(This is easy to extend to the case where $A_1, A_2, ..., A_n$ form a partition of $\Omega$.)
+
+This formula is useful because often the probabilities $P[B|A_i]$ can be
+estimated, while the probabilties $P[A_i|B]$ may be hard to estimate.
+
+Or perhaps $P[B]$ itself (which is really the denominator) is easy to estimate.
+
+We interpret this transformation as updating our estimate of the probability of each $A_i$
+based on new information, namely, that $B$ is true.   
+
+This update
+transforms the __prior__ probabilities $P[A_i]$ into the 
+__posterior__ probabilities $P[A_i|B]$.
+
+__Example.__
+
+Empirical evidence suggests that amongs sets of twins,
+about 1/3 are identical.  
+
+Assume therefore that probability of a pair of
+twins being identical to be 1/3.  
+
+Now, consider how a couple might
+update this probability after they get an ultrasound that shows that the
+twins are of the same gender.   
+
+What is their new estimate of the
+probability that their twins are identical?
+
+Let $I$ be the event that the twins are identical.  Let $G$ be the event
+that gender is the same via ultrasound.  
+
+The prior probabilities here
+is $P[I]$.
+
+What we want to calculate is the
+posterior probability $P[I\,|\,G]$.
+
+First, we note:
+
+$$P[G\,|\,I] = 1 $$
+
+(Surprisingly, people are sometimes confused about that fact!)   
+
+Note that this conditional probability is easy to estimate.
+
+Also,
+we assume that if the twins are not identical, they are like any two
+siblings, _i.e.,_ their probability of being same gender is 1/2: 
+
+$$P[G\,|\,\bar{I}] = 1/2 $$
+
+Again, easy to estimate.
+
+And we know from observing the population at large that among all sets
+of twins, about 1/3 are identical:
+
+$$ P[I] = 1/3 $$
+
+Note that this statistic is easy to obtain from data.
+
+Then:
+
+$$ P[I\,|\,G] = \frac{P[G\,|\,I]\; P[I]}{P[G\,|\,I]\,P[I] + P[G\,|\,\bar{I}]\,P[\bar{I}]} $$
+
+$$ = \frac{1 \cdot 1/3}{(1 \cdot 1/3) + (1/2 \cdot 2/3)} = \frac{1}{2}$$
+
+So we have updated our estimate of the twins being identical from 1/3
+(prior probability) to 1/2 (posterior probability).
+
+We did this in a way that used quantities that were relatively easy to obtain or measure.
+
+
+
+::: {.content-visible when-profile="slides"}
+## Independent Events
+:::
+
+::: {.content-visible when-profile="web"}
+### Independent Events
+:::
 
 __Definition.__ Two events $A$ and $B$ are __independent__ if $P[A\cap B] = P[A] \cdot P[B].$
 
@@ -174,39 +326,36 @@ __Definition.__ The cumulative distribution function (CDF) F for a random
 
 __Example.__  Consider the roll of a single die.  The random variable here is the number of points showing.  What is the CDF?
 
-<img src="./figs/single-die.png" alt="Die" width="100px">
+![](/figs/single-die.png){fig-align="center" width=100px}
 
 ```{python}
-#| hide_input: true
-#| scrolled: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
-plt.figure()
+#| fig-align: center
+plt.figure(figsize=(5, 3))
 for i in range(7):
-    plt.plot([i, i+1-.08], [i/6, i/6],'-b')
+    plt.plot([i, i+1-.08], [i/6, i/6], '-b')
 for i in range(1, 7):
     plt.plot(i, i/6, 'ob')
-    plt.plot(i, (i-1)/6, 'ob', fillstyle = 'none')
+    plt.plot(i, (i-1)/6, 'ob', fillstyle='none')
 plt.xlim([0, 7])
 plt.ylim([-0.05, 1.1])
 plt.title('Cumulative Distribution Function (CDF)')
 plt.xlabel(r'$x$ (Number of points showing)', size=14)
-plt.ylabel(r'$P[X\leq x]$', size=14);
+plt.ylabel(r'$P[X\leq x]$', size=14)
+plt.show()
 ```
 
 Now, consider this CDF of some random variable:
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
+#| fig-align: center
 from scipy.stats import norm
-plt.figure()
+plt.figure(figsize=(5, 3))
 x = np.linspace(norm.ppf(0.001), norm.ppf(0.999), 100)
-plt.plot(x, norm.cdf(x),'b-', lw=5, alpha = 0.6)
+plt.plot(x, norm.cdf(x),'b-', lw=5, alpha=0.6)
 plt.title('Cumulative Distribution Function (CDF)')
 plt.xlabel(r'$x$', size=14)
-plt.ylabel(r'$P[X\leq x]$', size=14);
+plt.ylabel(r'$P[X\leq x]$', size=14)
+plt.show()
 ```
 
 What does it mean when the slope is steeper for some $x$ values?
@@ -221,15 +370,15 @@ $$ f(x) = \frac{dF(x)}{dx}.$$
 
 Often we will go the other way as well:
 
-$$ F(x) = \int_{-\infty}^{x} f(t)\; dt $$
+$$ F(x) = \int_{-\infty}^{x} f(t) dt. $$
 
 You should be able to see that:
 
-$$ \int_{-\infty}^{+\infty} f(x)\; dx = 1 $$
+$$ \int_{-\infty}^{+\infty} f(x) dx = 1$$
 
 and
 
-$$      f(x) \geq 0 $$
+$$ f(x) \geq 0.$$
 
 Now, for a discrete random variable, the CDF is not differentiable (because the CDF is a step function).  
 
@@ -242,17 +391,16 @@ points of discontinuity of the CDF.
 For our example of the single die:
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
-plt.figure()
+#| fig-align: center
+plt.figure(figsize=(5, 3))
 x = np.arange(1, 7)
 plt.plot(x, 6*[1/6.], 'bo', ms=8)
 plt.vlines(x, 0, 1/6., colors='b', lw=5, alpha=0.5)
 plt.xlim([0.5, 6.5])
 plt.ylim([0, 1.1])
 plt.xlabel(r'x (Number of points showing)', size=14)
-plt.ylabel(r'$P[X = x]$', size=14);
+plt.ylabel(r'$P[X = x]$', size=14)
+plt.show()
 ```
 
 ## Characterizing Random Variables
@@ -383,6 +531,37 @@ So:
 $$\rho(X,Y) = 0.137$$
 
 Apparently, not a big number!
+
+
+## Multivariate Random Variables
+
+A __multivariate random variable__ is a vector of random variables.
+
+We often simply say a "random vector".
+
+That is, 
+
+$$ \mathbf{X} = \left[\begin{array}{c}X_1 \\ X_2 \\ \vdots \\ X_n\end{array}\right] $$
+
+The expected value of a random vector is obtained by taking the expected value of each component random variable:
+    
+$$ E[\mathbf{X}] = \mathbf{\mu_X} = \left[\begin{array}{c}E[X_1] \\ E[X_2] \\ \vdots \\ E[X_n]\end{array}\right] $$
+
+To properly characterize the variability of a random vector, we need to specify all the covariances of pairs of components.
+
+We organize these values into a __covariance matrix:__
+
+$$ \text{Cov}[X] = \left[\begin{array}{cccc}
+\text{Var}[X_1] & \text{Cov}[X_1, X_2] & \dots & \text{Cov}[X_1, X_n]\\
+\text{Cov}[X_2, X_1] & \text{Var}[X_2] & \dots & \text{Cov}[X_2, X_n]\\
+\vdots & \vdots & \ddots & \vdots\\
+\text{Cov}[X_n,X_1] & \text{Cov}[X_n, X_2] & \dots & \text{Var}[X_n]\\
+\end{array}\right] $$
+
+A couple things to note about a covariance matrix.
+
+1. The covariance matrix is symmetric (because $\text{Cov}(X_i, X_j) = \text{Cov}(X_j, X_i)$)
+2. The covariance matrix is __positive semidefinite__.
 
 ## Low and High Variability
 
@@ -895,36 +1074,6 @@ of a series of Pareto observations with $\alpha \leq 1$ will never
 converge to a fixed value, and the mean itself is not a useful
 statistic in this case.
 
-### Multivariate Random Variables
-
-A __multivariate random variable__ is a vector of random variables.
-
-We often simply say a "random vector".
-
-That is, 
-
-$$ \mathbf{X} = \left[\begin{array}{c}X_1 \\ X_2 \\ \vdots \\ X_n\end{array}\right] $$
-
-The expected value of a random vector is obtained by taking the expected value of each component random variable:
-    
-$$ E[\mathbf{X}] = \mathbf{\mu_X} = \left[\begin{array}{c}E[X_1] \\ E[X_2] \\ \vdots \\ E[X_n]\end{array}\right] $$
-
-To properly characterize the variability of a random vector, we need to specify all the covariances of pairs of components.
-
-We organize these values into a __covariance matrix:__
-
-$$ \text{Cov}[X] = \left[\begin{array}{cccc}
-\text{Var}[X_1] & \text{Cov}[X_1, X_2] & \dots & \text{Cov}[X_1, X_n]\\
-\text{Cov}[X_2, X_1] & \text{Var}[X_2] & \dots & \text{Cov}[X_2, X_n]\\
-\vdots & \vdots & \ddots & \vdots\\
-\text{Cov}[X_n,X_1] & \text{Cov}[X_n, X_2] & \dots & \text{Var}[X_n]\\
-\end{array}\right] $$
-
-A couple things to note about a covariance matrix.
-
-1. The covariance matrix is symmetric (because $\text{Cov}(X_i, X_j) = \text{Cov}(X_j, X_i)$)
-2. The covariance matrix is __positive semidefinite__.
-
 ### Random Variables as Vectors
 
 When working with data, we will often treat multiple observations of some feature as samples of a random variable.
@@ -1138,95 +1287,7 @@ Recall that the correlation between these two stocks was about 0.137.
 
 That is, the stocks are positively correlated, but not highly so.
 
-### Bayes' Rule
-
-Bayes' Rule is a simple way of manipulating conditional probabilities in a way that can be very useful.
-
-Start with a situation in which we are interested in two events, $A_1$ and $A_2$.  
-
-These are exhaustive, meaning that in any experiment either $A_1$ or $A_2$ must occur.   (That is, they form a partition of $\Omega$.)
-
-Now, according to the rules of probability:
-
-$$ P[A_1|B] = \frac{P[A_1 \cap B]}{P[B]}$$
-
-$$ = \frac{P[A_1 \cap B]}{P[B|A_1] + P[B|A_2]}$$
-
-$$ = \frac{P[B|A_1]\,P[A_1]}{P[B|A_1] + P[B|A_2]}$$
-
-(This is easy to extend to the case where $A_1, A_2, ..., A_n$ form a partition of $\Omega$.)
-
-This formula is useful because often the probabilities $P[B|A_i]$ can be
-estimated, while the probabilties $P[A_i|B]$ may be hard to estimate.
-
-Or perhaps $P[B]$ itself (which is really the denominator) is easy to estimate.
-
-We interpret this transformation as updating our estimate of the probability of each $A_i$
-based on new information, namely, that $B$ is true.   
-
-This update
-transforms the __prior__ probabilities $P[A_i]$ into the 
-__posterior__ probabilities $P[A_i|B]$.
-
-__Example.__
-
-Empirical evidence suggests that amongs sets of twins,
-about 1/3 are identical.  
-
-Assume therefore that probability of a pair of
-twins being identical to be 1/3.  
-
-Now, consider how a couple might
-update this probability after they get an ultrasound that shows that the
-twins are of the same gender.   
-
-What is their new estimate of the
-probability that their twins are identical?
-
-Let $I$ be the event that the twins are identical.  Let $G$ be the event
-that gender is the same via ultrasound.  
-
-The prior probabilities here
-is $P[I]$.
-
-What we want to calculate is the
-posterior probability $P[I\,|\,G]$.
-
-First, we note:
-
-$$P[G\,|\,I] = 1 $$
-
-(Surprisingly, people are sometimes confused about that fact!)   
-
-Note that this conditional probability is easy to estimate.
-
-Also,
-we assume that if the twins are not identical, they are like any two
-siblings, _i.e.,_ their probability of being same gender is 1/2: 
-
-$$P[G\,|\,\bar{I}] = 1/2 $$
-
-Again, easy to estimate.
-
-And we know from observing the population at large that among all sets
-of twins, about 1/3 are identical:
-
-$$ P[I] = 1/3 $$
-
-Note that this statistic is easy to obtain from data.
-
-Then:
-
-$$ P[I\,|\,G] = \frac{P[G\,|\,I]\; P[I]}{P[G\,|\,I]\,P[I] + P[G\,|\,\bar{I}]\,P[\bar{I}]} $$
-
-$$ = \frac{1 \cdot 1/3}{(1 \cdot 1/3) + (1/2 \cdot 2/3)} = \frac{1}{2}$$
-
-So we have updated our estimate of the twins being identical from 1/3
-(prior probability) to 1/2 (posterior probability).
-
-We did this in a way that used quantities that were relatively easy to obtain or measure.
-
-### Confidence Intervals
+## Confidence Intervals
 
 Say you are concerned with some data that we take as coming from a random process.
 
@@ -1266,7 +1327,7 @@ data, which (by assumption) are random.
 
 ![](figs/confidence-intervals.png)
 
-### Confidence Intervals for the Mean
+## Confidence Intervals for the Mean
 
 Imagine we have a set of $n$ samples of a random variable,
 $x_1, x_2, ..., x_n$ Let's assume that the random variable has mean
