@@ -215,7 +215,7 @@ I encourage you to post your questions on Piazza.
 Our class Piazza page is at 
 
 ::: {.r-fit-text .center} 
-[https://piazza.com/class/lzrr7w98lca2vt](https://piazza.com/class/lzrr7w98lca2vt)
+[https://piazza.com/bu/fall2024/ds701](https://piazza.com/bu/fall2024/ds701)
 :::
 
 ## Piazza Etiquette
