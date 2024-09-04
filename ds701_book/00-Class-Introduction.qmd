@@ -362,6 +362,21 @@ best interest and worth it to struggle some in creating your answers and solutio
 to learn what doesn't work, and which paths are dead ends, as it is to learn what does work. 
 :::
 
+## DS701 AI Tutor
+
+In fact we're offering an experimental generative AI tutor tailored to this course's content.
+
+::: {layout-ncol=3}
+![AI Tutor Sign In](figs/ai-tutor-signin.png){width="200px"}
+
+![AI Tutor Start](figs/ai-tutor-start.png){width="200px"}
+
+![AI Tutor Chat Interface](figs/ai-tutor-chat-interface.png){width="600px"}
+:::
+
+* Try it: [https://tools4ds-ai-tutor.hf.space](https://tools4ds-ai-tutor.hf.space).
+* All DS701 Students are registered to use it
+* It is open source hosted at [https://github.com/tools4ds/ds701-tutor](https://github.com/tools4ds/ds701-tutor)
 
 ## Academic honesty
 
