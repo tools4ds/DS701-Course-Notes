@@ -521,9 +521,3 @@ To update the repository and download the **new material**, type
 ```{sh}
 $ git pull
 ```
-
-## Homework repositories
-
-Each assignment will have its own private repository on GitHub that we share with you.  
-
-The last commit time on the repo will be used as the submission time.
