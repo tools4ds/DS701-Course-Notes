@@ -54,7 +54,7 @@ We have the following teaching assistants:
 
 ![](figs/people/chandrahas.jpeg){width="150px"}
 
-* **Office Hours:** Thu 11:00am - 12:00pm and by appointment
+* **Office Hours:** Th 11:00am - 12:00pm and by appointment
 * **Office Hours Location:** CCDS 1623
 * **Email:** charoori &lt;at&gt; bu &lt;dot&gt; edu
 
@@ -65,8 +65,8 @@ We have the following teaching assistants:
 
 ![](figs/people/farid.jpeg){width="150px"}
 
-* **Office Hours:** TBD
-* **Office Hours Location:** CCDS TBD
+* **Office Hours:** Tu 11:00am - 12:00pm and by appointment
+* **Office Hours Location:** CCDS 15th floor, open desks on the west side.
 * **Email:** faridkar &lt;at&gt; bu &lt;dot&gt; edu
 
 :::
@@ -76,7 +76,7 @@ We have the following teaching assistants:
 
 ![](figs/people/shreyas.jpeg){width="150px"}
 
-* **Office Hours:** TBD
+* **Office Hours:** Wed 2:00pm - 3:00pm 
 * **Office Hours Location:** CCDS TBD
 * **Email:** shreyas9 &lt;at&gt; bu &lt;dot&gt; edu
 
