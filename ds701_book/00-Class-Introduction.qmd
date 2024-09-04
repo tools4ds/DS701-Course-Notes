@@ -72,7 +72,7 @@ We have the following teaching assistants:
 :::
 ::: {.column width="33%"}
 
-**Shreyas Venkatadhri**
+**Shreyas Sudarsan**
 
 ![](figs/people/shreyas.jpeg){width="150px"}
 
