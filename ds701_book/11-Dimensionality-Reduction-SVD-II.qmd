@@ -3,11 +3,12 @@ title: Dimensionality Reduction and PCA -- SVD II
 jupyter: python3
 ---
 
-::: {.content-visible when-profile="web"}
-In the last lecture we learned about the SVD as a tool for constructing low-rank matrices.
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/11-Dimensionality-Reduction-SVD-II.ipynb)
+
+In the last section we learned about the SVD as a tool for constructing low-rank matrices.
 
 Today we'll look at it as a way to transform our data objects.
-:::
+
 
 ::: {.content-visible when-profile="slides"}
 ## SVD

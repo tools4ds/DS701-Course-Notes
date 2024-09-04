@@ -11,6 +11,8 @@ However, let's look back and try to put the modeling we've done into a larger co
 
 ## Models are simplifications
 
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/10-Low-Rank-and-SVD.ipynb)
+
 One way of thinking about modeling or clustering is that we are building a __simplification__ of the data. 
 
 That is, a model is a description of the data, that is simpler than the data.

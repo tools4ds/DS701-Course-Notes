@@ -3,6 +3,8 @@ title: Distances and Timeseries
 jupyter: python3
 ---
 
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/05-Distances-Timeseries.ipynb)
+
 Today we will start building some tools for making comparisons of data objects, with particular attention to timeseries.
 
 Working with data, we can encounter a wide variety of different data objects:

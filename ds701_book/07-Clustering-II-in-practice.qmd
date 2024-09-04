@@ -5,6 +5,9 @@ jupyter: python3
 
 ## Clustering in Practice
 
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/07-Clustering-II-in-practice.ipynb)
+
+
 ...featuring $k$-means
 
 Today we'll do an extended example showing $k$-means clustering in practice and in the context of the python libraries

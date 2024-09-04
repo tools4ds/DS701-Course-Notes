@@ -6,6 +6,10 @@ code-fold: false
 
 ## Introduction
 
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/02B-Pandas.ipynb)
+
+In this chapter we discuss the first of two important Python packages, Pandas.
+
 In this lecture we discuss one of most useful Python packages for data 
 science -- Pandas.
 
