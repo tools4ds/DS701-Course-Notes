@@ -102,7 +102,7 @@ There are two sections of this course:
   - Mo,We 4:40pm - 5:55pm
   - 595 Comm Ave HAR 324
 - **C2 discussion** (TAs)
-  - Fr 10:00am - 11:00am 
+  - Fr 10:10am - 11:00am 
   - 685-725 Comm Ave CAS 313
 :::
 ::::
@@ -215,7 +215,7 @@ I encourage you to post your questions on Piazza.
 Our class Piazza page is at 
 
 ::: {.r-fit-text .center} 
-[https://piazza.com/class/lzrr7w98lca2vt](https://piazza.com/class/lzrr7w98lca2vt)
+[https://piazza.com/bu/fall2024/ds701](https://piazza.com/bu/fall2024/ds701)
 :::
 
 ## Piazza Etiquette
