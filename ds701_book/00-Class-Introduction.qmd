@@ -166,8 +166,13 @@ The textbook used in the course is published at
 
 This online text will evolve as the course progresses, but we will work to keep it up-to-date.
 
-The slides used in the lecture are [Quarto](https://quarto.org/) RevealJS presentations. You can run the code 
-demonstrated in lecture on your own. 
+The slides used in the lecture are [Quarto](https://quarto.org/) RevealJS presentations. Setup
+instructions are on the repo 
+[README](https://github.com/tools4ds/DS701-Course-Notes). 
+
+For lectures with python you'll see the badge 
+![](https://colab.research.google.com/assets/colab-badge.svg). If you click on
+the badge, it will open the Jupyter notebook version of the lecture in Google Colab. 
 
 Feel free to explore, experiment, and modify this code as you see fit.
 
@@ -276,19 +281,19 @@ Of the 40% of the project course grade, it is further weighted as the following
 ## Project Grading Details
 
 ::: {.incremental}
-* Project quality
+* Project quality (50%)
   * Did the project accomplish a sufficient number of (possibly revised) objectives?
   * Was the client relationship managed well?
-* Repo quality
+* Repo quality (10%)
   * Is the Github repository well organized and easy to navigate?
   * Is the repo well documented especially with replication steps?
   * Can one start from a new environment and easily setup and run?
-* Individual Contribution
+* Individual Contribution (30%)
   * Is there clear evidence of attendance and active participation in class lab time, client and team meetings?
   * Documented activities in sprint plan history?
   * Git commit history and co-authored git commits?
   * Record of individual's contributions in document and presentation revision history? 
-* Collaboration
+* Collaboration (10%)
   * Is there indication, for example from peer reviews, of positive collaborations and constructive teamwork?
 :::
 
