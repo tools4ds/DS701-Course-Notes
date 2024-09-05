@@ -261,6 +261,36 @@ Final grades will be computed based on the following:
 The exact cutoffs for final grades will be determined after the class is complete.
 ::::
 
+## Project Grading
+
+Of the 40% of the project course grade, it is further weighted as the following
+
+| Percentage | Category         | 
+| :--------: | :--------------: | 
+| 50%        | Project quality  | 
+| 10%        | Repo quality     | 
+| 30%        | Individual Contribution | 
+| 10%        | Collaboration    | 
+
+
+## Project Grading Details
+
+::: {.incremental}
+* Project quality
+  * Did the project accomplish a sufficient number of (possibly revised) objectives?
+  * Was the client relationship managed well?
+* Repo quality
+  * Is the Github repository well organized and easy to navigate?
+  * Is the repo well documented especially with replication steps?
+  * Can one start from a new environment and easily setup and run?
+* Individual Contribution
+  * Is there clear evidence of attendance and active participation in class lab time, client and team meetings?
+  * Documented activities in sprint plan history?
+  * Git commit history and co-authored git commits?
+  * Record of individual's contributions in document and presentation revision history? 
+* Collaboration
+  * Is there indication, for example from peer reviews, of positive collaborations and constructive teamwork?
+:::
 
 ## Homeworks
 

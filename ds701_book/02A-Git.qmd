@@ -521,3 +521,16 @@ To update the repository and download the **new material**, type
 ```{sh}
 $ git pull
 ```
+## Recap
+
+In this lecture, we covered the following topics:
+
+::: {.incremental}
+1. Configuring git
+1. Creating a repository
+1. Staging and committing files
+1. Modifying files
+1. Recovering old versions
+1. Branching
+1. Pull requests
+:::
