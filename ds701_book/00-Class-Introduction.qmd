@@ -196,16 +196,16 @@ online resources. Google will quickly bring you to the authoritative (and curren
 
 We will use:
 
-1. Piazza for questions,
-1. Github for homeworks, midterm, and project submission,
-1. Gradescope for grading and grade management, and
-1. Kaggle for the midterm.
+1. Piazza for questions
+1. Github for homeworks, midterm, lectures
+1. Gradescope for grading and grade management
+1. Kaggle for the midterm
 
 You should already be signed up for Gradescope (if not, enroll using code sent via welcome email).
 
 You can add yourself to Piazza if you are not already enrolled (again, use the code sent via welcome email).
 
-You will need an account on Github. Please tell us your Github user name on this form.
+You will need an account on Github. Please tell us your Github user name on this [form](https://forms.gle/LdYwKn9o9rAZKEsW8).
 
 If you don’t have an up to date Python installation, take care of that right away.
 
