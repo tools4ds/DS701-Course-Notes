@@ -42,7 +42,7 @@ The first view is summarized by this quote from the first pages of Y. A. Rozanov
 > 
 >Let $n$ be the total number of experiments in the whole series of trials, and let $n(A)$ be the number of experiement in which $A$ occurs. Then the ratio $n(A)/n$ is called the relative frequency of the event $A.$ 
 >
-> It turns out that the relative frequencies observed in different series of trials are virtually the same for large $n,$ clustering about some constant $P[A],$ which is called the **probability of the event $A.$**
+> It turns out that the relative frequencies observed in different series of trials are virtually the same for large $n,$ clustering about some constant $P(A),$ which is called the **probability of the event $A.$**
 
 ::: {.content-visible when-profile="web"}
 This is called the **frequentist** intepretation of probability.
@@ -148,14 +148,36 @@ Georges Matheron, _Estimating and Choosing: An Essay on Probability in Practice_
 :::
 
 ::: {.content-visible when-profile="web"}
-### Events and Sample Space
-
-The sample space $\Omega$ may be continuous or discrete, and bounded or unbounded.
+### Sample Space and Events
 :::
 
 ::: {.content-visible when-profile="slides"}
-## Events and Sample Space
+## Sample Space and Events
 :::
+
+:::: {.fragment}
+__Definition.__ The sample space $\Omega$ is the set of all possible outcomes of a random trial.
+::::
+
+:::: {.fragment}
+__Definition.__ An event $E\subset\Omega$ is an outcome, or a set of outcomes of a random trial.
+
+::::
+
+:::: {.fragment}
+Examples:
+
+:::: {.incremental}
+- Rolling a dice: $\Omega = \{1, 2, 3, 4, 5, 6 \}$
+- Flipping a coin 2 times: $\Omega = \{ (H, H), (H, T), (T, H), (T, T)\}$
+- Distance a car travels before breaking down: $\Omega = \mathbb{R}_{+}$
+- Location of a dart thrown at a target. What is $\Omega$ in this case?
+::::
+::::
+
+:::: {.fragment}
+The sample space $\Omega$ may be continuous or discrete and bounded or unbounded.
+::::
 
 ::: {.content-visible when-profile="web"}
 ### Probability and Conditioning
@@ -165,15 +187,13 @@ The sample space $\Omega$ may be continuous or discrete, and bounded or unbounde
 ## Probability Rules
 :::
 
-__Definition.__  Consider a set $\Omega$, referred to as the
-_sample space._  A _probability
-  measure_ on $\Omega$ is a function $P[\cdot]$ defined on all the subsets of $\Omega$ (the
-  _events_) such that:
+__Definition.__  Consider a sample space $\Omega$. A _probability measure_ on $\Omega$ is a function $P(\cdot)$ defined on all the subsets of $\Omega$ (the _events_) such that:
   
-1. $P[\Omega] = 1$
-2. For any event $A \subset \Omega$, $P[A] \geq 0.$
-3. For any events $A, B \subset \Omega$ where $A \cap B =
-    \emptyset$, $P[A \cup B] = P[A] + P[B]$.
+:::: {.incremental}
+1. $P(\Omega) = 1$
+2. For any event $A \subset \Omega$, $P(A) \geq 0.$
+3. For any events $A, B \subset \Omega$ where $A \cap B = \emptyset$, $P(A \cup B) = P(A) + P(B)$.
+::::
 
 ::: {.content-visible when-profile="web"}
 Often we want to ask how a probability measure changes if we restrict the sample space to be some subset of $\Omega$.  
@@ -190,110 +210,166 @@ __Here and throughout we need examples.__
 __Definition.__ The _conditional probability_ of an event $A$ given that
 event $B$ (having positive probability) is known to occur, is 
 
-$$ P[A|B] = \frac{P[A \cap B]}{P[B]}  \mbox{ where } P[B] > 0 $$
+$$ P(A|B) = \frac{P(A \cap B)}{P(B)}~\text{where}~P(B) > 0 $$
 
-The function $P[\cdot|B]$ is a probability measure over the sample space
+The function $P(\cdot|B)$ is a probability measure over the sample space
 $B$.  
 
-Note that in the expression $P[A|B]$, $A$ is random but $B$ is fixed. 
+Note that in the expression $P(A|B)$, $A$ is random but $B$ is fixed. 
 
-Now if $B$ is a proper subset of $\Omega,$ then $P[B] < 1$.   So $P[\cdot|B]$ is a rescaling of the quantity $P[A\cap B]$ so that $P[B|B] = 1.$ 
+Now if $B$ is a proper subset of $\Omega,$ then $P(B) < 1$.   So $P(\cdot|B)$ is a rescaling of the quantity $P(A\cap B)$ so that $P(B|B) = 1.$ 
 
 ::: {.content-visible when-profile="web"}
-### Bayes' Rule
+### Bayes' Theorem
 :::
 
 ::: {.content-visible when-profile="slides"}
-## Bayes' Rule
+## Bayes' Theorem
 :::
 
-Bayes' Rule is a simple way of manipulating conditional probabilities in a way that can be very useful.
+Bayes' Theorem is a simple way of manipulating conditional probabilities in a way that can be very useful.
 
-Start with a situation in which we are interested in two events, $A_1$ and $A_2$.  
+Let $A,B$ be events, then
 
-These are exhaustive, meaning that in any experiment either $A_1$ or $A_2$ must occur. (That is, they form a partition of $\Omega$.)
+$$
+P(A|B) = \frac{P(B|A)P(A)}{P(B)}.
+$$
 
-Now, according to the rules of probability:
+:::: {.fragment}
 
-$$ P[A_1|B] = \frac{P[A_1 \cap B]}{P[B]}$$
+The terms in the above equation are often given the following names:
 
-$$ = \frac{P[A_1 \cap B]}{P[B|A_1] + P[B|A_2]}$$
+:::: {.incremental}
+- $P(A)$ is the prior.
+- $P(A|B)$ is the posterior probability.
+- $P(B|A)$ is the likelihood.
+- $P(B)$ is the marginal likelihood.
+::::
+::::
 
-$$ = \frac{P[B|A_1]\,P[A_1]}{P[B|A_1] + P[B|A_2]}$$
 
-(This is easy to extend to the case where $A_1, A_2, ..., A_n$ form a partition of $\Omega$.)
+:::: {.fragment}
+We can extend this theorme to more than two events.
+::::
 
-This formula is useful because often the probabilities $P[B|A_i]$ can be
-estimated, while the probabilties $P[A_i|B]$ may be hard to estimate.
+::: {.content-visible when-profile="slides"}
+## Bayes' Theorem continued
+:::
 
-Or perhaps $P[B]$ itself (which is really the denominator) is easy to estimate.
+Start with a situation in which we are interested in two events, $A_1$ and $A_2$. Let $B$ be any event in the samples space $\Omega$.
 
-We interpret this transformation as updating our estimate of the probability of each $A_i$
-based on new information, namely, that $B$ is true.   
+These are exhaustive, meaning that in any experiment either $A_1$ or $A_2$ must occur. This means they form a partition of $\Omega$, i.e., $\Omega = A_1 \cup A_2$ and $A_1 \cap A_2 = \emptyset$.
 
-This update
-transforms the __prior__ probabilities $P[A_i]$ into the 
-__posterior__ probabilities $P[A_i|B]$.
+In this situation, Baye's theorem is:
 
-__Example.__
+\begin{align*}
+P(A_1|B) &= \frac{P(A_1 \cap B)}{P(B)} \\
+& = \frac{P(A_1 \cap B)}{P(B|A_1) + P(B|A_2)} \\
+&= \frac{P(B|A_1)P(A_1)}{P(B|A_1) + P(B|A_2)}.
+\end{align*}
 
-Empirical evidence suggests that amongs sets of twins,
-about 1/3 are identical.  
+:::: {.fragment}
+This is can be extended to the case where $A_1, A_2, ..., A_n$ form a partition of $\Omega$.
+::::
 
-Assume therefore that probability of a pair of
-twins being identical to be 1/3.  
+::: {.content-visible when-profile="slides"}
+## Importance of Bayes' Theorem 
+:::
 
-Now, consider how a couple might
-update this probability after they get an ultrasound that shows that the
-twins are of the same gender.   
+This formula is useful because often the probabilities $P(B|A_i)$ can be estimated, while the probabilties $P(A_i|B)$ may be hard to estimate.
 
-What is their new estimate of the
-probability that their twins are identical?
+Or perhaps $P(B)$ itself (which is really the denominator) is easy to estimate.
 
-Let $I$ be the event that the twins are identical.  Let $G$ be the event
-that gender is the same via ultrasound.  
+We interpret this transformation as updating our estimate of the probability of each $A_i$ based on new information, namely, that $B$ is true.   
 
-The prior probabilities here
-is $P[I]$.
+This update transforms the __prior__ probabilities $P(A_i)$ into the __posterior__ probabilities $P(A_i|B)$.
 
-What we want to calculate is the
-posterior probability $P[I\,|\,G]$.
+::: {.content-visible when-profile="web"}
+### Bayes' Theorem Example
+:::
+
+::: {.content-visible when-profile="slides"}
+## Bayes' Theorem Example
+:::
+
+:::: {.fragment}
+Empirical evidence suggests that amongs sets of twins, about 1/3 are identical. 
+::::
+ 
+:::: {.fragment}
+Assume therefore that probability of a pair of twins being identical to be 1/3.  
+::::
+
+:::: {.fragment}
+Now, consider how a couple might update this probability after they get an ultrasound that shows that the twins are of the same gender.   
+::::
+
+:::: {.fragment}
+What is their new estimate of the probability that their twins are identical?
+::::
+
+:::: {.fragment}
+Let $I$ be the event that the twins are identical. Let $G$ be the event that gender is the same via ultrasound. 
+::::
+
+:::: {.fragment}
+The prior probability here is $P(I)$.
+::::
+
+:::: {.fragment}
+What we want to calculate is the posterior probability $P(I|G)$.
+::::
+
+::: {.content-visible when-profile="slides"}
+## Bayes' Theorem Example continued
+:::
 
 First, we note:
 
-$$P[G\,|\,I] = 1 $$
+:::: {.fragment}
+$$P(G|I) = 1.$$
+::::
 
-(Surprisingly, people are sometimes confused about that fact!)   
+:::: {.fragment}
+Surprisingly, people are sometimes confused about that fact!
+::::
 
-Note that this conditional probability is easy to estimate.
+:::: {.fragment}
+We also assume that if the twins are not identical, they are like any two siblings. This means they have an equal probability of being the same gender, i.e., 
+::::
 
-Also,
-we assume that if the twins are not identical, they are like any two
-siblings, _i.e.,_ their probability of being same gender is 1/2: 
+:::: {.fragment}
+$$P(G|\bar{I}) = 1/2.$$
+::::
 
-$$P[G\,|\,\bar{I}] = 1/2 $$
+:::: {.fragment}
+We know from observing the population at large that among all sets of twins, about 1/3 are identical
 
-Again, easy to estimate.
+$$ P(I) = 1/3.$$
 
-And we know from observing the population at large that among all sets
-of twins, about 1/3 are identical:
+This statistic is easy obtained from data.
+::::
 
-$$ P[I] = 1/3 $$
-
-Note that this statistic is easy to obtain from data.
+::: {.content-visible when-profile="slides"}
+## Bayes' Theorem Example continued
+:::
 
 Then:
 
-$$ P[I\,|\,G] = \frac{P[G\,|\,I]\; P[I]}{P[G\,|\,I]\,P[I] + P[G\,|\,\bar{I}]\,P[\bar{I}]} $$
+\begin{align*}
+P(I|G) &= \frac{P(G|I)P(I)}{P(G|I)P(I) + P(G|\bar{I})P(\bar{I})} \\ 
+&= \frac{1 \cdot 1/3}{(1 \cdot 1/3) + (1/2 \cdot 2/3)} \\
+&= \frac{1}{2}
+\end{align*}
 
-$$ = \frac{1 \cdot 1/3}{(1 \cdot 1/3) + (1/2 \cdot 2/3)} = \frac{1}{2}$$
-
+:::: {.fragment}
 So we have updated our estimate of the twins being identical from 1/3
 (prior probability) to 1/2 (posterior probability).
+::::
 
+:::: {.fragment}
 We did this in a way that used quantities that were relatively easy to obtain or measure.
-
-
+::::
 
 ::: {.content-visible when-profile="slides"}
 ## Independent Events
@@ -303,26 +379,34 @@ We did this in a way that used quantities that were relatively easy to obtain or
 ### Independent Events
 :::
 
-__Definition.__ Two events $A$ and $B$ are __independent__ if $P[A\cap B] = P[A] \cdot P[B].$
+__Definition.__ Two events $A$ and $B$ are __independent__ if $P(A\cap B) = P(A) \cdot P(B).$
 
-This is exactly the same as saying that $P[A|B] = P[A].$  
+This is exactly the same as saying that $P(A|B) = P(A).$  
 
 So we can see that the intuitive notion of independence is that "if one event occurs, that does not change the probability of the other event."
 
 ## Random Variables
 
-We are usually interested in numeric values associated with events.  
+We are usually interested in numeric values associated with events. This leads us to the notion of a __random variable__.
 
-When a random event has a numeric value we refer to it as a random variable.
+__Definition.__ A random variable $X$ is a function $X:\Sigma\rightarrow \mathbb{R}$.
 
-Notationally, we use CAPITAL LETTERS for random variables and lowercase for non-random quantities.
+We generally use captial letters to denote random variables and lowercase to denote non-random quantities.
 
 To collect information about what values of the random variable are more probable than others, we have some more definitions.
+
+::: {.content-visible when-profile="slides"}
+## Cumulative distribution functions
+:::
 
 __Definition.__ The cumulative distribution function (CDF) F for a random
  variable $X$ is equal to the probability measure for the event that
  consists of all possible outcomes with a value of the random variable $X$
- less than or equal to $x$, that is, $F(x) = P[X \leq x].$
+ less than or equal to $x$, that is, $F(x) = P(X \leq x).$
+
+::: {.content-visible when-profile="slides"}
+## Discrete CDFs
+:::
 
 __Example.__  Consider the roll of a single die.  The random variable here is the number of points showing.  What is the CDF?
 
@@ -340,9 +424,13 @@ plt.xlim([0, 7])
 plt.ylim([-0.05, 1.1])
 plt.title('Cumulative Distribution Function (CDF)')
 plt.xlabel(r'$x$ (Number of points showing)', size=14)
-plt.ylabel(r'$P[X\leq x]$', size=14)
+plt.ylabel(r'$P(X\leq x)$', size=14)
 plt.show()
 ```
+
+::: {.content-visible when-profile="slides"}
+## Continuous CDFs
+:::
 
 Now, consider this CDF of some random variable:
 
@@ -354,21 +442,30 @@ x = np.linspace(norm.ppf(0.001), norm.ppf(0.999), 100)
 plt.plot(x, norm.cdf(x),'b-', lw=5, alpha=0.6)
 plt.title('Cumulative Distribution Function (CDF)')
 plt.xlabel(r'$x$', size=14)
-plt.ylabel(r'$P[X\leq x]$', size=14)
+plt.ylabel(r'$P(X\leq x)$', size=14)
 plt.show()
 ```
-
+:::: {.fragment}
 What does it mean when the slope is steeper for some $x$ values?
+::::
 
+:::: {.fragment}
 The slope tells us how likely values are in a particular range.
+::::
 
-This is important enough that we define a function to capture it.  
+:::: {.fragment}
+This is important enough that we define a function to capture it. 
+::::
 
-__Definition.__ The _probability density function_ (pdf) is the derivative of the CDF, when that is defined.
+::: {.content-visible when-="slides"}
+## Probability density functions
+:::
+ 
+__Definition.__ The _probability density function_ (pdf) is the derivative of the CDF (when it is defined), i.e.,
 
 $$ f(x) = \frac{dF(x)}{dx}.$$
 
-Often we will go the other way as well:
+Often we will write this another way:
 
 $$ F(x) = \int_{-\infty}^{x} f(t) dt. $$
 
@@ -380,12 +477,15 @@ and
 
 $$ f(x) \geq 0.$$
 
-Now, for a discrete random variable, the CDF is not differentiable (because the CDF is a step function).  
+::: {.content-visible when-="slides"}
+## Probability density functions CDFs
+:::
 
-For the PDF of discrete RVs, we simply plot the probability function of
-each value.  That is, we plot $P[X = x]$ for the various values of $x$.
+For a discrete random variable, the CDF is not differentiable (because the CDF is a step function).  
 
-Another way to think of the PDF is that it consists of impulses at the
+Discrete RVs have _probability mass functions_ (pmf)and we simply plot the probability function of each value. That is, we plot $P(X = x)$ for the various values of $x$.
+
+Another way to think of the pmf is that it consists of impulses at the
 points of discontinuity of the CDF. 
 
 For our example of the single die:
@@ -399,11 +499,17 @@ plt.vlines(x, 0, 1/6., colors='b', lw=5, alpha=0.5)
 plt.xlim([0.5, 6.5])
 plt.ylim([0, 1.1])
 plt.xlabel(r'x (Number of points showing)', size=14)
-plt.ylabel(r'$P[X = x]$', size=14)
+plt.ylabel(r'$P(X = x)$', size=14)
 plt.show()
 ```
 
+::: {.content-visible when-profile="web"}
 ## Characterizing Random Variables
+:::
+
+::: {.content-visible when-profile="slides"}
+## Expected value
+:::
 
 __Definition.__ The _expected value_ $E[X]$ of a random
 variable $X$ is the probability-weighted sum or integral of all possible values of
@@ -411,32 +517,34 @@ the R.V.
 
 For a discrete random variable, this is:
 
-$$ E[X] \equiv \sum_{-\infty}^{+\infty} x\; P[X=x] $$
+$$E[X] \equiv \sum_{x} x P(X=x),$$
 
-and for a continuous random variable with pdf $p():$
+and for a continuous random variable with pdf $p()$
 
-$$ E[X] \equiv \int_{-\infty}^{+\infty} x\; p(x)\; dx $$
+$$E[X] \equiv \int_{-\infty}^{+\infty} x p(x) dx.$$
 
 The expected value is also called the average or the mean, although we
-prefer to reserve those terms for empirical statistics (actual
-measurements, not idealizations like these formulas).
+prefer to reserve those terms for empirical statistics (actual measurements, not idealizations like these formulas).
 
 The expected value is in some sense the "center of mass" of the random
-variable.   It is often denoted $\mu$.
+variable. It is often denoted $\mu$.
 
-The mean is usually a quite useful characterization of the random variable.
+The expected value is usually a quite useful characterization of the random variable.
 
 However, be careful: in some cases, the mean may not be very informative, or important.  
 
-In some cases a
-random variable may not ever take on the mean as a possible value.  (Consider again the single die, whose mean is 3.5)
+In some cases a random variable may not ever take on the mean as a possible value. (Consider again the single die, whose mean is 3.5)
 
 In other cases the notion of average isn't useful, as for the person
 with their head in the oven and feet in the freezer who claims "on
 average I feel fine." 
 
 In other words, the mean may not be very informative when
-observations are highly variable.   
+observations are highly variable. 
+
+::: {.content-visible when-profile="slides"}
+## Variance
+:::
 
 In fact, the variability of random quantities is crucially important to characterize.
 
@@ -444,11 +552,11 @@ For this we use __variance,__ the mean squared difference of the random variable
 
 __Definition.__ The variance of a random variable $X$ is
 
-$$ \mbox{Var} (X) \equiv E[(X - E[X])^2]. $$
+$$\text{Var}(X) \equiv E[(X - E[X])^2].$$
 
 For example, given a discrete R.V. with $E[X] = \mu$ this would be:
 
-$$ \mbox{Var} (X) = \sum_{x=-\infty}^{+\infty} (x-\mu)^2\; P[X=x]. $$
+$$\text{Var} (X) = \sum_{x} (x-\mu)^2 P(X=x).$$
 
 We use the symbol $\sigma^2$ to denote variance.
 
@@ -458,25 +566,33 @@ So to compare variance and mean in the same units, we take the square root of th
 
 This is called the __standard deviation__ and is denoted $\sigma$.
 
-Next, let's recall the case of the Tesla and Yelp returns from the last lecture:
+::: {.content-visible when-profile="slides"}
+## Stocks as random variables
+:::
+
+Next, let's recall the case of the Tesla and NVDA returns from the last lecture:
 
 ```{python}
-#| hide_input: false
-#| tags: [hide-input]
+#| fig-align: center
 import pandas as pd
 import yfinance as yf
 
-stocks = ['TSLA', 'YELP']
+stocks = ['TSLA', 'NVDA']
 df = pd.DataFrame()
 for s in stocks:
     df[s] = pd.DataFrame(yf.download(s,start='2014-01-01',end='2014-12-31', progress = False))['Close']
 
 rets = df.pct_change(30)
-rets[['TSLA', 'YELP']].plot(lw=2)
-plt.legend(loc='best');
+rets[['TSLA', 'NVDA']].plot(lw=2)
+plt.legend(loc='best')
+plt.show()
 ```
 
 Treating these two timeseries as random variables, we are interested in how they vary __together__.
+
+::: {.content-visible when-profile="slides"}
+## Covariance
+:::
 
 This is captured by the concept of __covariance.__
 
@@ -484,54 +600,61 @@ __Definition.__ For two random variables $X$ and $Y$, their _covariance_ is defi
 
 $$\text{Cov}(X,Y) = E\left[(X-\mu_X)(Y-\mu_Y)\right]$$
 
-If covariance is positive, this tells us that $X$ and $Y$ tend to be both above their means together, and both below their means together.
+If covariance is positive, this tells us that $X$ and $Y$ tend to both be  above their means together, and both below their means together.
 
 We will often denote $\text{Cov}(X,Y)$ as $\sigma_{XY}$
 
+::: {.content-visible when-profile=""}
+## Correlation
+:::
 If we are interested in asking "how similar" are two random variables, we want to normalize covariance by the amount of variance shown by the random variables.
 
-The tool for this purpose is __correlation__, ie, normalized covariance:
+The tool for this purpose is __correlation__, i.e., normalized covariance:
 
-$$\rho(X,Y) = \frac{E\left[(X-\mu_X)(Y-\mu_Y)\right]}{\sigma_X \sigma_Y}$$
+$$\rho(X,Y) = \frac{E\left[(X-\mu_X)(Y-\mu_Y)\right]}{\sigma_X \sigma_Y}.$$
 
 $\rho(X, Y)$ takes on values between -1 and 1.   
 
-If $\rho(X, Y) = 0$ then $X$ and $Y$ are __uncorrelated__.   Note that this is not the same thing as being independent!
+If $\rho(X, Y) = 0$ then $X$ and $Y$ are __uncorrelated__. Note that this is not the same thing as being independent!
 
 $\rho$ is sometimes called "Pearson $r$" after Karl Pearson who popularized it.
+
+::: {.content-visible when-profile="slides"}
+## Stock covariance
+:::
 
 Let's look at our example again:
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
 rets = df.pct_change(30)
-rets[['TSLA', 'YELP']].plot(lw=2)
-plt.legend(loc='best');
+rets[['TSLA', 'NVDA']].plot(lw=2)
+plt.legend(loc='best')
+plt.show()
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 df.cov()
 ```
 
-In the case of Tesla ($X$) and Yelp ($Y$) above, we find that
+In the case of Tesla ($X$) and Nvidia ($Y$) above, we find that
 
-$$\text{Cov}(X,Y) = 9.53$$
+$$\text{Cov}(X,Y) = 0.037745$$
 
-Is that a big number? small number?
+::: {.content-visible when-profile="slides"}
+## Stock correlation
+:::
+
+How similar are these random variables? Let's compute $\rho(X,Y)$ .
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 df.corr()
 ```
 
-So:
+We observe that 
 
-$$\rho(X,Y) = 0.137$$
+$$\rho(X,Y) \approx 0.600$$
 
-Apparently, not a big number!
-
+There appears to be some similarity between the two stocks.
 
 ## Multivariate Random Variables
 
@@ -696,7 +819,7 @@ It answers the question: "what is the probability it takes $k$ trials to obtain 
 
 Its PDF is given by:
 
-$$ P[X = k] = p(1-p)^{k-1}. \;\; k \geq 1$$ 
+$$ P(X = k) = p(1-p)^{k-1}. \;\; k \geq 1$$ 
 
 Its mean is $\mu = \frac{1}{p}$ and its variance is $\sigma^2 = \frac{1-p}{p^2}$.
 
@@ -715,7 +838,8 @@ plt.plot(x, geom.pmf(x, p), 'bo', ms=8, label = 'geom pmf')
 plt.vlines(x, 0, geom.pmf(x, p), colors='b', lw = 5, alpha = 0.6)
 plt.title(f'Geometric PDF, $p$ = {p}', size=14)
 plt.xlabel(r'$k$', size=14)
-plt.ylabel(r'$P[X = k]$', size=14);
+plt.ylabel(r'$P(X = k)$', size=14)
+plt.show()
 ```
 
 #### The Binomial Distribution
@@ -732,7 +856,7 @@ For any __given__ sequence of $k$ successes and $N-k$ failures, the probability 
 
 But there are many different such sequences: $\binom{N}{k}$ of them in fact. 
 
-So this distribution is $P[X=k] = \binom{N}{k}\; p^k\; (1-p)^{N-k}.$
+So this distribution is $P(X=k) = \binom{N}{k}\; p^k\; (1-p)^{N-k}.$
 
 Its mean is $pN$, and its variance is $pqN$.  
 
@@ -749,7 +873,8 @@ plt.plot(x, binom.pmf(x, 10, p), 'bo', ms=8, label = 'binom pmf')
 plt.vlines(x, 0, binom.pmf(x, 10, p), colors='b', lw = 5, alpha=0.6)
 plt.title(f'Binomial PDF, $p$ = {p}, $N$ = 10', size=14)
 plt.xlabel(r'$k$', size=14)
-plt.ylabel(r'$P[X = k]$', size=14);
+plt.ylabel(r'$P(X = k)$', size=14)
+plt.show()
 ```
 
 #### The Exponential Distribution
@@ -780,7 +905,8 @@ plt.title(f'Exponential PDF, $\lambda$ = {p}', size=14)
 plt.xlabel(r'$x$', size=14)
 plt.ylabel(r'$p(x)$', size=14)
 plt.ylim([0, 0.4])
-plt.xlim([0, 14]);
+plt.xlim([0, 14])
+plt.show()
 ```
 
 Notice how the Exponential is the __continuous analog__ of the Geometric:
@@ -800,8 +926,9 @@ plt.plot(xg, geom.cdf(xg, p), 'ro', ms = 8, label = 'Geometric')
 plt.suptitle(f'Geometric and Exponential CDFs', size = 14)
 plt.title(r'$\lambda = 0.3; \;\;\; p = 1-e^{-\lambda} =$' + f' {p:0.3f}', size=12)
 plt.xlabel(r'$x$', size=14)
-plt.ylabel(r'$P[X \leq x]$', size = 14)
-plt.legend(loc = 'best');
+plt.ylabel(r'$P(X \leq x]$', size = 14)
+plt.legend(loc = 'best')
+plt.show()
 ```
 
 #### The Poisson Distribution
@@ -815,7 +942,7 @@ When we ask the question
 The Poisson Distribution is the limiting form of binomial, when the
 number of trials goes to infinity, happening at some rate $\lambda$.
 
-$$ P[k \mbox{ successes in time } T] = (\lambda T)^k \frac{e^{- \lambda T}}{k!}$$
+$$ P(k \mbox{ successes in time } T]=) = (\lambda T)^k \frac{e^{- \lambda T}}{k!}$$
 
 It answers the question: when events happen indepdently at some fixed rate, how many will occur in a given fixed interval?
 
@@ -835,7 +962,8 @@ plt.plot(x, poisson.pmf(x, mu), 'bo', ms=8, label='poisson pmf')
 plt.vlines(x, 0, poisson.pmf(x, mu), colors='b', lw=5, alpha=0.6)
 plt.title(f'Poisson PDF.  $\lambda T$ = {mu}', size=14)
 plt.xlabel(r'k', size=14)
-plt.ylabel(r'P[X = k]', size=14);
+plt.ylabel(r'P(X = k)', size=14)
+plt.show()
 ```
 
 The Poisson distribution has an interesting role in our perception of randomness (which you can read more about [here](http://www.empiricalzeal.com/2012/12/21/what-does-randomness-look-like/#more-2450)).    
@@ -872,7 +1000,8 @@ horse_kicks
 #| tags: [hide-input]
 horse_kicks[["Predicted Instances (Poisson)","Observed Instances"]].plot.bar()
 plt.xlabel("Number of Deaths Per Year", size=14)
-plt.ylabel("Count", size=14);
+plt.ylabel("Count", size=14)
+plt.show()
 ```
 
 The message here is that when events occur at random, we actually tend to perceive them as clustered.   
@@ -906,7 +1035,8 @@ plt.vlines(x, 0, 1/6., colors='b', lw=5, alpha=0.5)
 plt.xlim([0.5, 6.5])
 plt.ylim([0, 1.1])
 plt.xlabel(r'x (Number of points showing)', size=14)
-plt.ylabel(r'$P[X = x]$', size=14);
+plt.ylabel(r'$P(X = x)$', size=14)
+plt.show()
 ```
 
 There is an important relationship between the uniform and Poisson distributions.
@@ -978,7 +1108,8 @@ x = np.linspace(norm.ppf(0.001), norm.ppf(0.999), 100)
 plt.plot(x, norm.pdf(x),'b-', lw = 5, alpha = 0.6)
 plt.title(r'Standard Gaussian PDF.  $\mu = 0, \sigma = 1$', size=14)
 plt.xlabel('x', size=14)
-plt.ylabel(r'$p(x)$', size=14);
+plt.ylabel(r'$p(x)$', size=14)
+plt.show()
 ```
 
 ```{python}
@@ -990,7 +1121,8 @@ x = np.linspace(norm.ppf(0.001), norm.ppf(0.999), 100)
 plt.plot(x, norm.cdf(x),'b-', lw = 5, alpha = 0.6)
 plt.title(r'Standard Gaussian CDF.  $\mu = 0, \sigma = 1$', size=14)
 plt.xlabel('x', size=14)
-plt.ylabel(r'$P[X\leq x]$', size=14);
+plt.ylabel(r'$P(X\leq x)$', size=14)
+plt.show()
 ```
 
 For an arbitrary Gaussian distribution with mean $\mu$ and variance
@@ -1049,7 +1181,8 @@ x = np.linspace(pareto.ppf(0.005,alpha), pareto.ppf(0.995,alpha), 100)
 plt.plot(x, pareto.pdf(x,alpha),'b-', lw = 5, alpha = 0.6, label='pareto pdf')
 plt.title(r'Pareto PDF.  $\alpha$ = {}'.format(alpha), size=14)
 plt.xlabel(r'x', size=14)
-plt.ylabel(r'p(x)', size=14);
+plt.ylabel(r'p(x)', size=14)
+plt.show()
 ```
 
 The variance of the Pareto distribution is infinite.  (The corresponding
@@ -1091,7 +1224,7 @@ Each column can be treated as a vector.
 So:
 * Let's say that our data frame `df` is represented as a matrix $D$, 
 * and that `df['TSLA']` are observations of some random variable $X$, 
-* and `df['YELP']` are observations of some random variable $Y$.  
+* and `df['NVDA']` are observations of some random variable $Y$.  
 
 Let $D$ have $n$ rows (ie, $n$ observations).
 
@@ -1162,7 +1295,8 @@ g = sns.JointGrid(data = df1, x = 'X1', y = 'X2', height = 5)
 g.plot(sns.scatterplot, sns.kdeplot)
 g.ax_joint.plot(1, 1, 'ro', markersize = 6)
 g.ax_marg_x.plot(1, 0, 'ro')
-g.ax_marg_y.plot(0, 1, 'ro');
+g.ax_marg_y.plot(0, 1, 'ro')
+plt.show()
 ```
 
 ```{python}
@@ -1174,7 +1308,8 @@ g = sns.JointGrid(data = df1, x = 'X1', y = 'X2', height = 5)
 g.plot(sns.kdeplot, sns.kdeplot)
 g.ax_joint.plot(1, 1, 'ro', markersize = 6)
 g.ax_marg_x.plot(1, 0, 'ro')
-g.ax_marg_y.plot(0, 1, 'ro');
+g.ax_marg_y.plot(0, 1, 'ro')
+plt.show()
 ```
 
 ```{python}
@@ -1206,7 +1341,8 @@ g = sns.JointGrid(data = df1, x = 'X1', y = 'X2', height = 5)
 g.plot(sns.scatterplot, sns.kdeplot)
 g.ax_joint.plot(1, 1, 'ro', markersize = 6)
 g.ax_marg_x.plot(1, 0, 'ro')
-g.ax_marg_y.plot(0, 1, 'ro');
+g.ax_marg_y.plot(0, 1, 'ro')
+plt.show()
 ```
 
 ```{python}
@@ -1218,7 +1354,8 @@ g = sns.JointGrid(data = df1, x = 'X1', y = 'X2', height = 5)
 g.plot(sns.kdeplot, sns.kdeplot)
 g.ax_joint.plot(1, 1, 'ro', markersize = 6)
 g.ax_marg_x.plot(1, 0, 'ro')
-g.ax_marg_y.plot(0, 1, 'ro');
+g.ax_marg_y.plot(0, 1, 'ro')
+plt.show()
 ```
 
 ```{python}
@@ -1246,7 +1383,8 @@ g = sns.JointGrid(data = df1, x = 'X1', y = 'X2', height = 5)
 g.plot(sns.scatterplot, sns.kdeplot)
 g.ax_joint.plot(1, 1, 'ro', markersize = 6)
 g.ax_marg_x.plot(1, 0, 'ro')
-g.ax_marg_y.plot(0, 1, 'ro');
+g.ax_marg_y.plot(0, 1, 'ro')
+plt.show()
 ```
 
 ```{python}
@@ -1259,7 +1397,8 @@ g = sns.JointGrid(data = df1, x = 'X1', y = 'X2', height = 5)
 g.plot(sns.kdeplot, sns.kdeplot)
 g.ax_joint.plot(1, 1, 'ro', markersize = 6)
 g.ax_marg_x.plot(1, 0, 'ro')
-g.ax_marg_y.plot(0, 1, 'ro');
+g.ax_marg_y.plot(0, 1, 'ro')
+plt.show()
 ```
 
 Finally, let's look at our stock data:
@@ -1269,18 +1408,20 @@ Finally, let's look at our stock data:
 #| hide_input: true
 #| slideshow: {slide_type: '-'}
 #| tags: [hide-input]
-g = sns.JointGrid(data = df, x = 'TSLA', y = 'YELP', height = 5)
+g = sns.JointGrid(data = df, x = 'TSLA', y = 'NVDA', height = 5)
 g.plot(sns.scatterplot, sns.kdeplot)
-g.ax_joint.plot(df.mean()['TSLA'], df.mean()['YELP'], 'ro', markersize = 6);
+g.ax_joint.plot(df.mean()['TSLA'], df.mean()['NVDA'], 'ro', markersize = 6)
+plt.show()
 ```
 
 ```{python}
 #| cell_style: split
 #| hide_input: true
 #| tags: [hide-input]
-g = sns.JointGrid(data = df, x = 'TSLA', y = 'YELP', height = 5)
+g = sns.JointGrid(data = df, x = 'TSLA', y = 'NVDA', height = 5)
 g.plot(sns.kdeplot, sns.kdeplot)
-g.ax_joint.plot(df.mean()['TSLA'], df.mean()['YELP'], 'ro', markersize = 6);
+g.ax_joint.plot(df.mean()['TSLA'], df.mean()['NVDA'], 'ro', markersize = 6)
+plt.show()
 ```
 
 Recall that the correlation between these two stocks was about 0.137.
@@ -1315,7 +1456,7 @@ This interval is then called the 90% confidence interval.
 To be more precise:  A confidence interval at level $\gamma$ for a fixed
 but unknown parameter $m$ is an interval $(a,b)$ such that
 
-$$ P[A < m < B] \geq \gamma. $$
+$$ P(A < m < B) \geq \gamma. $$
 
 Note that $m$ is fixed --- it is not random.  
 
@@ -1371,15 +1512,15 @@ $\bar{x}$ has a $N(\mu, \sigma/\sqrt{n})$ distribution.
 Then it is
 true that 
 
-$$ P[\mu-k\sigma/\sqrt{n} < \bar{x} < \mu+k\sigma/\sqrt{n}] = P[-k < S <
-k]$$
+$$ P(\mu-k\sigma/\sqrt{n} < \bar{x} < \mu+k\sigma/\sqrt{n}) = P(-k < S <
+k)$$
 
 where $S$ is the standard Gaussian random variable (having distribution $N(0,1)$).
 
 We write $z_{1-\alpha/2}$ to be the $1-\alpha/2$ quantile of the
 unit normal.  That is, 
 
-$$ P[-z_{1-\alpha/2} < S < z_{1-\alpha/2}] = 1-\alpha.$$
+$$ P(-z_{1-\alpha/2} < S < z_{1-\alpha/2}) = 1-\alpha.$$
 
 So to form a 90% probability interval for $S$ (centered on
 zero) we choose $k = z_{0.95}$.  
@@ -1396,7 +1537,8 @@ plt.plot(x, norm.pdf(x),'b-')
 plt.fill_between(x90, 0, norm.pdf(x90))
 plt.title(r'90% region for Standard Gaussian', size = 14)
 plt.xlabel('x', size = 14)
-plt.ylabel(r'$p(x)$', size = 14);
+plt.ylabel(r'$p(x)$', size = 14)
+plt.show()
 ```
 
 Turning back to $\bar{x}$, the
@@ -1413,9 +1555,9 @@ a fixed-size interval (of the same size) centered on the sample mean.
 This means that:
 
 \begin{eqnarray*}
-  1-\alpha & = & P[\mu-z_{1-\alpha/2}\sigma/\sqrt{N} < \bar{x} <
-\mu+z_{1-\alpha/2}\sigma/\sqrt{N}]\\
-& = & P[\bar{x}-k\sigma\sqrt{N} < \mu < \bar{x}+k\sigma/\sqrt{N}].
+  1-\alpha & = & P(\mu-z_{1-\alpha/2}\sigma/\sqrt{N} < \bar{x} <
+\mu+z_{1-\alpha/2}\sigma/\sqrt{N})\\
+& = & P(\bar{x}-k\sigma\sqrt{N} < \mu < \bar{x}+k\sigma/\sqrt{N}).
 \end{eqnarray*}
 
 This latter expression defines the __$1-\alpha$ confidence interval
