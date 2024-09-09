@@ -17,7 +17,6 @@ import seaborn as sns
 Today we'll review the essentials of probability and statistics that we'll need for this course.
 :::
 
-
 ## Probability
 
 What is probability?  
@@ -33,10 +32,33 @@ These views are:
 - Bayesian
 ::::
 
-::: {.content-visible when-profile="slides"}
-## Frequentist interpretation
+::: {.content-visible when-profile="web"}
+### The Frequentist View
 :::
-The first view is summarized by this quote from the first pages of Y. A. Rozanov. Probability Theory: A Concise Course. Dover Publications, Inc., 1969.
+
+::: {.content-visible when-profile="slides"}
+## The Frequentist View
+:::
+
+The frequentist view of probability requires the definition of several concepts.
+
+- _Experiment_: a situation in which the outcomes occur randomly.
+  
+  __Example__: Driving to work, a commuter passes through a sequence of three intersections with traffic lights. At each light she either stops $s$ or continues $c$.
+
+- _Sample space_: the set of all possible outcomes of the experiment.
+
+  __Example__: $\{ccc, ccs, csc, css, scc, ssc, scs, sss\},$ where $csc$, for example, denotes the outcome that the commuter continues through the first light, stops at the second light, and continues through the third light.
+
+- _Event_: a subset of the sample space.
+
+  __Example__: continuing through the first light (i.e., $\{ccc, ccs, csc, css\}$). 
+
+::: {.content-visible when-profile="slides"}
+## The Frequentist View
+:::
+
+The frequentist view is summarized by this quote from the first pages of Y. A. Rozanov. _Probability Theory: A Concise Course._ 1969.
 
 >Suppose an experiment under consideration can be repeated any number of times, so that, in principle at least, we can produce a whole series of “independent trials under identical conditions” in each of which, depending on chance, a particular event $A$ of interest either occurs or does not occur.
 > 
@@ -46,27 +68,35 @@ The first view is summarized by this quote from the first pages of Y. A. Rozanov
 
 ::: {.content-visible when-profile="web"}
 This is called the **frequentist** intepretation of probability.
-:::
-
-::: {.content-visible when-profile="web"}
-You can think of it as treating each event as a sort of idealized coin-flip.
-:::
-
-::: {.content-visible when-profile="slides"}
-## Bayesian interpretation
-:::
 
 The key idea in the above definition is to be able to:
 
-:::: {.fragment}
 > produce a whole series of “independent trials under identical conditions” 
+
+Which, when you think about it, is really a rather tricky notion.
+
+Nevertheless, the frequentist view of probability is quite useful and we will often use it in this course.
+
+You can think of it as treating each event as a sort of idealized coin-flip.
+
+In other words, when we use the frequentist view, we will generally be thinking of a somewhat abstract situation where we __assume__ that "independent trials under identical conditions" is a good description of the situation.
+:::
+
+::: {.content-visible when-profile="web"}
+### The Bayesian View
+:::
+
+::: {.content-visible when-profile="slides"}
+## The Bayesian View
+:::
+
+To understand the Bayesian view of probability, consider the following situations:
+
+:::: {.fragment}
+On a visit to the doctor, we may ask, "What is the probability that I have disease X?"
 ::::
 
 :::: {.fragment}
-However, we often use probability in another setting.
-
-On a visit to the doctor, we may ask, "What is the probability that I have disease X?"
-
 Or, before digging a well, we may ask, "What is the probability that I will strike water?"
 ::::
 
@@ -75,7 +105,11 @@ These questions are __totally incompatible__ with the notion of "independent tri
 ::::
 
 :::: {.fragment}
-In this setting, we are using probability to encode "degree of belief" or a "state of knowledge." We are asking instead:
+Either I do, or do not, have disease X. Either I will, or will not, strike water.
+::::
+
+:::: {.fragment}
+What we are really asking is
 
 :::: {.incremental}
 - "How certain should I be that I have disease X?" 
@@ -83,16 +117,12 @@ In this setting, we are using probability to encode "degree of belief" or a "sta
 ::::
 ::::
 
-::: {.content-visible when-profile="web"}
-This is called the __Bayesian__ interpretation of probability.
-:::
+:::: {.fragment}
+In this setting, we are using probability to encode "degree of belief" or a "state of knowledge."
+::::
 
 ::: {.content-visible when-profile="web"}
-> ... the probability emerging in the time of Pascal is essentially dual.
-> It has to do both with stable frequencies and with degrees of belief.
-> It is, as I shall put it, both aleatory and epistemological.
-> 
-> The Emergence of Probability, Ian Hacking, 2006
+This is called the __Bayesian__ interpretation of probability.
 :::
 
 ::: {.content-visible when-profile="slides"}
@@ -103,21 +133,17 @@ Somewhat amazingly, it turns out that whichever way we think of probability (fre
 
 ... the __rules__ that we use for computing probabilities are __exactly the same.__
 
-In most cases in this course we will use frequentist language and examples when talking about probability.
+This is a very deep and surprising thing.
 
-However, it's often really a "state of knowledge" that we are really talking about when we use probability models in this course.
+In other words, it's often really a "state of knowledge" that we are really talking about when we use probability models in this course.
 
-::: {.content-visible when-profile="web"}
-> A thing appears random only through the incompleteness of our knowledge 
-
--- Spinoza
+> A thing appears random only through the incompleteness of our knowledge. 
+>
+Spinoza, _Ethics,_ Part 1
 
 In other words, we use probability as an abstraction that __hides details__ we don't want to deal with.  
 
-(This is a time-honored use of probability.)
-:::
-
-It's important to recognize that both frequentist and Bayesian views are __valid__ and __useful__ views of probability.
+So it's important to recognize that both frequentist and Bayesian views are __valid__ and __useful__ views of probability.
 
 ::: {.content-visible when-profile="slides"}
 ## Frequentist vs Bayes
@@ -156,12 +182,11 @@ Georges Matheron, _Estimating and Choosing: An Essay on Probability in Practice_
 :::
 
 :::: {.fragment}
-__Definition.__ The sample space $\Omega$ is the set of all possible outcomes of a random trial.
+__Definition.__ The sample space $\Omega$ is the set of all possible outcomes of an experiment.
 ::::
 
 :::: {.fragment}
-__Definition.__ An event $E\subset\Omega$ is an outcome, or a set of outcomes of a random trial.
-
+__Definition.__ An event $E\subset\Omega$ is an outcome, or a set of outcomes of an experiment.
 ::::
 
 :::: {.fragment}
@@ -218,6 +243,21 @@ $B$.
 Note that in the expression $P(A|B)$, $A$ is random but $B$ is fixed. 
 
 Now if $B$ is a proper subset of $\Omega,$ then $P(B) < 1$.   So $P(\cdot|B)$ is a rescaling of the quantity $P(A\cap B)$ so that $P(B|B) = 1.$ 
+
+::: {.content-visible when-profile="web"}
+### Law of total probability
+:::
+
+::: {.content-visible when-profile="slides"}
+## Law of total probability
+:::
+
+An important tool for computing probabilities is provided by the following law.
+
+Let $B_1$ and $B_2$ form the complete sample space $\Omega$ and be disjoint $\left(B_1 \cap B_2 = \emptyset\right)$. Then for any event $A$,
+
+$$P(A) = P(A|B_1)P(B_1)+P(A|B_2)P(B_2).$$
+
 
 ::: {.content-visible when-profile="web"}
 ### Bayes' Theorem
@@ -387,108 +427,102 @@ So we can see that the intuitive notion of independence is that "if one event oc
 
 ## Random Variables
 
-We are usually interested in numeric values associated with events. This leads us to the notion of a __random variable__.
+When an experiment is performed, we might be interested in its actual outcome itself. However, more frequently we are interested in some function of the outcome. This leads us to the notion of a __random variable__.
 
-__Definition.__ A random variable $X$ is a function $X:\Sigma\rightarrow \mathbb{R}$.
+__Definition.__ A random variable $X$ is a function $X:\Omega\rightarrow \mathbb{R}$.
 
 We generally use captial letters to denote random variables and lowercase to denote non-random quantities.
 
-To collect information about what values of the random variable are more probable than others, we have some more definitions.
-
-::: {.content-visible when-profile="slides"}
-## Cumulative distribution functions
-:::
-
-__Definition.__ The cumulative distribution function (CDF) F for a random
- variable $X$ is equal to the probability measure for the event that
- consists of all possible outcomes with a value of the random variable $X$
- less than or equal to $x$, that is, $F(x) = P(X \leq x).$
-
-::: {.content-visible when-profile="slides"}
-## Discrete CDFs
-:::
-
-__Example.__  Consider the roll of a single die.  The random variable here is the number of points showing.  What is the CDF?
-
-![](/figs/single-die.png){fig-align="center" width=100px}
-
-```{python}
-#| fig-align: center
-plt.figure(figsize=(5, 3))
-for i in range(7):
-    plt.plot([i, i+1-.08], [i/6, i/6], '-b')
-for i in range(1, 7):
-    plt.plot(i, i/6, 'ob')
-    plt.plot(i, (i-1)/6, 'ob', fillstyle='none')
-plt.xlim([0, 7])
-plt.ylim([-0.05, 1.1])
-plt.title('Cumulative Distribution Function (CDF)')
-plt.xlabel(r'$x$ (Number of points showing)', size=14)
-plt.ylabel(r'$P(X\leq x)$', size=14)
-plt.show()
-```
-
-::: {.content-visible when-profile="slides"}
-## Continuous CDFs
-:::
-
-Now, consider this CDF of some random variable:
-
-```{python}
-#| fig-align: center
-from scipy.stats import norm
-plt.figure(figsize=(5, 3))
-x = np.linspace(norm.ppf(0.001), norm.ppf(0.999), 100)
-plt.plot(x, norm.cdf(x),'b-', lw=5, alpha=0.6)
-plt.title('Cumulative Distribution Function (CDF)')
-plt.xlabel(r'$x$', size=14)
-plt.ylabel(r'$P(X\leq x)$', size=14)
-plt.show()
-```
 :::: {.fragment}
-What does it mean when the slope is steeper for some $x$ values?
+We distinguish between discrete and continuous random variables. 
+::::
+
+::: {.content-visible when-profile="web"}
+### Discrete random variables
+:::
+
+::: {.content-visible when-profile="slides"}
+## Discrete random variables
+:::
+
+A _discrete random variable_ is a random variable that can take on
+only a finite or at most a countably infinite number of values.
+
+:::: {.fragment}
+__Examples__
+
+:::: {.incremental}
+- The number of points showing after a roll of a die. 
+- The number of heads after flipping a coin twice.
+::::
+::::
+
+::: {.content-visible when-profile="web"}
+### Continous random variables
+:::
+
+::: {.content-visible when-profile="slides"}
+## Continuous random variables
+:::
+
+A _continuous random variable_ is a random variable that can take on any value from a given range. That is, a continuous random variable has an uncountable set of possible outcomes.
+
+:::: {.fragment}
+__Examples__
+
+:::: {.incremental}
+- The lifetime of a light bulb.
+- The distance a car travels before breaking down.
+::::
+::::
+
+## Distributions
+
+To collect information about what values of random variable are more probable than others, we introduce the concept of distributions.
+
+:::: {.fragment}
+We have two options to consider:
+
+:::: {.incremental}
+- discrete distributions using the _probability mass function (PMF)_, and
+- continuous distributions using the _probability density function (PDF)_.
+::::
 ::::
 
 :::: {.fragment}
-The slope tells us how likely values are in a particular range.
+We will also introduce the cumulative distribution functions corresponding to both PMFs and PDFS.
 ::::
 
-:::: {.fragment}
-This is important enough that we define a function to capture it. 
-::::
+## Discrete Distributions
 
-::: {.content-visible when-="slides"}
-## Probability density functions
-:::
- 
-__Definition.__ The _probability density function_ (pdf) is the derivative of the CDF (when it is defined), i.e.,
-
-$$ f(x) = \frac{dF(x)}{dx}.$$
-
-Often we will write this another way:
-
-$$ F(x) = \int_{-\infty}^{x} f(t) dt. $$
-
-You should be able to see that:
-
-$$ \int_{-\infty}^{+\infty} f(x) dx = 1$$
-
-and
-
-$$ f(x) \geq 0.$$
-
-::: {.content-visible when-="slides"}
-## Probability density functions CDFs
+::: {.content-visible when-profile="web"}
+### Probability Mass Function
 :::
 
-For a discrete random variable, the CDF is not differentiable (because the CDF is a step function).  
+__Definition.__ For a discrete random variable $X$, we define the _probability mass function (PMF)_ $p(a)$ of $X$ by
 
-Discrete RVs have _probability mass functions_ (pmf)and we simply plot the probability function of each value. That is, we plot $P(X = x)$ for the various values of $x$.
+$$p(a) = P(X=a).$$
 
-Another way to think of the pmf is that it consists of impulses at the
-points of discontinuity of the CDF. 
+The PMF $p(a)$ is positive for at most a countable number of values of $a$. That is, if $X$ must assume one of the values $x_1, x_2,...,$ then
 
-For our example of the single die:
+\begin{align*}
+&p(x_i)  \geq 0 \:  \text{ for } i=1,2,... \\
+&p(x)  = 0 \: \text{ for all other values of } x.
+\end{align*}
+
+Since $X$ must take on one of the values $x_i$, we have
+
+$$\sum_{i=1}^{\infty} p(x_i) = 1.$$
+
+::: {.content-visible when-profile="slides"}
+## Discrete Distribution Example
+:::
+
+__Example.__  Consider the roll of a single die.  The random variable here is the number of points showing. What is the PDF of this discrete random variable?
+
+We assign equal probabilities to each outcome $\Omega = \{1, 2, 3, 4, 5, 6\}$:
+
+$$p(x_i) = \frac{1}{6}.$$
 
 ```{python}
 #| fig-align: center
@@ -504,6 +538,103 @@ plt.show()
 ```
 
 ::: {.content-visible when-profile="web"}
+### Cumulative Distribution Function
+:::
+
+::: {.content-visible when-profile="slides"}
+## The Discrete Cumulative Distribution Function
+:::
+
+__Definition.__ The _cumulative distribution function (CDF)_ $F$ can be expressed in terms of $p(a)$ by
+
+$$F(a) = P(X \leq a) = \sum_{x\leq a} p(x).$$
+
+If $X$ is a discrete random variable whose possible values are $x_1 , x_2 , x_3 ,...$, where $x_1 < x_2 < x_3 <...$, then the distribution function $F$ of $X$ is a step function. That is, the value of $F$ is constant in the intervals $[x_i−1,x_i)$ and then takes a step (or jump) of size $p(x_i)$ at $x_i$. 
+
+
+::: {.content-visible when-profile="slides"}
+## Discrete CDF example
+:::
+
+__Example.__  Let us return to the roll of a single die. The corresponding CDF is shown below.
+
+```{python}
+plt.figure()
+for i in range(7):
+    plt.plot([i, i+1-.08], [i/6, i/6],'-b')
+for i in range(1, 7):
+    plt.plot(i, i/6, 'ob')
+    plt.plot(i, (i-1)/6, 'ob', fillstyle = 'none')
+plt.xlim([0, 7])
+plt.ylim([-0.05, 1.1])
+plt.title('Cumulative Distribution Function (CDF)')
+plt.xlabel(r'$x$ (Number of points showing)', size=14)
+plt.ylabel(r'$P(X\leq x)$', size=14)
+plt.show()
+```
+
+## Continous Distributions
+
+::: {.content-visible when-profile="web"}
+### Probability Density Function
+:::
+
+Continuous random variables are described by their _probability density functions (PDFs)_. If $f$ is a PDF, then it has the following properties:
+
+:::: {.incremental}
+- $f(x) \geq 0,$
+- $\int_{- \infty}^{\infty} f(x) dx = 1.$
+::::
+
+:::: {.fragment}
+The probability density function plays a central role in probability theory, because all probability statements about a continuous random variable can be answered in terms of its PDF. 
+
+For instance, for a continuous variable $X$ where $P(X\leq a) = \int_{-\infty}^a f(x) dx$, we obtain
+
+$$P(a \leq X \leq b) = \int_{-\infty}^b f(x) dx - \int_{-\infty}^a f(x) dx = \int_a^b f(x) dx.$$
+::::
+
+::: {.content-visible when-profile="web"}
+### Cumulative Distribution Function
+:::
+
+::: {.content-visible when-profile="slides"}
+## The Continuous Cumulative Distribution Function
+:::
+
+__Definition.__ The _cumulative distribution function (CDF)_ $F$ can be expressed as
+
+$$F(a) = P(X\leq a) = \int_{-\infty}^a f(x) dx.$$
+
+:::: {.fragment}
+The relationship between the continuous CDF and PDF is
+
+$$f(x) = \frac{d F(x)}{dx}.$$
+::::
+
+::: {.content-visible when-profile="web"}
+The above formula tells us that the PDF is the derivative of the CDF.
+:::
+
+::: {.content-visible when-profile="slides"}
+## Continuous CDF example
+:::
+
+Consider the follwing CDF of some random variable:
+
+```{python}
+#| fig-align: center
+from scipy.stats import norm
+plt.figure(figsize=(5, 3))
+x = np.linspace(norm.ppf(0.001), norm.ppf(0.999), 100)
+plt.plot(x, norm.cdf(x),'b-', lw=5, alpha=0.6)
+plt.title('Cumulative Distribution Function (CDF)')
+plt.xlabel(r'$x$', size=14)
+plt.ylabel(r'$P(X\leq x)$', size=14)
+plt.show()
+```
+
+::: {.content-visible when-profile="web"}
 ## Characterizing Random Variables
 :::
 
@@ -511,44 +642,49 @@ plt.show()
 ## Expected value
 :::
 
-__Definition.__ The _expected value_ $E[X]$ of a random
-variable $X$ is the probability-weighted sum or integral of all possible values of
-the R.V.  
+__Definition.__ The _expected value_ $E[X]$ of a random variable $X$ is the probability-weighted sum or integral of all possible values of the R.V.  
 
 For a discrete random variable, this is:
 
-$$E[X] \equiv \sum_{x} x P(X=x),$$
+$$E[X] \equiv \sum_{x} x \cdot P(X=x).$$
 
-and for a continuous random variable with pdf $p()$
+For a continuous random variable with pdf $p()$
 
 $$E[X] \equiv \int_{-\infty}^{+\infty} x p(x) dx.$$
 
+::: {.content-visible when-profile="web"}
 The expected value is also called the average or the mean, although we
 prefer to reserve those terms for empirical statistics (actual measurements, not idealizations like these formulas).
 
 The expected value is in some sense the "center of mass" of the random
 variable. It is often denoted $\mu$.
+:::
+
+::: {.content-visible when-profile="slides"}
+## Expected value continued
+:::
 
 The expected value is usually a quite useful characterization of the random variable.
 
-However, be careful: in some cases, the mean may not be very informative, or important.  
+However, be careful: in certain situations, it may not be very informative, or important.  
 
-In some cases a random variable may not ever take on the mean as a possible value. (Consider again the single die, whose mean is 3.5)
+In some cases a random variable may not ever take on the expected value as a possible value. 
 
-In other cases the notion of average isn't useful, as for the person
-with their head in the oven and feet in the freezer who claims "on
-average I feel fine." 
+::: {.content-visible when-profile="web"}
+As an exmpale, consider the single die, whose expected value is 3.5
+:::
 
-In other words, the mean may not be very informative when
-observations are highly variable. 
+In other cases the notion of expected value isn't useful. Consider a person with their head in an oven and their feet in a freezer who claims "on average I feel fine." 
+
+Importantly, the mean may not be very informative when observations are highly variable. 
 
 ::: {.content-visible when-profile="slides"}
 ## Variance
 :::
 
-In fact, the variability of random quantities is crucially important to characterize.
+The variability of random quantities is crucially important in order to characterize them.
 
-For this we use __variance,__ the mean squared difference of the random variable from its mean.
+For this we use __variance,__ the mean squared difference of the random variable from its expected value.
 
 __Definition.__ The variance of a random variable $X$ is
 
@@ -674,38 +810,87 @@ To properly characterize the variability of a random vector, we need to specify 
 
 We organize these values into a __covariance matrix:__
 
-$$ \text{Cov}[X] = \left[\begin{array}{cccc}
-\text{Var}[X_1] & \text{Cov}[X_1, X_2] & \dots & \text{Cov}[X_1, X_n]\\
+$$ \text{Cov}[\mathbf{X}] = 
+\begin{bmatrix}
+\text{Var}[X_1] & \text{Cov}[X_1, X_2] & \dots & \text{Cov}[X_1, X_n] \\
 \text{Cov}[X_2, X_1] & \text{Var}[X_2] & \dots & \text{Cov}[X_2, X_n]\\
 \vdots & \vdots & \ddots & \vdots\\
 \text{Cov}[X_n,X_1] & \text{Cov}[X_n, X_2] & \dots & \text{Var}[X_n]\\
-\end{array}\right] $$
+\end{bmatrix} $$
 
 A couple things to note about a covariance matrix.
 
 1. The covariance matrix is symmetric (because $\text{Cov}(X_i, X_j) = \text{Cov}(X_j, X_i)$)
-2. The covariance matrix is __positive semidefinite__.
+2. The covariance matrix is __positive semidefinite__, which means $\mathbf{x}^T \text{Cov}[X] \mathbf{x}\geq 0$ for all vectors $\mathbf{x}$.
+
+::: {.content-visible when-profile="web"}
+### Random Variables as Vectors
+
+
+When working with data, we will often treat multiple observations of some feature as samples of a random variable.
+
+We will also typically organize the observations into a vector.
+
+Recall our stock data:
+
+```{python}
+df.head()
+```
+
+Each column can be treated as a vector.
+
+So:
+
+* Let's say that our data frame `df` is represented as a matrix $D$, 
+* and that `df['TSLA']` are observations of some random variable $X$, 
+* and `df['NVDA']` are observations of some random variable $Y$. 
+
+Let $D$ have $n$ rows (i.e., $n$ observations).
+
+Now, let us subtract from each column its mean, to form a new matrix $\tilde{D}$.
+
+In the new matrix $\tilde{D}$, every column has zero mean.
+
+Then notice the following: the Covariance matrix of $(X, Y)$ is simply $\frac{1}{n}\tilde{D}^T\tilde{D}$.
+
+For example, 
+
+\begin{align*}
+\text{Cov}(X,Y) &= E\left[(X-\mu_X)(Y-\mu_Y)\right] \\ 
+&= \frac{1}{n} \sum_i (\tilde{D}_{i1} \cdot \tilde{D}_{i2})\\
+&= \frac{1}{n}\;\tilde{d}_1^T\tilde{d}_2,
+\end{align*}
+
+where $\tilde{d}_1$ and $\tilde{d}_2$ are the columns of $\tilde{D}$.
+
+This shows that __covariance is actually an inner product__ between normalized observation vectors.
+:::
 
 ## Low and High Variability
 
 Historically, most sources of random variation that have concerned
 statisticians are instances of low variability.  
 
-The original roots of
-probability in the study of games of chance, and later in the study of
-biology and medicine, have mainly studied objects with low variability.
+The original roots of probability in the study of games of chance, and later in the study of biology and medicine, have mainly studied objects with low variability.
 
-(Note that by "low variability" I don't mean that such variability is unimportant.)
+Note that by "low variability" I don't mean that such variability is unimportant.
 
 Some examples of random variation in this category are: 
 
+:::: {.incremental}
 * the heights of adult humans
 * the number of trees per unit area in a mature forest
 * the sum of 10 rolls of a die
 * the time between emission of subatomic particles from a radioactive material.
+::::
 
-In each of these cases, there are a range of values that are
- "typical," and there is a clear threshold above what is typical, that essentially never occurs.
+:::: {.fragment}
+In each of these cases, there are a range of values that are "typical," and there is a clear threshold above what is typical, that essentially never occurs.
+::::
+
+::: {.content-visible when-profile="slides"}
+## Low and High Variability continued
+:::
 
 On the other hand, there are some situations in which variability is
 quite different.  
@@ -716,11 +901,17 @@ frequency.
 
 Some examples in this category are
 
+:::: {.incremental}
 * the distribution of wealth among individuals in society
 * the sizes of human settlements
 * the areas burnt in forest fires
 * the runs of gains and losses in various financial markets over time
-* and the number of collaborators a scholar has over her lifetime.   
+* and the number of collaborators a scholar has over their lifetime.   
+::::
+
+::: {.content-visible when-profile="slides"}
+## High Variability example
+:::
 
 > The banking system (betting against rare events) just lost [more than] 1
 > Trillion dollars (so far) on a single error, more than was ever earned
@@ -728,142 +919,86 @@ Some examples in this category are
 
 Nassim Nicholas Taleb, September 2008 
 
+![](figs/derivatives-portfolio-variation.png){fig-align="center"}
+
+An example of a run of observations showing high variability.   This figure shows the daily variations in a derivatives portfolio over the timeframe 1988-2008. About 99% of the variation over the 20 years occurs in a single day (the day the European Monetary System collapsed).
 
 
+## Important Distributions
 
-![](figs/derivatives-portfolio-variation.png)
+::: {.content-visible when-profile="web"}
+Now we will review certain distributions that come up over and over again in typical situations.
+:::
 
-An example of a run of observations showing high variability.   This figure shows the daily
-variations in a derivatives portfolio over the timeframe 1988-2008.
-About 99% of the variation over the 20 years occurs in a single day
-(the day the European Monetary System collapsed).
+::: {.content-visible when-profile="slides"}
+We will review the following important distributions:
 
-## Important Random Variables
+:::: {.incremental}
+- Binomial distribution (discrete)
+- Geometric distribution (discrete)
+- Poisson distribution (discrete)
+- Exponential distribution (continous)
+- Gaussian distribution (continous)
+::::
 
-Now we will review certain random variables that come up over and over again in typical situations.
+:::: {.fragment}
+See the course notes for other important distributions.
+::::
+:::
 
-### Independent Binary Trials
+::: {.content-visible when-profile="web"}
+### The Bernoulli Distribution
 
-Here is our canonical experiment: flipping a weighted coin.  
+An experiment of a particularly simple type is one in which there are only two possible outcomes, such as 
 
-The coin
-comes up "heads" (aka "success") with probability $p$.  
+- head or tail,
+- success or failure,
+- defective or nondefective component,
+- patient recovers or does not recover.
 
-We use the standard notation that the corresponding probability ("tails", "failure") is denoted $q$
-(i.e., $q = 1-p$).  
+Each distributions has one or more _parameters_.  Parameters are settings that control the distribution. A Bernoulli distribution has one parameter, $p$, which is the probability that the random variable is equal to 1. 
 
-These are called _Bernoulli trials_.
+__Definition.__ It is said that a random variable $X$ has a _Bernoulli distribution_ with parameter $p$ $(0\leq p \leq 1)$ if $X$ can take only the values 0 and 1 and the corresponding probabilities are
 
-One can think of each trial as a timestep so these are about _discrete
-  time_.
-  
-Notice that by definition, Bernoulli trials are __independent events.__
+$$P(X=1) = p \: \text{ and } \: P(X=0) = 1-p.$$
 
-Now we will extend this notion to continuous time.
+Note that there is a particularly concise way of writing the above definition:
 
-To start with, imagine that you flip the coin once per second.
+$$ p(x) = p^x (1-p)^{(1-x)} \: \text{ for } \: x = 0 \text{ and } x=1.$$
 
-So we expect to observe $p$ successes per second.
+The mean of a $X$ is $p$ and the variance of $X$ is $p(1-p)$.
 
-Now, imagine that you "speed up" the coin flipping so that instead of flipping a coin once per second,
-you flip it $m > 1$ times per second, 
+:::
 
-... and you simultaneously decrease the
-probability of success to $p/m$.   
+::: {.content-visible when-profile="web"}
+### The Binomial Distribution
+:::
 
-Then you expect the same number of
-successes per second (i.e., $p$) ... but events can happen at finer time
-intervals.   
+::: {.content-visible when-profile="slides"}
+## The Binomial Distribution
+:::
 
-Now imagine the limit as $m \rightarrow \infty$.  
+The binomial distribution considers precisely $N$ Bernoulli trials. Each trial has the probability of a success equal to $p$. $N$ and $p$ are the parameters of the binomial distribution. 
 
-This is a
-mathematical abstraction in which 
-* an event can happen at _any_ time instant
-* an event at any time instant is equally likely
-* and an event at any time instant is independent of any other time instant (it's still a coin with no memory).   
+The binomial distribution answers the question "What is the probability there will be $k$ successes in $N$ trials?"
 
-In this setting, we can think of events happening at some _rate_ $\lambda$ that is
-equal to $p$ per second.  
+__Definition.__ If $X$ represents the number of successes that occur in $N$ trials, then $X$ is said to have a _binomial distribution_ with parameters $N$ and $p$ $(0\leq p \leq 1)$. The PMF of a binomial random variable is given by
 
-Note that $\lambda$ has units of inverse time, e.g., sec$^{-1}$. 
+$$p(k) = P(X=k) = \binom{N}{k}\; p^k\; (1-p)^{N-k} \: \text{ for } k=0,1,...,N.$$
 
-Thus we have defined two kinds of coin-flipping:
-* in discrete time (Bernoulli trials with success probability $p$)
-* and in continuous time (with success rate $\lambda$)
+::: {.content-visible when-profile="web"}
+The validity of the above PMF can be verified as follows. First we notice, that, by the assumed independence of trials, for any __given__ sequence of $k$ successes and $N-k$ failures, the probability is $p^k \;(1-p)^{N-k}$. Then there are $\binom{N}{k}$ different sequences of the $N$ outcomes leading to $k$ successes and $N-k$ failures.
+:::
 
-For each of these two cases (discrete and continuous time) there are two questions we can ask:
+The mean of the Binomial distribution is $pN$, and its variance is $p(1-p)N$.
 
-1. Given that an event has just occured, how long until the next
-  success?
-2. In a fixed number of trials or amount of time, how many events
-  occur?
-
-These four cases define four commonly-used random variables.
-
-
-
-
-| | # Trials or Time Until Event | Number of Events in Fixed Time  |
-|-|:--:|:--:|
-|__Discrete Trials__| Geometric| Binomial |
-|__Continuous Rate__| Exponential | Poisson|
-
-Each one has an associated distribution.
-
-#### The Geometric Distribution
-
-The geometric distribution concerns Bernoulli trials.
-
-It answers the question: "what is the probability it takes $k$ trials to obtain the first success?"
-
-Its PDF is given by:
-
-$$ P(X = k) = p(1-p)^{k-1}. \;\; k \geq 1$$ 
-
-Its mean is $\mu = \frac{1}{p}$ and its variance is $\sigma^2 = \frac{1-p}{p^2}$.
-
-Its pdf looks like:
+::: {.content-visible when-profile="slides"}
+## Binomial Distribution Example
+:::
+The PMF of the Binomial distribution with $N = 10$ and $p=0.3$ is shown below.
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
-from scipy.stats import geom
-p = 0.3
-x = np.arange(geom.ppf(0.01, p), geom.ppf(0.995, p))
-plt.ylim([0, 0.4])
-plt.xlim([0.5, max(x)])
-plt.plot(x, geom.pmf(x, p), 'bo', ms=8, label = 'geom pmf')
-plt.vlines(x, 0, geom.pmf(x, p), colors='b', lw = 5, alpha = 0.6)
-plt.title(f'Geometric PDF, $p$ = {p}', size=14)
-plt.xlabel(r'$k$', size=14)
-plt.ylabel(r'$P(X = k)$', size=14)
-plt.show()
-```
-
-#### The Binomial Distribution
-
-The Binomial also concerns Bernoulli trials.
-
-In this experiment there are precisely $N$ coin flips, and $p$ is still
-the probability of a success.  
-
-Now we ask: what is the probability there
-will be $k$ successes?
-
-For any __given__ sequence of $k$ successes and $N-k$ failures, the probability is $p^k \;(1-p)^{N-k}$.
-
-But there are many different such sequences: $\binom{N}{k}$ of them in fact. 
-
-So this distribution is $P(X=k) = \binom{N}{k}\; p^k\; (1-p)^{N-k}.$
-
-Its mean is $pN$, and its variance is $pqN$.  
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
 from scipy.stats import binom
 p = 0.3
 x = np.arange(binom.ppf(0.01, 10, p), binom.ppf(0.9995, 10, p))
@@ -877,26 +1012,193 @@ plt.ylabel(r'$P(X = k)$', size=14)
 plt.show()
 ```
 
-#### The Exponential Distribution
+::: {.content-visible when-profile="web"}
+### The Geometric Distribution
+:::
 
-Now we shift to a situation where successes occur at a fixed __rate.__
+::: {.content-visible when-profile="slides"}
+## The Geometric Distribution
+:::
 
-The Exponential random variable is the analog of the geometric in the continuous case,
-_i.e.,_ the situation in which a success happens at some rate
-$\lambda$.  
+The geometric distribution concerns Bernoulli trials as well. It has only one parameter $p$, the probability of success.
 
-This RV can be thought of as measuring the __time__ until a success occurs. 
+The geometric distribution answers the question: "What is the probability it takes $k$ trials to obtain the first success?"
 
-Its pdf is:
+__Definition.__ It is said that a random variable $X$ has a _geometric distribution_ with parameter $p$ $(0\leq p \leq 1)$ if $X$ has a discrete distribution with 
 
-$$ p(x) = \lambda e^{- \lambda x}$$
+The mean of the geometric distribution is equal to $\frac{1}{p}$ and its variance is $\frac{1-p}{p^2}$. 
 
-The mean is $1/\lambda$, and the variance is $1/\lambda^2$.
+::: {.content-visible when-profile="slides"}
+## Geometric Distribution Example
+:::
+
+An example of the geometric PMF is given below.
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
+from scipy.stats import geom
+p = 0.3
+x = np.arange(geom.ppf(0.01, p), geom.ppf(0.995, p))
+plt.ylim([0, 0.4])
+plt.xlim([0.5, max(x)])
+plt.plot(x, geom.pmf(x, p), 'bo', ms=8, label = 'geom pmf')
+plt.vlines(x, 0, geom.pmf(x, p), colors='b', lw = 5, alpha = 0.6)
+plt.title(f'Geometric PDF, $p$ = {p}', size=14)
+plt.xlabel(r'$k$', size=14)
+plt.ylabel(r'$P(X = k)$', size=14)
+plt.show()
+```
+
+::: {.content-visible when-profile="web"}
+### The Poisson Distribution
+:::
+
+::: {.content-visible when-profile="slides"}
+## The Poisson Distribution
+:::
+
+Although the Bernoulli trials underlie all of the previous distributions, they do not form the basis for the Poisson distribution. To introduce the Poisson distribution we will look at some examples of random variables that generally obey the Poisson probability law are as follows:
+
+1. The number of misprints on a page (or a group of pages) of a book;
+1. The number of people in a community who survive to age 100;
+1. The number of wrong telephone numbers that are dialed in a day;
+1. The number of customers entering a post office on a given day;
+1. The number of $\alpha$-particles discharged in a fixed period of time from some radioactive material.
+
+In the above examples the events appear to happen at a certain rate, but completely at random (i.e., without a certain structure). 
+
+::: {.content-visible when-profile="slides"}
+## The Poisson Distribution continued
+:::
+
+A Poisson distribution answers the question: "How many successes occur in a fixed amount of time?"
+
+__Definition.__ A random variable $X$ that takes on one of the values $0, 1, 2,...$ is said to have a _Poisson distribution_ with parameter $\lambda$ if, for some $\lambda > 0$,
+
+$$p(k) = P(X=k) = \lambda^k \frac{e^{- \lambda}}{k!} \: \text{ for } x = 0, 1, 2,...$$
+
+::: {.content-visible when-profile="web"}
+This $p(k)$ defines a PMF, because
+
+$$\sum_{k=0}^{\infty} p(k) = \sum_{k=0}^{\infty} \lambda^k \frac{e^{- \lambda}}{k!} = e^{- \lambda} \sum_{k=0}^{\infty} \frac{\lambda^k}{k!} = e^{- \lambda} e^{\lambda} = 1.$$
+
+Here, we used the fact that the exponential function $e^{\lambda}$, can be expressed as series, $\sum_{k=0}^{\infty} \frac{\lambda^k}{k!}$ for every real number $\lambda$.
+:::
+
+Both the mean and the variance of a Poisson distribution with parameter $\lambda$ are equal to $\lambda.$
+
+::: {.content-visible when-profile="slides"}
+## Poisson Distribution Example
+:::
+The PMF of the Poisson distribution with parameter $\lambda = 0.3$  is shown below.
+
+```{python}
+#| fig-align: center
+from scipy.stats import poisson
+mu = 3
+x = np.arange(poisson.ppf(0.01, mu), poisson.ppf(0.9995, mu))
+# plt.ylim([0,1])
+plt.xlim([-0.5, max(x)+0.5])
+plt.ylim(ymax = 0.4)
+plt.plot(x, poisson.pmf(x, mu), 'bo', ms=8, label='poisson pmf')
+plt.vlines(x, 0, poisson.pmf(x, mu), colors='b', lw=5, alpha=0.6)
+plt.title(f'Poisson PDF.  $\lambda T$ = {mu}', size=14)
+plt.xlabel(r'k', size=14)
+plt.ylabel(r'P(X = k)', size=14)
+plt.show()
+```
+
+::: {.content-visible when-profile="web"}
+The Poisson random variable has a tremendous range of applications in diverse areas. The reason for that is the fact that a Poisson distribution with mean $Np$ may be used as an approximation for a binomial distribution with parameters $N$ and $p$ when $N$ is large and $p$ is small enough so that $Np$ is of moderate size. 
+
+
+The Poisson distribution has an interesting role in our perception of randomness (which you can read more about [here](http://www.empiricalzeal.com/2012/12/21/what-does-randomness-look-like/#more-2450)).    
+
+The classic example comes from history.  From the above site:
+:::
+
+::: {.content-visible when-profile="slides"}
+## Poisson Distribution and Horse Kicks
+:::
+
+>In 1898 Ladislaus Bortkiewicz, a Russian statistician of Polish descent, was trying to understand why, in some years, 
+>an unusually large number of soldiers in the Prussian army were dying due to horse-kicks. In a single army corp, 
+>there were sometimes 4 such deaths in a single year. Was this just coincidence?
+
+To assess whether horse-kicks were random (not following any pattern) Bortkiewicz simply compared the number per year to what would be predicted by the Poisson distribution.
+
+::: {.content-visible when-profile="slides"}
+## Poisson Distribution and Horse Kicks continued
+:::
+
+```{python}
+#| fig-align: center
+# note that this data is available in 'data/HorseKicks.txt'
+horse_kicks = pd.DataFrame(
+data = np.array([
+[0, 108.67, 109],
+[1, 66.29, 65],
+[2, 20.22, 22],
+[3, 4.11, 3],
+[4, 0.63, 1],
+[5, 0.08, 0],
+[6, 0.01, 0]]),
+columns = ["Number of Deaths Per Year","Predicted Instances (Poisson)","Observed Instances"])
+horse_kicks
+```
+
+```{python}
+#| fig-align: center
+horse_kicks[["Predicted Instances (Poisson)","Observed Instances"]].plot.bar()
+plt.xlabel("Number of Deaths Per Year", size=14)
+plt.ylabel("Count", size=14)
+plt.show()
+```
+
+The message here is that when events occur at random, we actually tend to perceive them as clustered.   
+
+::: {.content-visible when-profile="web"}
+Here is another example:
+
+![](figs/pinker-glow-worms-and-stars-plot.jpg)
+
+Which of these was generated by a random process ocurring equally likely everywhere?
+
+These images are from Steven Pinker’s book, _The Better Angels of our Nature._
+
+In the left figure, the number of dots falling into regions of a given size follows the Poisson distribution.
+:::
+
+::: {.content-visible when-profile="web"}
+### The Exponential Distribution
+:::
+
+::: {.content-visible when-profile="slides"}
+## The Exponential Distribution
+:::
+
+The exponential distribution is an example of a continuous distribution. It concerns a Poisson process and has one parameter, $\lambda$, the rate of success.
+
+__Definition.__ A continuous random variable whose PDF is given, for some $\lambda > 0$, by
+
+$$f(x) = \;\left\{\begin{array}{cr} \lambda e^{-\lambda x} & \text
+{for  } x \geq 0, \\ 0 & \text{otherwise}\end{array}\right.$$
+
+is said to be _exponentially distributed_ with parameter $\lambda$.
+
+The CDF, $F(a)$, of an exponential random variable is given by
+
+$$F(a) = P(X \leq a) = 1 - e^{-\lambda x} \mbox{ for } a \geq 0.$$ 
+
+Its mean is $1/\lambda$, and the variance is $1/\lambda^2$.
+
+The exponential distribution answers the question: "What is the probability it takes time $x$ to obtain the first success?"
+
+::: {.content-visible when-profile="slides"}
+## The Exponential Distribution PDF
+:::
+```{python}
+#| fig-align: center
 from scipy.stats import expon
 p = 0.3
 x = np.linspace(expon.ppf(0.01, scale=1/p), expon.ppf(0.995, scale=1/p), 100)
@@ -909,11 +1211,13 @@ plt.xlim([0, 14])
 plt.show()
 ```
 
-Notice how the Exponential is the __continuous analog__ of the Geometric:
+::: {.content-visible when-profile="slides"}
+## The Exponential Distribution CDF
+:::
+The exponential is the __continuous analog__ of the geometric distribution.
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
+#| fig-align: center
 from math import exp 
 lam = 0.3
 p = 1 - exp(- lam)
@@ -931,92 +1235,8 @@ plt.legend(loc = 'best')
 plt.show()
 ```
 
-#### The Poisson Distribution
-
-When we ask the question 
-
-"How many successes occur in a fixed amount of time?", 
-
-...we get the Poisson distribution.
-
-The Poisson Distribution is the limiting form of binomial, when the
-number of trials goes to infinity, happening at some rate $\lambda$.
-
-$$ P(k \mbox{ successes in time } T]=) = (\lambda T)^k \frac{e^{- \lambda T}}{k!}$$
-
-It answers the question: when events happen indepdently at some fixed rate, how many will occur in a given fixed interval?
-
-Its mean is $\lambda T$ and its variance is $\lambda T$ as well.
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
-from scipy.stats import poisson
-mu = 3
-x = np.arange(poisson.ppf(0.01, mu), poisson.ppf(0.9995, mu))
-# plt.ylim([0,1])
-plt.xlim([-0.5, max(x)+0.5])
-plt.ylim(ymax = 0.4)
-plt.plot(x, poisson.pmf(x, mu), 'bo', ms=8, label='poisson pmf')
-plt.vlines(x, 0, poisson.pmf(x, mu), colors='b', lw=5, alpha=0.6)
-plt.title(f'Poisson PDF.  $\lambda T$ = {mu}', size=14)
-plt.xlabel(r'k', size=14)
-plt.ylabel(r'P(X = k)', size=14)
-plt.show()
-```
-
-The Poisson distribution has an interesting role in our perception of randomness (which you can read more about [here](http://www.empiricalzeal.com/2012/12/21/what-does-randomness-look-like/#more-2450)).    
-
-The classic example comes from history.  From the above site:
-
->In 1898 Ladislaus Bortkiewicz, a Russian statistician of Polish descent, was trying to understand why, in some years, 
->an unusually large number of soldiers in the Prussian army were dying due to horse-kicks. In a single army corp, 
->there were sometimes 4 such deaths in a single year. Was this just coincidence?
-
-To assess whether horse-kicks were random (not following any pattern) Bortkiewicz simply compared the number per year to what would be predicted by the Poisson distribution.
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
-# note that this data is available in 'data/HorseKicks.txt'
-horse_kicks = pd.DataFrame(
-data = np.array([
-[0, 108.67, 109],
-[1, 66.29, 65],
-[2, 20.22, 22],
-[3, 4.11, 3],
-[4, 0.63, 1],
-[5, 0.08, 0],
-[6, 0.01, 0]]),
-columns = ["Number of Deaths Per Year","Predicted Instances (Poisson)","Observed Instances"])
-horse_kicks
-```
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
-horse_kicks[["Predicted Instances (Poisson)","Observed Instances"]].plot.bar()
-plt.xlabel("Number of Deaths Per Year", size=14)
-plt.ylabel("Count", size=14)
-plt.show()
-```
-
-The message here is that when events occur at random, we actually tend to perceive them as clustered.   
-
-Here is another example:
-
-![](figs/pinker-glow-worms-and-stars-plot.jpg)
-
-Which of these was generated by a random process ocurring equally likely everywhere?
-
-These images are from Steven Pinker’s book, _The Better Angels of our Nature._
-
-In the left figure, the number of dots falling into regions of a given size follows the Poisson distribution.
-
-#### The Uniform Distribution
+::: {.content-visible when-profile="web"}
+### The Uniform Distribution
 
 The uniform distribution models the case in which all outcomes are equally probable.  
 
@@ -1025,9 +1245,7 @@ It can be a discrete or continuous distribution.
 We have already seen the uniform distribution in the case of rolls of a fair die:
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
 plt.figure()
 x = np.arange(1, 7)
 plt.plot(x, 6*[1/6.], 'bo', ms=8)
@@ -1048,60 +1266,65 @@ You can replace "time" with "location", and so on.
 Also, the reverse statment is true as well.
 
 So a simple way to generate a picture like the scattered points above is to select the $x$ and $y$ coordinates of each point uniformly distributed over the picture size.
+:::
 
+::: {.content-visible when-profile="web"}
 ### The Gaussian Distribution
+:::
+
+::: {.content-visible when-profile="slides"}
+## The Gaussian Distribution
+:::
 
 The Gaussian Distribution is also called the Normal Distribution.
 
 We will make __extensive__ use of Gaussian distribution, for a number of reasons.
 
-<center>
-
-<img src="./figs/Gauss-on-Deutschemark.png" width="600px">
-
-</center>
+![](/figs/Gauss-on-Deutschemark.png){fig-align="center" width="600px"}
 
 One of reasons we will use it so much is that it is a good guess for how errors are distributed in data.
 
-This comes from the celebrated __Central Limit Theorem__.   Informally, 
+::: {.content-visible when-profile="web"}
+This comes from the celebrated __Central Limit Theorem__.  Informally, 
 
 >_The sum of a large number of independent observations from any
 >distribution with finite variance tends to have a Gaussian
 > distribution._
 
-<center>
-
-<img src="./figs/Galton-Bean-Machine.png" width="350px">
-
-     Francis Galton's "Bean Machine"
-    
-</center>
+![](figs/Galton-Bean-Machine.png){fig-align="center" width="350px"}"
 
 As a special case, the sum of $n$ independent Gaussian variates is Gaussian.
-
 
 Thus Gaussian processes remain Gaussian after passing through linear
 systems.   
 
 If $X_1$ and $X_2$ are Gaussian, then $X_3 = aX_1 + bX_2$ is Gaussian.
 
-Thus we can see that one way of thinking of the Gaussian is that it is the
-limit of the Binomial when $n$ is large, that is, the limit of
-the sum of many Bernoulli trials.    
+One way of thinking of the Gaussian is that it is the limit of the Binomial when $N$ is large, that is, the limit of the sum of many Bernoulli trials.    
 
-However many other
-sums of random variables (not just Bernoulli trials) converge to the
-Gaussian as well.
+However many other sums of random variables (not just Bernoulli trials) converge to the Gaussian as well.
+:::
 
-The _standard Gaussian_ distribution has mean zero and a variance (and standard deviation)
-of 1.   The pdf of the standard Gaussian is:
+::: {.content-visible when-profile="slides"}
+## The Gaussian Distribution PDF
+:::
+
+The _standard Gaussian_ distribution has mean zero and a variance (and standard deviation) of 1. The pdf of the standard Gaussian is:
 
 $$ p(x) = \frac{1}{\sqrt{2 \pi}} e^{-x^2/2}. $$
 
+For an arbitrary Gaussian distribution with mean $\mu$ and variance
+$\sigma^2$, the pdf is simply the standard Gaussian that is relocated to
+have its center at $\mu$ and its width scaled by $\sigma$
+
+$$ p_{\mu,\sigma}(x) = \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}.$$
+
+::: {.content-visible when-profile="slides"}
+## The Gaussian PDF Example
+:::
+
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
 from scipy.stats import norm
 plt.figure()
 x = np.linspace(norm.ppf(0.001), norm.ppf(0.999), 100)
@@ -1112,10 +1335,12 @@ plt.ylabel(r'$p(x)$', size=14)
 plt.show()
 ```
 
+::: {.content-visible when-profile="slides"}
+## The Gaussian CDF Example
+:::
+
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
 plt.figure()
 x = np.linspace(norm.ppf(0.001), norm.ppf(0.999), 100)
 plt.plot(x, norm.cdf(x),'b-', lw = 5, alpha = 0.6)
@@ -1125,12 +1350,7 @@ plt.ylabel(r'$P(X\leq x)$', size=14)
 plt.show()
 ```
 
-For an arbitrary Gaussian distribution with mean $\mu$ and variance
-$\sigma^2$, the pdf is simply the standard Gaussian that is relocated to
-have its center at $\mu$ and its width scaled by $\sigma$:
-
-$$ p_{\mu,\sigma}(x) = \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}. $$
-
+::: {.content-visible when-profile="web"}
 ### Heavy Tails
 
 Earlier we discussed high- and low-variability.   
@@ -1172,9 +1392,7 @@ $$ p(x) = \alpha k^{\alpha} x^{-\alpha-1}\;\;\; k \leq x,\; \;0 < \alpha
 It takes on values in the range $[k, \infty]$. 
 
 ```{python}
-#| hide_input: false
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
+#| fig-align: center
 from scipy.stats import pareto
 alpha = 1.3
 x = np.linspace(pareto.ppf(0.005,alpha), pareto.ppf(0.995,alpha), 100)
@@ -1194,63 +1412,15 @@ of the random variable have already been taken.
 
 The mean of the Pareto is $\frac{k\alpha}{\alpha-1}$, for $\alpha > 1$.  
 
-But
-note that as $\alpha$ decreases, the variability of the Pareto
-increases.  
+But note that as $\alpha$ decreases, the variability of the Pareto increases.  
 
-In fact, for $\alpha \leq 1$, the Pareto distribution has
-_infinite mean._  Again, in practice this means that a swamping
-observation for the mean is always possible.   
+In fact, for $\alpha \leq 1$, the Pareto distribution has _infinite mean._  Again, in practice this means that a swamping observation for the mean is always possible.   
 
-Hence the running average
-of a series of Pareto observations with $\alpha \leq 1$ will never
-converge to a fixed value, and the mean itself is not a useful
-statistic in this case.
-
-### Random Variables as Vectors
-
-When working with data, we will often treat multiple observations of some feature as samples of a random variable.
-
-We will also typically organize the observations into a vector.
-
-For example, consider our stock data:
-
-```{python}
-df
-```
-
-Each column can be treated as a vector.
-
-So:
-* Let's say that our data frame `df` is represented as a matrix $D$, 
-* and that `df['TSLA']` are observations of some random variable $X$, 
-* and `df['NVDA']` are observations of some random variable $Y$.  
-
-Let $D$ have $n$ rows (ie, $n$ observations).
-
-Now, let us subtract from each column its mean, to form a new matrix $\tilde{D}$.
-
-In the new matrix $\tilde{D}$, every column has zero mean.
-
-Then notice the following: the Covariance matrix of $(X, Y)$ is simply $\frac{1}{n}\; \tilde{D}^T\tilde{D}$.
-
-For example, 
-
-$$ \text{Cov}(X,Y) = E\left[(X-\mu_X)(Y-\mu_Y)\right] $$ 
-
-$$ = \frac{1}{n} \sum_i (\tilde{D}_{i1} \cdot \tilde{D}_{i2}) $$
-
-$$ = \frac{1}{n}\;\tilde{d}_1^T\tilde{d}_2$$
-
-where $\tilde{d}_1$ and $\tilde{d}_2$ are the columns of $\tilde{D}$.
-
-This shows that __covariance is actually an inner product__ between normalized observation vectors.
+Hence the running average of a series of Pareto observations with $\alpha \leq 1$ will never converge to a fixed value, and the mean itself is not a useful statistic in this case.
 
 ### The Multivariate Gaussian
 
 The most common multivariate distribution we will work with is the multivariate Gaussian.
-
-
 
 The multivariate normal distribution of a random vector $\mathbf{X} = (X_1, \dots, X_k)^T$ is denoted:
 
@@ -1264,11 +1434,11 @@ Here are some examples.
 
 We'll consider two-component random vectors:
 
-$$ \mathbf{X} = \begin{bmatrix}X_1\\X_2\end{bmatrix} $$
+$$\mathbf{X} = \begin{bmatrix}X_1\\X_2\end{bmatrix}.$$
 
-And our first example will be a simple one:
+And our first example will be a simple one
 
-$$ \mathbf{\mu} = \begin{bmatrix}1\\1\end{bmatrix}\;\;\;\;\Sigma = \begin{bmatrix}1 & 0\\0 & 1\end{bmatrix} $$
+$$ \mathbf{\mu} = \begin{bmatrix}1\\1\end{bmatrix}\;\;\;\;\Sigma = \begin{bmatrix}1 & 0\\0 & 1\end{bmatrix}.$$
 
 We see that the variance (and standard deviation) of each component is 1.
 
@@ -1277,20 +1447,17 @@ However the covariances are zero -- the components are uncorrelated.
 We will take 600 samples from this distribution.
 
 ```{python}
-#| hide_input: false
-#| slideshow: {slide_type: skip}
-#| tags: [hide-cell]
+#| fig-align: center
 from scipy.stats import multivariate_normal
 np.random.seed(4)
-df1 = pd.DataFrame(multivariate_normal.rvs(mean = np.array([1, 1]), cov = np.eye(2), size = 600),
-                  columns = ['X1', 'X2'])
+df1 = pd.DataFrame(multivariate_normal.rvs(mean = np.array([1, 1]),
+                                           cov = np.eye(2), 
+                                           size = 600), 
+                                           columns = ['X1', 'X2'])
 ```
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
 g = sns.JointGrid(data = df1, x = 'X1', y = 'X2', height = 5)
 g.plot(sns.scatterplot, sns.kdeplot)
 g.ax_joint.plot(1, 1, 'ro', markersize = 6)
@@ -1300,10 +1467,7 @@ plt.show()
 ```
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
 g = sns.JointGrid(data = df1, x = 'X1', y = 'X2', height = 5)
 g.plot(sns.kdeplot, sns.kdeplot)
 g.ax_joint.plot(1, 1, 'ro', markersize = 6)
@@ -1313,18 +1477,27 @@ plt.show()
 ```
 
 ```{python}
-#| hide_input: false
-#| slideshow: {slide_type: skip}
-#| tags: [hide-cell]
+#| fig-align: center
 np.random.seed(4)
-df1 = pd.DataFrame(multivariate_normal.rvs(mean = np.array([1, 1]), cov = np.array([[1, 0.8],[0.8, 1]]), 
+df1 = pd.DataFrame(multivariate_normal.rvs(mean = np.array([1, 1]), 
+                                           cov = np.array([[1, 0.8],[0.8, 1]]), 
                                            size = 600),
-                  columns = ['X1', 'X2'])
+                                           columns = ['X1', 'X2'])
 ```
 
-Next, we look at the case:
+Next, we look at the case
 
-$$ \mathbf{\mu} = \begin{bmatrix}1\\1\end{bmatrix}\;\;\;\;\Sigma = \begin{bmatrix}1 & 0.8\\0.8 & 1\end{bmatrix} $$
+$$\mathbf{\mu} = 
+\begin{bmatrix}
+1 \\ 
+1
+\end{bmatrix}
+\qquad
+\Sigma = 
+\begin{bmatrix}
+1 & 0.8 \\
+0.8 & 1
+\end{bmatrix}.$$
 
 Notice that $\text{Cov}(X_1, X_2) = 0.8$.   
 
@@ -1333,10 +1506,7 @@ We say that the components are __positively correlated.__
 Nonetheless, __the marginals are still Gaussian.__
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
 g = sns.JointGrid(data = df1, x = 'X1', y = 'X2', height = 5)
 g.plot(sns.scatterplot, sns.kdeplot)
 g.ax_joint.plot(1, 1, 'ro', markersize = 6)
@@ -1346,10 +1516,7 @@ plt.show()
 ```
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
+#| fig-align: center
 g = sns.JointGrid(data = df1, x = 'X1', y = 'X2', height = 5)
 g.plot(sns.kdeplot, sns.kdeplot)
 g.ax_joint.plot(1, 1, 'ro', markersize = 6)
@@ -1359,26 +1526,32 @@ plt.show()
 ```
 
 ```{python}
-#| hide_input: false
-#| slideshow: {slide_type: skip}
-#| tags: [hide-cell]
+#| fig-align: center
 np.random.seed(4)
-df1 = pd.DataFrame(multivariate_normal.rvs(mean = np.array([1, 1]), cov = np.array([[1, -0.8],[-0.8, 1]]), 
-                                           size = 600),
-                  columns = ['X1', 'X2'])
+df1 = pd.DataFrame(multivariate_normal.rvs(mean = np.array([1, 1]), 
+                                           cov = np.array([[1, -0.8],[-0.8, 1]]), 
+                                           size = 600), 
+                                           columns = ['X1', 'X2'])
 ```
 
 Next, we look at the case:
 
-$$ \mathbf{\mu} = \begin{bmatrix}1\\1\end{bmatrix}\;\;\;\;\Sigma = \begin{bmatrix}1 & -0.8\\-0.8 & 1\end{bmatrix} $$
+$$\mathbf{\mu} = 
+\begin{bmatrix} 
+1 \\
+1
+\end{bmatrix}
+\qquad
+\Sigma = 
+\begin{bmatrix} 
+1 & -0.8 \\
+-0.8 & 1
+\end{bmatrix}.$$
 
 Notice that $\text{Cov}(X_1, X_2) = -0.8$.   We say that the components are __negatively correlated__ or __anticorrelated.__
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
 g = sns.JointGrid(data = df1, x = 'X1', y = 'X2', height = 5)
 g.plot(sns.scatterplot, sns.kdeplot)
 g.ax_joint.plot(1, 1, 'ro', markersize = 6)
@@ -1388,11 +1561,7 @@ plt.show()
 ```
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| scrolled: false
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
+#| fig-align: center
 g = sns.JointGrid(data = df1, x = 'X1', y = 'X2', height = 5)
 g.plot(sns.kdeplot, sns.kdeplot)
 g.ax_joint.plot(1, 1, 'ro', markersize = 6)
@@ -1404,10 +1573,7 @@ plt.show()
 Finally, let's look at our stock data:
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
+#| fig-align: center
 g = sns.JointGrid(data = df, x = 'TSLA', y = 'NVDA', height = 5)
 g.plot(sns.scatterplot, sns.kdeplot)
 g.ax_joint.plot(df.mean()['TSLA'], df.mean()['NVDA'], 'ro', markersize = 6)
@@ -1415,9 +1581,7 @@ plt.show()
 ```
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| tags: [hide-input]
+#| fig-align: center
 g = sns.JointGrid(data = df, x = 'TSLA', y = 'NVDA', height = 5)
 g.plot(sns.kdeplot, sns.kdeplot)
 g.ax_joint.plot(df.mean()['TSLA'], df.mean()['NVDA'], 'ro', markersize = 6)
@@ -1466,7 +1630,7 @@ interval $(A, B)$.
 This interval is constructed based on the
 data, which (by assumption) are random.
 
-![](figs/confidence-intervals.png)
+![](figs/confidence-intervals.png){fig-align="center"}
 
 ## Confidence Intervals for the Mean
 
@@ -1526,9 +1690,7 @@ So to form a 90% probability interval for $S$ (centered on
 zero) we choose $k = z_{0.95}$.  
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
 from scipy.stats import norm
 plt.figure()
 x = np.linspace(norm.ppf(0.001), norm.ppf(0.999), 100)
@@ -1575,4 +1737,4 @@ confidence interval for the population mean is given by
 $$\bar{x} \pm  z_{1-\alpha/2} \, \frac{s}{\sqrt{n}}. $$
 
 As an example, a 95% confidence interval for the mean is the sample average plus or minus two standard errors.
-
+:::
