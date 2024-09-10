@@ -536,7 +536,7 @@ But that is not as interesting as the returns.
 So next, we calculate the returns over a period of length $T$. The returns are defined as
 
 $$
-r(t) = \frac{f(t)-f(t-T)}{f(t)}. 
+r(t) = \frac{f(t)-f(t-T)}{f(t-T)}. 
 $$
 
 The returns can be computed with a simple DataFrame method `pct_change()`.  Note that for the first $T$ timesteps, this value is not defined.
