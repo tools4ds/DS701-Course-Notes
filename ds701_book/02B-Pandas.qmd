@@ -8,8 +8,6 @@ code-fold: false
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/02B-Pandas.ipynb)
 
-In this chapter we discuss the first of two important Python packages, Pandas.
-
 In this lecture we discuss one of most useful Python packages for data 
 science -- Pandas.
 
@@ -113,7 +111,9 @@ df = pd.read_csv('nvidia_data.csv')
 df.head()
 ```
 
+::: {.callout-caution}
 But be careful, the index column is not automatically set.
+:::
 
 ```{python}
 df.info()
@@ -467,6 +467,7 @@ gain_groups = df.groupby(by='cat_gain')
 ---
 
 Essentially, `gain_groups` behaves like a dictionary:
+
 * the keys are the unique values found in the `gain` column, and 
 * the values are DataFrames that contain only the rows having the corresponding unique values.
 
