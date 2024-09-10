@@ -122,7 +122,7 @@ We will use the `StandardScaler` object which scales data to have zero-mean and 
 There are of course other scaling objects. See this [link](https://scikit-learn.org/stable/modules/preprocessing.html) for documentation. 
 :::
 
-For this exmaple we are not going to scale the target variables because they represent a price in dollars. Depending on the application, you may need to scale your target variable.
+For this example we are not going to scale the target variables because they represent a price in dollars. Depending on the application, you may need to scale your target variable.
 ::::
 
 :::: {.fragment}
@@ -171,9 +171,11 @@ In addition, we can use specific functions to evaluate the error in our predicti
 :::
 
 :::: {.fragment}
-Below is code that computes the $R^2$ value of the model and the mean squared error.
+Next is the code that computes the $R^2$ value of the model and the mean squared error.
 
-The $R^2$ value is a number between [0, 1] and provides a measure of how good the fit of the model is. A value of 1 means the model fits the data perfectly, while a value of 0 indicates there is no linear relatinoship between the observed and predicted values.
+The $R^2$ value is a number between [0, 1] and provides a measure of how good the fit of the model is. A value of 1 
+means the model fits the data perfectly, while a value of 0 indicates there is no linear relationship between the 
+observed and predicted values.
 ::::
 
 :::: {.fragment}
