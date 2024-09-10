@@ -347,13 +347,20 @@ Next, we will cover how you can clone the course's repository and how to submit 
 ## Github continued
 :::
 
-For more information on how to create your own repository on GitHub and upload code to it, please see the tutorial by [Software Carpentry](http://swcarpentry.github.io/git-novice/).
+For more information on how to create your own repository on GitHub and upload code to it, please see 
+[Start your journey -- Learn the basics of GitHub](https://docs.github.com/en/get-started/start-your-journey).
 
 ![](figs/github-workflow.jpg)
+
+::: {.callout-note}
+To be more accurate, the figure should indicate another lollipop which is the
+local copy of the remote repository.
+:::
 
 ::: {.content-hidden when-profile="web"}
 ## Github continued
 :::
+
 This workflow shows you the essential new commands:
 
 ::: {.incremental}
@@ -369,11 +376,12 @@ And when you first copy a remote repository, you will use:
 
 ## Git pull
 
-The git pull command is used in Git to update your local repository with changes from a remote repository. Essentially, it combines two other commands: ```git fetch``` and ```git merge```.
+The git pull command is used in Git to update your local repository with changes from a remote repository. Essentially,
+it combines two other commands: ```git fetch``` and ```git merge```.
 
 Here’s a breakdown of what happens when you run git pull:
 
-1. **Fetch Changes**: It first fetches the changes from the remote repository, updating your local copy of the remote branches.
+1. **Fetch Changes**: It first fetches the changes from the remote repository, _updating your local copy_ of the remote branches.
 1. **Merge Changes**: It then merges these changes into your current local branch.
 This means that git pull will bring your local branch up to date with the remote branch, incorporating any new commits that have been made.
 
