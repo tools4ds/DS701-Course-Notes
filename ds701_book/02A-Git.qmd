@@ -585,6 +585,48 @@ To update the repository and download the **new material**, type
 ```{sh}
 $ git pull
 ```
+
+## Exercise
+
+Here's an exercise to get you started with GitHub and practice the concepts we have covered so far.
+
+Go to your page on GitHub, e.g. `https://github.com/your-github-username`.
+
+Click on the `+` on the upper right corner of the page and select `New repository`.
+
+Call it "learn-github".
+
+Leave the repository public.
+
+Select the checkbox `Add a README file`.
+
+Click on `Create repository`.
+
+> Because we created this repository with a README file, GitHub automatically added it to the repository and so the
+> repository is not empty. 
+
+To clone the repository, click on `<> Code` and copy the URL.
+
+Then, clone the repository from *git*.
+
+```{sh}
+$ git clone https://github.com/your-github-username/learn-github.git
+$ cd learn-github
+```
+
+Now you can start working on the repository.
+
+Try:
+
+1. Create a new branch
+2. Add a new file text file to the repository and add some text to it.
+3. Add and commit the changes.
+4. Push the changes to the repository.
+5. Create a pull request.
+6. Merge the pull request and delete the branch on GitHub.
+7. Pull the changes to your local repository.
+8. Delete the branch from your local repository.
+
 ## Recap
 
 In this lecture, we covered the following topics:
