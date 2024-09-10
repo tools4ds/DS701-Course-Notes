@@ -1,6 +1,5 @@
 ---
 title: 'Essential Tools: Git'
-jupyter: python3
 ---
 
 ::: {.content-hidden when-profile="slides"}
@@ -301,14 +300,16 @@ For example, suppose we're adding a few citations to our project. We might want 
 
 ## Recovering old versions
 
-We can save changes to files and see what we have changed. How can we restore older versions however? Let's suppose we accidentally overwrite the file.
+We can save changes to files and see what we have changed. How can we restore older versions however? Let's suppose we
+accidentally overwrite the file but didn't stage the changes.
 
 ```{sh}
+$ echo "Despair! Nothing works" > science.txt
 $ cat science.txt
 Despair! Nothing works
 ```
 
-Now, ```git status``` tells us that the file has been changed, but those changes haven't been staged.
+Now, `git status` tells us that the file has been changed, but those changes haven't been staged.
 
 ```{sh}
 $ git status
@@ -325,10 +326,65 @@ no changes added to commit (use "git add" and/or "git commit -a")
 We can put things back the way they were by using ```git checkout```.
 
 ```{sh}
-$ git checkout HEAD science.txt
+$ git checkout -- science.txt
 $ cat science.txt
 Starting to think about data
 I need to attend ds701
+```
+
+## Recovering old versions, continued
+
+What if we changed it and checked it in?
+
+```{sh}
+$ echo "Despair! Nothing works" > science.txt
+$ cat science.txt
+Despair! Nothing works
+
+$ git add science.txt
+$ git commit -m "Added exclamation"
+```
+
+We have a new commit, but we want to go back to the previous version.
+
+We have two options:
+
+**Option 1: Undo the commit and unstage the changes**
+
+```{sh}
+$ git reset --soft HEAD~1
+```
+
+Now do `git status`.
+
+```{sh}
+$ git status
+On branch main
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        modified:   science.txt
+```
+
+**Option 2: Throw away the changes we have made and go back to the last commit**
+
+Let's commit the changes.
+
+```{sh}
+$ git commit -m "oops again"
+```
+
+But now we want to throw away the commit.
+
+```{sh}
+$ git reset --hard HEAD~1
+
+$ cat science.txt
+Starting to think about data
+I need to attend ds549
+
+$ git status
+On branch main
+nothing to commit, working tree clean
 ```
 
 ## GitHub
@@ -529,6 +585,48 @@ To update the repository and download the **new material**, type
 ```{sh}
 $ git pull
 ```
+
+## Exercise
+
+Here's an exercise to get you started with GitHub and practice the concepts we have covered so far.
+
+Go to your page on GitHub, e.g. `https://github.com/your-github-username`.
+
+Click on the `+` on the upper right corner of the page and select `New repository`.
+
+Call it "learn-github".
+
+Leave the repository public.
+
+Select the checkbox `Add a README file`.
+
+Click on `Create repository`.
+
+> Because we created this repository with a README file, GitHub automatically added it to the repository and so the
+> repository is not empty. 
+
+To clone the repository, click on `<> Code` and copy the URL.
+
+Then, clone the repository from *git*.
+
+```{sh}
+$ git clone https://github.com/your-github-username/learn-github.git
+$ cd learn-github
+```
+
+Now you can start working on the repository.
+
+Try:
+
+1. Create a new branch
+2. Add a new file text file to the repository and add some text to it.
+3. Add and commit the changes.
+4. Push the changes to the repository.
+5. Create a pull request.
+6. Merge the pull request and delete the branch on GitHub.
+7. Pull the changes to your local repository.
+8. Delete the branch from your local repository.
+
 ## Recap
 
 In this lecture, we covered the following topics:
