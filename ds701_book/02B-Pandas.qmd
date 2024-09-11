@@ -4,6 +4,7 @@ jupyter: python3
 code-fold: false
 ---
 
+::: {.content-visible when-profile="web"}
 ## Introduction
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/02B-Pandas.ipynb)
@@ -13,6 +14,7 @@ science -- Pandas.
 
 We'll touch on some highlights here, but to learn more, start with the
 [Pandas Getting started tutorials](https://pandas.pydata.org/docs/getting_started/intro_tutorials/index.html)
+:::
 
 ## Pandas
 
@@ -642,8 +644,8 @@ Here is a visualization of the result of such an analysis. We construct the plot
 plt.scatter(rets.mean(), rets.std())
 plt.xlabel('Expected returns')
 plt.ylabel('Standard Deviation (Risk)')
-plt.xlim([-.05,.1])
-plt.ylim([0,.3])
+plt.xlim([-.05, .1])
+plt.ylim([0, .3])
 for label, x, y in zip(rets.columns, rets.mean(), rets.std()):
     plt.annotate(
         label, 

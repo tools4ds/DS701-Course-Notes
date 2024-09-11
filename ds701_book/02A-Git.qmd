@@ -586,6 +586,72 @@ To update the repository and download the **new material**, type
 $ git pull
 ```
 
+## Git Merge
+
+__How it works__: Combines the changes from one branch into another by creating a new “merge commit” that has two parent commits: 
+
+- one from the current branch and 
+- one from the branch being merged.
+
+:::: {.fragment}
+Pros:
+
+:::: {.incremental}
+* Preserves history: Keeps the history of both branches intact, making it easy to trace back through the commit history.
+* Contextual clarity: The merge commit provides a clear indication that branches have been combined.
+::::
+::::
+
+:::: {.fragment}
+Cons:
+
+:::: {.incremental}
+* Messy history: Can create a cluttered commit history with many merge commits, especially if the main branch is very active.
+::::
+::::
+
+
+## Git Rebase
+
+__How it works__: Moves or combines a sequence of commits to a new base commit. It re-applies the changes from one branch on top of another branch, effectively rewriting the project history.
+
+:::: {.fragment}
+Pros:
+
+:::: {.incremental}
+* Cleaner history: Creates a linear commit history, making it easier to read and understand.
+* Simplifies debugging: A linear history simplifies the use of tools like git bisect for debugging.
+::::
+::::
+
+:::: {.fragment}
+Cons:
+
+:::: {.incremental}
+* Rewrites history: Can be dangerous if not used carefully, especially on shared branches, as it rewrites commit history.
+::::
+::::
+
+## Merge vs. Rebase
+
+__Use git merge__:
+
+:::: {.incremental}
+* When you want to preserve the complete history of changes.
+* When working in a collaborative environment where multiple developers are working on the same branch.
+* When you need to resolve conflicts between branches.
+::::
+
+:::: {.fragment}
+__Use git rebase__:
+
+:::: {.incremental}
+* When you want a cleaner, linear commit history.
+* When working on a feature branch that hasn’t been shared with others yet.
+* When you need to incorporate upstream changes into your feature branch before merging it back into the main branch.
+::::
+::::
+
 ## Exercise
 
 Here's an exercise to get you started with GitHub and practice the concepts we have covered so far.
@@ -639,4 +705,5 @@ In this lecture, we covered the following topics:
 1. Recovering old versions
 1. Branching
 1. Pull requests
+1. Merge vs. Rebase
 :::
