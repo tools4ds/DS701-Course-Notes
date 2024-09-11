@@ -3,7 +3,10 @@ title: Probability and Statistics Refresher
 jupyter: python3
 ---
 
+::: {.content-visible when-profile="web"}
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/03-Probability-and-Statistics-Refresher.ipynb)
+:::
+
 
 ```{python}
 #| echo: false
@@ -289,7 +292,7 @@ The terms in the above equation are often given the following names:
 
 
 :::: {.fragment}
-We can extend this theorme to more than two events.
+We can extend this theorem to more than two events.
 ::::
 
 ::: {.content-visible when-profile="slides"}
@@ -326,73 +329,36 @@ This update transforms the __prior__ probabilities $P(A_i)$ into the __posterior
 
 ::: {.content-visible when-profile="web"}
 ### Bayes' Theorem Example
-:::
 
-::: {.content-visible when-profile="slides"}
-## Bayes' Theorem Example
-:::
-
-:::: {.fragment}
 Empirical evidence suggests that amongs sets of twins, about 1/3 are identical. 
-::::
- 
-:::: {.fragment}
+
 Assume therefore that probability of a pair of twins being identical to be 1/3.  
-::::
 
-:::: {.fragment}
 Now, consider how a couple might update this probability after they get an ultrasound that shows that the twins are of the same gender.   
-::::
 
-:::: {.fragment}
 What is their new estimate of the probability that their twins are identical?
-::::
 
-:::: {.fragment}
 Let $I$ be the event that the twins are identical. Let $G$ be the event that gender is the same via ultrasound. 
-::::
 
-:::: {.fragment}
 The prior probability here is $P(I)$.
-::::
 
-:::: {.fragment}
 What we want to calculate is the posterior probability $P(I|G)$.
-::::
-
-::: {.content-visible when-profile="slides"}
-## Bayes' Theorem Example continued
-:::
 
 First, we note:
 
-:::: {.fragment}
 $$P(G|I) = 1.$$
-::::
 
-:::: {.fragment}
 Surprisingly, people are sometimes confused about that fact!
-::::
 
-:::: {.fragment}
 We also assume that if the twins are not identical, they are like any two siblings. This means they have an equal probability of being the same gender, i.e., 
-::::
 
-:::: {.fragment}
 $$P(G|\bar{I}) = 1/2.$$
-::::
 
-:::: {.fragment}
 We know from observing the population at large that among all sets of twins, about 1/3 are identical
 
 $$ P(I) = 1/3.$$
 
 This statistic is easy obtained from data.
-::::
-
-::: {.content-visible when-profile="slides"}
-## Bayes' Theorem Example continued
-:::
 
 Then:
 
@@ -402,15 +368,12 @@ P(I|G) &= \frac{P(G|I)P(I)}{P(G|I)P(I) + P(G|\bar{I})P(\bar{I})} \\
 &= \frac{1}{2}
 \end{align*}
 
-:::: {.fragment}
 So we have updated our estimate of the twins being identical from 1/3
 (prior probability) to 1/2 (posterior probability).
-::::
 
-:::: {.fragment}
 We did this in a way that used quantities that were relatively easy to obtain or measure.
-::::
 
+:::
 ::: {.content-visible when-profile="slides"}
 ## Independent Events
 :::
@@ -821,7 +784,7 @@ $$ \text{Cov}[\mathbf{X}] =
 A couple things to note about a covariance matrix.
 
 1. The covariance matrix is symmetric (because $\text{Cov}(X_i, X_j) = \text{Cov}(X_j, X_i)$)
-2. The covariance matrix is __positive semidefinite__, which means $\mathbf{x}^T \text{Cov}[X] \mathbf{x}\geq 0$ for all vectors $\mathbf{x}$.
+2. The covariance matrix is __positive semidefinite__, which means $\mathbf{z}^T \text{Cov}[X] \mathbf{z}\geq 0$ for all vectors $\mathbf{z}$.
 
 ::: {.content-visible when-profile="web"}
 ### Random Variables as Vectors
@@ -866,6 +829,7 @@ where $\tilde{d}_1$ and $\tilde{d}_2$ are the columns of $\tilde{D}$.
 This shows that __covariance is actually an inner product__ between normalized observation vectors.
 :::
 
+::: {.content-visible when-profile="web"}
 ## Low and High Variability
 
 Historically, most sources of random variation that have concerned
@@ -877,20 +841,12 @@ Note that by "low variability" I don't mean that such variability is unimportant
 
 Some examples of random variation in this category are: 
 
-:::: {.incremental}
 * the heights of adult humans
 * the number of trees per unit area in a mature forest
 * the sum of 10 rolls of a die
 * the time between emission of subatomic particles from a radioactive material.
-::::
 
-:::: {.fragment}
 In each of these cases, there are a range of values that are "typical," and there is a clear threshold above what is typical, that essentially never occurs.
-::::
-
-::: {.content-visible when-profile="slides"}
-## Low and High Variability continued
-:::
 
 On the other hand, there are some situations in which variability is
 quite different.  
@@ -901,17 +857,13 @@ frequency.
 
 Some examples in this category are
 
-:::: {.incremental}
 * the distribution of wealth among individuals in society
 * the sizes of human settlements
 * the areas burnt in forest fires
 * the runs of gains and losses in various financial markets over time
 * and the number of collaborators a scholar has over their lifetime.   
-::::
 
-::: {.content-visible when-profile="slides"}
-## High Variability example
-:::
+### Example
 
 > The banking system (betting against rare events) just lost [more than] 1
 > Trillion dollars (so far) on a single error, more than was ever earned
@@ -922,7 +874,7 @@ Nassim Nicholas Taleb, September 2008
 ![](figs/derivatives-portfolio-variation.png){fig-align="center"}
 
 An example of a run of observations showing high variability.   This figure shows the daily variations in a derivatives portfolio over the timeframe 1988-2008. About 99% of the variation over the 20 years occurs in a single day (the day the European Monetary System collapsed).
-
+:::
 
 ## Important Distributions
 
@@ -934,10 +886,8 @@ Now we will review certain distributions that come up over and over again in typ
 We will review the following important distributions:
 
 :::: {.incremental}
-- Binomial distribution (discrete)
-- Geometric distribution (discrete)
+- Bernoulli distribution (discrete)
 - Poisson distribution (discrete)
-- Exponential distribution (continous)
 - Gaussian distribution (continous)
 ::::
 
@@ -948,35 +898,42 @@ See the course notes for other important distributions.
 
 ::: {.content-visible when-profile="web"}
 ### The Bernoulli Distribution
+:::
+
+::: {.content-visible when-profile="slides"}
+## The Bernoulli Distribution
+:::
 
 An experiment of a particularly simple type is one in which there are only two possible outcomes, such as 
 
+:::: {.incremental}
 - head or tail,
 - success or failure,
 - defective or nondefective component,
 - patient recovers or does not recover.
+::::
 
-Each distributions has one or more _parameters_.  Parameters are settings that control the distribution. A Bernoulli distribution has one parameter, $p$, which is the probability that the random variable is equal to 1. 
+:::: {.fragment}
+Each distribution has one or more _parameters_.  Parameters are settings that control the distribution. A Bernoulli distribution has one parameter, $p$, which is the probability that the random variable is equal to 1. 
+::::
 
+::: {.content-visible when-profile="slides"}
+## The Bernoulli Distribution
+:::
 __Definition.__ It is said that a random variable $X$ has a _Bernoulli distribution_ with parameter $p$ $(0\leq p \leq 1)$ if $X$ can take only the values 0 and 1 and the corresponding probabilities are
 
 $$P(X=1) = p \: \text{ and } \: P(X=0) = 1-p.$$
 
+:::: {.fragment}
 Note that there is a particularly concise way of writing the above definition:
 
 $$ p(x) = p^x (1-p)^{(1-x)} \: \text{ for } \: x = 0 \text{ and } x=1.$$
 
 The mean of a $X$ is $p$ and the variance of $X$ is $p(1-p)$.
-
-:::
+::::
 
 ::: {.content-visible when-profile="web"}
 ### The Binomial Distribution
-:::
-
-::: {.content-visible when-profile="slides"}
-## The Binomial Distribution
-:::
 
 The binomial distribution considers precisely $N$ Bernoulli trials. Each trial has the probability of a success equal to $p$. $N$ and $p$ are the parameters of the binomial distribution. 
 
@@ -986,15 +943,10 @@ __Definition.__ If $X$ represents the number of successes that occur in $N$ tria
 
 $$p(k) = P(X=k) = \binom{N}{k}\; p^k\; (1-p)^{N-k} \: \text{ for } k=0,1,...,N.$$
 
-::: {.content-visible when-profile="web"}
 The validity of the above PMF can be verified as follows. First we notice, that, by the assumed independence of trials, for any __given__ sequence of $k$ successes and $N-k$ failures, the probability is $p^k \;(1-p)^{N-k}$. Then there are $\binom{N}{k}$ different sequences of the $N$ outcomes leading to $k$ successes and $N-k$ failures.
-:::
 
 The mean of the Binomial distribution is $pN$, and its variance is $p(1-p)N$.
 
-::: {.content-visible when-profile="slides"}
-## Binomial Distribution Example
-:::
 The PMF of the Binomial distribution with $N = 10$ and $p=0.3$ is shown below.
 
 ```{python}
@@ -1011,14 +963,10 @@ plt.xlabel(r'$k$', size=14)
 plt.ylabel(r'$P(X = k)$', size=14)
 plt.show()
 ```
+:::
 
 ::: {.content-visible when-profile="web"}
 ### The Geometric Distribution
-:::
-
-::: {.content-visible when-profile="slides"}
-## The Geometric Distribution
-:::
 
 The geometric distribution concerns Bernoulli trials as well. It has only one parameter $p$, the probability of success.
 
@@ -1029,10 +977,6 @@ __Definition.__ It is said that a random variable $X$ has a _geometric distribut
 $$ p(k) = P(X = k) = p(1-p)^{k-1} \qquad \text{for} \: k \geq 1.$$ 
 
 The mean of the geometric distribution is equal to $\frac{1}{p}$ and its variance is $\frac{1-p}{p^2}$. 
-
-::: {.content-visible when-profile="slides"}
-## Geometric Distribution Example
-:::
 
 An example of the geometric PMF is given below.
 
@@ -1050,6 +994,7 @@ plt.xlabel(r'$k$', size=14)
 plt.ylabel(r'$P(X = k)$', size=14)
 plt.show()
 ```
+:::
 
 ::: {.content-visible when-profile="web"}
 ### The Poisson Distribution
@@ -1173,11 +1118,6 @@ In the left figure, the number of dots falling into regions of a given size foll
 
 ::: {.content-visible when-profile="web"}
 ### The Exponential Distribution
-:::
-
-::: {.content-visible when-profile="slides"}
-## The Exponential Distribution
-:::
 
 The exponential distribution is an example of a continuous distribution. It concerns a Poisson process and has one parameter, $\lambda$, the rate of success.
 
@@ -1196,9 +1136,6 @@ Its mean is $1/\lambda$, and the variance is $1/\lambda^2$.
 
 The exponential distribution answers the question: "What is the probability it takes time $x$ to obtain the first success?"
 
-::: {.content-visible when-profile="slides"}
-## The Exponential Distribution PDF
-:::
 ```{python}
 #| fig-align: center
 from scipy.stats import expon
@@ -1213,9 +1150,6 @@ plt.xlim([0, 14])
 plt.show()
 ```
 
-::: {.content-visible when-profile="slides"}
-## The Exponential Distribution CDF
-:::
 The exponential is the __continuous analog__ of the geometric distribution.
 
 ```{python}
@@ -1236,6 +1170,7 @@ plt.ylabel(r'$P(X \leq x]$', size = 14)
 plt.legend(loc = 'best')
 plt.show()
 ```
+:::
 
 ::: {.content-visible when-profile="web"}
 ### The Uniform Distribution
