@@ -28,7 +28,7 @@ The goal of this lecture is to refresh the following topics:
 ## References
 :::
 
-Below is a list of very useful resrouces for learning about linear algebra:
+Below is a list of very useful resources for learning about linear algebra:
 
 - __Linear Algebra and Its Applications (6th edition)__, David C. Lay, Judi J. McDonald, and Steven R. Lay, Pearson, 2021,
 - __Introduction to Linear Algebra (6th edition)__, Gilbert Strang, Wellesley-Cambridge Press, 2023,
@@ -121,17 +121,17 @@ $$ \mathbf{u}\cdot\mathbf{v} = \sum_{i=0}^n u_i v_i.$$
 $$ \Vert \mathbf{u} - \mathbf{v} \Vert_2.$$
 1. Orthogonality: Two vectors $\mathbf{u},\mathbf{v}\in\mathbb{R}^{n}$ are orthogonal if and only if $\mathbf{u}\cdot\mathbf{v}=0$. 
 1. Angle between vectors:  Let $\mathbf{u},\mathbf{v}\in\mathbb{R}^{n}$, the angle between these vectors is $$\cos{\theta} = \frac{\mathbf{u}\cdot\mathbf{v}}{\Vert \mathbf{u}\Vert_2 \Vert\mathbf{v}\Vert_2}.$$
-1. A set of $n$ vectors $\mathbf{v}_{1}, \ldots, \mathbf{v}_{n}\in\mathbf{R}^n$ is linearly dependent if there exists scalars $c_1,\ldots, c_n$ not all zero such that 
+1. A set of $n$ vectors $\mathbf{v}_{1}, \ldots, \mathbf{v}_{n}\in\mathbb{R}^n$ is linearly dependent if there exists scalars $a_1,\ldots, a_n$ not all zero such that 
     $$
     \sum_{i=1}^{n} a_i \mathbf{v}_i = 0.
     $$
 
-    The vectors $\mathbf{v}_{1}, \ldots, \mathbf{v}_{n}$ are linearly independent if they are not linearly independent, i.e., the equation
+    The vectors $\mathbf{v}_{1}, \ldots, \mathbf{v}_{n}$ are linearly independent if they are not linearly dependent, i.e., the equation
     $$
     a_1 \mathbf{v}_1 + \cdots + a_n \mathbf{v}_n = 0,
     $$
     is only satisfied if $a_i=0$ for $i=1, \ldots,n$.
-1. Given a set of vectors $V = \{\mathbf{v}_{1}, \ldots, \mathbf{v}_{n}\}$, where $\mathbf{v}_i\in\mathbf{R}^n$, the span(V) is the set of all linear combinations of vectors in $V$.
+1. Given a set of vectors $V = \{\mathbf{v}_{1}, \ldots, \mathbf{v}_{n}\}$, where $\mathbf{v}_i\in\mathbb{R}^n$, the span(V) is the set of all linear combinations of vectors in $V$.
 
 ::: {.content-hidden when-profile="slides"}
 ### Visualizing vector operations
@@ -358,7 +358,7 @@ x_2  \begin{bmatrix} a_{12} \\ a_{22} \\ \vdots \\ a_{m2}  \end{bmatrix}
 x_n \begin{bmatrix} a_{1n} \\ a_{2n} \\ \vdots \\ a_{mn}  \end{bmatrix}.
 $$
 
-Observe that the matrix $A$ is a linear transformation that maps vectors in $R^{n}$ to $\mathbb{R}^{m}$.
+Observe that the matrix $A$ is a linear transformation that maps vectors in $\mathbb{R}^{n}$ to $\mathbb{R}^{m}$.
 
 ::: {.content-hidden when-profile="slides"}
 ### Matrix-matrix multiplication

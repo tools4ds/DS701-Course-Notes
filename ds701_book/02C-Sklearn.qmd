@@ -132,7 +132,7 @@ For this example we are not going to scale the target variables because they rep
 # Scale the data 
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
-X_test = scaler.fit_transform(X_test)
+X_test = scaler.fit(X_test)
 ```
 ::::
 
