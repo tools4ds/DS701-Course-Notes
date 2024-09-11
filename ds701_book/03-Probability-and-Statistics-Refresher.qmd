@@ -397,7 +397,7 @@ __Definition.__ A random variable $X$ is a function $X:\Omega\rightarrow \mathbb
 We generally use captial letters to denote random variables and lowercase to denote non-random quantities.
 
 :::: {.fragment}
-We distinguish between discrete and continuous random variables. 
+We distinguish between discrete and continuous random variables.  
 ::::
 
 ::: {.content-visible when-profile="web"}
@@ -1674,4 +1674,21 @@ confidence interval for the population mean is given by
 $$\bar{x} \pm  z_{1-\alpha/2} \, \frac{s}{\sqrt{n}}. $$
 
 As an example, a 95% confidence interval for the mean is the sample average plus or minus two standard errors.
+:::
+
+::: {.content-visible when-profile="slides"}
+## Recap
+Today we covered the following topics in probability:
+
+:::: {.incremental}
+- Frequentist vs Bayesian views
+- Probability rules
+- Conditional probability, Bayes' theorem, and independent events
+- Random variables
+- Expected value and variance
+- Distributions
+  - Bernoulli
+  - Poisson
+  - Gaussian (normal)
+::::
 :::
