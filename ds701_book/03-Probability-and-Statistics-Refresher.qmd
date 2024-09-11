@@ -1026,6 +1026,8 @@ The geometric distribution answers the question: "What is the probability it tak
 
 __Definition.__ It is said that a random variable $X$ has a _geometric distribution_ with parameter $p$ $(0\leq p \leq 1)$ if $X$ has a discrete distribution with 
 
+$$ p(k) = P(X = k) = p(1-p)^{k-1} \qquad \text{for} \: k \geq 1.$$ 
+
 The mean of the geometric distribution is equal to $\frac{1}{p}$ and its variance is $\frac{1-p}{p^2}$. 
 
 ::: {.content-visible when-profile="slides"}
