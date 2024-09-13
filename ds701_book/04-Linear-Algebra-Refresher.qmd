@@ -32,6 +32,7 @@ Below is a list of very useful resources for learning about linear algebra:
 
 - __Linear Algebra and Its Applications (6th edition)__, David C. Lay, Judi J. McDonald, and Steven R. Lay, Pearson, 2021,
 - __Introduction to Linear Algebra (6th edition)__, Gilbert Strang, Wellesley-Cambridge Press, 2023,
+    - Gilbert Strang's [lecture videos](https://youtube.com/playlist?list=PL221E2BBF13BECF6C&si=ImY77CfkyNVJvPtt)
 - __Linear Algebra and Learning from Data__, Gilbert Strang, Wellesley-Cambridge Press, 2019,
 - __Numerical Linear Algebra__, Lloyn N. Trefethen and David Bau, SIAM, 1997.
 
@@ -234,6 +235,7 @@ fig = plt.figure()
 ax = plt.gca()
 u = np.array([1, 2])
 v = np.array([4, 1])
+# w = np.dot(u, v) * v / np.sqrt(np.dot(v, v))
 w = np.dot(u, v) * v / np.dot(v, v)
 V = np.array([u, v, w])
 origin = np.array([[0, 0, 0], [0, 0, 0]])
@@ -254,6 +256,19 @@ plt.show()
 ```
 
 Observe that a right angle forms between the vectors $\mathbf{u}$ and $\mathbf{v}$ when $\mathbf{u}\cdot \mathbf{v} = 0$. 
+
+```{python}
+print(f"u = {u}")
+print(f"v = {v}")
+print(f"u.v = {np.dot(u, v)}")
+print(f"v.v = {np.dot(v, v)}")
+print(f"sqrt(v.v) = {np.sqrt(np.dot(v, v))}")
+print(f"v.v/sqrt(v.v) = {np.dot(v, v) / np.sqrt(np.dot(v, v))}")
+print(f"norm(v) = {np.linalg.norm(v)}")
+print(f"u.v / sqrt(v.v) = {np.dot(u, v) / np.sqrt(np.dot(v, v))}")
+
+print(f"u.v * v / (v.v) = {w}")
+```
 
 ## Matrices
 
@@ -675,7 +690,7 @@ A linear system of equations may have:
 ::::
 
 :::: {.fragment}
-When $m > n$, the system is said to be overdetermined and in general has infinitely many solutions. When $m<n$ the system is underdetermined and in general has no solution. For the case when $m=n$ and the matrix has $n$ linearly dependent columns, the solution is always unique.
+When $m > n$, the system is said to be overdetermined and _in general_ has no  solutions. When $m < n$ the system is underdetermined and _in general_ has infinitely many solutions. For the case when $m=n$ and the matrix has $n$ linearly dependent columns, the solution is always unique.
 
 For an invertible square matrix $A\mathbf{x}=\mathbf{b}$, the solution is always $\mathbf{x}=A^{-1}\mathbf{b}$. 
 ::::
