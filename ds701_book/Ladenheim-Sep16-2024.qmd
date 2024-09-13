@@ -1,0 +1,457 @@
+---
+title: Tools for Data Science
+jupyter: python3
+---
+
+## Course Overview
+
+This course is intended to develop your data science toolbox.
+
+:::: {.fragment}
+This means we focus on two uniting two aspects of data science
+
+:::: {.incremental}
+- theory (mathematics & algorithms), and
+- implementation (programming).
+::::
+::::
+
+:::: {.fragment}
+Theory is important to help understand the implementation.
+::::
+
+## Theory
+
+Data science depends on the following topics in mathematics
+
+:::: {.incremental}
+- linear algebra,
+- probability and statistics,
+- optimization.
+::::
+
+:::: {.fragment}
+The theoretical concepts we cover are needed to answer the following questions
+
+:::: {.incremental}
+- how to use a particular method,
+- when we should use a particular method, and
+- why a particular method is effective (or not effective).
+::::
+::::
+
+:::: {.fragment}
+Our aim is to provide practical knowledge so that you know which tools to use.
+::::
+
+## Programming tools
+
+Data scientists need to be able to program software.
+
+The programming tools you need to help you become an effective software engineer are
+
+:::: {.incremental}
+- Git
+- Python
+    - NumPy
+    - Pandas
+    - Scikit-Learn
+    - Plotting software (e.g., matplotlib, seaborn, plotly)
+    - Pytorch
+::::
+
+:::: {.fragment}
+Expertise in these tools is not developed from a single lecture, but from repeated practice and use.
+::::
+
+
+## Linear algebra
+
+Linear algebra allows us to understand the operations and transformations used to manipulate and extract information from data.
+
+:::: {.frag}
+Examples
+
+:::: {.incremental}
+- Deep neural networks use matrix-vector and matrix-matrix multiplication.
+- Natural language processing use the dot product to determine word similarity.
+- Least squares uses matrix inverses and matrix factorizations to compute models for predicting continuous values.
+- PCA (dimenstionality reduction) uses the matrix factorization called the Singluar Value Decomposition (SVD).
+- Graphs are described by adjacency matrices. Eigenvectors and eigenvalues of this matrix provide information about the graph structure.
+::::
+::::
+
+:::: {.fragment}
+Linear algebra is used to implement data science algorithms efficiently and accurately.
+::::
+
+:::: {.fragment}
+You will not have to program linear algebra algorithms. You will use appropriate Python packages.
+::::
+
+## LA topics
+
+Here is a summary of what I want to review and cover today
+
+:::: {.incremental}
+- Vectors, matrices, and matrix-vector operations,
+- Solving linear systems,
+- Eigenvalues and Eigenvectors,
+- Singular value decomposition.
+::::
+
+
+## Vectors
+
+We introduced length $n$ vectors of real numbers
+
+$$ \mathbf{x} = 
+\begin{bmatrix}
+x_1 \\
+x_2 \\
+\vdots \\
+x_n
+\end{bmatrix}\in\mathbb{R}^{n}.
+$$
+
+We can multipy vectors by numbers to crate $c\mathbf{x}$.
+
+We can add vectors of the same dimension(length) $\mathbf{x} + \mathbf{y}$.
+
+## Dot product
+
+For vectors $\mathbf{x}, \mathbf{y}\in\mathbb{R}^{n}$ the dot product is:
+
+$$ \mathbf{x}\cdot\mathbf{y} = \sum_{i=0}^n x_i y_i.$$
+
+The dot product is important 
+
+in natural language processing (NLP) applications.
+
+## Norms
+
+The 2-norm provides the magnitude (or length) of the vector. Let $\mathbf{x}\in\mathbb{R}^{n}$, the 2-norm is
+
+$$\Vert \mathbf{x}\Vert_2 = \sqrt{\mathbf{x}\cdot\mathbf{x}} = \sqrt{\sum_{i=1}^n x_i^2}.
+$$
+
+We will see other norms and reasons for their use in later lectures.
+
+## Distances
+
+Norms are needed to compare how close one vector is to another vector. For vectors $\mathbf{x}, \mathbf{y}\in\mathbb{R}^{n}$, the 2-norm of the difference is
+
+$$\Vert \mathbf{x} - \mathbf{y}\Vert_2 = \sqrt{\sum_{i=1}^n (x_i-y_i)^2}. $$
+
+This is the Euclidean distance.
+
+The 2-norm will be important when we consider least squares problems.
+
+## Vectors in NumPy
+
+Let's see some of theses operations in action using NumPy.
+
+```{python}
+import numpy as np
+
+x = np.array([1, -2, 4, -5, 1])
+y = np.array([-2, 3, 10, -8, 5])
+
+print("Scalar multiplication", 2*x)
+print("Vector addition", x+y)
+print("Dot product", np.dot(x, y))
+print("2-Norm of x", np.linalg.norm(x))
+print("Distance", np.linalg.norm(x-y))
+```
+
+## Matrices
+
+We introduced $m\times n$ matrices of real numbers
+$$
+A = 
+\begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1n} \\
+a_{21} & a_{22} & \cdots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{m1} &a_{m2} & \cdots & a_{mn} \\
+\end{bmatrix}\in\mathbb{R}^{m\times n}.
+$$
+
+We can multipy matrices by numbers to crate $cA$.
+
+We can add matrices of the same size $A + B$.
+
+## Solving linear systems
+
+Solving systems of equations is a major component of linear algebra.
+
+\begin{align*}
+2x_1 + 3x_2 &= 7 \\
+x_1 - 4x_2 &= 1
+\end{align*}
+
+These equations can be solved by hand using elimination.
+
+We can extract the coefficients into a matrix $A$, the unknowns into a vector $\mathbf{x}$, and the right hand side into a vector $\mathbf{b}$, i.e.,
+
+$$
+A = 
+\begin{bmatrix}
+2 & 3 \\
+1 & -4 \\
+\end{bmatrix}, \quad
+\mathbf{x} = 
+\begin{bmatrix}
+x_1 \\
+x_2\\
+\end{bmatrix},
+\quad \text{and} \quad
+\mathbf{b} = 
+\begin{bmatrix}
+7 \\
+1\\
+\end{bmatrix}.
+$$
+
+The system of equations can then be expressed as
+
+$$A\mathbf{x} = \mathbf{b}.$$
+
+:::: {.fragment}
+The solution is given by $\mathbf{x}=A^{-1}\mathbf{b}$.
+::::
+
+:::: {.fragment}
+How do we solve this when the set of equations and unknowns is much larger than 2?
+::::
+
+:::: {.fragment}
+Answer: matrix factorizations.
+::::
+
+## Matrix-vector multiplication
+
+Let $A\in\mathbb{R}^{m\times n}$ and $\mathbf{x}\in\mathbb{R}^{n}$, then $A\mathbf{x}\in\mathbb{R}^{m}$ is defined as 
+
+$$
+A\mathbf{x} 
+= 
+\begin{bmatrix}
+x_1a_{11} + x_2 a_{12} + \cdots + x_na_{1n} \\
+x_1a_{21} + x_2 a_{22} + \cdots + x_na_{2n} \\
+\vdots \\
+x_1a_{m1} + x_2 a_{m2} + \cdots + x_na_{mn} \\
+\end{bmatrix} 
+= 
+\begin{bmatrix}
+\mathbf{a}[1, :] \cdot \mathbf{x} \\
+\mathbf{a}[2, :] \cdot \mathbf{x} \\
+\vdots \\
+\mathbf{a}[m, :] \cdot \mathbf{x} 
+\end{bmatrix}.
+$$
+
+Equivalent to
+
+$$
+A\mathbf{x}
+= 
+x_1 \begin{bmatrix} a_{11} \\ a_{21} \\ \vdots \\ a_{m1}  \end{bmatrix} 
++ 
+x_2  \begin{bmatrix} a_{12} \\ a_{22} \\ \vdots \\ a_{m2}  \end{bmatrix}
++
+\cdots
++
+x_n \begin{bmatrix} a_{1n} \\ a_{2n} \\ \vdots \\ a_{mn}  \end{bmatrix}.
+$$
+
+
+## Matrix-matrix multiplication
+
+For $A\in\mathbb{R}^{m\times n}$ and $B\in\mathbb{R}^{n\times p}$, then $C=AB\in\mathbb{R}^{m\times p}$ is given by the formula 
+
+$$c_{ij} = \sum_{k=1}^{n} a_{ik}b_{kj}$$ 
+
+for $i=1,\ldots, m$ and $j=1,\ldots,p$. 
+
+$$C = 
+\begin{bmatrix}
+\mathbf{a}[1, :]\cdot \mathbf{b}[:, 1] & \cdots & \mathbf{a}[1, :]\cdot \mathbf{b}[:, p] \\
+\mathbf{a}[2, :]\cdot \mathbf{b}[:, 1] & \cdots & \mathbf{a}[2, :]\cdot \mathbf{b}[:, p] \\
+\vdots & \ddots & \vdots \\
+\mathbf{a}[m, :]\cdot \mathbf{b}[:, 1] & \cdots & \mathbf{a}[m, :]\cdot \mathbf{b}[:, p] \\
+\end{bmatrix}
+$$ 
+
+## Matrices in NumPy
+
+```{python}
+import numpy as np
+
+A = np.array([[1, 2, 3],
+              [4, 5, 6],
+              [7, 8, 9]])
+x = np.array([2, 4, 6])              
+B = np.array([[3, 2, 1],
+              [6, 5, 3],
+              [9, 8, 7]])
+
+print("Ax", A @ x)
+print("AB", A @ B)
+```
+
+
+## Eigenvalues and eigenvectors
+
+An eigenvector of an $n\times n$ matrix $A$ is a nonzero vector $\mathbf{x}$ such that 
+
+$$A\mathbf{x} = \lambda\mathbf{x}$$ 
+
+for some scalar $\lambda.$ The scalar $\lambda$ is called an eigenvalue.
+
+## Matrix Decompositions
+
+We introduce the following factorizations in class:
+
+- $A=LU$,
+- $A=QR$,
+- $A = X\Lambda X^{-1}$
+
+The first two matrix factorizations are useful for solving linear systems of equations.
+
+The last matrix is useful in theoretical settings. 
+
+Let's focus on the QR factorization.
+
+## QR Factorization
+
+The QR decomposition of a matrix $A\in\mathbb{R}^{m\times n}$ is
+
+$$ A = QR,$$
+
+with orthogonal matrix $Q\in\mathbb{R}^{m\times m}$ and upper triangular $R\in\mathbb{R}^{m\times n}$. The $m-n$ rows of $R$ are zeros.
+
+$$ A = 
+\underbrace{
+\begin{bmatrix}
+\vdots & \vdots & \vdots  & \vdots \\
+\mathbf{q}_1 &  \mathbf{q}_2 & \cdots & \mathbf{q}_m \\
+\vdots & \vdots & \vdots & \vdots \\
+\end{bmatrix}}_{m\times m}
+\underbrace{
+\begin{bmatrix}
+r_{11} & \cdots & r_{1n}  \\
+0 & \ddots & \vdots  \\
+\vdots & \cdots & r_{nn} \\
+ \cdots & 0 &  \cdots \\
+\end{bmatrix}}_{m\times n}
+$$
+
+
+## QR Example
+
+Lets solve $A\mathbf{x} = \mathbf{b}$ using the QR factorization.
+
+$$A\mathbf{x} = \mathbf{b}$$
+$$QR\mathbf{x} = \mathbf{b}$$
+$$ Q^TQR\mathbf{x} = Q^T\mathbf{b}$$
+
+$$ R\mathbf{x} = Q^T\mathbf{b} $$
+
+$$ \mathbf{x} = R^{-1}Q^{T}\mathbf{b}$$
+
+
+## Singular value decomposition
+
+The singular value decomposition (SVD) of a matrix $A\in\mathbf{R}^{m\times n}$ is 
+
+$$ A = U\Sigma V^{T}$$
+
+$$
+A =
+\underbrace{
+\begin{bmatrix}
+\vdots & \vdots & \vdots  & \vdots \\
+\mathbf{u}_1 &  \mathbf{u}_2 & \cdots & \mathbf{u}_m \\
+\vdots & \vdots & \vdots & \vdots \\
+\end{bmatrix}}_{m\times m}
+\underbrace{
+\begin{bmatrix}
+\sigma_1 & \cdots & 0  \\
+\vdots & \ddots & 0  \\
+0 & \cdots & \sigma_n \\
+ \cdots & 0 &  \cdots \\
+\end{bmatrix}}_{m\times n}
+\underbrace{\begin{bmatrix}
+\vdots & \vdots & \vdots \\
+ \mathbf{v}_1 & \cdots & \mathbf{v}_n \\
+\vdots & \vdots & \vdots \\
+\end{bmatrix}}_{n\times n}
+$$
+
+The SVD underlies PCA.
+
+## Least Squares
+
+Given a data matrix $A\in\mathbb{R}^{m\times n}$ with $m>n$ and a set of target values $\mathbf{b}\in\mathbb{R}^{m}$. The least squares problem is to find a set of $n$ coefficients $\mathbf{x}$, such that that the linear combination of these weights with your feature vectors minimizes the distance to the target values.
+
+Mathematically this is expresssed as, find $\hat{\mathbf{x}}\in\mathbb{R}^{n}$ such that
+$$\min_{\mathbf{x}} \Vert \mathbf{b}-A\mathbf{x}\Vert_{2}^{2}.$$
+
+## Least Squares Solution
+
+You can derive that solving the least squares problem is equivalent to solving the normal equations
+
+$$ A^TA\mathbf{x} = A^T\mathbf{b}.$$
+
+The solution to this problem is
+$$ \mathbf{x} = (A^TA)^{-1}A^T\mathbf{b}.$$
+
+Let's compute this in NumPy.
+
+
+## Least Squares Numerical Solution
+
+```{python}
+#| code-fold: false
+import numpy as np
+A = np.array([[-1.42382504, -1.4238264 ],
+              [ 1.26372846,  1.26372911], 
+              [-0.87066174, -0.87066138]])
+b = A @ np.array([1, 1])
+
+# Pseudoinverse
+x1 = np.linalg.inv(A.T @ A) @ A.T @ b
+print(x1)
+
+# QR
+[Q, R] = np.linalg.qr(A)
+x2 = np.linalg.solve(R, Q.T @ b)
+print(x2)
+
+# np.linalg.lstsq
+x3, _, _, _ = np.linalg.lstsq(A, b, rcond=None)
+print(x3) 
+
+# Print norms of the solutions
+print(np.linalg.norm(x1-np.array([1, 1])))
+print(np.linalg.norm(x2-np.array([1, 1])))
+print(np.linalg.norm(x3-np.array([1, 1])))
+```
+
+## Linear Algebra recap
+
+We've now reviewed
+
+
+- vectors and matrices,
+- eigenvectors and eigenvalues,
+- solving linear systems of equations,
+- matrix decompositions, and
+- solving the least squares problems.
+
+For more information see our course notes and the references cited therin.
+
+## Probability
+
+Probability is the study of chance and randomness.
