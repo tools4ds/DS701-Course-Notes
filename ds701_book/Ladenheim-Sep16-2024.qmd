@@ -311,11 +311,11 @@ for some scalar $\lambda.$ The scalar $\lambda$ is called an eigenvalue.
 
 ## Matrix Decompositions
 
-We introduce the following factorizations in class:
+We introduced the following factorizations in class:
 
 - $A=LU$,
 - $A=QR$,
-- $A = X\Lambda X^{-1}$
+- $A=X\Lambda X^{-1}$
 
 The first two matrix factorizations are useful for solving linear systems of equations.
 
@@ -400,15 +400,14 @@ $$\min_{\mathbf{x}} \Vert \mathbf{b}-A\mathbf{x}\Vert_{2}^{2}.$$
 
 ## Least Squares Solution
 
-You can derive that solving the least squares problem is equivalent to solving the normal equations
+The least squares problem is equivalent to solving the normal equations
 
 $$ A^TA\mathbf{x} = A^T\mathbf{b}.$$
 
-The solution to this problem is
+The solution to this problem is (when $(A^TA)^{-1}$ exists) is
 $$ \mathbf{x} = (A^TA)^{-1}A^T\mathbf{b}.$$
 
 Let's compute this in NumPy.
-
 
 ## Least Squares Numerical Solution
 
@@ -442,7 +441,6 @@ print(np.linalg.norm(x3-np.array([1, 1])))
 ## Linear Algebra recap
 
 We've now reviewed
-
 
 - vectors and matrices,
 - eigenvectors and eigenvalues,
