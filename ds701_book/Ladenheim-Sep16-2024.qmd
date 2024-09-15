@@ -448,5 +448,5 @@ We've now reviewed
 - matrix decompositions, and
 - solving the least squares problems.
 
-For more information see our course notes and the references cited therin.
+For more information see our course notes and the references cited therein.
 
