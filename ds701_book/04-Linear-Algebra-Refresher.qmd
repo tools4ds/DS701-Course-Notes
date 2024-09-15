@@ -5,7 +5,34 @@ jupyter: python3
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/04-Linear-Algebra-Refresher.ipynb)
 
-Linear alegbra is the branch of mathematics involving vectors and matrices. In particular, how vectors are transformed.  Knowledge of linear algebra is essential in data science. This is because linear algebra underpins the representation of data and the algorithms that transform this data.
+Linear alegbra is the branch of mathematics involving vectors and matrices. In particular, how vectors are transformed.  Knowledge of linear algebra is essential in data science. 
+
+## Linear algebra
+
+Linear algebra allows us to understand the operations and transformations used to manipulate and extract information from data.
+
+:::: {.frag}
+Examples
+
+:::: {.incremental}
+- Deep neural networks use matrix-vector and matrix-matrix multiplication.
+- Natural language processing use the dot product to determine word similarity.
+- Least squares uses matrix inverses and matrix factorizations to compute models for predicting continuous values.
+- PCA (dimenstionality reduction) uses the matrix factorization called the Singluar Value Decomposition (SVD).
+- Graphs are described by adjacency matrices. Eigenvectors and eigenvalues of this matrix provide information about the graph structure.
+::::
+::::
+
+::: {.content-visible when-profile="slides"}
+## Lecture overview
+:::
+:::: {.fragment}
+Linear algebra is used to implement data science algorithms efficiently and accurately.
+::::
+
+:::: {.fragment}
+You will not have to program linear algebra algorithms. You will use appropriate Python packages.
+::::
 
 ::: {.content-hidden when-profile="slides"}
 This lecture is a review of some aspects of linear algebra that are important for data science. Given the prerequisites for this course, I assume that you previously learned this material. 
