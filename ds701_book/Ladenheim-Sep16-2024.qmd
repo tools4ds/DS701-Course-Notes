@@ -450,6 +450,3 @@ We've now reviewed
 
 For more information see our course notes and the references cited therin.
 
-## Probability
-
-Probability is the study of chance and randomness.

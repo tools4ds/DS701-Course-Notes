@@ -5,6 +5,10 @@ jupyter: python3
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/03-Probability-and-Statistics-Refresher.ipynb)
 
+::: {.content-visible when-profile="slides"}
+Feel free to follow along in Google Colab.
+:::
+
 ```{python}
 #| echo: false
 import numpy as np
@@ -15,6 +19,41 @@ import seaborn as sns
 
 ::: {.content-visible when-profile="web"}
 Today we'll review the essentials of probability and statistics that we'll need for this course.
+:::
+
+::: {.content-visible when-profile="slides"}
+## Motivation
+:::
+Probability and statistics are fundamental to data science for several reasons:
+
+:::: {.incremental}
+1. Data Analysis: They help in understanding and interpreting data. Statistical methods allow you to summarize data (mean and variance) and identify patterns.
+1. Model Building: Many machine learning algorithms are based on statistical principles. For example, linear regression and logistic regression rely on probability and statistics.
+1. Uncertainty Quantification: Probability helps in quantifying uncertainty. This is crucial in making predictions and decisions based on data, as it allows you to estimate the likelihood of different outcomes.
+1. Hypothesis Testing: Statistics provide tools for testing hypotheses and validating models. This is essential for determining whether the patterns observed in data are significant or just due to random chance.
+::::
+
+:::: {.fragment}
+Combined with linear algebra, probability and statistics provide the theoretical foundation and practical tools needed to extract meaningful insights from data and make data-driven decisions. 
+::::
+
+::: {.content-visible when-profile="slides"}
+## Lecture Overview
+We will introduce the following concepts
+
+:::: {.incremental}
+- Frequentist and Bayesian views on probability,
+- Definitions and rules of probability,
+  - Events and sample spaces, Probability measures, Conditional probability, Bayes' theorem
+- Random variables and distributions 
+  - probability mass function, probability density function, cumulative distribution functions
+- Mean, variance, and covariance
+- Multivariate random variables
+::::
+
+:::: {.fragment}
+Our focus is on probability. For the topics on statistics, please consult the notes.
+::::
 :::
 
 ## Probability
@@ -173,6 +212,8 @@ Here is an illustration of this principle applied to probability:
 Georges Matheron, _Estimating and Choosing: An Essay on Probability in Practice_
 :::
 
+
+
 ::: {.content-visible when-profile="web"}
 ### Sample Space and Events
 :::
@@ -233,16 +274,24 @@ __Here and throughout we need examples.__
 :::
 
 __Definition.__ The _conditional probability_ of an event $A$ given that
-event $B$ (having positive probability) is known to occur, is 
+event $B$ (having positive probability) is known to occur, is  
 
 $$ P(A|B) = \frac{P(A \cap B)}{P(B)}~\text{where}~P(B) > 0 $$
 
+:::: {.columns}
+::: {.column width="60%"}
 The function $P(\cdot|B)$ is a probability measure over the sample space
 $B$.  
 
 Note that in the expression $P(A|B)$, $A$ is random but $B$ is fixed. 
 
 Now if $B$ is a proper subset of $\Omega,$ then $P(B) < 1$.   So $P(\cdot|B)$ is a rescaling of the quantity $P(A\cap B)$ so that $P(B|B) = 1.$ 
+:::
+::: {.column width="40%"}
+
+![](drawio/ConditionalProbability.png){fig-align="center" width=80%}
+:::
+::::
 
 ::: {.content-visible when-profile="web"}
 ### Law of total probability
@@ -252,12 +301,21 @@ Now if $B$ is a proper subset of $\Omega,$ then $P(B) < 1$.   So $P(\cdot|B)$ is
 ## Law of total probability
 :::
 
-An important tool for computing probabilities is provided by the following law.
+An important tool for computing probabilities is provided by the law of total probabilities.
 
+:::: {.columns}
+::: {.column width="60%"}
 Let $B_1$ and $B_2$ form the complete sample space $\Omega$ and be disjoint $\left(B_1 \cap B_2 = \emptyset\right)$. Then for any event $A$,
 
-$$P(A) = P(A|B_1)P(B_1)+P(A|B_2)P(B_2).$$
-
+\begin{align*}
+P(A) &= P(A\cap B_1) + P(A \cap B_2) \\
+&= P(A|B_1)P(B_1)+P(A|B_2)P(B_2)
+\end{align*}
+:::
+::: {.column width="40%"}
+![](drawio/LawOfTotalProbability.png){fig-align="center" width=80%}
+:::
+::::
 
 ::: {.content-visible when-profile="web"}
 ### Bayes' Theorem
@@ -880,7 +938,7 @@ Now we will review certain distributions that come up over and over again in typ
 :::
 
 ::: {.content-visible when-profile="slides"}
-We will review the following important distributions:
+We will review the following important distributions
 
 :::: {.incremental}
 - Bernoulli distribution (discrete)
@@ -1530,10 +1588,10 @@ That is, the stocks are positively correlated, but not highly so.
 
 Say you are concerned with some data that we take as coming from a random process.
 
-You want to characterize it as accurately as possible.   You measure it, yielding a
+You want to characterize it as accurately as possible. You measure it, yielding a
 single value.  
 
-How much does that value tell you?   Can you rely on it as a description of the random process?
+How much does that value tell you? Can you rely on it as a description of the random process?
 
 Let's say you have a dataset and you compute its average value.   
 
@@ -1603,12 +1661,10 @@ samples $n$.
 Now, remember that the true mean $\mu$ is a constant, while the
 empirical mean $\bar{x}$ is a random variable.   
 
-Let us assume for a
-moment that we know the true $\mu$ and $\sigma$, and that we accept that
+Let us assume for a moment that we know the true $\mu$ and $\sigma$, and that we accept that
 $\bar{x}$ has a $N(\mu, \sigma/\sqrt{n})$ distribution.   
 
-Then it is
-true that 
+Then it is true that 
 
 $$ P(\mu-k\sigma/\sqrt{n} < \bar{x} < \mu+k\sigma/\sqrt{n}) = P(-k < S <
 k)$$
@@ -1637,24 +1693,21 @@ plt.ylabel(r'$p(x)$', size = 14)
 plt.show()
 ```
 
-Turning back to $\bar{x}$, the
-90% probability interval on $\bar{x}$ would be:
+Turning back to $\bar{x}$, the 90% probability interval on $\bar{x}$ would be:
 
-$$ \mu-z_{0.95}\sigma/\sqrt{n} < \bar{x} <
-\mu+z_{0.95}\sigma/\sqrt{n}. $$
+$$ \mu-z_{0.95}\sigma/\sqrt{n} < \bar{x} < \mu+z_{0.95}\sigma/\sqrt{n}. $$
 
 The last step: by a simple argument, we can show that the sample mean is 
 in some fixed-size interval centered on the true mean, if and only if the true
-mean is also in
-a fixed-size interval (of the same size) centered on the sample mean.
+mean is also in a fixed-size interval (of the same size) centered on the sample mean.
 
 This means that:
 
-\begin{eqnarray*}
-  1-\alpha & = & P(\mu-z_{1-\alpha/2}\sigma/\sqrt{N} < \bar{x} <
-\mu+z_{1-\alpha/2}\sigma/\sqrt{N})\\
-& = & P(\bar{x}-k\sigma\sqrt{N} < \mu < \bar{x}+k\sigma/\sqrt{N}).
-\end{eqnarray*}
+\begin{align*}
+1-\alpha & = P(\mu-z_{1-\alpha/2}\sigma/\sqrt{N} < \bar{x} <
+\mu+z_{1-\alpha/2}\sigma/\sqrt{N}) \\
+& = P(\bar{x}-k\sigma\sqrt{N} < \mu < \bar{x}+k\sigma/\sqrt{N}).
+\end{align*}
 
 This latter expression defines the __$1-\alpha$ confidence interval
   for the mean.__
