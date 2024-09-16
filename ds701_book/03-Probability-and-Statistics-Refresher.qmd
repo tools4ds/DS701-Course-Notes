@@ -58,17 +58,13 @@ Our focus is on probability. For the topics on statistics, please consult the no
 
 ## Probability
 
-What is probability?  
+We all have a general sense of what is meant by probability. Probability is the study of randomness. It is the branch of mathematis that analyzes the chances (likelihood) of random events.
 
-We all have a general sense of what is meant by probability.
-
-However, when we look closely, we see that there are at least two different ways to interpret the notion of "the probability of an event."
-
-These views are:
+There are two different ways in which probability is interpreted. These views are
 
 :::: {.incremental}
-- frequentist
-- Bayesian
+- frequentist, and
+- Bayesian.
 ::::
 
 ::: {.content-visible when-profile="web"}
@@ -129,7 +125,7 @@ In other words, when we use the frequentist view, we will generally be thinking 
 ## The Bayesian View
 :::
 
-To understand the Bayesian view of probability, consider the following situations:
+To understand the Bayesian view of probability, consider the following situations.
 
 :::: {.fragment}
 On a visit to the doctor, we may ask, "What is the probability that I have disease X?"
@@ -191,8 +187,6 @@ So it's important to recognize that both frequentist and Bayesian views are __va
 ![](figs/Bayes-Frequentism.png){fig-align="center" width="30%"} 
 
 ::: {.content-visible when-profile="web"}
-So, now, let's talk about rules for computing probabilities.
-
 >Any simple idea is approximate; as an illustration, consider an object ... what is an object? Philosophers are always 
 >saying, “Well, just take a chair for example.” The moment they say that, you know that they do not know what they are 
 >talking about any more. What is a chair? ... every object is a mixture of a lot of things, so we can deal with it 
@@ -212,7 +206,7 @@ Here is an illustration of this principle applied to probability:
 Georges Matheron, _Estimating and Choosing: An Essay on Probability in Practice_
 :::
 
-
+So, now, let's talk about rules for computing probabilities.
 
 ::: {.content-visible when-profile="web"}
 ### Sample Space and Events
@@ -234,10 +228,11 @@ __Definition.__ An event $E\subset\Omega$ is an outcome, or a set of outcomes of
 Examples:
 
 :::: {.incremental}
-- Rolling a dice: $\Omega = \{1, 2, 3, 4, 5, 6 \}$
-- Flipping a coin 2 times: $\Omega = \{ (H, H), (H, T), (T, H), (T, T)\}$
-- Distance a car travels before breaking down: $\Omega = \mathbb{R}_{+}$
-- Location of a dart thrown at a target. What is $\Omega$ in this case?
+- Rolling a dice: $\Omega = \{1, 2, 3, 4, 5, 6 \}$, $E = \text{Rolling a 2}.$ 
+- Flipping a coin 2 times: $\Omega = \{ (H, H), (H, T), (T, H), (T, T)\}$, $E=\text{Rolling a heads and a tail}$.
+- Distance a car travels before breaking down: $\Omega = \mathbb{R}_{+}$, $E=\text{
+Traver greater than 100 miles}.$
+- Location of a dart thrown at a target. What is $\Omega$ in this case? What is an event $E$?
 ::::
 ::::
 
@@ -265,8 +260,6 @@ __Definition.__  Consider a sample space $\Omega$. A _probability measure_ on $\
 Often we want to ask how a probability measure changes if we restrict the sample space to be some subset of $\Omega$.  
 
 This is called __conditioning.__
-
-__Here and throughout we need examples.__
 :::
 
 ::: {.content-visible when-profile="slides"}
@@ -338,10 +331,10 @@ $$
 The terms in the above equation are often given the following names:
 
 :::: {.incremental}
-- $P(A)$ is the prior.
+- $P(A)$ is the prior probability.
 - $P(A|B)$ is the posterior probability.
 - $P(B|A)$ is the likelihood.
-- $P(B)$ is the marginal likelihood.
+- $P(B)$ is the marginal probability.
 ::::
 ::::
 
@@ -445,7 +438,7 @@ So we can see that the intuitive notion of independence is that "if one event oc
 
 ## Random Variables
 
-When an experiment is performed, we might be interested in its actual outcome itself. However, more frequently we are interested in some function of the outcome. This leads us to the notion of a __random variable__.
+When an experiment is performed, we might be interested in the actual outcome. However, more frequently we are interested in some function of the outcome. This leads us to the notion of a __random variable__.
 
 __Definition.__ A random variable $X$ is a function $X:\Omega\rightarrow \mathbb{R}$.
 
@@ -556,7 +549,7 @@ plt.show()
 ```
 
 ::: {.content-visible when-profile="web"}
-### Cumulative Distribution Function
+### Discrete Cumulative Distribution Function
 :::
 
 ::: {.content-visible when-profile="slides"}
@@ -613,7 +606,7 @@ $$P(a \leq X \leq b) = \int_{-\infty}^b f(x) dx - \int_{-\infty}^a f(x) dx = \in
 ::::
 
 ::: {.content-visible when-profile="web"}
-### Cumulative Distribution Function
+### Continuous Cumulative Distribution Function
 :::
 
 ::: {.content-visible when-profile="slides"}
@@ -638,7 +631,7 @@ The above formula tells us that the PDF is the derivative of the CDF.
 ## Continuous CDF example
 :::
 
-Consider the follwing CDF of some random variable:
+Here is an exampel of a continous CDF of some random variable.
 
 ```{python}
 #| fig-align: center
@@ -689,7 +682,7 @@ However, be careful: in certain situations, it may not be very informative, or i
 In some cases a random variable may not ever take on the expected value as a possible value. 
 
 ::: {.content-visible when-profile="web"}
-As an exmpale, consider the single die, whose expected value is 3.5
+As an example, consider the single die, whose expected value is 3.5
 :::
 
 In other cases the notion of expected value isn't useful. Consider a person with their head in an oven and their feet in a freezer who claims "on average I feel fine." 
@@ -863,20 +856,20 @@ So:
 * and that `df['TSLA']` are observations of some random variable $X$, 
 * and `df['NVDA']` are observations of some random variable $Y$. 
 
-Let $D$ have $n$ rows (i.e., $n$ observations).
+Let $D$ have $m$ rows (i.e., $m$ observations).
 
 Now, let us subtract from each column its mean, to form a new matrix $\tilde{D}$.
 
 In the new matrix $\tilde{D}$, every column has zero mean.
 
-Then notice the following: the Covariance matrix of $(X, Y)$ is simply $\frac{1}{n}\tilde{D}^T\tilde{D}$.
+Then notice the following: the Covariance matrix of $(X, Y)$ is simply $\frac{1}{m}\tilde{D}^T\tilde{D}$.
 
-For example, 
+To see this compute
 
 \begin{align*}
 \text{Cov}(X,Y) &= E\left[(X-\mu_X)(Y-\mu_Y)\right] \\ 
-&= \frac{1}{n} \sum_i (\tilde{D}_{i1} \cdot \tilde{D}_{i2})\\
-&= \frac{1}{n}\;\tilde{d}_1^T\tilde{d}_2,
+&= \frac{1}{m} \sum_i (\tilde{D}_{i1} \cdot \tilde{D}_{i2})\\
+&= \frac{1}{m}\;\tilde{d}_1^T\tilde{d}_2,
 \end{align*}
 
 where $\tilde{d}_1$ and $\tilde{d}_2$ are the columns of $\tilde{D}$.
@@ -982,7 +975,7 @@ $$P(X=1) = p \: \text{ and } \: P(X=0) = 1-p.$$
 :::: {.fragment}
 Note that there is a particularly concise way of writing the above definition:
 
-$$ p(x) = p^x (1-p)^{(1-x)} \: \text{ for } \: x = 0 \text{ and } x=1.$$
+$$ p(x) = P(X=x) = p^x (1-p)^{(1-x)} \: \text{ for } \: x = 0 \text{ and } x=1.$$
 
 The mean of a $X$ is $p$ and the variance of $X$ is $p(1-p)$.
 ::::
@@ -1077,7 +1070,7 @@ A Poisson distribution answers the question: "How many successes occur in a fixe
 
 __Definition.__ A random variable $X$ that takes on one of the values $0, 1, 2,...$ is said to have a _Poisson distribution_ with parameter $\lambda$ if, for some $\lambda > 0$,
 
-$$p(k) = P(X=k) = \lambda^k \frac{e^{- \lambda}}{k!} \: \text{ for } x = 0, 1, 2,...$$
+$$p(k) = P(X=k) = \lambda^k \frac{e^{- \lambda}}{k!} \: \text{ for } k = 0, 1, 2,...$$
 
 ::: {.content-visible when-profile="web"}
 This $p(k)$ defines a PMF, because
@@ -1099,12 +1092,11 @@ The PMF of the Poisson distribution with parameter $\lambda = 0.3$  is shown bel
 from scipy.stats import poisson
 mu = 3
 x = np.arange(poisson.ppf(0.01, mu), poisson.ppf(0.9995, mu))
-# plt.ylim([0,1])
 plt.xlim([-0.5, max(x)+0.5])
 plt.ylim(ymax = 0.4)
 plt.plot(x, poisson.pmf(x, mu), 'bo', ms=8, label='poisson pmf')
 plt.vlines(x, 0, poisson.pmf(x, mu), colors='b', lw=5, alpha=0.6)
-plt.title(f'Poisson PDF.  $\lambda T$ = {mu}', size=14)
+plt.title(f'Poisson PDF.  $\lambda$ = {mu/10}', size=14)
 plt.xlabel(r'k', size=14)
 plt.ylabel(r'P(X = k)', size=14)
 plt.show()
@@ -1185,7 +1177,7 @@ is said to be _exponentially distributed_ with parameter $\lambda$.
 
 The CDF, $F(a)$, of an exponential random variable is given by
 
-$$F(a) = P(X \leq a) = 1 - e^{-\lambda x} \mbox{ for } a \geq 0.$$ 
+$$F(a) = P(X \leq a) = 1 - e^{-\lambda a} \mbox{ for } a \geq 0.$$ 
 
 Its mean is $1/\lambda$, and the variance is $1/\lambda^2$.
 
@@ -1221,7 +1213,7 @@ plt.plot(xg, geom.cdf(xg, p), 'ro', ms = 8, label = 'Geometric')
 plt.suptitle(f'Geometric and Exponential CDFs', size = 14)
 plt.title(r'$\lambda = 0.3; \;\;\; p = 1-e^{-\lambda} =$' + f' {p:0.3f}', size=12)
 plt.xlabel(r'$x$', size=14)
-plt.ylabel(r'$P(X \leq x]$', size = 14)
+plt.ylabel(r'$P(X \leq x)$', size = 14)
 plt.legend(loc = 'best')
 plt.show()
 ```
@@ -1234,7 +1226,7 @@ The uniform distribution models the case in which all outcomes are equally proba
 
 It can be a discrete or continuous distribution.
 
-We have already seen the uniform distribution in the case of rolls of a fair die:
+We have already seen the uniform distribution in the case of rolls of a fair die.
 
 ```{python}
 #| fig-align: center
@@ -1294,7 +1286,7 @@ If $X_1$ and $X_2$ are Gaussian, then $X_3 = aX_1 + bX_2$ is Gaussian.
 
 One way of thinking of the Gaussian is that it is the limit of the Binomial when $N$ is large, that is, the limit of the sum of many Bernoulli trials.    
 
-However many other sums of random variables (not just Bernoulli trials) converge to the Gaussian as well.
+However, because of the central limit theorem, many other sums of random variables (not just Bernoulli trials) converge to the Gaussian.
 :::
 
 ::: {.content-visible when-profile="slides"}
@@ -1355,10 +1347,10 @@ However in other cases, extremely large observations can occur.   Distributions 
 
 Some examples of data that can be often modeled using heavy-tailed distributions:
 
-* The sizes of files in a file system
-* The sizes of objects transferred over the Internet
-* The execution time of jobs on a computer system
-* The degree of nodes in a network (eg, social network).
+* The sizes of files in a file system.
+* The sizes of objects transferred over the Internet.
+* The execution time of jobs on a computer system.
+* The degree of nodes in a network (e.g., social network).
 
 In practice, random variables that follow heavy tailed distributions
 are characterized as exhibiting many small observations mixed in with
@@ -1376,9 +1368,9 @@ distribution.
 Pareto was an Italian economist who studied income distributions.
 (In fact, income distributions typically show heavy tails.)
 
-Its pdf is:
+Its pdf is
 
-$$ p(x) = \alpha k^{\alpha} x^{-\alpha-1}\;\;\; k \leq x,\; \;0 < \alpha
+$$ p(x) = \alpha k^{\alpha} x^{-\alpha-1}\;\;\; k \geq x,\; \;0 < \alpha
 \leq 2. $$
 
 It takes on values in the range $[k, \infty]$. 
@@ -1387,8 +1379,8 @@ It takes on values in the range $[k, \infty]$.
 #| fig-align: center
 from scipy.stats import pareto
 alpha = 1.3
-x = np.linspace(pareto.ppf(0.005,alpha), pareto.ppf(0.995,alpha), 100)
-plt.plot(x, pareto.pdf(x,alpha),'b-', lw = 5, alpha = 0.6, label='pareto pdf')
+x = np.linspace(pareto.ppf(0.005, alpha), pareto.ppf(0.995, alpha), 100)
+plt.plot(x, pareto.pdf(x, alpha),'b-', lw = 5, alpha = 0.6, label='pareto pdf')
 plt.title(r'Pareto PDF.  $\alpha$ = {}'.format(alpha), size=14)
 plt.xlabel(r'x', size=14)
 plt.ylabel(r'p(x)', size=14)
@@ -1580,9 +1572,9 @@ g.ax_joint.plot(df.mean()['TSLA'], df.mean()['NVDA'], 'ro', markersize = 6)
 plt.show()
 ```
 
-Recall that the correlation between these two stocks was about 0.137.
+Recall that the correlation between these two stocks was about 0.600.
 
-That is, the stocks are positively correlated, but not highly so.
+That is, the stocks are positively correlated.
 
 ## Confidence Intervals
 
