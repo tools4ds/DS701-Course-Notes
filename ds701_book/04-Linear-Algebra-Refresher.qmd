@@ -285,6 +285,7 @@ plt.show()
 Observe that a right angle forms between the vectors $\mathbf{u}$ and $\mathbf{v}$ when $\mathbf{u}\cdot \mathbf{v} = 0$. 
 
 ```{python}
+#| echo: false
 print(f"u = {u}")
 print(f"v = {v}")
 print(f"u.v = {np.dot(u, v)}")
