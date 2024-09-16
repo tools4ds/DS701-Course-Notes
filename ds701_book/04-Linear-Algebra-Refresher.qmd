@@ -837,6 +837,7 @@ print(np.linalg.norm(x2-np.array([1, 1])))
 print(np.linalg.norm(x3-np.array([1, 1])))
 ```
 
+::: {.content-visible when-profile="slides"}
 ## Recap
 
 We have introduced the following concepts:
@@ -848,3 +849,4 @@ We have introduced the following concepts:
 - linear systems of equations,
 - least squares,
 - eigenvalues and eigenvectors.
+:::

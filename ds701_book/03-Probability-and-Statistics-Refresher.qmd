@@ -1677,7 +1677,6 @@ As an example, a 95% confidence interval for the mean is the sample average plus
 ## Recap
 Today we covered the following topics in probability:
 
-:::: {.incremental}
 - Frequentist vs Bayesian views
 - Probability rules
 - Conditional probability, Bayes' theorem, and independent events
@@ -1687,5 +1686,4 @@ Today we covered the following topics in probability:
   - Bernoulli
   - Poisson
   - Gaussian (normal)
-::::
 :::
