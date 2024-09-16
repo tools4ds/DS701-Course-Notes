@@ -837,5 +837,14 @@ print(np.linalg.norm(x2-np.array([1, 1])))
 print(np.linalg.norm(x3-np.array([1, 1])))
 ```
 
+## Recap
 
+We have introduced the following concepts:
 
+- vectors,
+- matrices,
+- matrix multiplication,
+- matrix decompositions,
+- linear systems of equations,
+- least squares,
+- eigenvalues and eigenvectors.
