@@ -251,52 +251,48 @@ plt.show()
 ## Dot product
 :::
 
-The dot product of two vectors $\mathbf{u}, \mathbf{v}$ can be used to project $\mathbf{u}$ onto $\mathbf{v}$. This is illustrated in @fig-dot-product.
+The dot product of two vectors $\mathbf{u}, \mathbf{v}$ can be used to project $\mathbf{u}$ onto $\mathbf{v}$. 
+
+$$
+\mathrm{proj}_{\mathbf{v}}\mathbf{u} = \frac{\mathbf{u}\cdot\mathbf{v}}{\Vert \mathbf{v} \Vert^2}\mathbf{v}
+$$
+
+This is illustrated in @fig-dot-product.
 
 ```{python}
 #| label: fig-dot-product
 #| fig-cap: "Dot product"
 import matplotlib.pyplot as plt
 import numpy as np
+
 fig = plt.figure()
 ax = plt.gca()
+
+# Define vectors u and v
 u = np.array([1, 2])
 v = np.array([4, 1])
-# w = np.dot(u, v) * v / np.sqrt(np.dot(v, v))
-w = np.dot(u, v) * v / np.dot(v, v)
-V = np.array([u, v, w])
+
+# Project u onto v
+projection = np.dot(u, v) * v / np.dot(v, v)
+
+V = np.array([u, v, projection])
+
 origin = np.array([[0, 0, 0], [0, 0, 0]])
-plt.quiver(*origin, V[:, 0], V[:, 1], 
-           color=['b', 'b', 'r'], 
-           angles='xy', 
-           scale_units='xy', 
-           scale=1)
+plt.quiver(*origin, V[:, 0], V[:, 1], color=['b', 'b', 'r'], angles='xy', scale_units='xy', scale=1)
+
 ax.set_xlim([-1, 6])
 ax.set_ylim([-1, 4])
-ax.text(1.3, 1.9, '$u$', size=16)
-ax.text(4.3, 1.2, '$v$', size=16)
-ax.text(0.4, -0.3, r'$\frac{u\cdot v}{\Vert v \Vert}$', size=16)
-plt.plot([u[0], w[0]], [u[1], w[1]], 'g--')
-# plt.plot([4, 5], [1, 3], 'g--')
+ax.text(1.3, 1.9, r'$\mathbf{u}$', size=16)
+ax.text(4.3, 1.2, r'$\mathbf{v}$', size=16)
+ax.text(0.4, -0.3, r'$\mathrm{proj}_{\mathbf{v}}\mathbf{u}$', size=16)
+
+plt.plot([u[0], projection[0]], [u[1], projection[1]], 'g--')
+
 ax.grid()
 plt.show()
 ```
 
 Observe that a right angle forms between the vectors $\mathbf{u}$ and $\mathbf{v}$ when $\mathbf{u}\cdot \mathbf{v} = 0$. 
-
-```{python}
-#| echo: false
-print(f"u = {u}")
-print(f"v = {v}")
-print(f"u.v = {np.dot(u, v)}")
-print(f"v.v = {np.dot(v, v)}")
-print(f"sqrt(v.v) = {np.sqrt(np.dot(v, v))}")
-print(f"v.v/sqrt(v.v) = {np.dot(v, v) / np.sqrt(np.dot(v, v))}")
-print(f"norm(v) = {np.linalg.norm(v)}")
-print(f"u.v / sqrt(v.v) = {np.dot(u, v) / np.sqrt(np.dot(v, v))}")
-
-print(f"u.v * v / (v.v) = {w}")
-```
 
 ## Matrices
 
