@@ -3,8 +3,6 @@ title: Probability and Statistics Refresher
 jupyter: python3
 ---
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/03-Probability-and-Statistics-Refresher.ipynb)
-
 ```{python}
 #| echo: false
 import numpy as np
@@ -18,6 +16,8 @@ Today we'll review the essentials of probability and statistics that we'll need 
 :::
 
 ## Probability
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/03-Probability-and-Statistics-Refresher.ipynb)
 
 What is probability?  
 
@@ -1677,7 +1677,6 @@ As an example, a 95% confidence interval for the mean is the sample average plus
 ## Recap
 Today we covered the following topics in probability:
 
-:::: {.incremental}
 - Frequentist vs Bayesian views
 - Probability rules
 - Conditional probability, Bayes' theorem, and independent events
@@ -1687,5 +1686,4 @@ Today we covered the following topics in probability:
   - Bernoulli
   - Poisson
   - Gaussian (normal)
-::::
 :::
