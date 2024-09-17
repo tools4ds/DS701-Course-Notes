@@ -3,10 +3,6 @@ title: Probability and Statistics Refresher
 jupyter: python3
 ---
 
-## Introduction
-
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/03-Probability-and-Statistics-Refresher.ipynb)
-
 ```{python}
 #| echo: false
 import numpy as np
@@ -17,10 +13,11 @@ import seaborn as sns
 
 We'll review the essentials of probability and statistics that we'll need for this course.
 
-::: {.content-visible when-profile="slides"}
 ## Motivation
-:::
-Probability and statistics are fundamental to data science for several reasons:
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/03-Probability-and-Statistics-Refresher.ipynb)
+
+Why do we need knowledge of probability and statistics as a data scientist?
 
 :::: {.incremental}
 1. Data Analysis: They help in understanding and interpreting data. Statistical methods allow you to summarize data (mean and variance) and identify patterns.
@@ -43,12 +40,9 @@ We will introduce the following concepts
   - Events and sample spaces, Probability measures, Conditional probability, Bayes' theorem
 - Random variables and distributions 
   - probability mass function, probability density function, cumulative distribution functions
-- Mean, variance, and covariance
-- Multivariate random variables
-::::
-
-:::: {.fragment}
-Our focus is on probability. For the topics on statistics, please consult the notes.
+- Mean, variance, and covariance,
+- Multivariate random variables,
+- Important distributions.
 ::::
 :::
 
@@ -227,7 +221,7 @@ Examples:
 - Rolling a dice: $\Omega = \{1, 2, 3, 4, 5, 6 \}$, $E = \text{Rolling a 2}.$ 
 - Flipping a coin 2 times: $\Omega = \{ (H, H), (H, T), (T, H), (T, T)\}$, $E=\text{Rolling a heads and a tail}$.
 - Distance a car travels before breaking down: $\Omega = \mathbb{R}_{+}$, $E=\text{
-Traver greater than 100 miles}.$
+Travels greater than 100 miles}.$
 - Location of a dart thrown at a target. What is $\Omega$ in this case? What is an event $E$?
 ::::
 ::::
@@ -438,7 +432,7 @@ When an experiment is performed, we might be interested in the actual outcome. H
 
 __Definition.__ A random variable $X$ is a function $X:\Omega\rightarrow \mathbb{R}$.
 
-We generally use captial letters to denote random variables and lowercase to denote non-random quantities.
+We generally use capital letters to denote random variables and lowercase to denote non-random quantities.
 
 :::: {.fragment}
 We distinguish between discrete and continuous random variables.  
@@ -556,7 +550,7 @@ __Definition.__ The _cumulative distribution function (CDF)_ $F$ can be expresse
 
 $$F(a) = P(X \leq a) = \sum_{x\leq a} p(x).$$
 
-If $X$ is a discrete random variable whose possible values are $x_1 , x_2 , x_3 ,...$, where $x_1 < x_2 < x_3 <...$, then the distribution function $F$ of $X$ is a step function. That is, the value of $F$ is constant in the intervals $[x_i−1,x_i)$ and then takes a step (or jump) of size $p(x_i)$ at $x_i$. 
+If $X$ is a discrete random variable whose possible values are $x_1 , x_2 , x_3 ,...$, where $x_1 < x_2 < x_3 <...$, then the distribution function $F$ of $X$ is a step function. That is, the value of $F$ is constant in the intervals $[x_{i−1},x_i)$ and then takes a step (or jump) of size $p(x_i)$ at $x_i$. 
 
 
 ::: {.content-visible when-profile="slides"}
@@ -627,7 +621,7 @@ The above formula tells us that the PDF is the derivative of the CDF.
 ## Continuous CDF example
 :::
 
-Here is an exampel of a continous CDF of some random variable.
+Here is an example of a continuous CDF of some random variable.
 
 ```{python}
 #| fig-align: center
@@ -713,7 +707,7 @@ This is called the __standard deviation__ and is denoted $\sigma$.
 ## Stocks as random variables
 :::
 
-Next, let's recall the case of the Tesla and NVDA returns from the last lecture:
+Next, let's recall the case of the Tesla and NVidia returns from the last lecture:
 
 ```{python}
 #| fig-align: center
@@ -723,7 +717,7 @@ import yfinance as yf
 stocks = ['TSLA', 'NVDA']
 df = pd.DataFrame()
 for s in stocks:
-    df[s] = pd.DataFrame(yf.download(s,start='2014-01-01',end='2014-12-31', progress = False))['Close']
+    df[s] = pd.DataFrame(yf.download(s, start='2023-01-01', end='2023-12-31', progress = False))['Close']
 
 rets = df.pct_change(30)
 rets[['TSLA', 'NVDA']].plot(lw=2)
@@ -731,7 +725,7 @@ plt.legend(loc='best')
 plt.show()
 ```
 
-Treating these two timeseries as random variables, we are interested in how they vary __together__.
+Treating these two time-series as random variables, we are interested in how they vary __together__.
 
 ::: {.content-visible when-profile="slides"}
 ## Covariance
@@ -741,11 +735,11 @@ This is captured by the concept of __covariance.__
 
 __Definition.__ For two random variables $X$ and $Y$, their _covariance_ is defined as:
 
-$$\text{Cov}(X,Y) = E\left[(X-\mu_X)(Y-\mu_Y)\right]$$
+$$\text{Cov}(X,Y) = E\left[(X-\mu_X)(Y-\mu_Y)\right].$$
 
-If covariance is positive, this tells us that $X$ and $Y$ tend to both be  above their means together, and both below their means together.
+If covariance is positive, this tells us that $X$ and $Y$ tend to both be  above their means together and both below their means together.
 
-We will often denote $\text{Cov}(X,Y)$ as $\sigma_{XY}$
+We will often denote $\text{Cov}(X,Y)$ as $\sigma_{XY}$.
 
 ::: {.content-visible when-profile=""}
 ## Correlation
@@ -779,15 +773,15 @@ plt.show()
 df.cov()
 ```
 
-In the case of Tesla ($X$) and Nvidia ($Y$) above, we find that
+In the case of Tesla ($X$) and NVidia ($Y$) above, we find that
 
-$$\text{Cov}(X,Y) = 0.037745$$
+$$\text{Cov}(X,Y) \approx 388.$$
 
 ::: {.content-visible when-profile="slides"}
 ## Stock correlation
 :::
 
-How similar are these random variables? Let's compute $\rho(X,Y)$ .
+How similar are these random variables? Let's compute $\rho(X,Y).$
 
 ```{python}
 df.corr()
@@ -795,7 +789,7 @@ df.corr()
 
 We observe that 
 
-$$\rho(X,Y) \approx 0.600$$
+$$\rho(X,Y) \approx 0.86.$$
 
 There appears to be some similarity between the two stocks.
 
@@ -807,11 +801,11 @@ We often simply say a "random vector".
 
 That is, 
 
-$$ \mathbf{X} = \left[\begin{array}{c}X_1 \\ X_2 \\ \vdots \\ X_n\end{array}\right] $$
+$$\mathbf{X} = \left[\begin{array}{c}X_1 \\ X_2 \\ \vdots \\ X_n\end{array}\right].$$
 
 The expected value of a random vector is obtained by taking the expected value of each component random variable:
     
-$$ E[\mathbf{X}] = \mathbf{\mu_X} = \left[\begin{array}{c}E[X_1] \\ E[X_2] \\ \vdots \\ E[X_n]\end{array}\right] $$
+$$ E[\mathbf{X}] = \mathbf{\mu_X} = \left[\begin{array}{c}E[X_1] \\ E[X_2] \\ \vdots \\ E[X_n]\end{array}\right].$$
 
 To properly characterize the variability of a random vector, we need to specify all the covariances of pairs of components.
 
@@ -823,7 +817,7 @@ $$ \text{Cov}[\mathbf{X}] =
 \text{Cov}[X_2, X_1] & \text{Var}[X_2] & \dots & \text{Cov}[X_2, X_n]\\
 \vdots & \vdots & \ddots & \vdots\\
 \text{Cov}[X_n,X_1] & \text{Cov}[X_n, X_2] & \dots & \text{Var}[X_n]\\
-\end{bmatrix} $$
+\end{bmatrix}.$$
 
 A couple things to note about a covariance matrix.
 
@@ -832,7 +826,6 @@ A couple things to note about a covariance matrix.
 
 ::: {.content-visible when-profile="web"}
 ### Random Variables as Vectors
-
 
 When working with data, we will often treat multiple observations of some feature as samples of a random variable.
 
@@ -876,8 +869,7 @@ This shows that __covariance is actually an inner product__ between normalized o
 ::: {.content-visible when-profile="web"}
 ## Low and High Variability
 
-Historically, most sources of random variation that have concerned
-statisticians are instances of low variability.  
+Historically, most sources of random variation that have concerned statisticians are instances of low variability.  
 
 The original roots of probability in the study of games of chance, and later in the study of biology and medicine, have mainly studied objects with low variability.
 
@@ -885,26 +877,24 @@ Note that by "low variability" I don't mean that such variability is unimportant
 
 Some examples of random variation in this category are: 
 
-* the heights of adult humans
-* the number of trees per unit area in a mature forest
-* the sum of 10 rolls of a die
+* the heights of adult humans,
+* the number of trees per unit area in a mature forest,
+* the sum of 10 rolls of a die,
 * the time between emission of subatomic particles from a radioactive material.
 
 In each of these cases, there are a range of values that are "typical," and there is a clear threshold above what is typical, that essentially never occurs.
 
-On the other hand, there are some situations in which variability is
-quite different.  
+On the other hand, there are some situations in which variability is quite different.  
 
 In these cases, there is no real "typical" range of
-values, and arbitrarily large values can occur with non-negligible
-frequency.   
+values, and arbitrarily large values can occur with non-negligible frequency.   
 
 Some examples in this category are
 
-* the distribution of wealth among individuals in society
-* the sizes of human settlements
-* the areas burnt in forest fires
-* the runs of gains and losses in various financial markets over time
+* the distribution of wealth among individuals in society,
+* the sizes of human settlements,
+* the areas burnt in forest fires,
+* the runs of gains and losses in various financial markets over time,
 * and the number of collaborators a scholar has over their lifetime.   
 
 ### Example
@@ -917,7 +907,7 @@ Nassim Nicholas Taleb, September 2008
 
 ![](figs/derivatives-portfolio-variation.png){fig-align="center"}
 
-An example of a run of observations showing high variability.   This figure shows the daily variations in a derivatives portfolio over the timeframe 1988-2008. About 99% of the variation over the 20 years occurs in a single day (the day the European Monetary System collapsed).
+An example of a run of observations showing high variability.  This figure shows the daily variations in a derivatives portfolio over the time-frame 1988-2008. About 99% of the variation over the 20 years occurs in a single day (the day the European Monetary System collapsed).
 :::
 
 ## Important Distributions
@@ -932,7 +922,7 @@ We will review the following important distributions
 :::: {.incremental}
 - Bernoulli distribution (discrete)
 - Poisson distribution (discrete)
-- Gaussian distribution (continous)
+- Gaussian distribution (continuous)
 ::::
 
 :::: {.fragment}
@@ -953,7 +943,7 @@ An experiment of a particularly simple type is one in which there are only two p
 :::: {.incremental}
 - head or tail,
 - success or failure,
-- defective or nondefective component,
+- defective or non-defective component,
 - patient recovers or does not recover.
 ::::
 
@@ -985,7 +975,7 @@ The binomial distribution answers the question "What is the probability there wi
 
 __Definition.__ If $X$ represents the number of successes that occur in $N$ trials, then $X$ is said to have a _binomial distribution_ with parameters $N$ and $p$ $(0\leq p \leq 1)$. The PMF of a binomial random variable is given by
 
-$$p(k) = P(X=k) = \binom{N}{k}\; p^k\; (1-p)^{N-k} \: \text{ for } k=0,1,...,N.$$
+$$p(k) = P(X=k) = \binom{N}{k}\; p^k\; (1-p)^{N-k} \: \text{ for } k=0,1,\ldots,N.$$
 
 The validity of the above PMF can be verified as follows. First we notice, that, by the assumed independence of trials, for any __given__ sequence of $k$ successes and $N-k$ failures, the probability is $p^k \;(1-p)^{N-k}$. Then there are $\binom{N}{k}$ different sequences of the $N$ outcomes leading to $k$ successes and $N-k$ failures.
 
@@ -1048,7 +1038,7 @@ plt.show()
 ## The Poisson Distribution
 :::
 
-Although the Bernoulli trials underlie all of the previous distributions, they do not form the basis for the Poisson distribution. To introduce the Poisson distribution we will look at some examples of random variables that generally obey the Poisson probability law are as follows:
+Although the Bernoulli trials underlie all of the previous distributions, they do not form the basis for the Poisson distribution. To introduce the Poisson distribution we will look at some examples of random variables that generally obey the Poisson probability law:
 
 1. The number of misprints on a page (or a group of pages) of a book;
 1. The number of people in a community who survive to age 100;
@@ -1081,7 +1071,8 @@ Both the mean and the variance of a Poisson distribution with parameter $\lambda
 ::: {.content-visible when-profile="slides"}
 ## Poisson Distribution Example
 :::
-The PMF of the Poisson distribution with parameter $\lambda = 0.3$  is shown below.
+
+The PMF of the Poisson distribution with parameter $\lambda = 0.3$ is shown below.
 
 ```{python}
 #| fig-align: center
@@ -1104,7 +1095,7 @@ The Poisson random variable has a tremendous range of applications in diverse ar
 
 The Poisson distribution has an interesting role in our perception of randomness (which you can read more about [here](http://www.empiricalzeal.com/2012/12/21/what-does-randomness-look-like/#more-2450)).    
 
-The classic example comes from history.  From the above site:
+The classic example comes from history.
 :::
 
 ::: {.content-visible when-profile="slides"}
@@ -1152,7 +1143,7 @@ Here is another example:
 
 ![](figs/pinker-glow-worms-and-stars-plot.jpg)
 
-Which of these was generated by a random process ocurring equally likely everywhere?
+Which of these was generated by a random process occurring equally likely everywhere?
 
 These images are from Steven Pinker’s book, _The Better Angels of our Nature._
 
@@ -1291,11 +1282,9 @@ However, because of the central limit theorem, many other sums of random variabl
 
 The _standard Gaussian_ distribution has mean zero and a variance (and standard deviation) of 1. The pdf of the standard Gaussian is:
 
-$$ p(x) = \frac{1}{\sqrt{2 \pi}} e^{-x^2/2}. $$
+$$p(x) = \frac{1}{\sqrt{2 \pi}} e^{-x^2/2}.$$
 
-For an arbitrary Gaussian distribution with mean $\mu$ and variance
-$\sigma^2$, the pdf is simply the standard Gaussian that is relocated to
-have its center at $\mu$ and its width scaled by $\sigma$
+For an arbitrary Gaussian distribution with mean $\mu$ and variance $\sigma^2$, the pdf is simply the standard Gaussian that is relocated to have its center at $\mu$ and its width scaled by $\sigma$
 
 $$ p_{\mu,\sigma}(x) = \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}.$$
 
@@ -1348,26 +1337,20 @@ Some examples of data that can be often modeled using heavy-tailed distributions
 * The execution time of jobs on a computer system.
 * The degree of nodes in a network (e.g., social network).
 
-In practice, random variables that follow heavy tailed distributions
-are characterized as exhibiting many small observations mixed in with
-a few large observations.  
+In practice, random variables that follow heavy tailed distributions are characterized as exhibiting many small observations mixed in with a few large observations.  
 
-In such datasets, most of the observations
-are small, but most of the contribution to the sample mean or variance
-comes from the rare, large observations.
+In such datasets, most of the observations are small, but most of the contribution to the sample mean or variance comes from the rare, large observations.
 
 #### The Pareto Distribution
 
-The Pareto distribution is the simplest continuous heavy-tailed
-distribution.    
+The Pareto distribution is the simplest continuous heavy-tailed distribution.    
 
-Pareto was an Italian economist who studied income distributions.
-(In fact, income distributions typically show heavy tails.)
+Pareto was an Italian economist who studied income distributions. (In fact, income distributions typically show heavy tails.)
 
 Its pdf is
 
 $$ p(x) = \alpha k^{\alpha} x^{-\alpha-1}\;\;\; k \geq x,\; \;0 < \alpha
-\leq 2. $$
+\leq 2.$$
 
 It takes on values in the range $[k, \infty]$. 
 
@@ -1383,12 +1366,9 @@ plt.ylabel(r'p(x)', size=14)
 plt.show()
 ```
 
-The variance of the Pareto distribution is infinite.  (The corresponding
-integral diverges.)
+The variance of the Pareto distribution is infinite.  (The corresponding integral diverges.)
 
-In practice, this means that a new observation that significantly
-changes the sample variance is _always_ possible, no matter how many samples
-of the random variable have already been taken.
+In practice, this means that a new observation that significantly changes the sample variance is _always_ possible, no matter how many samples of the random variable have already been taken.
 
 The mean of the Pareto is $\frac{k\alpha}{\alpha-1}$, for $\alpha > 1$.  
 
@@ -1402,7 +1382,7 @@ Hence the running average of a series of Pareto observations with $\alpha \leq 1
 
 The most common multivariate distribution we will work with is the multivariate Gaussian.
 
-The multivariate normal distribution of a random vector $\mathbf{X} = (X_1, \dots, X_k)^T$ is denoted:
+The multivariate normal distribution of a random vector $\mathbf{X} = (X_1, \dots, X_k)^T$ is denoted
 
 $$\mathbf{X} \sim \mathcal{N}(\mathbf{\mu}, \Sigma)$$
 
@@ -1514,7 +1494,7 @@ df1 = pd.DataFrame(multivariate_normal.rvs(mean = np.array([1, 1]),
                                            columns = ['X1', 'X2'])
 ```
 
-Next, we look at the case:
+Next, we look at the case
 
 $$\mathbf{\mu} = 
 \begin{bmatrix} 
@@ -1528,7 +1508,7 @@ $$\mathbf{\mu} =
 -0.8 & 1
 \end{bmatrix}.$$
 
-Notice that $\text{Cov}(X_1, X_2) = -0.8$.   We say that the components are __negatively correlated__ or __anticorrelated.__
+Notice that $\text{Cov}(X_1, X_2) = -0.8$. We say that the components are __negatively correlated__ or __anticorrelated.__
 
 ```{python}
 #| fig-align: center
@@ -1568,7 +1548,7 @@ g.ax_joint.plot(df.mean()['TSLA'], df.mean()['NVDA'], 'ro', markersize = 6)
 plt.show()
 ```
 
-Recall that the correlation between these two stocks was about 0.600.
+Recall that the correlation between these two stocks was about 0.86.
 
 That is, the stocks are positively correlated.
 
@@ -1576,8 +1556,7 @@ That is, the stocks are positively correlated.
 
 Say you are concerned with some data that we take as coming from a random process.
 
-You want to characterize it as accurately as possible. You measure it, yielding a
-single value.  
+You want to characterize it as accurately as possible. You measure it, yielding a single value.  
 
 How much does that value tell you? Can you rely on it as a description of the random process?
 
@@ -1589,23 +1568,19 @@ We think of the hypothetical data source as a random variable with a true mean $
 
 (Note that we are using frequentist style thinking here.)
 
-We would like to find a range within which we are 90% sure that the
-true mean $\mu$ lies.  
+We would like to find a range within which we are 90% sure that the true mean $\mu$ lies.  
 
-In other words, we want the probability that the true mean lies in
-the interval to be 0.9.  
+In other words, we want the probability that the true mean lies in the interval to be 0.9.  
 
 This interval is then called the 90% confidence interval.
 
-To be more precise:  A confidence interval at level $\gamma$ for a fixed
-but unknown parameter $m$ is an interval $(a,b)$ such that
+To be more precise:  A confidence interval at level $\gamma$ for a fixed but unknown parameter $m$ is an interval $(a,b)$ such that
 
-$$ P(A < m < B) \geq \gamma. $$
+$$P(A < m < B) \geq \gamma.$$
 
 Note that $m$ is fixed --- it is not random.  
 
-What is random is the
-interval $(A, B)$.  
+What is random is the interval $(A, B)$.  
 
 This interval is constructed based on the
 data, which (by assumption) are random.
@@ -1614,53 +1589,39 @@ data, which (by assumption) are random.
 
 ## Confidence Intervals for the Mean
 
-Imagine we have a set of $n$ samples of a random variable,
-$x_1, x_2, ..., x_n$ Let's assume that the random variable has mean
-$\mu$ and variance $\sigma^2$.
+Imagine we have a set of $n$ samples of a random variable, $x_1, x_2, ..., x_n$ Let's assume that the random variable has mean $\mu$ and variance $\sigma^2$.
 
 An estimate of $\mu$ is the empirical average of the samples, $\bar{x}$.   
 
-Now, the Central Limit Theorem tells us that the sum of a
-large number $n$ of random variables, each with mean $\mu$ and variance
-$\sigma^2$, yields a Gaussian random variable with mean
-$n\mu$ and variance $n \sigma^2$.   
+Now, the Central Limit Theorem tells us that the sum of a large number $n$ of random variables, each with mean $\mu$ and variance $\sigma^2$, yields a Gaussian random variable with mean $n\mu$ and variance $n \sigma^2$.   
 
 So the distribution of the average of $n$ samples
-is normal with mean $\mu$ and variance $\sigma^2 / n$.  That
-is, 
+is normal with mean $\mu$ and variance $\sigma^2 / n$. That is, 
 
 $$ \bar{x} \sim \mathcal{N}(\mu, \sigma/\sqrt{n}) $$
 
-We usually assume that the number of samples should be 30 or more for
-the CLT to hold.   
+We usually assume that the number of samples should be 30 or more for the CLT to hold.   
 
-While the specific value 30 is a bit arbitrary, we will usually be
-using very large samples (datasets) in this course for which this assumption is 
-valid.
+While the specific value 30 is a bit arbitrary, we will usually be using very large samples (datasets) in this course for which this assumption is  valid.
 
 The standard deviation of the sample mean is called the standard error.
 
 Notice that the standard error decreases as we increase the sample size, according to $1/\sqrt{n}.$
 
 So it will turn out that using $\bar{x}$, we can get
-increasingly "tight" estimates of $\mu$ as we increase the number of
-samples $n$.
+increasingly "tight" estimates of $\mu$ as we increase the number of samples $n$.
 
-Now, remember that the true mean $\mu$ is a constant, while the
-empirical mean $\bar{x}$ is a random variable.   
+Now, remember that the true mean $\mu$ is a constant, while the empirical mean $\bar{x}$ is a random variable.   
 
-Let us assume for a moment that we know the true $\mu$ and $\sigma$, and that we accept that
-$\bar{x}$ has a $N(\mu, \sigma/\sqrt{n})$ distribution.   
+Let us assume for a moment that we know the true $\mu$ and $\sigma$, and that we accept that $\bar{x}$ has a $N(\mu, \sigma/\sqrt{n})$ distribution.   
 
 Then it is true that 
 
-$$ P(\mu-k\sigma/\sqrt{n} < \bar{x} < \mu+k\sigma/\sqrt{n}) = P(-k < S <
-k)$$
+$$ P(\mu-k\sigma/\sqrt{n} < \bar{x} < \mu+k\sigma/\sqrt{n}) = P(-k < S < k) $$
 
 where $S$ is the standard Gaussian random variable (having distribution $N(0,1)$).
 
-We write $z_{1-\alpha/2}$ to be the $1-\alpha/2$ quantile of the
-unit normal.  That is, 
+We write $z_{1-\alpha/2}$ to be the $1-\alpha/2$ quantile of the unit normal. That is, 
 
 $$ P(-z_{1-\alpha/2} < S < z_{1-\alpha/2}) = 1-\alpha.$$
 
@@ -1697,17 +1658,14 @@ This means that:
 & = P(\bar{x}-k\sigma\sqrt{N} < \mu < \bar{x}+k\sigma/\sqrt{N}).
 \end{align*}
 
-This latter expression defines the __$1-\alpha$ confidence interval
-  for the mean.__
+This latter expression defines the __$1-\alpha$ confidence interval for the mean.__
 
-We are done, except for estimating $\sigma$.  We do this
-directly from the data: $\hat{\sigma} = s$
+We are done, except for estimating $\sigma$. We do this
+directly from the data: $\hat{\sigma} = s$, where $s$ is the sample standard deviation, that is,
 
-where $s$ is the sample standard deviation, that is,
 $s = \sqrt{1/(n-1) \sum (x_i - \bar{x})^2}$.
 
-To summarize: by the argument presented here, a 100(1-$\alpha$)%
-confidence interval for the population mean is given by
+To summarize: by the argument presented here, a 100(1-$\alpha$)% confidence interval for the population mean is given by
 
 $$\bar{x} \pm  z_{1-\alpha/2} \, \frac{s}{\sqrt{n}}. $$
 
