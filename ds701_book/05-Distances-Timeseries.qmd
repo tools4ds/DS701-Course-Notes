@@ -1,26 +1,51 @@
 ---
-title: Distances and Timeseries
+title: Distances and Time Series
 jupyter: python3
 ---
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/05-Distances-Timeseries.ipynb)
 
-Today we will start building some tools for making comparisons of data objects, with particular attention to timeseries.
+We will start building some tools for making comparisons of data objects with particular attention to time series.
 
-Working with data, we can encounter a wide variety of different data objects:
+Working with data, we can encounter a wide variety of different data objects
 
 ::: {.incremental}
-* Records of users
-* Graphs
-* Images
-* Videos
-* Text (webpages, books)
-* Strings (DNA sequences)
-* Timeseries
+* records of users,
+* images,
+* videos,
+* text (webpages, books),
+* strings (DNA sequences), and
+* time series.
 :::
 
 ::: {.fragment}
 How can we compare them?
+:::
+
+::: {.content-visible when-profile="slides"}
+## Lecture Overview
+
+We cover the following topics in today's lecture
+
+:::: {.incremental}
+- feature space and matrix representations of data,
+- metrics, norms, similarity, and dissimilarity,
+- bit vectors, sets, and time series.
+::::
+:::
+
+::: {.content-visible when-profile="slides"}
+## Time Series Data
+Some examples of time series data
+
+:::: {.incremental}
+- stock prices,
+- weather data,
+- electricity consumption,
+- website traffic,
+- retail sails, and
+- various economic indicators.
+::::
 :::
 
 ## Feature space representation
@@ -66,74 +91,19 @@ $$\begin{bmatrix}25\\200000\\1\\0\\0\end{bmatrix}.$$
 ## Encodings
 :::
 
-We will see many other encodings that take non-numeric data and encode into vectors or matrices.
+We will see many other encodings that take non-numeric data and encode them into vectors or matrices.
 
-For example, there are vector or matrix encodings for:
-
-::: {.incremental}
-* Graphs
-* Images
-* Text 
-:::
-
-## Metrics
-
-A metric is a function $d(x, y)$ that satisfies the following properties.
+For example, there are vector or matrix encodings for
 
 ::: {.incremental}
-* $d(i, j) = 0 \leftrightarrow  i == j \quad\quad$ (identity of indiscernables)
-* $d(i, j) = d(j, i) \qquad\qquad~~$ (symmetry)
-* $d(i, j)\leq d(i, h) + d(h, j) ~~$ (triangle inequality)
-:::
-
-::: {.fragment}
-We can use a metric to determine how __similar__ or __dissimilar__ two objects are.
-
-A dissimilarity function takes two objects as input, and returns a large value when the two objects are not very similar.
-:::
-
-::: {.content-hidden when-profile="web"}
-## Triangle inequality
-:::
-![](figs/TriangleInequality.png)
-    
-[Source](https://commons.wikimedia.org/w/index.php?curid=26047092)
-
-::: {.content-hidden when-profile="web"}
-## Distances
-:::
-
-A metric is also commonly called a __distance__.
-
-Sometimes we will use "distance" informally, i.e, to refer to a dissimilarity function even if we are not sure it is a metric.   
-
-We'll try to say "dissimilarity" in those cases though.
-
-::: {.fragment}
-Why is it important or valuable for a dissimilarity to be a metric?
-:::
-
-::: {.content-hidden when-profile="web"}
-## Distances continued
-:::
-
-::: {.incremental}
-- The additional constraints allow us to reason about and more easily visualize the data.
-- The main way this happens is through the triangle inequality.   
-- The triangle inequality basically says, if two objects are "close" to another object, then they are "close" to each other.  
-- This is not always the case for real data, but when it is true, it can really help.
-- Definitions of distance or dissimilarity functions are usually
-diferent for real, boolean, categorical, and ordinal
-variables.
-- Weights may be associated with diferent variables
-based on applications and data semantics.
+* graphs,
+* images, and
+* text.
 :::
 
 ## Matrix representation
 
-Very often we will manage data conveniently in matrix form.
-
-The standard way of doing this is:
+We generally store data in a matrix form as
 
 $$ 
 \mbox{$m$ data objects}\left\{\begin{array}{c}\;\\\;\\\;\\\;\\\;\end{array}\right.\;\;\overbrace{\left[\begin{array}{ccccc}
@@ -145,77 +115,118 @@ $$
 \end{array}\right]}^{\mbox{$n$ features}} 
 $$
 
-Where we typically use symbols $m$ for number of rows (objects) and $n$ for number of columns (features).
+The number of rows is denoted by $m$ and the number of columns by $n$. The rows are instances or records of data and the columns are the features.
 
-::: {.content-hidden when-profile="web"}
-## Matrix represntation of distances
+## Metrics
+
+A metric is a function $d(x, y)$ that satisfies the following properties.
+
+:::: {.columns}
+::: {.column width="70%"}
+::: {.incremental}
+* $d(x, x) = 0$
+* $d(x, y) > 0 \forall x\neq y\qquad\qquad$ (positivity)
+* $d(x, y) = d(y, x) \qquad\qquad~~$ (symmetry)
+* $d(x, y)\leq d(x, z) + d(z, y) ~~$ (triangle inequality)
+:::
+:::
+::: {.column width="30%"}
+:::: {.fragment}
+![](drawio/TriangleInequality.png){fig-align="center"}
+::::
+:::
+::::
+
+::: {.fragment}
+We can use a metric to determine how __similar__ or __dissimilar__ two objects are.
+
+A dissimilarity function takes two objects as input and returns a large value when the two objects are not very similar.
+
+A metric is also commonly called a __distance__.
 :::
 
-When we are working with distances, the matrix representation is:
+::: {.content-visible when-profile="web"}
+Sometimes we will use "distance" informally, i.e., to refer to a similarity or dissimilarity function even if we are not sure it is a metric.   
+
+We'll try to say "dissimilarity" in those cases though.
+:::
+
+::: {.content-hidden when-profile="web"}
+## Distance Matrices
+:::
+
+The distance matrix is defined as
 
 $$ 
 \mbox{$m$ data objects}\left\{\begin{array}{c}\;\\\;\\\;\\\;\\\;\end{array}\right.\;\;
 \overbrace{\left[\begin{array}{ccccc}
-\begin{array}{c} 0  \\  d(1,2) \\ d(1,3) \\ \vdots \\ d(1,m)  \end{array} &
-\begin{array}{c} \; \\  0      \\ d(2,3) \\ \vdots \\ d(2,m)  \end{array} &
+\begin{array}{c} 0  \\  d(x_1, x_2) \\ d(x_1,x_3) \\ \vdots \\ d(x_1,x_m)  \end{array} &
+\begin{array}{c} \; \\  0      \\ d(x_2,x_3) \\ \vdots \\ d(x_2,x_m)  \end{array} &
 \begin{array}{c} \; \\ \;      \\ 0      \\ \vdots \\ \cdots   \end{array} &
-\begin{array}{c} \; \\ \;      \\ \;     \\[-1pt] \ddots \\[-1pt] \cdots   \end{array}  &
-\begin{array}{c} \; \\ \;      \\ \;     \\ \;     \\[4pt] d(m, n) \end{array} &
-\end{array}\right]}^{\mbox{$n$ data features}}
+\begin{array}{c} \; \\ \;      \\ \;     \\ \ddots \\ d(x_{m-1},x_m)   \end{array}  &
+\begin{array}{c} \; \\ \;      \\ \;     \\ \;     \\[6pt] 0 \end{array} &
+\end{array}\right]}^{\mbox{$m$ data objects}},
 $$
+
+where $x_i$ denotes the $i$-th column of the data matrix $X$.
 
 ## Norms
 
-Assume some function $p(\mathbf{v})$ which measures the "size" of the vector $\mathbf{v}$.
-
-$p()$ is called a __norm__ if:
+Let $\mathbf{u}, \mathbf{v}\in\mathbf{R}^{n}$ and $a\in\mathbb{R}$. The vector function $p(\mathbf{v})$ is called a __norm__ if
 
 ::: {.incremental}
-* $p(a\mathbf{v}) = |a|\; p(\mathbf{v})\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;$ (absolute scaling)
-* $p(\mathbf{u} + \mathbf{v}) \leq p(\mathbf{u}) + p(\mathbf{v})\;\;\;\;\;\;\;\;\;\;$  (subadditivity)
-* $p(\mathbf{v}) = 0 \leftrightarrow \mathbf{v}$ is the zero vector $\;\;\;\;$(separates points)
+* $p(a\mathbf{v}) = |a|p(\mathbf{v})$,
+* $p(\mathbf{u} + \mathbf{v}) \leq p(\mathbf{u}) + p(\mathbf{v})$,
+* $p(\mathbf{v}) = 0 \leftrightarrow \mathbf{v}$.
+:::
+
+::: {.frag}
+__Every norm defines a corresponding metric.__ 
 :::
 
 ::: {.fragment}
-Norms are important for this reason, among others:
+In particular If $p()$ is a norm, then $d(\mathbf{x}, \mathbf{y}) = p(\mathbf{x}-\mathbf{y})$ is a metric.
 :::
 
-::: {.fragment}
-__Every norm defines a corresponding metric.__
+::: {.content-visible when-profile="web"}
+### $\ell_p$ norm
 :::
 
-::: {.fragment}
-That is, if $p()$ is a norm, then $d(\mathbf{x}, \mathbf{y}) = p(\mathbf{x}-\mathbf{y})$ is a metric.
+::: {.content-visible when-profile="slides"}
+## $\ell_p$ norm
 :::
-
-## Useful Norms
 
 A general class of norms are called __$\ell_p$__ norms, where $p \geq 1.$
 
-$$ \Vert \mathbf{x} \Vert_p = \left(\sum_{i=1}^d |x_i|^p\right)^{\frac{1}{p}} $$ 
-
-Notice that we use this notation for the $p$-norm of a vector $\mathbf{x}$:
-
-$$ \Vert \mathbf{x} \Vert_p $$
+$$\Vert \mathbf{x} \Vert_p = \left(\sum_{i=1}^d |x_i|^p\right)^{\frac{1}{p}}.$$ 
 
 The corresponding distance that an $\ell_p$ norm defines is called the _Minkowski distance._
 
-$$ \Vert \mathbf{x} - \mathbf{y} \Vert_p = \left(\sum_{i=1}^d |x_i - y_i|^p\right)^{\frac{1}{p}} $$
+$$\Vert \mathbf{x} - \mathbf{y} \Vert_p = \left(\sum_{i=1}^d |x_i - y_i|^p\right)^{\frac{1}{p}}.$$
 
-::: {.content-hidden when-profile="web"}
+::: {.content-visible when-profile="web"}
+### $\ell_2$ norm
+:::
+
+::: {.content-visible when-profile="slides"}
 ## $\ell_2$ norm
 :::
+
 A special -- but very important -- case is the $\ell_2$ norm.
 
-$$ \Vert \mathbf{x} \Vert_2 = \sqrt{\sum_{i=1}^d |x_i|^2} $$
+$$\Vert \mathbf{x} \Vert_2 = \sqrt{\sum_{i=1}^d |x_i|^2}.$$
 
 We've already mentioned it: it is the __Euclidean__ norm.
 
 The distance defined by the $\ell_2$ norm is the same as the Euclidean distance between the vectors.
 
-$$ \Vert \mathbf{x} - \mathbf{y} \Vert_2  = \sqrt{\sum_{i=1}^d (x_i - y_i)^2} $$
+$$ \Vert \mathbf{x} - \mathbf{y} \Vert_2  = \sqrt{\sum_{i=1}^d (x_i - y_i)^2}.$$
 
-::: {.content-hidden when-profile="web"}
+::: {.content-visible when-profile="web"}
+### $\ell_1$ norm
+:::
+
+::: {.content-visible when-profile="slides"}
 ## $\ell_1$ norm
 :::
 
@@ -228,8 +239,12 @@ This defines the __Manhattan__ distance, or (for binary vectors), the __Hamming_
 $$ \Vert \mathbf{x} - \mathbf{y} \Vert_1 = \sum_{i=1} |x_i - y_i| $$
 
 ![](figs/L05-manhattan-distance.png){fig-align="center"}
-    
-::: {.content-hidden when-profile="web"}
+
+::: {.content-visible when-profile="web"}
+### $\ell_\infty$ norm
+:::
+
+::: {.content-visible when-profile="slides"}
 ## $\ell_\infty$ norm
 :::
 
@@ -241,9 +256,8 @@ The value of the $\ell_\infty$ norm is simply the __largest element__ in a vecto
 What is the metric that this norm induces?
 :::
 
-::: {.content-hidden when-profile="web"}
+::: {.content-visible when-profile="web"}
 ## $\ell_0$ norm
-:::
 
 Another related idea is the $\ell_0$ "norm," which is not a norm, but is in a sense what we get from the $p$-norm for $p = 0$.
 
@@ -252,6 +266,7 @@ Note that this is __not__ a norm, but it gets called that anyway.
 This "norm" simply counts the number of __nonzero__ elements in a vector.
 
 This is called the vector's __sparsity.__
+:::
 
 ::: {.content-hidden when-profile="web"}
 ## Visualizing norms
@@ -266,33 +281,112 @@ That is, for each norm, the set of vectors having norm 1, or distance 1 from the
 [Source](https://commons.wikimedia.org/w/index.php?curid=678101)
 
 
-## Similarity and Dissimilarity
+::: {.content-visible when-profile="slides"}
+## What norm should I use?
 
-From linear algebra, we learn that the inner product of two vectors can be used to compute the __cosine of the angle__ between them:
+The choice of norm depends on the characteristics of your data and the problem you're trying to solve.
 
-$$ \cos(\mathbf{x}, \mathbf{y}) = \frac{\mathbf{x}^T\mathbf{y}}{\Vert\mathbf{x}\Vert \Vert\mathbf{y}\Vert} $$
+:::: {.columns}
+::: {.column width="33%"}
+__$\ell_1$ norm__
 
-Note that this value is __large__ when $\mathbf{x} \approx \mathbf{y}.$  So it is a __similarity__ function.
+- Use when your data is sparse.
+- Robust to outliers.
+:::
+::: {.column width="33%"}
+__$\ell_2$ norm__
 
-We often find that we have a similarity function $s$ and need to convert it to a dissimilarity function $d$.   
+- Use when measuring distances in Euclidean space.
+- Smooth and differentiable.
+:::
+::: {.column width="33%"}
+__$\ell_\infty$ norm__
 
+- Use when you need uniform bounds.
+- Maximum deviation.
+:::
+::::
+
+:::
+
+
+## Similarity and Dissimilarity Functions
+
+:::: {.columns}
+::: {.column width="44%"}
+Similarity functions quantify how similar two objects are. The higher the similarity score, the more alike the objects.
+
+:::: {.fragment}
+__Examples__
+
+:::: {.incremental}
+- cosine similarity,
+- Jaccard similarity.
+::::
+::::
+:::
+::: {.column width="55%"}
+Dissimilarity functions quantifies the difference between two objects. The higher the dissimilarity score, the more different the objects are.
+
+:::: {.fragment}
+__Examples__
+
+:::: {.incremental}
+- Manhattan distance,
+- Hamming distance.
+::::
+::::
+:::
+::::
+
+::: {.content-visible when-profile="web"}
+### Similarity
+:::
+
+::: {.content-visible when-profile="slides"}
+## Similarity
+:::
+
+We know that the inner product of two vectors can be used to compute the __cosine of the angle__ between them
+
+$$ \cos(\theta) = \frac{\mathbf{x}^T\mathbf{y}}{\Vert\mathbf{x}\Vert \Vert\mathbf{y}\Vert} \equiv \cos(\mathbf{x}, \mathbf{y})  .$$
+
+This value is close to 1 when $\mathbf{x} \approx \mathbf{y}$. We can use this formula to define a __similarity__ function called the __cosine similarity__ $\cos(\mathbf{x}, \mathbf{y})$.
+
+::: {.content-visible when-profile="web"}
+### Dissimilarity
+:::
+
+::: {.content-visible when-profile="slides"}
+## Dissimilarity
+:::
+
+:::: {.fragment}
+Given a similarity function $s(\mathbf{x}, \mathbf{y})$, how could we convert it to a dissimilarity function $d(\mathbf{x}, \mathbf{y})$?
+::::
+
+:::: {.fragment}
 Two straightforward ways of doing that are:
 
-$$d(x,y) = 1\,/\,s(x,y)$$
+$$d(\mathbf{x},\mathbf{y}) = 1\,/\,s(\mathbf{x},\mathbf{y})$$
 
 or 
 
-$$d(x,y) = k - s(x,y)$$
+$$d(\mathbf{x},\mathbf{y}) = k - s(\mathbf{x},\mathbf{y})$$
 
-...for some properly chosen $k$.
+for some properly chosen $k$.
+::::
 
+:::: {.fragment}
 For cosine similarity, one often uses:
     
 $$ d(\mathbf{x}, \mathbf{y}) = 1 - \cos(\mathbf{x}, \mathbf{y})$$
+::::
 
+::: {.content-visible when-profile="web"}
 Note however that this is __not a metric!__
+:::
 
-However if we recover the actual angle beween $\mathbf{x}$ and $\mathbf{y}$, that is a metric.
 
 ## Bit vectors and Sets
 
@@ -310,7 +404,9 @@ Or: "What is the smallest number of bit flips that will convert one vector into 
 
 ![](figs/L5-hamming-2.png){fig-align="center"}
 
+::: {.content-visible when-profile="web"}
 In other cases, the Hamming distance is not a very appropriate metric.
+:::
 
 ::: {.content-hidden when-profile="web"}
 ## Hamming distance with sets
@@ -320,48 +416,58 @@ Consider the case in which the bit vector is being used to represent a set.
 
 In that case, Hamming distance measures the __size of the set difference.__
 
-For example, consider two documents.  We will use bit vectors to represent the sets of words in each document.
+For example, consider two documents. We will use bit vectors to represent the sets of words in each document.
 
+:::: {.incremental}
 * Case 1: both documents are large, almost identical, but differ in 10 words.
 * Case 2: both documents are small, disjoint, have 5 words each.
+::::
 
-The situation can be represented as this:
+:::: {.fragment}
+What matters is not just the size of the set difference, but the size of the intersection.
+::::
 
-![](figs/L5-jaccard-1.png){fig-align="center"}
-
-What matters is not just the size of the set difference, but the size of the intersection as well.
 
 ::: {.content-hidden when-profile="web"}
 ## Jaccard similarity
 :::
-
 This leads to the _Jaccard_ similarity:
 
-$$J_{Sim}(\mathbf{x}, \mathbf{y}) = \frac{|\mathbf{x} \cap \mathbf{y}|}{|\mathbf{x} \cup \mathbf{y}|}$$
+$$J_{Sim}(\mathbf{x}, \mathbf{y}) = \frac{|\mathbf{x} \cap \mathbf{y}|}{|\mathbf{x} \cup \mathbf{y}|}.$$
 
+:::: {.columns}
+::: {.column width="60%"}
 This takes on values from 0 to 1, so a natural dissimilarity metric is $1 - J_{Sim}().$
 
-In fact, this is a __metric!__:
+In fact, this is a __metric!__
 
-$$J_{Dist}(\mathbf{x}, \mathbf{y}) = 1- \frac{|\mathbf{x} \cap \mathbf{y}|}{|\mathbf{x} \cup \mathbf{y}|}$$
+$$J_{Dist}(\mathbf{x}, \mathbf{y}) = 1- \frac{|\mathbf{x} \cap \mathbf{y}|}{|\mathbf{x} \cup \mathbf{y}|}.$$
+:::
+::: {.column width="40%"}
+![](figs/L5-jaccard-1.png){fig-align="center"}
+:::
+::::
+
 
 ::: {.content-hidden when-profile="web"}
-## Jaccard similarity continued
+## Jaccard Similarity Example 1
+:::
+    
+::: {.content-visible when-profile="web"}
+Let's revisit the previously introduces cases comparing documents.
 :::
 
-Consider our two cases:
-    
-Case 1: (very large almost identical documents)
+Case 1: Very large almost identical documents.
 
 ![](figs/L5-jaccard-2.png){fig-align="center"}
 
 Here $J_{Sim}(\mathbf{x}, \mathbf{y})$ is almost 1.
 
 ::: {.content-hidden when-profile="web"}
-## Jaccard similarity continued
+## Jaccard Similarity Example 2
 :::
 
-Case 2: (small disjoint documents)
+Case 2: Very small disjoint documents.
 
 ![](figs/L5-jaccard-3.png){fig-align="center"}
 
@@ -369,12 +475,14 @@ Here $J_{Sim}(\mathbf{x}, \mathbf{y})$ is 0.
 
 ## Time Series
 
-A time series is a sequence of real numbers, representing the measurements of a real variable at (equal) time intervals.
+A time series is a sequence of real numbers, representing the measurements of a real variable at (possibly equal) time intervals.
+
+Some examples are
 
 ::: {.incremental}
-* Stock prices
-* Volume of sales over time
-* Daily temperature readings
+* stock prices,
+* the volume of sales over time, and
+* daily temperature readings.
 :::
 
 ::: {.fragment}
@@ -383,20 +491,20 @@ A time series database is a large collection of time series.
 
 ## Similarity of Time Series
 
-How should we measure the "similarity" of two timeseries?
-
-We will assume they are the same length.
-
-Examples:
+Suppose we wish to compare the following time series.
 
 ::: {.incremental}
-* Find companies with similar stock price movements over a time interval
-* Find similar DNA sequences
-* Find users with similar credit usage patterns
+* Stock price movements for companies over a time interval.
+* Two sequences of DNA.
+* Credit usage patterns for bank clients.
 :::
 
+:::: {.fragment}
+How should we measure the "similarity" of these time series?
+::::
+
 ::: {.fragment}
-Two Problems:
+There are two problems to address.
 
 ::: {.incremental}
 1. Defining a meaningful similarity (or distance) function.
@@ -412,7 +520,7 @@ Then we could use a $p$-norm, e.g., $\ell_1, \ell_2,$ or $\ell_p$ to measure sim
 
 ::: {.fragment}
 
-Advantages:
+__Advantages__
 
 ::: {.incremental}    
 1. Easy to compute - linear in the length of the time series (O(n)).
@@ -421,17 +529,31 @@ Advantages:
 :::
 
 ::: {.content-hidden when-profile="web"}
-## Norm-based Similarity Measures continued
+## Beware of Norm-based Similarity
 :::
 
-Disadvantage:
+::: {.content-visible when-profile="slides"}
+:::: {.columns}
+::: {.column width="40%"}
+__Disadvantage__
 
-::: {.fragment}
+1. May not be __meaningful!__
+
+We may believe that $\mathbf{ts1}$ and $\mathbf{ts2}$ are the most "similar" pair of time series.
+:::
+::: {.column width="60%"}
+![](figs/L5-ts-euclidean.png){fig-align="center"}
+:::
+::::
+:::
+
+::: {.content-visible when-profile="web"}
+__Disadvantage__
 1. May not be __meaningful!__
 
 ![](figs/L5-ts-euclidean.png){fig-align="center"}
 
-We may believe that $\mathbf{ts1}$ and $\mathbf{ts2}$ are the most "similar" pair of timeseries.
+We may believe that $\mathbf{ts1}$ and $\mathbf{ts2}$ are the most "similar" pair of time series.
 :::
 
 ::: {.fragment}
@@ -444,34 +566,33 @@ while
 $$ \Vert \mathbf{ts1} - \mathbf{ts3} \Vert_2 = 23.2.$$
 :::
 
-::: {.fragment}
-Not good!
-:::
-
+::: {.content-visible when-profile="web"}
 ## Feature Engineering
 
-In general, there may be different aspects of a timeseries that are important in different settings.
+In general, there may be different aspects of a time series that are important in different settings.
 
 ::: {.fragment}
-The first step therefore is to ask yourself "what is important about timeseries in my application?"
+The first step therefore is to ask yourself "what is important about time series in my application?"
 :::
 
 ::: {.fragment}
 This is an example of __feature engineering.__
 :::
-
-::: {.content-hidden when-profile="web"}
-## Feature engineering continued
 :::
 
-In other words, feature engineering is the art of computing some derived measure from your data object that makes its important properties usable in a subsequent step.
+
+::: {.content-visible when-profile="slides"}
+## Feature Engineering
+:::
+
+Feature engineering is the art of computing some derived measure from your data object that makes the important properties usable in a subsequent step.
 
 ::: {.fragment}
-A reasonable approach may then to be:
+A reasonable approach is to
 
 ::: {.incremental}    
-* extract the relevant features
-* use a simple method (eg, a norm) to define similarity over those features.
+* extract the relevant features,
+* use a simple method (e.g., a norm) to define similarity over those features.
 :::
 :::
 
@@ -479,54 +600,62 @@ A reasonable approach may then to be:
 In the case above, one might think of using 
 
 ::: {.incremental}
-* Fourier coefficients (to capture periodicity)
-* Histograms
-* Or something else!
+* Fourier coefficients (to capture periodicity),
+* histograms,
+* or something else!
 :::
 :::
 
+::: {.content-visible when-profile="web"}
 ## Dynamic Time Warping
+:::
+
+::: {.content-visible when-profile="slides"}
+## Bump Hunting
+:::
 
 One case that arises often is something like the following:  "bump hunting"
 
 ![](figs/L5-DTW-1.png){fig-align="center"} 
 
-Both timeseries have the same key characteristics: four bumps.
+Both time series have the same key characteristics: four bumps.
 
-But a one-one match (ala Euclidean distance) will not detect the similarity.
+But a one-to-one match (ala Euclidean distance) will not detect the similarity.
 
+::: {.content-visible when-profile="web"}
 (Be sure to think about why Euclidean distance will fail here.)
+:::
 
 A solution to this is called __dynamic time warping.__
 
 
 ::: {.content-hidden when-profile="web"}
-## Dynamic time warping continued
+## Dynamic Time Warping
 :::
 
 The basic idea is to allow acceleration or deceleration of signals along the time dimension.
 
-::: {.fragmen}
-Classic applications:
+::: {.fragment}
+__Classic applications__
 
 ::: {.incremental}
-* Speech recognition
-* Handwriting recognition
+* speech recognition
+* handwriting recognition
 :::
 :::
 
 ::: {.fragment}
-Specifically: 
+Specifically
 
 ::: {.incremental}
 * Consider $X = x_1, x_2, \dots, x_n$ and $Y = y_1, y_2, \dots, y_n$.
 * We are allowed to extend each sequence by repeating elements to form $X'$ and $Y'$.
-* We then calculate, eg, Euclidean distance between the extended sequnces $X'$ and $Y'$
+* We then calculate, e.g., Euclidean distance between the extended sequences $X'$ and $Y'$
 :::
 :::
 
 ::: {.content-hidden when-profile="web"}
-## Dynamic time warping continued
+## Visualizing DTW
 :::
 
 There is a simple way to visualize this algorithm.
@@ -540,31 +669,32 @@ $M$ measures the amount of error we get if we match $x_i$ with $y_j$.
 So we seek a __path through $M$ that minimizes the total error.__
 
 ::: {.content-hidden when-profile="web"}
-## Dynamic time warping continued
+## DTW restrictions
+:::
+::: {.content-visible when-profile="web"}
+We need to start in the lower left and work our way up via a continuous path.
 :::
 
-We need to start in the lower left and work our way up via a continuous path.
-
 ::: {.fragment}
-Basic restrictions on path:
+The basic restrictions on path are:
     
 ::: {.incremental}
 * Montonicity
-  * path should not go down or to the left
+  * The path should not go down or to the left.
 * Continuity
-  * No elements may be skipped in sequence
+  * No elements may be skipped in a sequence.
 :::
 :::
 
 ::: {.fragment}
-This can be solved via dynamic programming.  However, the algorithm is still quadratic in $n$.
+This can be solved via dynamic programming. However, the algorithm is still quadratic in $n$.
 :::
 
 ::: {.content-hidden when-profile="web"}
-## Dynamic time warping continued
+## Improving DTW 
 :::
 
-Hence, we may choose to put a restriction on the amount that the path can deviate from the diagonal.
+To reduce the computational complexity, we can put a restriction on the amount that the path can deviate from the diagonal.
 
 The basic algorithm looks like this:
 
@@ -586,6 +716,7 @@ This is implemented by not allowing the path to pass through locations where $|i
 
 Then the algorithm is $\mathcal{O}(nw)$.
 
+::: {.content-hidden when-profile="slides"}
 ## From Timeseries to Strings
 
 A closely related idea concerns strings.
@@ -599,10 +730,6 @@ Given two strings, one way to define a 'distance' between them is:
 Edit operations are insertion, deletion, and substitution of single characters.
 
 This is called __edit distance__ or __Levenshtein distance.__
-
-::: {.content-hidden when-profile="web"}
-## Comparing strings
-:::
 
 For example, given strings:
 
@@ -632,8 +759,22 @@ we would like to
 ## Comparing strings continued
 :::
 
-A dynamic programming algorithm can also be used to find this distance, 
-
-and it is __very similar to dynamic time-warping.__
+A dynamic programming algorithm can also be used to find this distance, and it is __very similar to dynamic time-warping.__
 
 In bioinformatics this algorithm is called __"Smith-Waterman" sequence alignment.__
+:::
+
+::: {.content-visible when-profile="slides"}
+## Recap
+
+We covered the following topics
+
+:::: {.incremental}
+- reviewed representations of data,
+- discussed metrics and norms,
+- discussed similarity and dissimilarity functions,
+- introduced time series, 
+- feature engineering, and
+- dynamic time warping.
+:::: 
+:::
