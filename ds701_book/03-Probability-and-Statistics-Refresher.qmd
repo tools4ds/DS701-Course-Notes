@@ -3,6 +3,10 @@ title: Probability and Statistics Refresher
 jupyter: python3
 ---
 
+## Introduction
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/03-Probability-and-Statistics-Refresher.ipynb)
+
 ```{python}
 #| echo: false
 import numpy as np
@@ -15,15 +19,20 @@ We'll review the essentials of probability and statistics that we'll need for th
 
 ## Motivation
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/03-Probability-and-Statistics-Refresher.ipynb)
-
 Why do we need knowledge of probability and statistics as a data scientist?
 
 :::: {.incremental}
-1. Data Analysis: They help in understanding and interpreting data. Statistical methods allow you to summarize data (mean and variance) and identify patterns.
-1. Model Building: Many machine learning algorithms are based on statistical principles. For example, linear regression and logistic regression rely on probability and statistics.
-1. Uncertainty Quantification: Probability helps in quantifying uncertainty. This is crucial in making predictions and decisions based on data, as it allows you to estimate the likelihood of different outcomes.
-1. Hypothesis Testing: Statistics provide tools for testing hypotheses and validating models. This is essential for determining whether the patterns observed in data are significant or just due to random chance.
+1. **Data Analysis:** Helps in understanding and interpreting data. Statistical
+   methods allow you to summarize data (mean and variance) and identify patterns.
+1. **Model Building:** Many machine learning algorithms are based on statistical
+   principles. For example, linear regression and logistic regression rely on
+   probability and statistics.
+1. **Uncertainty Quantification:** Probability helps in quantifying uncertainty.
+   This is crucial in making predictions and decisions based on data, as it
+   allows you to estimate the likelihood of different outcomes.
+1. **Hypothesis Testing:** Statistics provide tools for testing hypotheses and
+   validating models. This is essential for determining whether the patterns
+   observed in data are significant or just due to random chance.
 ::::
 
 :::: {.fragment}
@@ -35,16 +44,19 @@ Combined with linear algebra, probability and statistics provide the theoretical
 We will introduce the following concepts
 
 :::: {.incremental}
-- Frequentist and Bayesian views on probability,
-- Definitions and rules of probability,
+- Frequentist and Bayesian views on probability
+- Definitions and rules of probability
   - Events and sample spaces, Probability measures, Conditional probability, Bayes' theorem
 - Random variables and distributions 
   - probability mass function, probability density function, cumulative distribution functions
-- Mean, variance, and covariance,
-- Multivariate random variables,
-- Important distributions.
+- Mean, variance, and covariance
+- Multivariate random variables
+- Important distributions
 ::::
 :::
+
+
+# Probability
 
 ## Probability
 
@@ -412,6 +424,7 @@ So we have updated our estimate of the twins being identical from 1/3
 We did this in a way that used quantities that were relatively easy to obtain or measure.
 
 :::
+
 ::: {.content-visible when-profile="slides"}
 ## Independent Events
 :::
@@ -425,6 +438,8 @@ __Definition.__ Two events $A$ and $B$ are __independent__ if $P(A\cap B) = P(A)
 This is exactly the same as saying that $P(A|B) = P(A).$  
 
 So we can see that the intuitive notion of independence is that "if one event occurs, that does not change the probability of the other event."
+
+# Random Variables
 
 ## Random Variables
 
@@ -910,6 +925,9 @@ Nassim Nicholas Taleb, September 2008
 An example of a run of observations showing high variability.  This figure shows the daily variations in a derivatives portfolio over the time-frame 1988-2008. About 99% of the variation over the 20 years occurs in a single day (the day the European Monetary System collapsed).
 :::
 
+
+# Important Distributions
+
 ## Important Distributions
 
 ::: {.content-visible when-profile="web"}
@@ -941,10 +959,10 @@ See the course notes for other important distributions.
 An experiment of a particularly simple type is one in which there are only two possible outcomes, such as 
 
 :::: {.incremental}
-- head or tail,
-- success or failure,
-- defective or non-defective component,
-- patient recovers or does not recover.
+- head or tail
+- success or failure
+- defective or non-defective component
+- patient recovers or does not recover
 ::::
 
 :::: {.fragment}
@@ -1054,9 +1072,13 @@ In the above examples the events appear to happen at a certain rate, but complet
 
 A Poisson distribution answers the question: "How many successes occur in a fixed amount of time?"
 
-__Definition.__ A random variable $X$ that takes on one of the values $0, 1, 2,...$ is said to have a _Poisson distribution_ with parameter $\lambda$ if, for some $\lambda > 0$,
+__Definition.__ A random variable $X$ that takes on one of the values
+$0, 1, 2,...$ is said to have a _Poisson distribution_ with parameter $\lambda$
+if, for some $\lambda > 0$,
 
-$$p(k) = P(X=k) = \lambda^k \frac{e^{- \lambda}}{k!} \: \text{ for } k = 0, 1, 2,...$$
+$$
+p(k) = P(X=k) = \lambda^k \frac{e^{- \lambda}}{k!} \: \text{ for } k = 0, 1, 2,...
+$$
 
 ::: {.content-visible when-profile="web"}
 This $p(k)$ defines a PMF, because
@@ -1090,10 +1112,14 @@ plt.show()
 ```
 
 ::: {.content-visible when-profile="web"}
-The Poisson random variable has a tremendous range of applications in diverse areas. The reason for that is the fact that a Poisson distribution with mean $Np$ may be used as an approximation for a binomial distribution with parameters $N$ and $p$ when $N$ is large and $p$ is small enough so that $Np$ is of moderate size. 
+The Poisson random variable has a tremendous range of applications in diverse areas.
+The reason for that is the fact that a Poisson distribution with mean $Np$ may be
+used as an approximation for a binomial distribution with parameters $N$ and $p$
+when $N$ is large and $p$ is small enough so that $Np$ is of moderate size. 
 
 
-The Poisson distribution has an interesting role in our perception of randomness (which you can read more about [here](http://www.empiricalzeal.com/2012/12/21/what-does-randomness-look-like/#more-2450)).    
+The Poisson distribution has an interesting role in our perception of randomness
+(which you can read more about [here](http://www.empiricalzeal.com/2012/12/21/what-does-randomness-look-like/#more-2450)).    
 
 The classic example comes from history.
 :::
@@ -1102,11 +1128,12 @@ The classic example comes from history.
 ## Poisson Distribution and Horse Kicks
 :::
 
->In 1898 Ladislaus Bortkiewicz, a Russian statistician of Polish descent, was trying to understand why, in some years, 
+> In 1898 Ladislaus Bortkiewicz, a Russian statistician of Polish descent, was trying to understand why, in some years, 
 >an unusually large number of soldiers in the Prussian army were dying due to horse-kicks. In a single army corp, 
 >there were sometimes 4 such deaths in a single year. Was this just coincidence?
 
-To assess whether horse-kicks were random (not following any pattern) Bortkiewicz simply compared the number per year to what would be predicted by the Poisson distribution.
+To assess whether horse-kicks were random (not following any pattern) Bortkiewicz simply compared the number per year to
+what would be predicted by the Poisson distribution.
 
 ::: {.content-visible when-profile="slides"}
 ## Poisson Distribution and Horse Kicks continued
@@ -1125,6 +1152,7 @@ data = np.array([
 [5, 0.08, 0],
 [6, 0.01, 0]]),
 columns = ["Number of Deaths Per Year","Predicted Instances (Poisson)","Observed Instances"])
+horse_kicks.set_index("Number of Deaths Per Year", inplace=True)
 horse_kicks
 ```
 
@@ -1673,6 +1701,9 @@ As an example, a 95% confidence interval for the mean is the sample average plus
 :::
 
 ::: {.content-visible when-profile="slides"}
+
+# Recap
+
 ## Recap
 Today we covered the following topics in probability:
 
