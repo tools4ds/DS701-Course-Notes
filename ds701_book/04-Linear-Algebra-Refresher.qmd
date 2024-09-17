@@ -651,6 +651,20 @@ u_{11} & u_{12} & u_{13} \\
 \end{bmatrix}
 $$
 
+It simplifies the process of solving linear equations and is more numerically
+stable than computing the inverse of $A$.
+
+<br>
+You can then solve this in two steps:
+
+1. **Forward substitution:** First, solve the equation $L\mathbf{y} = \mathbf{b}$ for $\mathbf{y}$.
+2. **Backward substitution:** Then, solve $U\mathbf{x} = \mathbf{y}$ for $\mathbf{x}$.
+
+This method is particularly useful because triangular matrices are much easier to
+work with. It can make solving linear systems faster and more efficient, 
+especially for large matrices.
+
+
 ::: {.content-visible when-profile="web"}
 ### QR decomposition
 :::
@@ -666,6 +680,37 @@ A=QR,
 $$
 where $Q$ is an orthogonal square matrix and $R$ is an upper-triangular square matrix.
 
+
+QR factorization is useful in solving linear systems and performing least squares fitting.
+
+<br>
+This factorization has a couple of important benefits:
+
+1. **Solving Linear Systems**: When you're working with a system of equations represented by $A\mathbf{x} = \mathbf{b}$, you can substitute the QR factorization into this equation:
+
+   $$
+   QR\mathbf{x} = \mathbf{b}
+   $$
+
+   Since $Q$ is orthogonal, you can multiply both sides by $Q^T$ (the transpose of $Q$) to simplify it:
+
+   $$
+   R\mathbf{x} = Q^T\mathbf{b}
+   $$
+
+   Now, you can solve this upper triangular system for $\mathbf{x}$ using backward substitution, which is typically easier and more stable.
+
+2. **Least Squares Problems**: In many data science applications, you want to find the best fit line or hyperplane for your data. QR factorization is particularly useful here because it helps in minimizing the error when the system is overdetermined (more equations than unknowns). You can solve the least squares problem by leveraging the QR decomposition to find:
+
+   $$
+   \hat{\mathbf{x}} = R^{-1}Q^T\mathbf{b}
+   $$
+
+By converting the problem into a triangular system, QR factorization often provides a more stable numerical solution than other methods, especially for poorly conditioned matrices.
+
+
+
+
 ::: {.content-visible when-profile="web"}
 ### Eigendecomposition
 :::
@@ -674,13 +719,13 @@ where $Q$ is an orthogonal square matrix and $R$ is an upper-triangular square m
 ## Eigendecomposition
 :::
 
-Let $A\in\mathbb{R}^{n}$ have $n$ linearly independent eigenvectors $\mathbf{x}_i$ for $i=1,\ldots, n$, then $A$ can be factorized as
+Let $A\in\mathbb{R}^{n\times n}$ have $n$ linearly independent eigenvectors $\mathbf{x}_i$ for $i=1,\ldots, n$, then $A$ can be factorized as
 
 $$
 A = X\Lambda X^{-1},
 $$
 
-where $X$ is a matrix of the eigenvectors, and 
+where the columns of matrix $X$ are the eigenvectors of $A$, and 
 
 $$
 \Lambda =
@@ -691,9 +736,21 @@ $$
 0 & 0 & \cdots & \lambda_{n}  \\
 \end{bmatrix},
 $$
+
 is a diagonal matrix of the eigenvalues. 
 
 In this case, the matrix $A$ is said to be diagonalizable.
+
+<br>
+Instead of calulating $A\mathbf{x}$ directly, we can map it by first
+transforming it using $X^{-1}$ and then stretching it by $\Lambda$ and finally
+transforming it using $X$.
+
+$$
+A \mathbf{x} = X \Lambda X^{-1} \mathbf{x}
+$$
+
+We'll use eigendecomposition in Principal Component Analysis (PCA) to reduce dimensionality in datasets while preserving as much variance as possible.
 
 ::: {.content-visible when-profile="slides"}
 ## Spectral decomposition
@@ -715,8 +772,8 @@ This is known as the spectral theorem and this decomposition of $A$ is its spect
 ## Singular value decomposition
 :::
 
-
-Let $A\in\mathbb{R}^{m\times n}$ with $m>n$, then $A$ admits a decomposition
+For the previous few examples, we required $\mathbf{A}$ to be square. Now
+let $A\in\mathbb{R}^{m\times n}$ with $m>n$, then $A$ admits a decomposition
 
 $$
 A = U\Sigma V^{T}.
@@ -734,7 +791,10 @@ $$
 0 & 0 & \cdots & \sigma_{mn} \\
 \end{bmatrix}.
 $$
-The values $\sigma_{ij}$ are the singular values of the matrix $A$. Amazingly, it can be proven that every matrix $A\in\mathbb{R}^{m\times n}$ has a singular value decomposition.
+
+The values $\sigma_{ij}$ are the singular values of the matrix $A$. 
+
+Amazingly, it can be proven that every matrix $A\in\mathbb{R}^{m\times n}$ has a singular value decomposition.
 
 
 # Linear Systems and Least Squares
@@ -756,6 +816,29 @@ Observe that this is simply the matrix vector equation
 
 $$
 A\mathbf{x}=\mathbf{b}.
+$$
+
+$$
+A\mathbf{x} = 
+\begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1n} \\
+a_{21} & a_{22} & \cdots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{m1} & a_{m2} & \cdots & a_{mn} \\
+\end{bmatrix}
+\begin{bmatrix}
+x_1 \\
+x_2 \\
+\vdots \\
+x_n
+\end{bmatrix}
+=
+\begin{bmatrix}
+b_1 \\
+b_2 \\
+\vdots \\
+b_m
+\end{bmatrix}.
 $$
 
 ::: {.content-visible when-profile="slides"}
@@ -795,7 +878,9 @@ The process of inverting $L$ and $U$ is called backward and forward substitution
 
 In data science it is often the case that we have to solve the linear system 
 
-$$ A \mathbf{x} = \mathbf{b}.$$ 
+$$
+A \mathbf{x} = \mathbf{b}.
+$$ 
 
 This problem may have no solution -- perhaps due to noise or measurement error.
 
@@ -803,14 +888,18 @@ In such a case, we look for a vector $\mathbf{x}$ such that $A\mathbf{x}$ is a g
 
 The quality of the approximation can be measured using the distance from $A\mathbf{x}$ to $\mathbf{b},$ i.e.,
 
-$$\Vert A\mathbf{x} - \mathbf{b}\Vert_2.$$
+$$
+\Vert A\mathbf{x} - \mathbf{b}\Vert_2.
+$$
 
 ::: {.content-visible when-profile="slides"}
 ## Least squares continued
 :::
 The general least-squares problem is given $A\in\mathbb{R}^{m\times n}$ and and $\mathbf{b}\in\mathbb{R}^{m}$, find a vector $\hat{\mathbf{x}}\in\mathbb{R}^{n}$ such that $\Vert A\mathbf{x}-\mathbf{b}\Vert_2$ is minimized, i.e. 
 
-$$\hat{\mathbf{x}} = \arg\min_\mathbf{x} \Vert A\mathbf{x} - \mathbf{b}\Vert.$$
+$$
+\hat{\mathbf{x}} = \arg\min_\mathbf{x} \Vert A\mathbf{x} - \mathbf{b}\Vert.
+$$
 
 This emphasizes the fact that the least squares problem is a minimization problem.
 
@@ -857,6 +946,7 @@ We can prove that these equations always have at least one solution.
 When $A^TA$ is invertible, the system is said to be overdetermined. This means that there is a unique solution
 
 $$\hat{\mathbf{x}} = (A^TA)^{-1}A^T\mathbf{b}.$$
+
 
 ::: {.content-visible when-profile="slides"}
 ## Least squares beware
