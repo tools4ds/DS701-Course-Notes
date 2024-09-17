@@ -739,25 +739,16 @@ and
 
 ``t = VIVADAVIS``
 
-::: {.fragment}
 
 we would like to 
 
-::: {.incremental}
 * compute the edit distance, and
 * obtain the optimal __alignment__
-:::
-:::
 
-::: {.fragment}
+
 ![](figs/viva-las-vegas.png){fig-align="center"}
 
 [Source](http://medicalbioinformaticsgroup.de/downloads/lectures/Algorithmen_und_Datenstrukturen/WS15-16/aldabi_ws15-16_woche6.pdf)
-:::
-
-::: {.content-hidden when-profile="web"}
-## Comparing strings continued
-:::
 
 A dynamic programming algorithm can also be used to find this distance, and it is __very similar to dynamic time-warping.__
 
