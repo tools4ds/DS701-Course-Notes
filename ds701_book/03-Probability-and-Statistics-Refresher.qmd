@@ -284,7 +284,7 @@ Now if $B$ is a proper subset of $\Omega,$ then $P(B) < 1$.   So $P(\cdot|B)$ is
 :::
 ::: {.column width="40%"}
 
-![](drawio/ConditionalProbability.png){fig-align="center" width=80%}
+![](figs/Lec03-ConditionalProbability.png){fig-align="center" width=80%}
 :::
 ::::
 
@@ -308,7 +308,7 @@ P(A) &= P(A\cap B_1) + P(A \cap B_2) \\
 \end{align*}
 :::
 ::: {.column width="40%"}
-![](drawio/LawOfTotalProbability.png){fig-align="center" width=80%}
+![](figs/Lec03-LawOfTotalProbability.png){fig-align="center" width=80%}
 :::
 ::::
 
