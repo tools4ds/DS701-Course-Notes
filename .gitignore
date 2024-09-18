@@ -6,3 +6,6 @@ ENV/
 
 # Mac OS system files
 .DS_Store
+
+# Ignore VSCode directory
+.vscode/
