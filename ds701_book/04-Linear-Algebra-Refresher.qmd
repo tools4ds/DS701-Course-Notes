@@ -250,10 +250,10 @@ $$
 
 ---
 
-The dot product of two vectors $\mathbf{u}, \mathbf{v}$ can be used to project $\mathbf{u}$ onto $\mathbf{v}$. 
+The dot product of two vectors $\mathbf{u}, \mathbf{v}$ can be used to project $\mathbf{u}$ onto $\mathbf{v}$
 
 $$
-\mathrm{proj}_{\mathbf{v}}\mathbf{u} = \frac{\mathbf{u}\cdot\mathbf{v}}{\Vert \mathbf{v} \Vert^2}\mathbf{v}
+\mathrm{proj}_{\mathbf{v}}\mathbf{u} = \frac{\mathbf{u}\cdot\mathbf{v}}{\Vert \mathbf{v} \Vert^2}\mathbf{v}.
 $$
 
 This is illustrated in @fig-dot-product.
