@@ -43,7 +43,7 @@ Some examples of time series data
 - weather data,
 - electricity consumption,
 - website traffic,
-- retail sails, and
+- retail sales, and
 - various economic indicators.
 ::::
 :::
@@ -172,8 +172,7 @@ where $x_i$ denotes the $i$-th column of the data matrix $X$.
 
 ## Norms
 
-For vectors $\mathbf{u}, \mathbf{v}\in\mathbf{R}^{n}$ and scalar $a\in\mathbb{R}$. 
-The vector function $p(\mathbf{v})$ is called a __norm__ if
+Let $\mathbf{u}, \mathbf{v}\in\mathbf{R}^{n}$ and $a\in\mathbb{R}$. The vector function $p(\mathbf{v})$ is called a __norm__ if
 
 ::: {.incremental}
 * $p(a\mathbf{v}) = |a|p(\mathbf{v})$,
@@ -183,7 +182,7 @@ The vector function $p(\mathbf{v})$ is called a __norm__ if
 
 ::: {.fragment}
 __Every norm defines a corresponding metric.__ 
-:::
+::::
 
 ::: {.fragment}
 In particular If $p()$ is a norm, then $d(\mathbf{x}, \mathbf{y}) = p(\mathbf{x}-\mathbf{y})$ is a metric.
@@ -221,7 +220,7 @@ $$
 
 We've already mentioned it: it is the __Euclidean__ norm.
 
-The distance defined by the $\ell_2$ norm is the same as the Euclidean distance between the vectors.
+The distance defined by the $\ell_2$ norm is the same as the Euclidean distance between two vectors $\mathbf{x}, \mathbf{y}$.
 
 $$ 
 \Vert \mathbf{x} - \mathbf{y} \Vert_2  = \sqrt{\sum_{i=1}^d (x_i - y_i)^2}.
@@ -237,15 +236,11 @@ $$
 
 Another important special case is the $\ell_1$ norm.
 
-$$ 
-\Vert \mathbf{x} \Vert_1 = \sum_{i=1}^d |x_i| 
-$$
+$$ \Vert \mathbf{x} \Vert_1 = \sum_{i=1}^d |x_i|.$$
 
 This defines the __Manhattan__ distance, or (for binary vectors), the __Hamming__ distance:
 
-$$ 
-\Vert \mathbf{x} - \mathbf{y} \Vert_1 = \sum_{i=1} |x_i - y_i| 
-$$
+$$ \Vert \mathbf{x} - \mathbf{y} \Vert_1 = \sum_{i=1} |x_i - y_i|.$$
 
 ![](figs/L05-manhattan-distance.png){fig-align="center"}
 
@@ -259,7 +254,11 @@ $$
 
 If we take the limit of the $\ell_p$ norm as $p$ gets large we get the $\ell_\infty$ norm.  
 
-The value of the $\ell_\infty$ norm is simply the __largest element__ in a vector.
+We have that
+
+$$
+\Vert \mathbf{x} \Vert_{\infty} = \max_{i} \vert x_{i} \vert .
+$$
 
 ::: {.fragment}
 What is the metric that this norm induces?
@@ -520,7 +519,7 @@ Suppose we wish to compare the following time series.
 
 ::: {.incremental}
 * Stock price movements for companies over a time interval.
-* Two sequences of DNA.
+* The motion data of two people walking.
 * Credit usage patterns for bank clients.
 :::
 
@@ -673,9 +672,9 @@ __Classic applications__
 Specifically
 
 ::: {.incremental}
-* Consider $X = x_1, x_2, \dots, x_n$ and $Y = y_1, y_2, \dots, y_n$.
-* We are allowed to extend each sequence by repeating elements to form $X'$ and $Y'$.
-* We then calculate, e.g., Euclidean distance between the extended sequences $X'$ and $Y'$
+* Consider $X = x_1, x_2, \dots, x_n$ and $Y = y_1, y_2, \dots, y_m$.
+* We are allowed to modify each sequence by inserting, deleting, or matching elements to form $X'$ and $Y'$.
+* We then calculate, e.g., Euclidean distance between the extended sequences $X'$ and $Y'$.
 :::
 :::
 
@@ -742,11 +741,11 @@ This is implemented by not allowing the path to pass through locations where $|i
 Then the algorithm is $\mathcal{O}(nw)$.
 
 ::: {.content-hidden when-profile="slides"}
-## From Timeseries to Strings
+## From Time series to Strings
 
 A closely related idea concerns strings.
 
-The key point is that, like timeseries, strings are __sequences__.
+The key point is that, like time series, strings are __sequences__.
 
 Given two strings, one way to define a 'distance' between them is:
 
@@ -768,7 +767,7 @@ and
 we would like to 
 
 * compute the edit distance, and
-* obtain the optimal __alignment__
+* obtain the optimal __alignment__.
 
 
 ![](figs/viva-las-vegas.png){fig-align="center"}
