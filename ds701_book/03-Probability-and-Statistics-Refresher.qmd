@@ -256,6 +256,16 @@ __Definition.__  Consider a sample space $\Omega$. A _probability measure_ on $\
 1. $P(\Omega) = 1$
 2. For any event $A \subset \Omega$, $P(A) \geq 0.$
 3. For any events $A, B \subset \Omega$ where $A \cap B = \emptyset$, $P(A \cup B) = P(A) + P(B)$.
+4. When $A \cap B \neq \emptyset$, $P(A \cup B) = P(A) + P(B) - P(A \cap B)$.
+::::
+
+:::: {.columns}
+::: {.column width="50%"}
+![](drawio/disjoint-probs.png){fig-align="center" width=80%}
+:::
+::: {.column width="50%"}
+![](drawio/intersecting-probs.png){fig-align="center" width=80%}
+:::
 ::::
 
 ::: {.content-visible when-profile="web"}
@@ -271,7 +281,9 @@ This is called __conditioning.__
 __Definition.__ The _conditional probability_ of an event $A$ given that
 event $B$ (having positive probability) is known to occur, is  
 
-$$ P(A|B) = \frac{P(A \cap B)}{P(B)}~\text{where}~P(B) > 0 $$
+$$
+P(A|B) = \frac{P(A \cap B)}{P(B)}~\text{where}~P(B) > 0
+$$
 
 :::: {.columns}
 ::: {.column width="60%"}
@@ -287,6 +299,20 @@ Now if $B$ is a proper subset of $\Omega,$ then $P(B) < 1$.   So $P(\cdot|B)$ is
 ![](drawio/ConditionalProbability.png){fig-align="center" width=80%}
 :::
 ::::
+
+## Probablity Multiplication Rule
+
+The probability multiplication rule is a simple consequence of the definition of conditional probability.
+
+$$
+P(A \cap B) = P(A|B) P(B)
+$$
+
+This can be extended to three events $A$, $B$, and $C$ as follows:
+
+$$
+P(A \cap B \cap C) = P(A|B \cap C) P(B \cap C) = P(A|B \cap C)P(B|C)P(C)
+$$
 
 ::: {.content-visible when-profile="web"}
 ### Law of total probability
@@ -333,10 +359,10 @@ $$
 The terms in the above equation are often given the following names:
 
 :::: {.incremental}
-- $P(A)$ is the prior probability.
-- $P(A|B)$ is the posterior probability.
-- $P(B|A)$ is the likelihood.
-- $P(B)$ is the marginal probability.
+- $P(A)$ is the **prior probability** of $A$ -- _initial belief before new evidence_.
+- $P(A|B)$ is the **posterior probability** of $A$ -- _updated belief after new evidence_.
+- $P(B|A)$ is the **likelihood** of $B$ -- _probability of observing evidence given a particular belief_.
+- $P(B)$ is the **marginal probability** of $B$ -- _total probability of observing the evidence under all possible causes_.
 ::::
 ::::
 
@@ -435,12 +461,31 @@ We did this in a way that used quantities that were relatively easy to obtain or
 
 __Definition.__ Two events $A$ and $B$ are __independent__ if $P(A\cap B) = P(A) \cdot P(B).$
 
-This is exactly the same as saying that $P(A|B) = P(A).$  
+<br>
 
+:::: {.fragment}
+For example, consider rolling a die and flipping a coin. The result of the coin flip does not affect the result of the die roll. Therefore, the events are independent.
+
+$$
+\small
+P(\text{rolling 2 and flipping heads}) = P(\text{rolling 2}) \cdot P(\text{flipping heads}) = \frac{1}{6} \cdot \frac{1}{2} = \frac{1}{12}.
+$$
+::::
+
+<br>
+
+:::: {.fragment}
+This is exactly the same as saying that $P(A|B) = P(A).$  _(Prove this to yourself using the definition of conditional probability.)_
+::::
+
+<br>
+
+:::: {.fragment}
 So we can see that the intuitive notion of independence is that "if one event occurs, that does not change the probability of the other event."
+::::
 
 # Random Variables
-
+ 
 ## Random Variables
 
 When an experiment is performed, we might be interested in the actual outcome. However, more frequently we are interested in some function of the outcome. This leads us to the notion of a __random variable__.
@@ -470,6 +515,7 @@ __Examples__
 :::: {.incremental}
 - The number of points showing after a roll of a die. 
 - The number of heads after flipping a coin twice.
+- The number of people arriving at a train station between 8 and 9 AM.
 ::::
 ::::
 
@@ -506,7 +552,7 @@ We have two options to consider:
 ::::
 
 :::: {.fragment}
-We will also introduce the cumulative distribution functions corresponding to both PMFs and PDFS.
+We will also introduce the _cumulative distribution functions_ corresponding to both PMFs and PDFS.
 ::::
 
 ## Discrete Distributions
@@ -607,7 +653,9 @@ The probability density function plays a central role in probability theory, bec
 
 For instance, for a continuous variable $X$ where $P(X\leq a) = \int_{-\infty}^a f(x) dx$, we obtain
 
-$$P(a \leq X \leq b) = \int_{-\infty}^b f(x) dx - \int_{-\infty}^a f(x) dx = \int_a^b f(x) dx.$$
+$$
+P(a \leq X \leq b) = \int_{-\infty}^b f(x) dx - \int_{-\infty}^a f(x) dx = \int_a^b f(x) dx.
+$$
 ::::
 
 ::: {.content-visible when-profile="web"}
@@ -621,6 +669,14 @@ $$P(a \leq X \leq b) = \int_{-\infty}^b f(x) dx - \int_{-\infty}^a f(x) dx = \in
 __Definition.__ The _cumulative distribution function (CDF)_ $F$ can be expressed as
 
 $$F(a) = P(X\leq a) = \int_{-\infty}^a f(x) dx.$$
+
+:::: {.fragment}
+So continuing from the previous slide:
+
+$$
+P(a \leq X \leq b) = \int_{-\infty}^b f(x) dx - \int_{-\infty}^a f(x) dx = F(b) - F(a).
+$$
+::::
 
 :::: {.fragment}
 The relationship between the continuous CDF and PDF is
@@ -686,29 +742,31 @@ However, be careful: in certain situations, it may not be very informative, or i
 
 In some cases a random variable may not ever take on the expected value as a possible value. 
 
-::: {.content-visible when-profile="web"}
-As an example, consider the single die, whose expected value is 3.5
-:::
-
-In other cases the notion of expected value isn't useful. Consider a person with their head in an oven and their feet in a freezer who claims "on average I feel fine." 
+* As an example, consider the single die, whose expected value is 3.5
+* In other cases the notion of expected value isn't useful. Consider a person with their
+  head in an oven and their feet in a freezer who claims "on average I feel fine." 
 
 Importantly, the mean may not be very informative when observations are highly variable. 
 
 ::: {.content-visible when-profile="slides"}
-## Variance
+## Variance and Standard Deviation
 :::
 
 The variability of random quantities is crucially important in order to characterize them.
 
-For this we use __variance,__ the mean squared difference of the random variable from its expected value.
+For this we use __variance,__ _the mean squared difference of the random variable from its expected value._
 
 __Definition.__ The variance of a random variable $X$ is
 
-$$\text{Var}(X) \equiv E[(X - E[X])^2].$$
+$$
+\text{Var}(X) \equiv \sigma^2 \equiv E[(X - E[X])^2].
+$$
 
 For example, given a discrete R.V. with $E[X] = \mu$ this would be:
 
-$$\text{Var} (X) = \sum_{x} (x-\mu)^2 P(X=x).$$
+$$
+\sigma^2 = \text{Var} (X) = \sum_{x} (x-\mu)^2 P(X=x).
+$$
 
 We use the symbol $\sigma^2$ to denote variance.
 
@@ -722,7 +780,7 @@ This is called the __standard deviation__ and is denoted $\sigma$.
 ## Stocks as random variables
 :::
 
-Next, let's recall the case of the Tesla and NVidia returns from the last lecture:
+Next, let's recall the case of the Tesla and NVidia returns from the previous lecture:
 
 ```{python}
 #| fig-align: center
@@ -750,24 +808,35 @@ This is captured by the concept of __covariance.__
 
 __Definition.__ For two random variables $X$ and $Y$, their _covariance_ is defined as:
 
-$$\text{Cov}(X,Y) = E\left[(X-\mu_X)(Y-\mu_Y)\right].$$
+$$
+\text{Cov}(X,Y) = E\left[(X-\mu_X)(Y-\mu_Y)\right].
+$$
 
 If covariance is positive, this tells us that $X$ and $Y$ tend to both be  above their means together and both below their means together.
 
 We will often denote $\text{Cov}(X,Y)$ as $\sigma_{XY}$.
 
-::: {.content-visible when-profile=""}
+::: {.content-visible when-profile="slides"}
 ## Correlation
 :::
 If we are interested in asking "how similar" are two random variables, we want to normalize covariance by the amount of variance shown by the random variables.
 
 The tool for this purpose is __correlation__, i.e., normalized covariance:
 
-$$\rho(X,Y) = \frac{E\left[(X-\mu_X)(Y-\mu_Y)\right]}{\sigma_X \sigma_Y}.$$
+$$
+\rho(X,Y) = \frac{E\left[(X-\mu_X)(Y-\mu_Y)\right]}{\sigma_X \sigma_Y}.
+$$
 
 $\rho(X, Y)$ takes on values between -1 and 1.   
 
-If $\rho(X, Y) = 0$ then $X$ and $Y$ are __uncorrelated__. Note that this is not the same thing as being independent!
+If $\rho(X, Y) = 0$ then $X$ and $Y$ are __uncorrelated__. 
+
+::: {.callout-note}
+Note that this is not the same thing as being independent! It just means there
+is no linear relationship between the two.
+
+But independence implies uncorrelated. Plug in equations and check.
+:::
 
 $\rho$ is sometimes called "Pearson $r$" after Karl Pearson who popularized it.
 
