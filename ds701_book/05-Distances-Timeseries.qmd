@@ -101,7 +101,7 @@ For example, there are vector or matrix encodings for
 * text.
 :::
 
-## Matrix representation
+## Matrix representation of data
 
 We generally store data in a matrix form as
 
@@ -345,7 +345,7 @@ __Examples__
 
 :::: {.incremental}
 - cosine similarity,
-- Jaccard similarity.
+- Jaccard similarity _(intersection over union)_.
 ::::
 ::::
 :::
