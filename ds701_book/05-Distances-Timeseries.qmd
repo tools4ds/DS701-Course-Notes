@@ -138,7 +138,12 @@ A metric is a function $d(x, y)$ that satisfies the following properties.
 ::::
 
 ::: {.fragment}
+<<<<<<< Updated upstream
 We can use a metric to determine how __similar__ or __dissimilar__ two objects are.
+=======
+A metric is a measure of the dissimilarity between two objects. The larger the
+measure, the more dissimilar the objects are.
+>>>>>>> Stashed changes
 
 A dissimilarity function takes two objects as input and returns a large value when the two objects are not very similar.
 
