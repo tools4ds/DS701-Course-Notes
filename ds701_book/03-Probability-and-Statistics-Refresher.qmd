@@ -60,7 +60,7 @@ We will introduce the following concepts
 
 ## Probability
 
-We all have a general sense of what is meant by probability. Probability is the study of randomness. It is the branch of mathematis that analyzes the chances (likelihood) of random events.
+We all have a general sense of what is meant by probability. Probability is the study of randomness. It is the branch of mathematics that analyzes the chances (likelihood) of random events.
 
 There are two different ways in which probability is interpreted. These views are
 
