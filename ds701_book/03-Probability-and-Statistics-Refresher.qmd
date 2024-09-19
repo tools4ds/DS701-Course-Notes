@@ -828,15 +828,15 @@ We organize these values into a __covariance matrix:__
 
 $$ \text{Cov}[\mathbf{X}] = 
 \begin{bmatrix}
-\text{Var}[X_1] & \text{Cov}[X_1, X_2] & \dots & \text{Cov}[X_1, X_n] \\
-\text{Cov}[X_2, X_1] & \text{Var}[X_2] & \dots & \text{Cov}[X_2, X_n]\\
+\text{Var}(X_1) & \text{Cov}(X_1, X_2) & \dots & \text{Cov}(X_1, X_n) \\
+\text{Cov}(X_2, X_1) & \text{Var}(X_2) & \dots & \text{Cov}(X_2, X_n)\\
 \vdots & \vdots & \ddots & \vdots\\
-\text{Cov}[X_n,X_1] & \text{Cov}[X_n, X_2] & \dots & \text{Var}[X_n]\\
+\text{Cov}(X_n,X_1) & \text{Cov}(X_n, X_2) & \dots & \text{Var}(X_n)\\
 \end{bmatrix}.$$
 
 A couple things to note about a covariance matrix.
 
-1. The covariance matrix is symmetric (because $\text{Cov}(X_i, X_j) = \text{Cov}(X_j, X_i)$)
+1. The covariance matrix is symmetric (because $\text{Cov}[X_i, X_j] = \text{Cov}(X_j, X_i)$)
 2. The covariance matrix is __positive semidefinite__, which means $\mathbf{z}^T \text{Cov}[X] \mathbf{z}\geq 0$ for all vectors $\mathbf{z}$.
 
 ::: {.content-visible when-profile="web"}
