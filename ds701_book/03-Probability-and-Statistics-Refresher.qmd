@@ -300,7 +300,7 @@ Now if $B$ is a proper subset of $\Omega,$ then $P(B) < 1$.   So $P(\cdot|B)$ is
 :::
 ::::
 
-## Probablity Multiplication Rule
+## Probability Multiplication Rule
 
 The probability multiplication rule is a simple consequence of the definition of conditional probability.
 
