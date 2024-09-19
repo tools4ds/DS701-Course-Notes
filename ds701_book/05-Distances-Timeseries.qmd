@@ -125,9 +125,9 @@ A metric is a function $d(x, y)$ that satisfies the following properties.
 ::: {.column width="70%"}
 ::: {.incremental}
 * $d(x, x) = 0$
-* $d(x, y) > 0 ~\forall x\neq y\qquad\qquad$ (positivity)
-* $d(x, y) = d(y, x) \qquad\qquad~~$ (symmetry)
-* $d(x, y)\leq d(x, z) + d(z, y) ~~$ (triangle inequality)
+* $d(x, y) > 0 \hspace{1cm} \forall x\neq y$ (positivity)
+* $d(x, y) = d(y, x)$ (symmetry)
+* $d(x, y)\leq d(x, z) + d(z, y)$ (triangle inequality)
 :::
 :::
 ::: {.column width="30%"}
@@ -138,20 +138,19 @@ A metric is a function $d(x, y)$ that satisfies the following properties.
 ::::
 
 ::: {.fragment}
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 We can use a metric to determine how __similar__ or __dissimilar__ two objects are.
-=======
+
 A metric is a measure of the dissimilarity between two objects. The larger the
 measure, the more dissimilar the objects are.
->>>>>>> Stashed changes
 
-A dissimilarity function takes two objects as input and returns a large value when the two objects are not very similar.
-
-A metric is also commonly called a __distance__.
+If the objects are vectors, then the metric is also commonly called a __distance__.
 :::
 
 ::: {.content-visible when-profile="web"}
-Sometimes we will use "distance" informally, i.e., to refer to a similarity or dissimilarity function even if we are not sure it is a metric.   
+Sometimes we will use "distance" informally, i.e., to refer to a similarity or
+dissimilarity function even if we are not sure it is a metric.   
 
 We'll try to say "dissimilarity" in those cases though.
 :::
@@ -184,11 +183,18 @@ Let $\mathbf{u}, \mathbf{v}\in\mathbb{R}^{n}$ and $a\in\mathbb{R}$. The vector f
 ::: {.incremental}
 * $p(a\mathbf{v}) = |a|p(\mathbf{v})$,
 * $p(\mathbf{u} + \mathbf{v}) \leq p(\mathbf{u}) + p(\mathbf{v})$,
+<<<<<<< HEAD
 * $p(\mathbf{v}) = 0 \Leftrightarrow \mathbf{v}=0$.
 :::
 :::
 
 :::: {.fragment}
+=======
+* $p(\mathbf{v}) = 0$ if and only if $\mathbf{v} = 0$.
+:::
+
+::: {.fragment}
+>>>>>>> main
 __Every norm defines a corresponding metric.__ 
 ::::
 
@@ -222,13 +228,17 @@ $$\Vert \mathbf{x} - \mathbf{y} \Vert_p = \left(\sum_{i=1}^d |x_i - y_i|^p\right
 
 A special -- but very important -- case is the $\ell_2$ norm.
 
-$$\Vert \mathbf{x} \Vert_2 = \sqrt{\sum_{i=1}^d |x_i|^2}.$$
+$$
+\Vert \mathbf{x} \Vert_2 = \sqrt{\sum_{i=1}^d |x_i|^2}.
+$$
 
 We've already mentioned it: it is the __Euclidean__ norm.
 
 The distance defined by the $\ell_2$ norm is the same as the Euclidean distance between two vectors $\mathbf{x}, \mathbf{y}$.
 
-$$ \Vert \mathbf{x} - \mathbf{y} \Vert_2  = \sqrt{\sum_{i=1}^d (x_i - y_i)^2}.$$
+$$ 
+\Vert \mathbf{x} - \mathbf{y} \Vert_2  = \sqrt{\sum_{i=1}^d (x_i - y_i)^2}.
+$$
 
 ::: {.content-visible when-profile="web"}
 ### $\ell_1$ norm
@@ -288,7 +298,23 @@ Here is the notion of a "circle" under each of three norms.
 
 That is, for each norm, the set of vectors having norm 1, or distance 1 from the origin.
 
+:::: {.columns}
+::: {.column width="50%"}
 ![](figs/L5-Vector-Norms.png){fig-align="center"}
+:::
+::: {.column width="50%"}
+
+<br><br>
+$|x_1| + |x_2| = 1$
+
+<br><br>
+$\sqrt{x_1^2 + x_2^2} = 1$
+
+<br><br>
+$\max(|x_1|, |x_2|) = 1$
+:::
+::::
+
 
 [Source](https://commons.wikimedia.org/w/index.php?curid=678101)
 
