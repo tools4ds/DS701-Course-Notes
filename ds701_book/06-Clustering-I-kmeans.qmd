@@ -697,7 +697,7 @@ plt.show()
 
 ## Choosing the right $k$
 
-Generally, we would say that, given some $k$, the $k$-means algorithm "learns" the cluster centers -- that is, the parameters of the model.
+Generally, we would say that, given some $K$, the $k$-means algorithm "learns" the cluster centers -- that is, the parameters of the model.
 
 But we have not yet considered how to choose the right number of clusters.
 
@@ -837,9 +837,9 @@ counts_scaled.mean().values
 ## Feature Scaling Example, Continued
 :::
 
-Notice that values that used to be zero have now become negative.
+Notice that values that used to be positive have now become negative.
 
-In some situations it may not be sensible to change zeros into something else.
+In some situations it may not be sensible to change non-negative values into something else.
 It may make more sense to map all values into a fixed range, for example $[0, 1]$.
 
 ```{python}
