@@ -17,11 +17,11 @@ Unsupervised learning is a type of machine learning where the model learns from 
 We cover the following topics in unsupervised learning:
 
 - clustering,
-- dimensionatity reduction.
+- dimensionality reduction.
 
 ### Clustering
 
-Clustering is a technique that groups unlabeled data together based upon their similarties (or differences). We cover the following topics in clustering:
+Clustering is a technique that groups unlabeled data together based upon their similarities (or differences). We cover the following topics in clustering:
 
 - [k-means](06-Clustering-I-kmeans.qmd),
 - [hierarchical clustering](08-Clustering-III-hierarchical.qmd)
@@ -29,7 +29,7 @@ Clustering is a technique that groups unlabeled data together based upon their s
 
 ### Dimensionality reduction
 
-Dimensionality reduction is a technique that compresses high-dimensional data into lower dimensional data with minimal information loss. We cover dimensionality reduction when discussing the [Singular Value Decompositin](11-Dimensionality-Reduction-SVD-II.qmd).
+Dimensionality reduction is a technique that compresses high-dimensional data into lower dimensional data with minimal information loss. We cover dimensionality reduction when discussing the [Singular Value Decomposition](11-Dimensionality-Reduction-SVD-II.qmd).
 
 ## Supervised learning
 
@@ -52,7 +52,7 @@ Examples of regression are:
 
 ### Classification
 
-Classification models in machine learning are used to predict discrete values, or classes, based on the input features. The following topics in classificaion are covered:
+Classification models in machine learning are used to predict discrete values, or classes, based on the input features. The following topics in classification are covered:
 
 - [decision tress and random forests](14-Classification-I-Decision-Trees.qmd),
 - [k-nearest neighbors](15-Classification-II-kNN.qmd),
