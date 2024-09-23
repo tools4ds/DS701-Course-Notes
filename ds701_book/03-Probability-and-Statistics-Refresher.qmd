@@ -296,7 +296,7 @@ Now if $B$ is a proper subset of $\Omega,$ then $P(B) < 1$.   So $P(\cdot|B)$ is
 :::
 ::: {.column width="40%"}
 
-![](figs/Lec03-ConditionalProbability.png){fig-align="center" width=80%}
+![](drawio/ConditionalProbability.png){fig-align="center" width=80%}
 :::
 ::::
 

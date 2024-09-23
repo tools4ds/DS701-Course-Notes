@@ -138,8 +138,6 @@ A metric is a function $d(x, y)$ that satisfies the following properties.
 ::::
 
 ::: {.fragment}
-<<<<<<< HEAD
-<<<<<<< Updated upstream
 We can use a metric to determine how __similar__ or __dissimilar__ two objects are.
 
 A metric is a measure of the dissimilarity between two objects. The larger the
@@ -183,18 +181,10 @@ Let $\mathbf{u}, \mathbf{v}\in\mathbb{R}^{n}$ and $a\in\mathbb{R}$. The vector f
 ::: {.incremental}
 * $p(a\mathbf{v}) = |a|p(\mathbf{v})$,
 * $p(\mathbf{u} + \mathbf{v}) \leq p(\mathbf{u}) + p(\mathbf{v})$,
-<<<<<<< HEAD
-* $p(\mathbf{v}) = 0 \Leftrightarrow \mathbf{v}=0$.
-:::
-:::
-
-:::: {.fragment}
-=======
 * $p(\mathbf{v}) = 0$ if and only if $\mathbf{v} = 0$.
 :::
 
 ::: {.fragment}
->>>>>>> main
 __Every norm defines a corresponding metric.__ 
 ::::
 
