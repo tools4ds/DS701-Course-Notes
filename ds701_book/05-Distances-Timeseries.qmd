@@ -132,14 +132,16 @@ A metric is a function $d(x, y)$ that satisfies the following properties.
 :::
 ::: {.column width="30%"}
 :::: {.fragment}
-![](drawio/TriangleInequality.png){fig-align="center"}
+![](figs/Lec03-TriangleInequality.png){fig-align="center"}
 ::::
 :::
 ::::
 
 ::: {.fragment}
+We can use a metric to determine how __similar__ or __dissimilar__ two objects are.
+
 A metric is a measure of the dissimilarity between two objects. The larger the
-meausre, the more dissimilar the objects are.
+measure, the more dissimilar the objects are.
 
 If the objects are vectors, then the metric is also commonly called a __distance__.
 :::
@@ -172,7 +174,9 @@ where $x_i$ denotes the $i$-th column of the data matrix $X$.
 
 ## Norms
 
-Let $\mathbf{u}, \mathbf{v}\in\mathbf{R}^{n}$ and $a\in\mathbb{R}$. The vector function $p(\mathbf{v})$ is called a __norm__ if
+Let $\mathbf{u}, \mathbf{v}\in\mathbb{R}^{n}$ and $a\in\mathbb{R}$. The vector function $p(\mathbf{v})$ is called a __norm__ if
+
+:::: {.fragment}
 
 ::: {.incremental}
 * $p(a\mathbf{v}) = |a|p(\mathbf{v})$,
