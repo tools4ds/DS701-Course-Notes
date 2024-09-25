@@ -55,31 +55,32 @@ print("gt_centers: ", gt_centers.shape)
 ::: {.notes}
 `datasets.makeblobs` takes as arguments:
 
-- `n_samples`: the number of samples to generate,
-- `n_features`: the number of features, or in other words the dimensionality of
+- `n_samples`: The number of samples to generate
+- `n_features`: The number of features, or in other words the dimensionality of
 each sample
-- `center_box`: the bounds of the cluster centers
-- `random_state`: random seed
-- `return_centers`: We also choose the option to return the centers so we have ground truth
+- `center_box`: The bounds of the cluster centers
+- `random_state`: The random seed for reproducibility
+- `return_centers`: A boolean flag, True to return the centers so that we have ground truth
 :::
 
 ## Visualize the Data
 
 To get a sense of the raw data we can inspect it.
 
-For statistical visualization, a good library is [seaborn](https://seaborn.pydata.org/).
+For statistical visualization, a good library is [Seaborn](https://seaborn.pydata.org/).
 
 Let's plot the `X` data as a matrix
 [heatmap](https://seaborn.pydata.org/generated/seaborn.heatmap.html), 
 where every row is a data point and the columns are the features.
 
 ```{python}
+#| fig-align: center
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Set the figure size to make the plot smaller
 plt.figure(figsize=(7, 5))  # Adjust the width and height as needed
-sns.heatmap(X, xticklabels = False, yticklabels = False, linewidths = 0, cbar = False)
+sns.heatmap(X, xticklabels = False, yticklabels = False, linewidths = 0, cbar = True)
 plt.show()
 ```
 
@@ -159,7 +160,7 @@ print_matrix(euclidean_dists)
 ```
 
 Note that this produces a $100\times100$ symmetric matrix where the diagonal
-is all zeros (distance from itself)
+is all zeros (distance from itself).
 
 ---
 
@@ -195,24 +196,25 @@ dimensionality later in the course.
 :::
 ## Visualizing with MDS
 
-The idea behind [Multidimensional Scaling (MDS)](https://en.wikipedia.org/wiki/Multidimensional_scaling) is: 
+The idea behind [Multidimensional Scaling (MDS)](https://en.wikipedia.org/wiki/Multidimensional_scaling) is given a pairwise distance (or dissimilarity) matrix:
 
-* given a pairwise distance (or dissimilarity) matrix, 
-* find a set of coordinates in 1, 2 or 3-D space that approximates those distances as well as possible.
-* points that are close (or far) in high dimensional space are close (or far) in the reduced dimension space
+:::: {.incremental}
+* Find a set of coordinates in 1, 2 or 3-D space that approximates those distances as well as possible.
+* The points that are close (or far) in high dimensional space should be close (or far) in the reduced dimension space.
+::::
 
 ::: {.fragment}
 Note that there are two forms of MDS:
 
 * Metric MDS, of which Classical MDS is a special case, and has a closed form solution
-  based on the eigenvectors of the centered distance matrix
+  based on the eigenvectors of the centered distance matrix.
 * Non-Metric MDS, which tries to find a non-parametric monotonic relationship
-  between the dissimilarities and the target coordinates through an iterative approach
+  between the dissimilarities and the target coordinates through an iterative approach.
 :::
 
 ::: {.fragment}
-Also note that MDS may not always work well if, for example the dissimilarities
-are not well modeled by a metric like Euclidean distance
+MDS may not always work well if, for example the dissimilarities
+are not well modeled by a metric like Euclidean distance.
 :::
 
 ## MDS Visualization Result
@@ -239,13 +241,11 @@ Out of curiosity, we can visualize the pairwise distance matrix using a heatmap.
 
 ```{python}
 #| code-fold: false
+#| fig-align: center
 sns.heatmap(euclidean_dists, xticklabels=False, yticklabels=False, linewidths=0, 
-            square=True );
+            square=True )
+plt.show()
 ```
-
-::: {.fragment}
-Perhaps not as useful a visualization however.
-:::
 
 ## Applying  $k$-Means
 
@@ -255,11 +255,11 @@ These are in __`sklearn.cluster.`__
 
 There are 3 functions in all the clustering classes, 
 
-* **`fit()`**: builds the model from the training data
-    * e.g. for $k$-means, find the centroids
-* **`predict()`**: assigns labels to the data after building the models 
-    * e.g. cluster number for $k$-means
-* **`fit_predict()`**: does both in a single step 
+* **`fit()`**: builds the model from the training data.
+    * For $k$-means, this function find the centroids.
+* **`predict()`**: assigns labels to the data after building the models. 
+    * For $k$-means this assigns the cluster number to a point.
+* **`fit_predict()`**: calls fit and predict in a single step.
 
 ---
 
@@ -278,14 +278,16 @@ For comparisons, here are the original cluster numbers.
 print(y)
 ```
 
-Note that the $k$-means labels are different than the ground truth labels. They
-would have to be remapped with
+Note that the $k$-means labels are different than the ground truth labels. 
+
+---
+We can remap the values according to
 
 $$
 \begin{align*}
 0 &\rightarrow 0 \\
 1 &\rightarrow 2 \\
-2 &\rightarrow 1
+2 &\rightarrow 1.
 \end{align*}
 $$
 
@@ -312,13 +314,13 @@ To reiterate, mismatches are 0.00%.
 
 ---
 
-All the tools in `scikit-learn` are implemented as python objects.
+All the tools in `scikit-learn` are implemented as Python objects.
 
-Thus, the general sequence for using a tool from `scikit-learn` is:
+Recall that the general sequence for using a tool from `scikit-learn` is:
 
-* Create the object, probably with some hyperparameter settings or intialization,
-* Run the method, generally by using the `fit()` function, and
-* Examine the results, which are generally property variables of the object.
+* create the object, probably with some hyperparameter settings or initialization,
+* run the method, generally by using the `fit()` function, and
+* examine the results, which are generally property variables of the object.
 
 ```{python}
 #| code-fold: false
@@ -338,10 +340,12 @@ print(f'Clustering inertia: {inertia:0.1f}.')
 Let's visualize the results.  We'll do that by reordering the data items according to their cluster.
 
 ```{python}
+#| fig-align: center
 import numpy as np
 idx = np.argsort(labels)
 rX = X[idx, :]
-sns.heatmap(rX, xticklabels = False, yticklabels = False, linewidths = 0);
+sns.heatmap(rX, xticklabels = False, yticklabels = False, linewidths = 0)
+plt.show()
 ```
 
 You can clearly see the feature similarities of the samples in the same cluster.
@@ -351,8 +355,10 @@ You can clearly see the feature similarities of the samples in the same cluster.
 We can also sort the pairwise distance matrix.
 
 ```{python}
+#| fig-align: center
 rearranged_dists = euclidean_dists[idx,:][:,idx]
-sns.heatmap(rearranged_dists, xticklabels = False, yticklabels = False, linewidths = 0, square = True);
+sns.heatmap(rearranged_dists, xticklabels = False, yticklabels = False, linewidths = 0, square = True)
+plt.show()
 ```
 
 Here again, you can see the inter-cluster sample distances are small.
@@ -365,6 +371,7 @@ How do we know whether the clusters we get represent "real" structure in our dat
 Consider a dataset of 100 points _uniformly distributed_ in the unit square.
 
 ```{python}
+#| fig-align: center
 import pandas as pd
 np.random.seed(42)
 unif_X = np.random.default_rng().uniform(0, 1, 500)
@@ -382,6 +389,7 @@ df.plot('X', 'Y', kind = 'scatter',
 After running $k$-means on this data:
 
 ```{python}
+#| fig-align: center
 kmeans = KMeans(init = 'k-means++', n_clusters = 3, n_init = 500, random_state=0)
 df['label'] = kmeans.fit_predict(df[['X', 'Y']])
 df.plot('X', 'Y', kind = 'scatter', c = 'label', 
@@ -392,7 +400,7 @@ df.plot('X', 'Y', kind = 'scatter', c = 'label',
 
 
 :::: {.fragment}
-The point is: many clustering algorithms will usually output some "clustering" of the data.
+The point is: clustering algorithms output some "clustering" of the data.
 ::::
 
 ---
@@ -404,8 +412,8 @@ Generally we encounter two problems:
 ::::
 
 ::: {.incremental}
-* Are there "real" clusters in the data?
-* if so, __how many__ clusters are there?
+* Are there *real* clusters in the data?
+* If so, *how many* clusters are there?
 :::
 
 :::: {.fragment}
@@ -422,7 +430,7 @@ You will often need to use your judgment in answering them.
 
 ### With Ground Truth Data
 
-* How to evaluate clustering algos when you have ground truth data
+* How to evaluate clustering algorithms when you have ground truth data
     * how do you align labels?
     * different accuracy measures
 
@@ -445,10 +453,10 @@ You will often need to use your judgment in answering them.
 
 ## Clustering Metrics
 
-Broadly separated into two categories:
+Broadly separated into two categories.
 
 :::: {.fragment}
-**Ground truth based metrics**
+1. **Ground truth based metrics**
 
 We'll look at (Adjusted) Rand Index.
 
@@ -462,7 +470,7 @@ match exact labels, but rather group similar items together.
 ::::
 
 :::: {.fragment}
-**Internal cluster metrics (no ground truth external labels)**
+2. **Internal cluster metrics (no ground truth external labels)**
 
 We'll look at Silhouette Coefficient.
 ::::
@@ -476,16 +484,22 @@ Named after William M. Rand.
 
 In some cases we'll have ground truth cluster labels, call them $T$.
 
-In that case, what we need is a way to compare a proposed clustering, $C$, with $T$.
+In that case, what we need is a way to compare a proposed clustering, $C$, with $T$. To make this comparison we use the __Rand Index__.
 
-The _Rand Index_ counts:
+The formula for the Rand Index is:
 
-- the number of pairs of points that are in the same cluster in both $T$ and $C$, and
-- the number of pairs of points that are in different clusters in both $T$ and $C$.
+$$
+\text{RI}(T,C) = \frac{a+b}{n \choose 2},
+$$
 
-normalized by the combinatoric number of pairs of points, $n \choose 2$.
+- where $a$ is the number of pairs of points that are in the same cluster in both $T$ and $C$, and
+- $b$ is the number of pairs of points that are in different clusters in both $T$ and $C$.
 
-## Defining the Rand Index
+We normalize the sum by the combinatorial number of pairs of points, $n \choose 2$.
+
+The __Rand Index__ is a value that falls in the range $[0, 1]$.
+
+## Rand Index Example 1
 
 Let's proceed by way of example.
 
@@ -503,11 +517,13 @@ df_rand_gt = pd.DataFrame(np.column_stack([X_rand[:, 0], X_rand[:, 1], y_rand]),
 df_rand_clust = df_rand_gt.copy()
 kmeans = KMeans(init = 'k-means++', n_clusters = 3, n_init = 100, random_state=0)
 df_rand_clust['label'] = kmeans.fit_predict(df_rand_gt[['X', 'Y']])
+df_rand_clust['label'] = df_rand_clust['label'].replace({0: 1, 1: 2, 2: 0})
 ```
 
 We then run $k$-means with 3 clusters to on the datasets to get labels $C$ and plot the results:
 
 ```{python}
+#| fig-align: center
 figs, axs = plt.subplots(1, 2, figsize = (12, 5))
 df_rand_gt.plot('X', 'Y', 
                 kind = 'scatter', 
@@ -525,26 +541,13 @@ df_rand_clust.plot('X', 'Y',
                     ax = axs[1],
                     colorbar = False)
 axs[1].set_title('Clustering (C)')
-axs[1].set_axis_off();
+axs[1].set_axis_off()
+plt.show()
 ```
 
-## Rand Index Defined
-
-Specifically:
-
-::: {.incremental}
-- Let $a$ be the number of pairs that have the same label in $T$ and the same label in $C$. 
-- Let $b$ be the number of pairs that have different labels in $T$ and different labels in $C$. 
-:::
-
-:::: {.fragment}
-Then the Rand Index is: 
-
-$$
-\text{RI}(T,C) = \frac{a+b}{n \choose 2}
-$$
-
-::::
+```{python}
+print("The Rand index is: ", metrics.rand_score(df_rand_gt["label"], df_rand_clust["label"]))
+```
 
 :::: {.fragment}
 How do we know whether a particular Rand Index (RI) score is significant?
@@ -554,12 +557,11 @@ We might compare it to the RI for a __random__ assignment of points to labels.
 This leads to the __Adjusted Rand Index.__
 ::::
 
-## Definition of Adjusted Rand Index
+## The Adjusted Rand Index
 
-To "calibrate" the Rand Index this way, we use the expected Rand Index of random labelings,
-denoted $E[\text{RI}]$.   
+To *calibrate* the Rand Index this way, we use the expected Rand Index of random labels, denoted $E[\text{RI}]$.   
 
-The Expected Rand Index considers $C$ to be a clustering that has the same cluster sizes as $T$, but labels are assigned at random.
+The Expected Rand Index considers $C$ to be a clustering that has the same cluster sizes as $T$, but the labels are assigned at random.
 
 :::: {.fragment}
 Using that, we define the adjusted Rand index as a simple __rescaling__ of RI:
@@ -568,18 +570,25 @@ $$
 \text{ARI} = \frac{\text{RI} - E[\text{RI}]}{\max(\text{RI}) - E[\text{RI}]}
 $$
 
-The computation of the $E[\text{RI}]$ and the $\max(\text{RI})$ are simple combinatorics (we'll omit the derivation).
+The values of $E[\text{RI}]$ and $\max(\text{RI})$ can be computed using combinatorics (we'll omit the derivation).
+
+The below code block computes and prints the adjusted Rand index for the example on the previous slide.
+
+```{python}
+print("The adjusted Rand index is: ", metrics.adjusted_rand_score(df_rand_gt["label"], df_rand_clust["label"]))
+```
 ::::
 
-## Rand Index Example
+## Rand Index Example 2
 
 :::: {.columns}
 ::: {.column width="40%"}
 ```{python}
+#| fig-align: center
 import matplotlib.pyplot as plt
 
 plt.figure(figsize=(4, 3))  # Adjust the width and height as needed
-sns.heatmap(X, xticklabels = False, yticklabels = False, linewidths = 0);
+sns.heatmap(X, xticklabels = False, yticklabels = False, linewidths = 0)
 plt.show()
 ```
 :::
@@ -589,24 +598,58 @@ Let's consider again our 3-cluster dataset with known labels `y`.
 ::::
 
 
-Here is the adjusted Rand Index, when using $k$-means to cluster this dataset for 1 to 10 clusters:
+Here is the Rand Index and adjusted Rand Index, when using $k$-means to cluster this dataset for 1 to 10 clusters:
 
 ```{python}
-def ri_evaluate_clusters(X,max_clusters,ground_truth):
+#| fig-align: center
+def ri_evaluate_clusters(X, max_clusters, ground_truth):
     ri = np.zeros(max_clusters+1)
-    ri[0] = 0;
+    ri[0] = 0
+    ari = np.zeros(max_clusters+1)
+    ari[0] = 0
     for k in range(1,max_clusters+1):
         kmeans = KMeans(init='k-means++', n_clusters=k, n_init=10)
         kmeans.fit_predict(X)
-        ri[k] = metrics.adjusted_rand_score(kmeans.labels_,ground_truth)
-    return ri
+
+        ri[k] = metrics.rand_score(kmeans.labels_, ground_truth)
+        ari[k] = metrics.adjusted_rand_score(kmeans.labels_, ground_truth)
+    return ri, ari
     
-ri = ri_evaluate_clusters(X, 10, y)
-plt.plot(range(1,len(ri)), ri[1:], 'o-')
+ri, ari = ri_evaluate_clusters(X, 10, y)
+plt.plot(range(1, len(ri)), ri[1:], 'ro-', range(1, len(ari)), ari[1:], 'b*-')
 plt.xlabel('Number of clusters')
 plt.title('$k$-means Clustering Compared to Known Labels')
-plt.ylabel('Adjusted Rand Index');
+plt.ylabel('Index value')
+plt.legend(['RI', 'ARI'])
+plt.show()
 ```
+
+## RI vs ARI
+
+The ARI provides a more nuanced evaluation of clustering similarity compared to the RI by accounting for the chance grouping of elements. Here are the key differences:
+
+:::: {.columns}
+::: {.column width="50%"}
+__Rand Index (RI)__
+
+- Measures Agreement: The RI measures the agreement between two clusterings by considering all pairs of elements and counting pairs that are either in the same or different clusters in both clusterings.
+- Range: The RI ranges from 0 to 1, where 1 indicates perfect agreement and 0 indicates no agreement.
+:::
+::: {.column width="50%"}
+__Adjusted Rand Index (ARI)__
+
+- Adjusts for Chance: The ARI adjusts the RI by considering the expected similarity that might occur by random chance. This adjustment makes the ARI a more reliable measure, especially when dealing with random or unbalanced clusterings.
+- Range: The ARI can take values from -1 to 1. A value of 0 indicates that the clustering is no better than random, while a value of 1 indicates perfect agreement. Negative values indicate that the clustering is worse than random.
+:::
+::::
+
+## Information Provided by ARI
+
+The ARI corrects for the fact that some level of agreement between clusterings can occur purely by chance. This makes it a more accurate measure of the true similarity between clusterings.
+
+The ARI’s range allows for a clearer interpretation of clustering performance. An ARI of 0 means the clustering is no better than random, which is more informative than an RI of 0.5, which might still be influenced by chance.
+
+The ARI allows for better comparison between different clustering results, as it normalizes the index to account for the chance agreement.
 
 ## Deciding on the Number of Clusters
 
@@ -643,7 +686,8 @@ For our synthetic data, here is the $k$-means objective, as a function of $k$:
 plt.plot(range(1, len(error)), error[1:], 'o-')
 plt.xlabel('Number of clusters')
 plt.title(r'$k$-means clustering performance of synthetic data')
-plt.ylabel('Error');
+plt.ylabel('Error')
+plt.show()
 ```
 
 ::: {.callout-warning}
@@ -658,7 +702,7 @@ Let's create a function to evaluate clusters for later use.
 #| code-fold: false
 def evaluate_clusters(X,max_clusters):
     error = np.zeros(max_clusters+1)
-    error[0] = 0;
+    error[0] = 0
     for k in range(1,max_clusters+1):
         kmeans = KMeans(init='k-means++', n_clusters=k, n_init=10)
         kmeans.fit_predict(X)
@@ -704,18 +748,22 @@ We'll use [`sklearn.metrics.silhouette_score`](https://scikit-learn.org/stable/m
 
 
 :::: {.fragment}
-Then the **Silhouette Coefficient** for a clustering is:
+Then the **Silhouette Coefficient** for a point is
 
 $$ 
-s = \frac{b-a}{\max(a, b)} 
+s = \frac{b-a}{\max(a, b)}.
 $$
+::::
+
+:::: {.fragment}
+The overall silhouette coefficient for a clustering is the average of the silhouette coefficients for each data point.
 ::::
 
 ::: {.content-visible when-profile="slides"}
 ## Silhouette Coefficient
 :::
 
-We can calcute the Silhouette Score for our synthetic data:
+We can calculate the Silhouette Score for our synthetic data:
 
 ```{python}
 sc = metrics.silhouette_score(X, labels, metric='euclidean')
@@ -731,8 +779,8 @@ We can also evaluate it for 2-10 clusters and plot the results:
 ```{python}
 def sc_evaluate_clusters(X, max_clusters, n_init, seed):
     s = np.zeros(max_clusters+1)
-    s[0] = 0;
-    s[1] = 0;
+    s[0] = 0
+    s[1] = 0
     for k in range(2, max_clusters+1):
         kmeans = KMeans(init='k-means++', n_clusters = k, n_init = n_init, random_state = seed)
         kmeans.fit_predict(X)
@@ -743,7 +791,8 @@ s = sc_evaluate_clusters(X, 10, 10, 1)
 plt.plot(range(2, len(s)), s[2:], 'o-')
 plt.xlabel('Number of Clusters')
 plt.title('$k$-means clustering performance on synthetic data')
-plt.ylabel('Silhouette Score');
+plt.ylabel('Silhouette Score')
+plt.show()
 ```
 
 :::: {.fragment}
@@ -751,6 +800,20 @@ Again, these results are more perfect than typical.
 
 But the general idea is to look for a local maximum in the Silhouette Coefficient as the potential number of clusters.
 ::::
+
+## k-means++ initialization
+Proposed in 2007 by David Arthur and Sergei Vassilvitskii.
+
+K-means++ improves the initialization of cluster centers to enhance the quality of the final clustering results. Here’s how it works.
+
+- Choose an initial centroid $c_1$ randomly.
+- Choose the next centroid $c_i$ with probability proportional to the squared distances to each data point.
+    - This ensures that new centroids are spread out across the data space.
+- Repeat this process until $k$ centroids have been selected.
+
+Once the initial centroids are chosen, the standard k-means algorithm is applied.
+
+The main advantage of k-means++ over randomly assigning points is that it reduces the likelihood of poor clustering results due to suboptimal initial centroids. This often leads to faster convergence and better overall clustering quality.
 
 # Real Data Clustering Example
 
@@ -841,7 +904,7 @@ Next, as noted in __scikit-learn__:
 >
 >__Tf__ means __term-frequency__ while __tf–idf__ means __term-frequency times inverse document-frequency.__
 >
->This is a originally a term weighting scheme developed for information retrieval (as a ranking function for search
+>This is originally a term weighting scheme developed for information retrieval (as a ranking function for search
 > engines results), that has also found good use in document classification and clustering.
 
 The idea is that rare words are more informative than common words.  
@@ -855,13 +918,13 @@ Hence, the definition of tf-idf is as follows.
 First:
 
 $$
-\text{tf}(t,d) = \text{Number of times term }t \text{ occurs in document } d
+\text{tf}(t,d) = \text{Number of times term }t \text{ occurs in document } d~.
 $$
 
 Next, if $N$ is the total number of documents in the corpus $D$ then:
 
 $$
-\text{idf}(t,D)=\frac{N}{|\{d\in D : t\in d \}|}
+\text{idf}(t,D)=\log{\frac{N}{|\{d\in D : t\in d \}|}},
 $$
 
 where the denominator is the number of documents in which the term $t$ appears.
@@ -869,7 +932,7 @@ where the denominator is the number of documents in which the term $t$ appears.
 And finally:
 
 $$
-\text{tf-idf}(t,d)=\text{tf}(t,d)\times \text{idf}(t,D)
+\text{tf-idf}(t,d)=\text{tf}(t,d)\times \text{idf}(t,D).
 $$
 
 ```{python}
@@ -886,9 +949,10 @@ print(f'The datas type is {type(data)} and the shape is {data.shape}')
 For what it's worth we can look at the data feature matrix:
 
 ```{python}
+
 fig, ax1 = plt.subplots(1,1,figsize=(8,4))
 dum = sns.heatmap(data[1:100,1:200].todense(), xticklabels=False, yticklabels=False, 
-            linewidths=0, cbar=False, ax=ax1)
+            linewidths=0, cbar=True, ax=ax1)
 ```
 
 ```{python}
@@ -901,31 +965,37 @@ print(news_data.target_names)
 Now let's look at the different cluster measures versus number of clusters.
 
 ```{python}
+#| fig-align: center
 error = evaluate_clusters(data, 10)
 plt.plot(range(1, len(error)), error[1:])
 plt.title('$k$-means Clustering Performance on Newsgroup Articles')
 plt.xlabel('Number of clusters')
-plt.ylabel('Error');
+plt.ylabel('Error')
+plt.show()
 ```
 
 ---
 
 ```{python}
-ri = ri_evaluate_clusters(data, 10, news_data.target)
-plt.plot(range(1, len(ri)), ri[1:], 'o-')
+#| fig-align: center
+ri, ari = ri_evaluate_clusters(data, 10, news_data.target)
+plt.plot(range(1, len(ari)), ari[1:], 'o-')
 plt.xlabel('Number of clusters')
 plt.title('$k$-means Clustering Compared to Known Labels\nNewsgroup Articles')
-plt.ylabel('Adjusted Rand Index');
+plt.ylabel('Adjusted Rand Index')
+plt.show()
 ```
 
 ---
 
 ```{python}
+#| fig-align: center
 s = sc_evaluate_clusters(data, 10, 100, 3)
 plt.plot(range(2, len(s)), s[2:], 'o-')
 plt.xlabel('Number of Clusters')
 plt.title('$k$-means clustering performance on Newsgroup Articles')
-plt.ylabel('Silhouette Score');
+plt.ylabel('Silhouette Score')
+plt.show()
 ```
 
 ## Looking into the clusters
@@ -956,27 +1026,28 @@ for i in range(k):
 Let's calculate the pairwise distances matrix.
 
 ```{python}
+#| fig-align: center
 euclidean_dists = metrics.euclidean_distances(data)
 labels = kmeans.labels_
 idx = np.argsort(labels)
 clustered_dists = euclidean_dists[idx][:,idx]
 fig, ax1 = plt.subplots(1,1,figsize=(6,6))
-dum = sns.heatmap(clustered_dists, xticklabels=False, yticklabels=False, linewidths=0, square=True,cbar=False, ax=ax1)
+dum = sns.heatmap(clustered_dists, xticklabels=False, yticklabels=False, linewidths=0, square=True, cbar=True, ax=ax1)
 ```
 
 ## MDS Embedding
 
 Let's visualize with MDS.   
 
-Note that MDS is a slow algorithm and we can't do all 1700+ data points quickly, so we will
-take a random sample.
+Note that MDS is a slow algorithm and we can't do all 1700+ data points quickly, so we will take a random sample.
 
 ```{python}
 import random
 n_items = euclidean_dists.shape[0]
-subset = random.sample(range(n_items),500)
+random.seed(42)
+subset = random.sample(range(n_items), 500)
 
-fit = mds.fit(euclidean_dists[subset][:,subset])
+fit = mds.fit(euclidean_dists[subset][:, subset])
 pos = fit.embedding_
 ```
 
@@ -989,14 +1060,24 @@ labels
 ## MDS Embedding
 
 ```{python}
-cols = [['y', 'b', 'g', 'r', 'c'][l] for l in labels[subset]]
+#| fig-align: center
+colorblind_palette = ['#E69F00', '#56B4E9', '#009E73', '#F0E442', '#0072B2']
+cols = [colorblind_palette[l] for l in labels[subset]]
 plt.scatter(pos[:, 0], pos[:, 1], s = 12, c = cols)
-plt.title('MDS Embedding of Newsgroup Articles');
+plt.title('MDS Embedding of Newsgroup Articles')
+
+unique_labels = np.unique(labels[subset])
+# Create legend handles and labels based on unique labels
+handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=colorblind_palette[l], markersize=10) for l in unique_labels]
+legend_labels = [f'Cluster {l}' for l in unique_labels]
+# Add the legend to the plot
+plt.legend(handles, legend_labels, title='Clusters')
+plt.show()
 ```
 
 ## Recap and Next
 
-We've covered
+We've covered:
 
 * How clustering is used in practice
 * Tools for evaluating the quality of a clustering
@@ -1004,7 +1085,7 @@ We've covered
 * Important visualizations
 * A little bit about feature extraction for text
 
-Next time, we'll look at 
+Next time, we'll look at: 
 
 * Hierarchical clustering
 * Gaussian mixture models
