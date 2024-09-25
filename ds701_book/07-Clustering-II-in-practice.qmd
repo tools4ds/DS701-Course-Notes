@@ -18,11 +18,11 @@ __`scikit-learn.`__
 Our goals are to learn:
 
 ::: {.incremental}
-* How clustering is used in practice.
-* Tools for evaluating the quality of a clustering.
-* Tools for assigning meaning or labels to a cluster.
-* Important visualizations.
-* A little bit about feature extraction for text.
+* How clustering is used in practice
+* Tools for evaluating the quality of a clustering
+* Tools for assigning meaning or labels to a cluster
+* Important visualizations
+* A little bit about feature extraction for text
 :::
 
 ## Training wheels: Synthetic data
@@ -55,12 +55,12 @@ print("gt_centers: ", gt_centers.shape)
 ::: {.notes}
 `datasets.makeblobs` takes as arguments:
 
-- `n_samples`: The number of samples to generate.
+- `n_samples`: The number of samples to generate
 - `n_features`: The number of features, or in other words the dimensionality of
-each sample.
-- `center_box`: The bounds of the cluster centers.
-- `random_state`: The random seed for reproducibility.
-- `return_centers`: A boolean flag, True to return the centers so that we have ground truth.
+each sample
+- `center_box`: The bounds of the cluster centers
+- `random_state`: The random seed for reproducibility
+- `return_centers`: A boolean flag, True to return the centers so that we have ground truth
 :::
 
 ## Visualize the Data
@@ -1067,15 +1067,15 @@ plt.show()
 
 ## Recap and Next
 
-We've covered
+We've covered:
 
-* How clustering is used in practice.
-* Tools for evaluating the quality of a clustering.
-* Tools for assigning meaning or labels to a cluster.
-* Important visualizations.
-* A little bit about feature extraction for text.
+* How clustering is used in practice
+* Tools for evaluating the quality of a clustering
+* Tools for assigning meaning or labels to a cluster
+* Important visualizations
+* A little bit about feature extraction for text
 
-Next time, we'll look at 
+Next time, we'll look at: 
 
-* hierarchical clustering,
-* Gaussian mixture models.
+* Hierarchical clustering
+* Gaussian mixture models
