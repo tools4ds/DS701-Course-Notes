@@ -214,7 +214,7 @@ Note that there are two forms of MDS:
 
 ::: {.fragment}
 MDS may not always work well if, for example the dissimilarities
-are not well modeled by a metric like Euclidean distance
+are not well modeled by a metric like Euclidean distance.
 :::
 
 ## MDS Visualization Result
@@ -598,11 +598,11 @@ Let's consider again our 3-cluster dataset with known labels `y`.
 ::::
 
 
-Here is the adjusted Rand Index, when using $k$-means to cluster this dataset for 1 to 10 clusters:
+Here is the Rand Index and adjusted Rand Index, when using $k$-means to cluster this dataset for 1 to 10 clusters:
 
 ```{python}
 #| fig-align: center
-def ri_evaluate_clusters(X,max_clusters, ground_truth):
+def ri_evaluate_clusters(X, max_clusters, ground_truth):
     ri = np.zeros(max_clusters+1)
     ri[0] = 0
     ari = np.zeros(max_clusters+1)
@@ -748,11 +748,15 @@ We'll use [`sklearn.metrics.silhouette_score`](https://scikit-learn.org/stable/m
 
 
 :::: {.fragment}
-Then the **Silhouette Coefficient** for a clustering is:
+Then the **Silhouette Coefficient** for a point is
 
 $$ 
-s = \frac{b-a}{\max(a, b)} 
+s = \frac{b-a}{\max(a, b)}.
 $$
+::::
+
+:::: {.fragment}
+The overall silhouette coefficient for a clustering is the average of the silhouette coefficients for each data point.
 ::::
 
 ::: {.content-visible when-profile="slides"}
@@ -809,7 +813,7 @@ K-means++ improves the initialization of cluster centers to enhance the quality 
 
 Once the initial centroids are chosen, the standard k-means algorithm is applied.
 
-The main advantage of k-means++ over randomly assigning points is that it reduces the likelihood of poor clustering results due to suboptimal initial centroids. This often leads to faster convergence and better overall clustering quality
+The main advantage of k-means++ over randomly assigning points is that it reduces the likelihood of poor clustering results due to suboptimal initial centroids. This often leads to faster convergence and better overall clustering quality.
 
 # Real Data Clustering Example
 
@@ -914,13 +918,13 @@ Hence, the definition of tf-idf is as follows.
 First:
 
 $$
-\text{tf}(t,d) = \text{Number of times term }t \text{ occurs in document } d
+\text{tf}(t,d) = \text{Number of times term }t \text{ occurs in document } d~.
 $$
 
 Next, if $N$ is the total number of documents in the corpus $D$ then:
 
 $$
-\text{idf}(t,D)=\frac{N}{|\{d\in D : t\in d \}|}
+\text{idf}(t,D)=\log{\frac{N}{|\{d\in D : t\in d \}|}},
 $$
 
 where the denominator is the number of documents in which the term $t$ appears.
@@ -928,7 +932,7 @@ where the denominator is the number of documents in which the term $t$ appears.
 And finally:
 
 $$
-\text{tf-idf}(t,d)=\text{tf}(t,d)\times \text{idf}(t,D)
+\text{tf-idf}(t,d)=\text{tf}(t,d)\times \text{idf}(t,D).
 $$
 
 ```{python}
@@ -945,6 +949,7 @@ print(f'The datas type is {type(data)} and the shape is {data.shape}')
 For what it's worth we can look at the data feature matrix:
 
 ```{python}
+
 fig, ax1 = plt.subplots(1,1,figsize=(8,4))
 dum = sns.heatmap(data[1:100,1:200].todense(), xticklabels=False, yticklabels=False, 
             linewidths=0, cbar=True, ax=ax1)
@@ -960,6 +965,7 @@ print(news_data.target_names)
 Now let's look at the different cluster measures versus number of clusters.
 
 ```{python}
+#| fig-align: center
 error = evaluate_clusters(data, 10)
 plt.plot(range(1, len(error)), error[1:])
 plt.title('$k$-means Clustering Performance on Newsgroup Articles')
@@ -971,6 +977,7 @@ plt.show()
 ---
 
 ```{python}
+#| fig-align: center
 ri, ari = ri_evaluate_clusters(data, 10, news_data.target)
 plt.plot(range(1, len(ari)), ari[1:], 'o-')
 plt.xlabel('Number of clusters')
@@ -982,6 +989,7 @@ plt.show()
 ---
 
 ```{python}
+#| fig-align: center
 s = sc_evaluate_clusters(data, 10, 100, 3)
 plt.plot(range(2, len(s)), s[2:], 'o-')
 plt.xlabel('Number of Clusters')
@@ -1018,6 +1026,7 @@ for i in range(k):
 Let's calculate the pairwise distances matrix.
 
 ```{python}
+#| fig-align: center
 euclidean_dists = metrics.euclidean_distances(data)
 labels = kmeans.labels_
 idx = np.argsort(labels)
@@ -1051,6 +1060,7 @@ labels
 ## MDS Embedding
 
 ```{python}
+#| fig-align: center
 colorblind_palette = ['#E69F00', '#56B4E9', '#009E73', '#F0E442', '#0072B2']
 cols = [colorblind_palette[l] for l in labels[subset]]
 plt.scatter(pos[:, 0], pos[:, 1], s = 12, c = cols)
