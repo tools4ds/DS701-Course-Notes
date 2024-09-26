@@ -25,6 +25,8 @@ Our goals are to learn:
 * A little bit about feature extraction for text
 :::
 
+# Visualization
+
 ## Training wheels: Synthetic data
 
 Generally, when learning about or developing a new unsupervised method, it's a 
@@ -247,6 +249,9 @@ sns.heatmap(euclidean_dists, xticklabels=False, yticklabels=False, linewidths=0,
 plt.show()
 ```
 
+
+# Applying $k$-means
+
 ## Applying  $k$-Means
 
 The Python package `scikit-learn` has a huge set of tools for unsupervised learning generally, and clustering specifically.  
@@ -362,6 +367,9 @@ plt.show()
 ```
 
 Here again, you can see the inter-cluster sample distances are small.
+
+
+# Cluster Evaluation
 
 ## Cluster Evaluation
 
@@ -801,6 +809,8 @@ Again, these results are more perfect than typical.
 But the general idea is to look for a local maximum in the Silhouette Coefficient as the potential number of clusters.
 ::::
 
+# k-means++
+
 ## k-means++ initialization
 Proposed in 2007 by David Arthur and Sergei Vassilvitskii.
 
@@ -814,6 +824,7 @@ K-means++ improves the initialization of cluster centers to enhance the quality 
 Once the initial centroids are chosen, the standard k-means algorithm is applied.
 
 The main advantage of k-means++ over randomly assigning points is that it reduces the likelihood of poor clustering results due to suboptimal initial centroids. This often leads to faster convergence and better overall clustering quality.
+
 
 # Real Data Clustering Example
 
