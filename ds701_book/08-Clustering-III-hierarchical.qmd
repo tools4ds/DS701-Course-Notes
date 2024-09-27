@@ -207,6 +207,18 @@ $$
 D_\text{average}(i,j) = \frac{1}{|C_i|\cdot|C_j|}\sum_{x \in C_i,\, y \in C_j}d(x, y)
 $$
 
+
+<div style = "float: left; width: 41%; text-align: center;">
+    Single-Linkage
+</div>
+<div style = "float: left; width: 18%; text-align: center;">
+    Complete-Linkage
+</div>
+<div style = "float: left; width: 41%; text-align: center;">
+    Average-Linkage
+</div>
+
+
 ![](./figs/L08-hierarchical-criteria.png){width="600px"}
 
 * Single-Linkage
