@@ -226,6 +226,41 @@ __Divisive__ Clustering ("top-down"):
 To illustrate the impact of the choice of cluster distances, we'll focus on agglomerative clustering.
 :::
 
+## Hierarchical Clustering Algorithm Inputs
+
+1. __Input data__ as either
+    * __2-D sample/feature matrix__
+    * __1D condensed distance matrix__ -- upper triangular of pairwise distance matrix flattened
+2. The cluster __linkage__ method (__single__, complete, average, ward, ...)
+3. The __distance metric__ (_euclidean_, manhattan, jaccard, ...)
+
+## Hierarchical Clustering Algorithm Output
+
+An $(n-1,4)$ shaped __linkage matrix__.
+
+Where __each row__ is `[idx1, idx2, dist, sample_count]` is a single step in the clustering
+process and
+
+`idx1` and `idx2` are indices of the cluster being merged, where 
+
+* indices $\{ 0...n-1 \}$ refer to the original data points and 
+* indices $\{n, n+1, ...\}$ refer to each new cluster created
+
+And `sample_count` is the number of original data samples in the new cluster.
+
+
+## Hierarchical Clustering Algorithm Explained
+
+1. __Initialization__
+    * Start with each data point as its own cluster.
+    * Calculate the distance matrix if not provided
+2. __Iterative Clustering__
+    * At each step, the two closest clusters (accourding to linkage method and distance metric)
+      are merged into a new cluster.
+    * The distance between new cluster and the remaining clusters is added
+    * Repeat previous two steps until only one cluster remains.
+
+
 ## Defining Cluster Proximity
 
 Given two clusters, how do we define the _distance_ between them?
@@ -284,7 +319,7 @@ for i in range(6):
 plt.axis('on')
 plt.xticks([])
 plt.yticks([])
-plt.savefig('figs/L08-basic-pointset.png');
+#plt.savefig('figs/L08-basic-pointset.png');
 ```
 
 ::: {.content-visible when-profile="slides"}
@@ -314,7 +349,7 @@ D.style.format('{:.2f}')
 ```{python}
 import scipy.cluster
 import scipy.cluster.hierarchy as hierarchy
-Z = hierarchy.linkage(X, method='single')
+Z = hierarchy.linkage(X, method='single', metric='euclidean')
 hierarchy.dendrogram(Z);
 ```
 
@@ -323,9 +358,10 @@ hierarchy.dendrogram(Z);
 
 ## Single Linkage Clustering Advantages
 
-* Single-linkage clustering can handle non-elliptical shapes.
+Single-linkage clustering can handle non-elliptical shapes.
 
-In fact it can produce long, elongated clusters:
+Here we use SciPy's [fcluster](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.fcluster.html)
+to form flat custers from hierarchical clustering.
 
 ```{python}
 #| fig-align: center
@@ -336,23 +372,29 @@ Z = hierarchy.linkage(X_moon_05, method='single')
 labels = hierarchy.fcluster(Z, 2, criterion = 'maxclust')
 
 plt.scatter(X_moon_05[:,0], X_moon_05[:,1], c = [['b','g'][i-1] for i in labels])
-plt.title('Single-Linkage Can Find Irregularly Shaped Clusters')
+# plt.title('Single-Linkage Can Find Irregularly Shaped Clusters')
 plt.axis('off');
 ```
+
+::: {.content-visible when-profile="slides "}
+## Single Linkage Advantages, cont.
+:::
 
 Single-Linkage can find different sized clusters:
 
 ```{python}
 X_rand_lo, y_rand_lo = sk_data.make_blobs(n_samples=[20, 200], centers = [[1, 1], [3, 1]], n_features = 2,
                           center_box = (-10.0, 10.0), cluster_std = [.1, .5], random_state = 0)
+
 Z = hierarchy.linkage(X_rand_lo, method='single')
 labels = hierarchy.fcluster(Z, 2, criterion = 'maxclust')
+
 plt.scatter(X_rand_lo[:,0], X_rand_lo[:,1], c = [['b','g'][i-1] for i in labels])
 # plt.title('Single-Linkage Can Find Different-Sized Clusters')
 plt.axis('off');
 ```
 
-## Single Linkage Clustering Disadvantages
+## Single Linkage Disadvantages
 
 Single-linkage clustering can be sensitive to noise and outliers.
 
@@ -368,6 +410,10 @@ plt.scatter(X_moon_10[:,0], X_moon_10[:,1], c = [['b','g'][i-1] for i in labels]
 # plt.title('Single-Linkage Clustering Changes Drastically on Slightly More Noisy Data')
 plt.axis('off');
 ```
+
+::: {.content-visible when-profile="slides"}
+## Single Linkage Disadvantages, cont.
+:::
 
 And here's another example where we bump the standard deviation on the clusters slightly.
 
@@ -465,19 +511,23 @@ __Limitations:__
     
 * Biased toward elliptical clusters
 
+Produces more isotropic clusters.
+
 ```{python}
 Z = hierarchy.linkage(X_moon_10, method='average')
 labels = hierarchy.fcluster(Z, 2, criterion = 'maxclust')
 plt.scatter(X_moon_10[:,0], X_moon_10[:,1], c = [['b','g'][i-1] for i in labels])
-plt.title('Average-Linkage Similar to Complete - Globular Clusters')
+# plt.title('Average-Linkage Similar to Complete - Globular Clusters')
 plt.axis('off');
 ```
+
+More resistant to noise than Single-Linkage.
 
 ```{python}
 Z = hierarchy.linkage(X_rand_hi, method='average')
 labels = hierarchy.fcluster(Z, 2, criterion = 'maxclust')
 plt.scatter(X_rand_hi[:,0], X_rand_hi[:,1], c = [['b','g'][i-1] for i in labels])
-plt.title('Average-Linkage More resistant to noise than Single-Linkage')
+# plt.title('Average-Linkage More resistant to noise than Single-Linkage')
 plt.axis('off');
 ```
 
@@ -497,15 +547,16 @@ plt.axis('off');
 
 Finally, we consider one more cluster distance.
 
-Ward's distance asks "what if".
-
-That is, "What if we combined these two clusters -- how would clustering improve?"
+Ward's distance asks "What if we combined these two clusters -- how would clustering improve?"
 
 To define "how would clustering improve?" we appeal to the $k$-means criterion.
 
 So:
 
-__Ward's Distance__ between clusters $C_i$ and $C_j$ is the difference between the total within cluster sum of squares for the two clusters separately, __compared to__ the within cluster sum of squares resulting from merging the two clusters into a new cluster $C_{i+j}$:
+__Ward's Distance__ between clusters $C_i$ and $C_j$ is the difference between
+the total within cluster sum of squares for the two clusters separately, 
+__compared to__ the _within cluster sum of squares_ resulting from merging the two
+clusters into a new cluster $C_{i+j}$:
 
 $$
 D_\text{Ward}(i, j) = \sum_{x \in C_i} (x - c_i)^2 + \sum_{x \in C_j} (x - c_j)^2  - \sum_{x \in C_{i+j}} (x - c_{i+j})^2 
@@ -574,8 +625,16 @@ plt.scatter(pos[:, 0], pos[:, 1], s = 8);
 ## Hierarchical Clustering in Practice, cont.
 :::
 
+Hierarchical clustering is available in __`sklearn`__, but there is a much more
+fully developed set of 
+[tools](https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html) 
+in the [scipy](https://docs.scipy.org/doc/scipy/index.html) package and that is the one to use.
 
-Hierarchical clustering is available in __`sklearn`__, but there is a much more fully developed set of tools in the __`scipy`__ package and that is the one to use.
+Let's run hierarchical clustering on our synthetic dataset.
+
+::: {.callout-tip}
+Try the other linkage methods and see how the clustering and dendogram changes.
+:::
 
 ```{python}
 import scipy.cluster
@@ -585,6 +644,8 @@ import scipy.spatial.distance
 # linkages = ['single','complete','average','weighted','ward']
 Z = hierarchy.linkage(X, method = 'single')
 ```
+
+And draw the dendogram.
 
 ```{python}
 R = hierarchy.dendrogram(Z)
@@ -616,10 +677,13 @@ data.shape
 Cluster hierarchically and display dendogram. Feel free to experiment with different metrics.
 
 ```{python}
+# linkages are one of 'single','complete','average','weighted','ward'
+#
 # metrics can be ‘braycurtis’, ‘canberra’, ‘chebyshev’, ‘cityblock’, ‘correlation’, ‘cosine’, 
 # ‘dice’, ‘euclidean’, ‘hamming’, ‘jaccard’, ‘kulsinski’, ‘mahalanobis’, ‘matching’, 
 # ‘minkowski’, ‘rogerstanimoto’, ‘russellrao’, ‘seuclidean’, ‘sokalmichener’, ‘sokalsneath’, 
 # ‘sqeuclidean’, ‘yule’.
+
 Z_20ng = hierarchy.linkage(data, method = 'ward', metric = 'euclidean')
 plt.figure(figsize=(14,4))
 R_20ng = hierarchy.dendrogram(Z_20ng, p=4, truncate_mode = 'level', show_leaf_counts=True)
@@ -627,15 +691,17 @@ R_20ng = hierarchy.dendrogram(Z_20ng, p=4, truncate_mode = 'level', show_leaf_co
 
 ## Selecting the Number of Clusters
 
-Let's flatten the hierarchical cluster at different depths and calculate the 
+Let's flatten the hierarchy to different numbers clusters and calculate the 
 _Silhouette Score_.
 
 ```{python}
 max_clusters = 20
 s = np.zeros(max_clusters+1)
+
 for k in range(2, max_clusters+1):
     clusters = hierarchy.fcluster(Z_20ng, k, criterion = 'maxclust')
     s[k] = metrics.silhouette_score(np.asarray(data), clusters, metric = 'euclidean')
+
 plt.plot(range(2, len(s)), s[2:], '.-')
 plt.xlabel('Number of clusters')
 plt.ylabel('Silhouette Score');
@@ -662,18 +728,33 @@ for i in range(1,k+1):
 
 ## Comparison of Linkages
 
-TODO: Show figure from sklearn with reference...
+Scikit-Learn has a very nice [notebook](https://scikit-learn.org/stable/auto_examples/cluster/plot_linkage_comparison.html)
+and plot, copied here, that shows the different clusters resulting from different
+linkage methods.
+
+![](./figs/L08-sphx_glr_plot_linkage_comparison_001.png){width="100%" fig-align="center"}
 
 
 # DBSCAN
 
-## DBSCAN -- Density Based Clustering
+## DBSCAN -- Intro
 
-TODO: add content here, then show comparison plot
+There are many other clustering algorithms as illustrated below from Scikit-learn
+[Clustering](https://scikit-learn.org/stable/modules/clustering.html#dbscan).
+
+You can see the strengths and weaknesses for various kinds of data distributions.
+
+
+![](figs/L08-cluster-plot-comparison.png){width="100%" fig-align="center"}
+
+## DBSCAN -- Density Based Scanning
+
+We'll talk about one more: [DBSCAN](https://scikit-learn.org/stable/modules/clustering.html#dbscan).
+
 
 # Recap
 
-## Recap
+## Clustering Recap
 
 * Hierarchical clustering is a method of clustering that produces a nested set of clusters organized into a tree.
 * The dendrogram is a tree-like diagram that records the containment relations among clusters.
