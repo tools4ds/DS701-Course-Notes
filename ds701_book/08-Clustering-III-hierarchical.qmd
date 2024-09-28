@@ -735,32 +735,22 @@ linkage methods.
 ![](./figs/L08-sphx_glr_plot_linkage_comparison_001.png){width="100%" fig-align="center"}
 
 
-# DBSCAN
-
-## DBSCAN -- Intro
-
-There are many other clustering algorithms as illustrated below from Scikit-learn
-[Clustering](https://scikit-learn.org/stable/modules/clustering.html#dbscan).
-
-You can see the strengths and weaknesses for various kinds of data distributions.
-
-
-![](figs/L08-cluster-plot-comparison.png){width="100%" fig-align="center"}
-
-## DBSCAN -- Density Based Scanning
-
-We'll talk about one more: [DBSCAN](https://scikit-learn.org/stable/modules/clustering.html#dbscan).
 
 
 # Recap
 
 ## Clustering Recap
 
-* Hierarchical clustering is a method of clustering that produces a nested set of clusters organized into a tree.
-* The dendrogram is a tree-like diagram that records the containment relations among clusters.
-* The choice of cluster distance metric can significantly impact the resulting clustering.
-* Single-linkage clustering can produce long, elongated clusters.
-* Complete-linkage clustering produces more-balanced clusters.
-* Average-linkage clustering is a compromise between single- and complete-linkage.
-* Ward's distance is a hierarchical analog of $k$-means.
+This wraps up our _partitional_ Cluster topics. We covered:
+
+::: {.incremental}
+* What the clusering problem is
+* An overview of the $k$-means clustering algorithm including initialization with $k$-means++
+* Visualization techniques such as Multi-Dimensional Scaling
+* Cluster evaluation with (Adjusted) Rand Index and Silhouette Coefficient
+* Using evaluation to determine number of clusters
+* Hierarchical Clustering with different methods and metrics
+* Looked at applications of clustering on various types of synthetic data, image
+  color quantization, newsgroup clustering
+:::
 
