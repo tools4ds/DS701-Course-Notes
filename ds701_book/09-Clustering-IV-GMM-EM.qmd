@@ -166,15 +166,15 @@ y = norm.pdf(x, mean, std_dev)
 
 # Plot the Gaussian
 plt.figure(figsize=(5, 3))
-plt.plot(x, y, label=f'$\mu$: {mean}, $\sigma^2$: {variance}')
+plt.plot(x, y, label=f'$\\mu$: {mean}, $\\sigma^2$: {variance}')
 
 # Label the mean
-plt.axvline(mean, color='r', linestyle='--', label=f'Mean ($\mu$) = {mean}')
+plt.axvline(mean, color='r', linestyle='--', label=f'Mean ($\\mu$) = {mean}')
 
 # Draw a horizontal arrow illustrating the variance
 plt.annotate('', xy=(mean - std_dev, 0.1), xytext=(mean + std_dev, 0.1),
              arrowprops=dict(arrowstyle='<->', color='blue'))
-plt.text(mean, 0.12, '$\sigma$', horizontalalignment='center', color='blue')
+plt.text(mean, 0.12, '$\\sigma$', horizontalalignment='center', color='blue')
 
 # Add title and labels
 plt.title("Gaussian Distribution")
