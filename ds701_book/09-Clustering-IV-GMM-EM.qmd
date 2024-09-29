@@ -121,7 +121,7 @@ Our goal with Gaussian mixture models (GMMs) is to show how to compute the proba
 The main ideas behind GMMs are
 
 - Assume each cluster is normally distributed
-- Use the Expectation Maximization (ME) algorithm to iteratively determine the parameters of our the Gaussian clusters
+- Use the Expectation Maximization (EM) algorithm to iteratively determine the parameters of our the Gaussian clusters
 - Determine probabilities on whether a data point belongs to a particular cluster
 
 We will see that GMMs are better suited for clustering non-spherical distributions of points.
@@ -136,9 +136,58 @@ Probability distributions are specified by their parameters.
 
 The Gaussian (Normal) distribution is determined by the parameters $\mu$ and $\sigma^{2}$, i.e.,
 
+:::: {.columns}
+::: {.column width="40%"}
+
 $$
-f(x\vert\mu, \sigma^{2}) = \frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x-\mu^2)}{2\sigma^2}}.
+f(x\vert\mu, \sigma^{2}) = \frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x-\mu)^{2}}{2\sigma^2}}.
 $$
+
+:::
+::: {.column width="60%"}
+
+```{python}
+#| echo: false
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+# Parameters
+mean = 0.5
+variance = 1.5
+std_dev = np.sqrt(variance)
+
+# Generate x values
+x = np.linspace(mean - 4*std_dev, mean + 4*std_dev, 1000)
+
+# Calculate the Gaussian
+y = norm.pdf(x, mean, std_dev)
+
+# Plot the Gaussian
+plt.figure(figsize=(5, 3))
+plt.plot(x, y, label=f'$\mu$: {mean}, $\sigma^2$: {variance}')
+
+# Label the mean
+plt.axvline(mean, color='r', linestyle='--', label=f'Mean ($\mu$) = {mean}')
+
+# Draw a horizontal arrow illustrating the variance
+plt.annotate('', xy=(mean - std_dev, 0.1), xytext=(mean + std_dev, 0.1),
+             arrowprops=dict(arrowstyle='<->', color='blue'))
+plt.text(mean, 0.12, '$\sigma$', horizontalalignment='center', color='blue')
+
+# Add title and labels
+plt.title("Gaussian Distribution")
+plt.xlabel("x")
+plt.ylabel("Probability Density")
+plt.legend()
+
+# Show the plot
+plt.show()
+```
+
+:::
+::::
 
 **Parameter estimation** is the process of determining the parameters of a distribution based on a sample of observed data.
 
@@ -146,14 +195,17 @@ $$
 
 ## Likelihood Function
 
-The likelihood function $L(\boldsymbol{\theta}, x)$ represents the probability of observing the given data $x$ as a function of the parameters $\boldsymbol{\theta}$ of the distribution.
+The likelihood function $L(\boldsymbol{\theta}, x)$ represents the probability
+of observing the given data $x$ as a function of the parameters $\boldsymbol{\theta}$ of the distribution.
 
 The primary purpose of the likelihood function is to estimate the parameters that make the observed data $x$ most probable.
 
 The likelihood function for a set of samples $x_{n}~\text{for}~n=1, \ldots, N$ drawn from a Gaussian distribution is
 
 $$
-L(\mu, \sigma^{2}, x_1, \ldots, x_n) = \prod_{n=1}^{N}(x_n\vert \mu, \sigma^{2}) = \prod_{n=1}^{N}\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x_n-\mu^2)}{2\sigma^2}}.
+L(\mu, \sigma^{2}, x_1, \ldots, x_n) \
+= \prod_{n=1}^{N}(x_n\vert \mu, \sigma^{2}) \
+= \prod_{n=1}^{N}\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x_n-\mu)^{2}}{2\sigma^2}}.
 $$
 
 --- 
@@ -169,10 +221,52 @@ The parameters that maximize the likelihood function are called the **maximum li
 
 ## Log-likelihood
 
-A common manipulation to obtain a more useful form of the likelihood function is to take its natural logarithm, i.e.,
+A common manipulation to obtain a more useful form of the likelihood function is to take its natural logarithm.
+
+```{python}
+#| echo: false
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate x values from -5 to 5
+x = np.linspace(0.001, 5, 400)
+
+# Calculate the natural logarithm of x
+y = np.log(x)
+
+# Plot the function
+plt.figure(figsize=(4, 3))
+plt.plot(x, y, label='log(x)')
+plt.axhline(0, color='black',linewidth=0.5)
+plt.axvline(0, color='black',linewidth=0.5)
+plt.title('Natural Logarithm Function')
+plt.xlabel('x')
+plt.ylabel('log(x)')
+plt.legend()
+plt.grid(True)
+plt.show()
+```
+
+
+Advantages of the log-likelihood:
+
+* The log function is monotonically increasing, so the MLE is the same as the log-likelihood estimate
+* The product of probabilities becomes a sum of logarithms, which is more numerically stable
+* The log-likelihood is easier to work with
+
+## Applying the Log
 
 $$
-\log{\left(L(\mu, \sigma^{2}, x_1, \ldots, x_n)\right)} = -\frac{N}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^{2}\sum_{n=1}^{N}(x_n -\mu)^{2}}.
+\begin{align*}
+\log{\left(L(\mu, \sigma^{2}, x_1, \ldots, x_n)\right)} \
+& = \log{\left(\prod_{n=1}^{N}\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x_n-\mu)^{2}}{2\sigma^2}}\right)} \\
+& = \sum_{n=1}^{N}\log{\left(\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x_n-\mu)^{2}}{2\sigma^2}}\right)} \\
+& = \sum_{n=1}^{N}\left(\log{\left(\frac{1}{\sigma\sqrt{2\pi}}\right)} + \log{\left(e^{-\frac{(x_n-\mu)^{2}}{2\sigma^2}}\right)}\right) \\
+& = \sum_{n=1}^{N}\left(-\log{\sigma} - \log{\sqrt{2\pi}} - \frac{(x_n-\mu)^{2}}{2\sigma^2}\right) \\
+& = \sum_{n=1}^{N}\left(-\log{\sigma} - \frac{1}{2}\log{2\pi} - \frac{(x_n-\mu)^{2}}{2\sigma^2}\right) \\
+& = -\frac{N}{2}\log{2\pi} - \frac{N}{2}\log{\sigma^2} - \frac{1}{2\sigma^{2}}\sum_{n=1}^{N}(x_n -\mu)^{2}.
+\end{align*}
 $$
 
 Using the log-likelihood we will be able to derive formulas for the maximum likelihood estimates. 
@@ -282,15 +376,17 @@ This could be a hypothetical situation with $K=4$ normally distributed clusters.
 Given data points $\mathbf{x}\in\mathbb{R}^{d}$, i.e., $d$-dimensional points, then we use the multivariate Gaussian to describe the clusters. The formula for the multivariate Gaussian is
 
 $$
-f(\mathbf{x}\vert \bar{\mu}, \Sigma) = \frac{1}{(2\pi)^{d/2}\vert \Sigma \vert^{1/2}}e^{-\frac{1}{2}(\mathbf{x}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{x}-\boldsymbol{\mu})},
+f(\mathbf{x}\vert \bar{\mu}, \Sigma) = \frac{1}{(2\pi)^{d/2}\vert \Sigma \vert^{1/2}}e^{-\frac{1}{2}(\mathbf{x}-\mathbf{\mu})^T\Sigma^{-1}(\mathbf{x}-\mathbf{\mu})},
 $$
 
 where $\Sigma\in\mathbb{R}^{d\times d}$ is the covariance matrix, $\vert \Sigma\vert$, denote the determinant of $\Sigma$, and $\boldsymbol{\mu}$ is the $d$-dimensional vector of expected values.
 
 ::: {.content-hidden when-profile="web"}
-Recall also that the shape of a multivariate Gaussian – the direction of its axes and the width along each axis – is determined by the covariance matrix .
+Recall also that the shape of a multivariate Gaussian – the direction of its axes
+and the width along each axis – is determined by the covariance matrix.
 
-The covariance matrix is the multidimensional analog of the variance. It determines the extent to which vector components are correlated.
+The covariance matrix is the multidimensional analog of the variance. It 
+determines the extent to which vector components are correlated.
 :::
 
 ## Notation
