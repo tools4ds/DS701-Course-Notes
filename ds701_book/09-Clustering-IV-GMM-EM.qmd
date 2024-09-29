@@ -542,11 +542,15 @@ __$k$-means__
 1. Update the clusters (means).
 1. Repeat 2-3 until convergence.
 
+--- 
+
 From a practical standpoint, the main difference is that in GMMs, data points do not belong to a __single__ cluster, but have some probability of belonging to __each__ cluster.
 
 In other words, as stated previously, GMMs use soft assignment.
 
 For that reason, GMMs are also sometimes called __soft $k$-means.__
+
+---
 
 However, there is also an important conceptual difference. 
 
