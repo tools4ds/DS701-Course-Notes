@@ -233,7 +233,7 @@ To illustrate the impact of the choice of cluster distances, we'll focus on aggl
     * __2-D sample/feature matrix__
     * __1D condensed distance matrix__ -- upper triangular of pairwise distance matrix flattened
 2. The cluster __linkage__ method (__single__, complete, average, ward, ...)
-3. The __distance metric__ (_euclidean_, manhattan, jaccard, ...)
+3. The __distance metric__ (_Euclidean_, manhattan, Jaccard, ...)
 
 ## Hierarchical Clustering Algorithm Output
 
@@ -256,7 +256,7 @@ And `sample_count` is the number of original data samples in the new cluster.
     * Start with each data point as its own cluster.
     * Calculate the distance matrix if not provided
 2. __Iterative Clustering__
-    * At each step, the two closest clusters (accourding to linkage method and distance metric)
+    * At each step, the two closest clusters (according to linkage method and distance metric)
       are merged into a new cluster.
     * The distance between new cluster and the remaining clusters is added
     * Repeat previous two steps until only one cluster remains.
@@ -373,7 +373,7 @@ X_moon_05, y_moon_05 = sk_data.make_moons(random_state = 0, noise = 0.05)
 Z = hierarchy.linkage(X_moon_05, method='single')
 labels = hierarchy.fcluster(Z, 2, criterion = 'maxclust')
 
-plt.scatter(X_moon_05[:,0], X_moon_05[:,1], c = [['b','g'][i-1] for i in labels])
+plt.scatter(X_moon_05[:, 0], X_moon_05[:, 1], c = [['b','g'][i-1] for i in labels])
 plt.axis('off')
 plt.show()
 ```
@@ -391,7 +391,7 @@ X_rand_lo, y_rand_lo = sk_data.make_blobs(n_samples=[20, 200], centers = [[1, 1]
 Z = hierarchy.linkage(X_rand_lo, method='single')
 labels = hierarchy.fcluster(Z, 2, criterion = 'maxclust')
 
-plt.scatter(X_rand_lo[:,0], X_rand_lo[:,1], c = [['b','g'][i-1] for i in labels])
+plt.scatter(X_rand_lo[:, 0], X_rand_lo[:, 1], c = [['b','g'][i-1] for i in labels])
 # plt.title('Single-Linkage Can Find Different-Sized Clusters')
 plt.axis('off')
 plt.show()
@@ -409,7 +409,7 @@ X_moon_10, y_moon_10 = sk_data.make_moons(random_state = 0, noise = 0.1)
 Z = hierarchy.linkage(X_moon_10, method='single')
 labels = hierarchy.fcluster(Z, 2, criterion = 'maxclust')
 
-plt.scatter(X_moon_10[:,0], X_moon_10[:,1], c = [['b','g'][i-1] for i in labels])
+plt.scatter(X_moon_10[:, 0], X_moon_10[:, 1], c = [['b','g'][i-1] for i in labels])
 # plt.title('Single-Linkage Clustering Changes Drastically on Slightly More Noisy Data')
 plt.axis('off')
 plt.show()
@@ -428,7 +428,7 @@ X_rand_hi, y_rand_hi = sk_data.make_blobs(n_samples=[20, 200], centers = [[1, 1]
 Z = hierarchy.linkage(X_rand_hi, method='single')
 labels = hierarchy.fcluster(Z, 2, criterion = 'maxclust')
 
-plt.scatter(X_rand_hi[:,0], X_rand_hi[:,1], c = [['b','g'][i-1] for i in labels])
+plt.scatter(X_rand_hi[:, 0], X_rand_hi[:, 1], c = [['b','g'][i-1] for i in labels])
 plt.axis('off')
 plt.show()
 ```
@@ -462,7 +462,7 @@ X_moon_05, y_moon_05 = sk_data.make_moons(random_state = 0, noise = 0.05)
 Z = hierarchy.linkage(X_moon_05, method='complete')
 labels = hierarchy.fcluster(Z, 2, criterion = 'maxclust')
 
-plt.scatter(X_moon_05[:,0], X_moon_05[:,1], c = [['b','g'][i-1] for i in labels])
+plt.scatter(X_moon_05[:, 0], X_moon_05[:, 1], c = [['b','g'][i-1] for i in labels])
 plt.axis('off')
 plt.show()
 ```
@@ -471,7 +471,7 @@ plt.show()
 Z = hierarchy.linkage(X_rand_hi, method='complete')
 labels = hierarchy.fcluster(Z, 2, criterion = 'maxclust')
 
-plt.scatter(X_rand_hi[:,0], X_rand_hi[:,1], c = [['b','g'][i-1] for i in labels])
+plt.scatter(X_rand_hi[:, 0], X_rand_hi[:, 1], c = [['b','g'][i-1] for i in labels])
 plt.axis('off')
 plt.show()
 ```
@@ -481,11 +481,19 @@ Less susceptible to noise:
 ```{python}
 Z = hierarchy.linkage(X_moon_10, method='complete')
 labels = hierarchy.fcluster(Z, 2, criterion = 'maxclust')
-plt.scatter(X_moon_10[:,0], X_moon_10[:,1], c = [['b','g'][i-1] for i in labels])
+plt.scatter(X_moon_10[:, 0], X_moon_10[:, 1], c = [['b','g'][i-1] for i in labels])
 
 plt.axis('off')
 plt.show()
 ```
+
+## Complete-Linkage Clustering Disadvantages
+
+Some disadvantages for complete-linkage clustering are:
+
+- Sensitivity to outliers
+- Tendency to compute more compact, spherical clusters
+- Computationally intensive for large datasets.
 
 ## Average-Linkage Clustering
 
@@ -523,7 +531,7 @@ Produces more isotropic clusters.
 ```{python}
 Z = hierarchy.linkage(X_moon_10, method='average')
 labels = hierarchy.fcluster(Z, 2, criterion = 'maxclust')
-plt.scatter(X_moon_10[:,0], X_moon_10[:,1], c = [['b','g'][i-1] for i in labels])
+plt.scatter(X_moon_10[:, 0], X_moon_10[:, 1], c = [['b','g'][i-1] for i in labels])
 
 plt.axis('off')
 plt.show()
@@ -534,7 +542,7 @@ More resistant to noise than Single-Linkage.
 ```{python}
 Z = hierarchy.linkage(X_rand_hi, method='average')
 labels = hierarchy.fcluster(Z, 2, criterion = 'maxclust')
-plt.scatter(X_rand_hi[:,0], X_rand_hi[:,1], c = [['b','g'][i-1] for i in labels])
+plt.scatter(X_rand_hi[:, 0], X_rand_hi[:, 1], c = [['b','g'][i-1] for i in labels])
 
 plt.axis('off')
 plt.show()
@@ -643,7 +651,7 @@ in the [scipy](https://docs.scipy.org/doc/scipy/index.html) package and that is 
 Let's run hierarchical clustering on our synthetic dataset.
 
 ::: {.callout-tip}
-Try the other linkage methods and see how the clustering and dendogram changes.
+Try the other linkage methods and see how the clustering and dendrogram changes.
 :::
 
 ```{python}
@@ -655,7 +663,7 @@ import scipy.spatial.distance
 Z = hierarchy.linkage(X, method = 'single')
 ```
 
-And draw the dendogram.
+And draw the dendrogram.
 
 ```{python}
 R = hierarchy.dendrogram(Z)
@@ -684,7 +692,7 @@ data = vectorizer.fit_transform(news_data.data).todense()
 data.shape
 ```
 
-Cluster hierarchically and display dendogram. Feel free to experiment with different metrics.
+Cluster hierarchically and display dendrogram. Feel free to experiment with different metrics.
 
 ```{python}
 # linkages are one of 'single','complete','average','weighted','ward'
