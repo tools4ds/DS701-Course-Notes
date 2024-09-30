@@ -1,76 +1,70 @@
 ---
 title: Gaussian Mixture Models
 jupyter: python3
+fig-align: center
 ---
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/09-Clustering-IV-GMM-EM.ipynb)
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
+#| echo: false
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-%matplotlib inline
 ```
 
-
-
-<center>
-
-<img src="figs/L09-MultivariateNormal.png" width="70%">
-
-</center>
+![](figs/L09-MultivariateNormal.png){fig-align="center"}
 
 ## From Hard to Soft Clustering
 
 __So far,__ we have seen how to cluster objects using $k$-means: 
 
-1. start with an initial set of cluster centers,
-2. assign each object to its closest cluster center, and 
-3. recompute the centers of the new clusters. 
-4. Repeat 2 $\rightarrow$ 3 until convergence.
+1. Start with an initial set of cluster centers,
+1. Assign each object to its closest cluster center 
+1. Recompute the centers of the new clusters
+1. Repeat 2 $\rightarrow$ 3 until convergence
 
-__Note__ that in $k$-means, every object is assigned to a **single** cluster. 
+In $k$-means clustering every object is assigned to a **single** cluster. 
 
 This is called __hard__ assignment.
 
-However, there may be cases were we either __cannot__ use hard assignments or we do not __want__ to do it! 
+However, there may be cases where we either __cannot__ use hard assignments or we do not __want__ to do it.
 
-In particular, we may believe that the best description of the data is a set of __overlapping__ clusters.
+In particular, we might have reason to believe that the best description of the data is a set of __overlapping__ clusters.
 
-For example: 
+# Overlapping Clusters
 
-Imagine that we believe society consists of just __two__ kinds of individuals: poor, or rich.
+## Rich or Poor Example
 
-Let's think about how we might model society as a mixture of poor and rich, when viewed in terms of age.
+Let's consider as an example a society that consists of just __two__ kinds of individuals: poor or rich.
 
-Say we sample 20,000 rich individuals, and 20,000 poor individuals, and get the following histograms:
+How might we model society as a mixture of poor and rich, when viewed in terms of the single feature age?
+
+## Rich or Poor Sampling
+
+Let's sample 20,000 rich individuals and 20,000 poor individuals. From this sample we get have the following histograms.
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
+#| fig-align: center
 # original inspiration for this example from
 # https://www.cs.cmu.edu/~./awm/tutorials/gmm14.pdf
 from scipy.stats import multivariate_normal
 np.random.seed(4)
 df = pd.DataFrame(multivariate_normal.rvs(mean = np.array([37, 45]), cov = np.diag([196, 121]), size = 20000),
                    columns = ['poor', 'rich'])
-df.hist(bins = range(80), sharex = True);
+df.hist(bins = range(80), sharex = True)
+plt.show()
 ```
 
-We find that ages of the poor set have mean 37 with standard deviation 14,
+We find that ages of the poor set have mean $\mu=37$ with standard deviation $\sigma=14$, while the ages of the rich set have mean $\mu=45$ with standard deviation $\sigma=11$.
 
-while the ages of the rich set have mean 45 with standard deviation 11.
+## Rich or Poor by Age
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
+#| fig-align: center
 from scipy.stats import norm
-plt.figure()
 x = np.linspace(norm.ppf(0.001, loc = 37, scale = 14), norm.ppf(0.999, loc = 37, scale = 14), 100)
 plt.plot(x, norm.pdf(x, loc = 37, scale = 14),'b-', lw = 5, alpha = 0.6, label = 'poor')
 x = np.linspace(norm.ppf(0.001, loc = 45, scale = 11), norm.ppf(0.999, loc = 45, scale = 11), 100)
@@ -79,20 +73,25 @@ plt.xlim([15, 70])
 plt.xlabel('Age', size=14)
 plt.legend(loc = 'best')
 plt.title('Age Distributions')
-plt.ylabel(r'$p(x)$', size=14);
+plt.ylabel(r'$p(x)$', size=14)
+plt.show()
 ```
 
-Clearly, viewed along the age dimension, there are two clusters that overlap.
+## Soft Clustering
+
+Viewed along the age dimension we observe that there are two overlapping clusters.
 
 Furthermore, given some particular individual at a given age, say 25, we cannot say for sure which cluster they belong to.  
 
 Rather, we will use _probability_ to quantify our uncertainty about the cluster that any single individual belongs to.
 
-Thus, we could say that a given individual ("John Smith", age 25) belongs to the _rich_ cluster with some probability, and the _poor_ cluster with some different probability.
+Thus, we could say that a given individual ("John Smith", age 25) belongs to the _rich_ cluster with some probability and the _poor_ cluster with a different probability.
 
 Naturally we expect the probabilities for John Smith to sum up to 1.
 
 This is called __soft assignment,__ and a clustering using this principle is called __soft clustering.__
+
+## Conditional Probability
 
 More formally, we say that an object can belong to each particular cluster with some probability, such that the sum of the probabilities adds up to 1 for each object. 
 
@@ -102,165 +101,392 @@ Note that the distribution over $C_1$ and $C_2$ only refers to object $x_1$.
 
 Thus, it is a __conditional__ probability:
 
-$$P(C_1 \,|\, x_1) = 0.3$$
-$$P(C_2 \,|\, x_1) = 0.7$$
-
-And to return to our previous example:
-
-$$P(\text{rich}\,|\,\text{age 25}) + P(\text{poor}\,|\,\text{age 25}) = 1 $$
-
-## Mixtures of Gaussians
-
-We're going to consider a particular model for each cluster: the Gaussian (or Normal) distribution.
-
-$${\displaystyle f(x\;|\;\mu ,\sigma ^{2})={\frac {1}{\sqrt {2\sigma ^{2}\pi }}}\;exp({-{\frac {(x-\mu )^{2}}{2\sigma ^{2}}}}})$$
-
-<center>
-
-<img src="figs/L09-Normal_Distribution_PDF.png" width="60%">
-
-</center>
-
-By <a href="//commons.wikimedia.org/wiki/User:Inductiveload" title="User:Inductiveload">Inductiveload</a> - self-made, Mathematica, Inkscape, Public Domain, <a href="https://commons.wikimedia.org/w/index.php?curid=3817954">https://commons.wikimedia.org/w/index.php?curid=3817954</a>
-
-You can see that, for example, this is a reasonable model for the distribution of ages in each of the two population groups (rich and poor).
-
-In the case of the population example, we have a single feature: age.   
-
-How do we use a Gaussian when we have multiple features?
-
-The answer is that we use a __multivariate Gaussian.__
-
-<center>
-
-<img src="figs/L09-MultivariateNormal.png" width="70%">
-
-</center>
-
-By <a href="//commons.wikimedia.org/wiki/User:Bscan" title="User:Bscan">Bscan</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="http://creativecommons.org/publicdomain/zero/1.0/deed.en" title="Creative Commons Zero, Public Domain Dedication">CC0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=25235145">https://commons.wikimedia.org/w/index.php?curid=25235145</a>
-
-Now each point is a vector in $n$ dimensions: $\mathbf{x} = (x_1, \dots, x_n)^T$.  
-
-As a reminder, the multivariate Gaussian has a pdf (density) function of:
-
 $$
-f(x_{1},\ldots ,x_{n})={\frac  {1}{{\sqrt  {(2\pi )^{{n}}
-\Vert{\boldsymbol  \Sigma }\Vert}}}}\exp \left(-{\frac  {1}{2}}({{\mathbf  x}}-{{\boldsymbol  \mu }})^{{\mathrm  {T}}}{{\boldsymbol  \Sigma }}^{{-1}}({{\mathbf  x}}-{{\boldsymbol  \mu }})\right)
+\begin{align*}
+P(C_1 \,|\, x_1) &= 0.3, \\
+P(C_2 \,|\, x_1) &= 0.7.
+\end{align*}
 $$
 
-Recall also that the shape of a multivariate Gaussian -- the direction of its axes and the width along each axis -- is determined by the __covariance matrix $\Sigma$__.
+And to return to our previous example
 
-The covariance matrix is the multidimensional analog of the variance.   It determines the extent to which vector components are correlated.
+$$
+P(\text{rich}\,|\,\text{age 25}) + P(\text{poor}\,|\,\text{age 25}) = 1.
+$$
 
-For example, let's say we are looking to classify cars based on their model year and miles per gallon (mpg).  
+## Lecture Overview
+
+Our goal with Gaussian mixture models (GMMs) is to show how to compute the probabilities that a data point belongs to a particular cluster.
+
+The main ideas behind GMMs are
+
+- Assume each cluster is normally distributed
+- Use the Expectation Maximization (EM) algorithm to iteratively determine the parameters of our the Gaussian clusters
+- Determine probabilities on whether a data point belongs to a particular cluster
+
+We will see that GMMs are better suited for clustering non-spherical distributions of points.
+
+To help us in understanding GMMs we will first review maximum likelihood estimation.
+
+# Maximum Likelihood Estimation (MLE)
+
+## Motivation
+
+Probability distributions are specified by their parameters.
+
+The Gaussian (Normal) distribution is determined by the parameters $\mu$ and $\sigma^{2}$, i.e.,
+
+:::: {.columns}
+::: {.column width="40%"}
+
+$$
+f(x\vert\mu, \sigma^{2}) = \frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x-\mu)^{2}}{2\sigma^2}}.
+$$
+
+:::
+::: {.column width="60%"}
+
+```{python}
+#| echo: false
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+# Parameters
+mean = 0.5
+variance = 1.5
+std_dev = np.sqrt(variance)
+
+# Generate x values
+x = np.linspace(mean - 4*std_dev, mean + 4*std_dev, 1000)
+
+# Calculate the Gaussian
+y = norm.pdf(x, mean, std_dev)
+
+# Plot the Gaussian
+plt.figure(figsize=(5, 3))
+plt.plot(x, y, label=f'$\\mu$: {mean}, $\\sigma^2$: {variance}')
+
+# Label the mean
+plt.axvline(mean, color='r', linestyle='--', label=f'Mean ($\\mu$) = {mean}')
+
+# Draw a horizontal arrow illustrating the variance
+plt.annotate('', xy=(mean - std_dev, 0.1), xytext=(mean + std_dev, 0.1),
+             arrowprops=dict(arrowstyle='<->', color='blue'))
+plt.text(mean, 0.12, '$\\sigma$', horizontalalignment='center', color='blue')
+
+# Add title and labels
+plt.title("Gaussian Distribution")
+plt.xlabel("x")
+plt.ylabel("Probability Density")
+plt.legend()
+
+# Show the plot
+plt.show()
+```
+
+:::
+::::
+
+**Parameter estimation** is the process of determining the parameters of a distribution based on a sample of observed data.
+
+**Maximum likelihood estimation** is a method estimate the parameters of an assumed probability distribution given a sample of observed data.
+
+## Likelihood Function
+
+The likelihood function $L(\boldsymbol{\theta}, x)$ represents the probability
+of observing the given data $x$ as a function of the parameters $\boldsymbol{\theta}$ of the distribution.
+
+The primary purpose of the likelihood function is to estimate the parameters that make the observed data $x$ most probable.
+
+The likelihood function for a set of samples $x_{n}~\text{for}~n=1, \ldots, N$ drawn from a Gaussian distribution is
+
+$$
+L(\mu, \sigma^{2}, x_1, \ldots, x_n) \
+= \prod_{n=1}^{N}(x_n\vert \mu, \sigma^{2}) \
+= \prod_{n=1}^{N}\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x_n-\mu)^{2}}{2\sigma^2}}.
+$$
+
+--- 
+
+For a particular set of parameters $\mu, \sigma^{2}$
+
+- **large** values of $L(\mu, \sigma^{2}, x_1, \ldots, x_n)$ indicate the observed data is very probable (high likelihood)
+- **small** values of $L(\mu, \sigma^{2}, x_1, \ldots, x_n)$ indicate the observed data is very improbable (low likelihood)
+
+:::: {.fragment}
+The parameters that maximize the likelihood function are called the **maximum likelihood estimates**.
+::::
+
+## Log-likelihood
+
+A common manipulation to obtain a more useful form of the likelihood function is to take its natural logarithm.
+
+:::: {.columns}
+::: {.column width="40%"}
+
+```{python}
+#| echo: false
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate x values from -5 to 5
+x = np.linspace(0.001, 5, 400)
+
+# Calculate the natural logarithm of x
+y = np.log(x)
+
+# Plot the function
+plt.figure(figsize=(4, 3))
+plt.plot(x, y, label='log(x)')
+plt.axhline(0, color='black',linewidth=0.5)
+plt.axvline(0, color='black',linewidth=0.5)
+plt.title('Natural Logarithm Function')
+plt.xlabel('x')
+plt.ylabel('log(x)')
+plt.legend()
+plt.grid(True)
+plt.show()
+```
+
+:::
+::: {.column width="60%"}
+
+Advantages of the log-likelihood:
+
+* The log function is monotonically increasing, so the MLE is the same as the log-likelihood estimate
+* The product of probabilities becomes a sum of logarithms, which is more numerically stable
+* The log-likelihood is easier to work with
+
+:::
+::::
+
+## Applying the Log
+
+$$
+\begin{align*}
+\log{\left(L(\mu, \sigma^{2}, x_1, \ldots, x_n)\right)} \
+& = \log{\left(\prod_{n=1}^{N}\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x_n-\mu)^{2}}{2\sigma^2}}\right)} \\
+& = \sum_{n=1}^{N}\log{\left(\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x_n-\mu)^{2}}{2\sigma^2}}\right)} \\
+& = \sum_{n=1}^{N}\left(\log{\left(\frac{1}{\sigma\sqrt{2\pi}}\right)} + \log{\left(e^{-\frac{(x_n-\mu)^{2}}{2\sigma^2}}\right)}\right) \\
+& = -\frac{N}{2}\log{2\pi} - N\log{\sigma} - \frac{1}{2\sigma^{2}}\sum_{n=1}^{N}(x_n -\mu)^{2}.
+\end{align*}
+$$
+
+Using the log-likelihood we will be able to derive formulas for the maximum likelihood estimates. 
+
+## Maximizing the log-likelihood
+
+:::: {.fragment}
+How do we maximize (optimize) a function of parameters?
+::::
+
+:::: {.fragment}
+To find the optimal parameters of a function, we compute partial derivatives of the function and set them equal to zero. The solution to these equations gives us a local optimal value for the parameters
+
+For the case of the Gaussian we compute
+
+$$
+\begin{align*}
+\nabla_{\mu} L(\mu, \sigma^{2}, x_1, \ldots, x_n) &= 0 \\
+\nabla_{\sigma} L(\mu, \sigma^{2}, x_1, \ldots, x_n) &= 0 \\
+\end{align*}
+$$
+::::
+
+## Gaussian MLEs
+
+The maximum likelihood estimates for a Gaussian distribution are given by
+
+$$
+\begin{align*}
+\bar{\mu} &= \frac{1}{N}\sum_{n=1}^{N} x_{n}, \\
+\bar{\sigma}^2 &= \frac{1}{N}\sum_{n=1}^{N}(x_{n} - \mu)^{2}.
+\end{align*}
+$$
+
+## Summary of MLE
+
+Given samples $x_{1}, \ldots, x_n$ drawn from a Gaussian distribution, we computed the maximum likelihood estimates by maximizing the log likelihood function
+
+$$
+\log{\left(L(\mu, \sigma^{2}, x_1, \ldots, x_n)\right)} = -\frac{N}{2}\log{2\pi} - N\log{\sigma} - \frac{1}{2\sigma^{2}}\sum_{n=1}^{N}(x_n -\mu)^{2}.
+$$
+
+This gives us the maximum likelihood estimates
+
+$$
+\begin{align*}
+\bar{\mu} &= \frac{1}{N}\sum_{n=1}^{N} x_{n}, \\
+\bar{\sigma}^2 &= \frac{1}{N}\sum_{n=1}^{N}(x_{n} - \mu)^{2}.
+\end{align*}
+$$
+
+We use this information to help our understanding of Gaussian Mixture models.
+
+# Gaussian Mixture Models
+
+## Univariate Gaussians
+
+In GMMs we assume that each of our clusters follows a Gaussian (normal) distribution with their own parameters. 
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the parameters for the 4 Gaussians
+params = [
+    {"mean": 0, "variance": 1, "color": "#377eb8"},  # Blue
+    {"mean": 2, "variance": 0.5, "color": "#4daf4a"},  # Green
+    {"mean": -2, "variance": 1.5, "color": "#e41a1c"},  # Red
+    {"mean": 1, "variance": 2, "color": "#984ea3"}  # Purple
+]
+
+# Generate x values
+x = np.linspace(-10, 10, 1000)
+
+# Plot each Gaussian
+for param in params:
+    mean = param["mean"]
+    variance = param["variance"]
+    color = param["color"]
+    
+    # Calculate the Gaussian
+    y = (1 / np.sqrt(2 * np.pi * variance)) * np.exp(- (x - mean)**2 / (2 * variance))
+    
+    # Plot the Gaussian
+    plt.plot(x, y, color=color, label=f"$\\mu$: {mean}, $\\sigma^2$: {variance}")
+
+# Add legend
+plt.legend()
+
+# Add title and labels
+plt.title("1D Gaussians with Different Means and Variances")
+plt.xlabel("x")
+plt.ylabel("Probability Density")
+
+# Show the plot
+plt.show()
+```
+
+::: {.notes}
+This is a similar situation to our previous example where we considered labeling a person as poor or rich based on the single feature age.
+
+This could be a hypothetical situation with $K=4$ normally distributed clusters.
+:::
+
+## Multivariate Gaussians
+
+Given data points $\mathbf{x}\in\mathbb{R}^{d}$, i.e., $d$-dimensional points, then we use the multivariate Gaussian to describe the clusters. The formula for the multivariate Gaussian is
+
+$$
+f(\mathbf{x}\vert \boldsymbol{\mu}, \Sigma) = \frac{1}{(2\pi)^{d/2}\vert \Sigma \vert^{1/2}}e^{-\frac{1}{2}(\mathbf{x}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{x}-\boldsymbol{\mu})},
+$$
+
+where $\Sigma\in\mathbb{R}^{d\times d}$ is the covariance matrix, $\vert \Sigma\vert$, denote the determinant of $\Sigma$, and $\boldsymbol{\mu}$ is the $d$-dimensional vector of expected values.
+
+::: {.content-hidden when-profile="web"}
+Recall also that the shape of a multivariate Gaussian – the direction of its axes
+and the width along each axis – is determined by the covariance matrix.
+
+The covariance matrix is the multidimensional analog of the variance. It 
+determines the extent to which vector components are correlated.
+:::
+
+## Notation
+
+The notation $x \sim \mathcal{N}(\mu, \sigma^2)$ is used to denote a _univariate_ random variable that is normally 
+distributed with expected value $\mu$ and variance $\sigma^{2}.$
+
+The notation $\mathbf{x} \sim \mathcal{N}(\boldsymbol{\mu}, \Sigma)$ is used to denote a _multivariate_
+random variable that is normally distributed with mean $\boldsymbol{\mu}$ and covariance matrix $\Sigma$.
+
+## Multivariate Example: Cars
 
 To illustrate a particular model, let us consider the properties of cars produced in the US, Europe, and Asia.
 
+For example, let's say we are looking to classify cars based on their model year and miles per gallon (mpg).  
+
 <!-- image credit: https://www.cs.cmu.edu/~./awm/tutorials/gmm14.pdf -->
-<center>
-
-<img src="figs/L09-multivariate-example.png" width="90%">
-
-</center>
+![](figs/L09-multivariate-example.png){width="90%}
 
 It seems that the data can be described (roughly) as a mixture of __three__ __multivariate__ Gaussian distributions.
 
-The general situation is that we assume the data was generated according to a collection of arbitrary Gaussian distributions.
+## Intuition
 
-This is called a __Gaussian Mixture Model.__
+Given $K$ clusters, the goal with a GMM is to determine the probability for whether a point $\mathbf{x}\in\mathbb{R}^{d}$ belongs to a particular cluster. 
 
-Aka a "GMM".
+We assume that each cluster is distributed normally, according to some (unknown) parameters $\boldsymbol{\mu}_i, \Sigma_i$. We also assume that the probability that a point belongs to a particular cluster is given by $w_i$.
 
-<!-- image credit: http://autonlab.org/_media/tutorials/gmm14.pdf  and
-https://web.iitd.ac.in/~sumeet/GMM_said_crv10_tutorial.pdf -->
+A Gaussian mixture model is defined by these parameters $w_i, \boldsymbol{\mu}_i, \Sigma_i$ for $i=1, \ldots, K$. 
 
+We can use these parameters to compute the probability that a point $\mathbf{x}$ belongs to a particular cluster $C_k$.
 
-<div style = "float: left; width: 45%; text-align: center;">
-    
-<img src="figs/L09-general-GMM.png" width="45%">
-Ellipsoid Representation
-</div>
-
-<div style = "float: left; width: 55%; text-align: center;">
-    
-<img src="figs/L09-GMM-density.png"  style="width:55%">
-Density
-</div>
-
-A Gaussian Mixture Model is defined by:
-    
-$$ w_i, \mu_i, \Sigma_i,\;\; i = 1,\dots,k$$
-
-Where $w_i$ is the prior probability (weight) of the $i$th Gaussian, such that 
-
-$$\sum_i w_i = 1,\;\;\; 0\leq w_i\leq 1.$$
-
-Intuitively, $w_i$ tells us "what fraction of the data comes from Gaussian $i$."
-
-Then the probability density at any point $x$ is given by:
-    
-$$ p(x) = \sum_i w_i \cdot \mathcal{N}(x\,|\, \mu_i, \Sigma_i) $$
+Similar to MLE, we must compute the parameters $w_i, \boldsymbol{\mu}_i, \Sigma_i$.
 
 ## Learning the Parameters of a GMM
 
-This model is all very well, but how do we learn the parameters of such a model, given some data?
+Given some data how do we estimate the 
 
-That is, assume we are told there are $k$ clusters.   
-
-For each $i$ in $1, \dots, k$, how do we estimate the 
 * cluster probability $w_i$,
-* cluster mean $\mu_i$, and 
-* cluster covariance  $\Sigma_i$?
+* cluster mean $\boldsymbol{\mu}_i$, and 
+* cluster covariance  $\Sigma_i$
 
-There are a variety of ways of finding the best $(w_i, \mu_i, \Sigma_i)\;\;\;i = 1,\dots,k$.
+for each $i=1, \ldots, K$?
 
-We will consider the most popular method:  __Expectation Maximization (EM).__
+:::: {.fragment}
+We will formulate a likelihood function for these parameters $\boldsymbol{\theta}_i = (w_i, \boldsymbol{\mu}_i, \Sigma_i)$ and then optimize this function.
+::::
 
-This is another famous algorithm, in the same "super-algorithm" league as $k$-means.
+## Latent Variables
 
-EM is formulated using a probabilistic model for data.   It can solve a problem like:
+We assume that each data point $x$ is produced by a **latent variable** $z$.
 
-> Given a set of data points and a parameter $k$, find the $(w_i, \mu_i, \Sigma_i)\;\;i = 1,\dots,k$ that __maximizes the likelihood of the data__ assuming a GMM with those parameters.
+This variable is called latent because it is never actually observed. It is used to help indicate cluster membership and is helpful for the derivation of the likelihood function.
 
-(It can also solve lots of other problems involving maximizing likelihood of data under a model.)
+We can view this as a one-hot-encoding that identifies a probability of membership to one of the $K$ clusters.
 
-However, note that problems of this type are often NP-hard.  
+We impose a distribution over $z$ representing a soft assignment
 
-EM only guarantees that it will find a __local__ optimum of the objective function.
+$$
+p(z) = (w_1, \cdots, w_K)^{T}, \quad \text{with} \quad 0\leq w_i \leq 1 \quad \text{and} \quad \sum_{i=1}^{K}w_i = 1.
+$$
 
-## Probabilities We Will Use
+## PDF of a GMM
 
-At a high level, EM for the GMM problem has strong similarities to $k$-means.
+With our distribution weights $w_i$ for the $K$ clusters, we can compute the probability density for a GMM at any point $\mathbf{x}$ via the formula
 
-However, there are two main differences:
+$$
+p(\mathbf{x}) = \sum_{i=1}^{K} w_i \cdot f(\mathbf{x}\vert \mu_i, \Sigma_i).
+$$
 
-1. The $k$-means problem posits a **hard** assignment of objects to clusters, while GMM uses __soft__ assignment.
-2. The parameters of the soft assignment are chosed based on a __probability model__ for the data.
+If this is feeling a bit abstract, let's see how this applies to our the initial example where we were clustering a person as rich or poor based on their age.
 
-Let's start by reviewing the situation probabilistically.
+## Rich vs Poor Example
 
-Assume a set data points  $x_1, x_2,\ldots,x_n$ in  a $d$ dimensional space. 
+We have our single data point $x=25$, and we have 2 Gaussians representing our clusters, $C_1$ and $C_2$, with parameters $\mu_1 = 37, \sigma_1^{2}=14$ and $\mu_2 = 45, \sigma_2^{2}=11$, respectively.
 
-Also assume a set of $k$ clusters $C_1, C_2, \ldots, C_k$.   Each cluster is assumed to follow a Gaussian distribution:
+Our latent variables are the probabilities that we classify someone as either rich or poor, i.e., $w_1 = P(z = 1) = P(\text{rich})$ and $w_2 = P(z = 2) = P(\text{poor})$.
 
-$$ C_i \sim {\mathcal N}({\mathbf \mu_i},{\mathbf \Sigma_i}) $$
 
-We will be working with conditional probabilities.
+Our interest in this problem is computing the posterior probability, which is, $P(C_1 | x) = P(z=1 \vert x) P(\text{rich} \vert \text{age 25})$
 
-First, 
+:::: {.fragment}
+How do we determine these posterior probabilities $P(C_i \vert x) = P(z=1 \vert x)$?
+::::
 
-$P(x_i\,|\,C_j)$ is the probability of seeing data point $x_i$ when sampling from cluster $C_j$.  
+:::: {.fragment}
+The answer is Bayes' Rule.
+::::
 
-That is, it is the value of a Gaussian pdf at the point $x_i$, for a Gaussian with parameters $({\mathbf \mu_j},{\mathbf \Sigma_j})$.
 
-Clearly, if I give you the cluster parameters, it is a straightforward thing to compute this conditional probability.
+## Rich vs Poor Example Part 2
 
-In our example: $P(\text{age 25}\,|\,\text{rich})$
+If we know the parameters of the Gaussians, we can determine the value of $P(x | C_1)$ when $x=25$. This is shown with the red dot.
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
-plt.figure()
 x = np.linspace(norm.ppf(0.001, loc = 37, scale = 14), norm.ppf(0.999, loc = 37, scale = 14), 100)
 plt.plot(x, norm.pdf(x, loc = 37, scale = 14),'b-', lw = 5, alpha = 0.6, label = 'poor')
 x = np.linspace(norm.ppf(0.001, loc = 45, scale = 11), norm.ppf(0.999, loc = 45, scale = 11), 100)
@@ -270,26 +496,35 @@ plt.xlim([15, 70])
 plt.xlabel('Age', size=14)
 plt.legend(loc = 'best')
 plt.title('Age Distributions')
-plt.ylabel(r'$p(x)$', size=14);
+plt.ylabel(r'$p(x)$', size=14)
+plt.show()
 ```
 
-We will also work with $P(C_j\,|\,x_i)$.
+---
+Bayes' Rule then allows us to compute 
 
-This is the probability that a data point at $x_i$ was drawn from cluster $C_j$.   
+$$
+P(C_1 \vert x)=\frac{P(x\vert C_1)}{P(x)}P(C_1).
+$$
 
-That is, the data point could have been drawn from any of the $k$ clusters -- what is the probability it was drawn from $C_j$ in particular?
+We can always use the law of total probability to compute
 
-In our example: $P(\text{rich}\,|\,\text{age 25})$
+$$
+\begin{align*}
+P(x) &= P(x \vert C_1)P(C_1) + P(x\vert C_2)P(C_2), \\
+&=  P(z=1) P(x \vert z=1) + P(z=2) P(x\vert z=2), \\
+&=  w_1 P(x \vert z=1) + w_2 P(x\vert z=2), \\
+&= \sum_{i=1}^{2} w_i \cdot f(\mathbf{x}\vert \mu_i, \sigma_i).
+\end{align*}
+$$
 
-How can we compute $P(C_j\,|\,x_i)$?
+::: {.content-hidden when-profile="slides"}
+The final formula is illustrated in the following figure.
+:::
 
-Note that the reverse conditional probability is easy to compute -- so this is a job for __Bayes' Rule!__
-
-$$ P(C_j\,|\,x_i)=\frac{P(x_i\,|\,C_j)}{P(x_i)}P(C_j)$$
+---
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
 plt.figure()
 x = np.linspace(norm.ppf(0.001, loc = 37, scale = 14), norm.ppf(0.999, loc = 37, scale = 14), 100)
 plt.plot(x, norm.pdf(x, loc = 37, scale = 14),'b-', lw = 5, alpha = 0.6, label = 'poor')
@@ -301,94 +536,125 @@ plt.xlim([15, 70])
 plt.xlabel('Age', size=14)
 plt.legend(loc = 'best')
 plt.title('Age Distributions')
-plt.ylabel(r'$p(x)$', size=14);
+plt.ylabel(r'$p(x)$', size=14)
+plt.show()
 ```
 
-$$ P(\text{rich}\,|\,\text{age 25}) = \frac{\text{red}}{\text{red} \cdot P(\text{rich}) + \text{black} \cdot P(\text{poor})} \cdot P(\text{rich}) $$
+$$ P(\text{rich}\,|\,\text{age 25}) = \frac{\text{red}}{\text{red} \cdot P(\text{rich}) + \text{black} \cdot P(\text{poor})} \cdot P(\text{rich}).$$
 
-Finally, we will also need to estimate the parameters of each Gaussian, given some data.
+## GMM Likelihood
 
-This is also an easy problem.   
+Let's gather for all $i=1, \ldots, K$, the coefficients $w_i,\boldsymbol{\mu}_i, \Sigma_i$ into a vector $\boldsymbol{\theta}$.
 
-For example, the best estimate for the mean of a Gaussian, given some data, is the __average__ of the data points.
+The likelihood function for a Gaussian mixture model with $N$ data points
 
-Likewise, there is a simple formula for the covariance.
+$$
+L(\boldsymbol{\theta}, x_1, \ldots, x_n) = \prod_{n=1}^{N}\sum_{k=1}^{K}w_k \frac{1}{(2\pi)^{d/2}\vert \Sigma_k \vert^{1/2}}e^{-\frac{1}{2}(\mathbf{x}_n-\boldsymbol{\mu}_k)^T\Sigma_{k}^{-1}(\mathbf{x}_n-\boldsymbol{\mu}_{k})}
+$$
 
-These are called __Maximum Likelihood Estimates__ (MLE) of the parameters.
+The log-likelihood is
 
-Often we use $\mathbf \theta$ to denote "all the parameters of the model."   
+$$
+\log{\left(L(\boldsymbol{\theta}, x_1, \ldots, x_n)\right)} = \sum_{n=1}^{N}\log{\left(\sum_{k=1}^{K}w_k \frac{1}{(2\pi)^{d/2}\vert \Sigma_k \vert^{1/2}}e^{-\frac{1}{2}(\mathbf{x}_n-\boldsymbol{\mu}_k)^T\Sigma_{k}^{-1}(\mathbf{x}_n-\boldsymbol{\mu}_{k})}\right)}.
+$$
 
-In this case $\mathbf \theta_i = (w_i, {\mathbf \mu_i},{\mathbf \Sigma_i})$.
+Unlike the log of a product, the log of a sum does not simplify nicely. As a result, the partial derivatives with respect to $\boldsymbol{\mu}_k$, depend on the covariances and mixture weights (similarly for the other partial derivatives of $\Sigma_k$ and $w_k$).
+
+To solve this problem we turn to __Expectation Maximization__.
+
+## Expectation Maximization
+
+This is another famous algorithm, in the same "super-algorithm" league as $k$-means.
+
+EM is formulated using a probabilistic model for data. It can solve a problem like
+
+> Given a set of data points and a parameter $K$, find the $(w_k, \mu_k, \Sigma_k)~k = 1,\dots,K$ that __maximizes the likelihood of the data__ assuming a GMM with those parameters.
+
+It can also solve lots of other problems involving maximizing likelihood of data under a different model.
+
+Similar to $k$-means, this problem is NP-hard.  
+
+Furthermore, EM only guarantees that we will find a __local__ optimum of the objective function.
 
 ## Expectation Maximization for GMM -- The Algorithm
 
-OK, now we have all the necessary pieces.   Here is the algorithm.
+::: {.content-hidden when-profile="slides"}
+Here is the EM algorithm.
+:::
 
-__Initialization__: 
+__Step 1 Initialization__
 
-Start with an initial set of clusters  $C_1^1, C_2^1, \ldots, C_k^1$ and the initial probabilities that a random point belongs to each cluster $P(C_1), P(C_2), \ldots, P(C_k)$.
+Initialize the parameters $w_k, \boldsymbol{\mu}_k, \Sigma_k$ for $k=1, \dots, K$. The final result will be sensitive to this choice, so a good (and fast) initialization procedure is $k$-means.
 
-The result will be sensitive to this choice, so a good (and fast) initialization procedure is $k$-means.
+__Step 2 Expectation__ 
 
-<!-- Source http://bengio.abracadoudou.com/lectures/gmm.pdf -->
+Use the current values for $w_k, \boldsymbol{\mu}_k, \Sigma_k$ and for each of the $N$ data points $x_n$, compute the posterior probabilities
 
-<center>
+$$
+r_{nk} = \frac{w_k f(\mathbf{x}_n \vert \boldsymbol{\mu}_{k}, \Sigma_k)}{\sum_{i=1}^{K}w_i f(\mathbf{x}_n \vert \boldsymbol{\mu}_{i}, \Sigma_i)},
+$$
 
-<img src="figs/L09-EM-E-step.png" width="60%">
+where $f(\mathbf{x}_n \vert \boldsymbol{\mu}_{k}, \Sigma_k)$ is the multivariate Gaussian.
 
-</center>
+__Step 3 Maximization__ 
 
-*Step 1* (__Expectation__): For each point $x_i$, compute the probability that it belongs to each cluster $C_j$:
+Using the values $r_{nk}$ for $n=1,\ldots, N$ and $k=1, \ldots, K$. First compute $N_{k} = \sum_{n=1}^{N} r_{nk}$. Then compute updated $w_k, \boldsymbol{\mu}_k, \Sigma_k$ according to the formulas
 
-$$ P(C_j\,|\,x_i)=\frac{P(x_i\,|\,C_j)}{P(x_i)}\,P(C_j)$$
-    
-(Thank you, Rev. Bayes!)
+$$
+\boldsymbol{\mu}_{k}= \frac{1}{N_k}\sum_{n=1}^{N} r_{nk} \mathbf{x}_n, \quad 
+\Sigma_{k} = \frac{1}{N_k}\sum_{n=1}^{N} (\mathbf{x}_n \boldsymbol{\mu}_k)^{T}(\mathbf{x}_n -\boldsymbol{\mu}_k), \quad
+w_k = \frac{N_k}{N}.
+$$
 
-This is called the _posterior_ probability of $C_j$ given $x_i$.
+__Step 4__ Stop if convergence criterion is satisfied. Otherwise repeat Steps 2 and 3.
 
-We know how to compute everything on the right.
+## Storage and Computational Costs
 
-Note that: $P(x_i) = \sum_{j=1}^k P(x_i\,|\,C_j)\,P(C_j)$
+It is important to be aware of the computational costs of our algorithm.
 
-<!-- Source http://bengio.abracadoudou.com/lectures/gmm.pdf -->
+Storage costs:
 
-<center>
+- There are $N$ $d$-dimensional points
+- There are $K$ clusters
+- There are $N\times K$ coefficients $r_{nk}$
+- There are $K$ $d$-dimensional cluster centers $\boldsymbol{\mu}_k$
+- There are $K$ $d\times d$ covariance matrices $\Sigma_k$
+- There are $K$ weights $w_k$
 
-<img src="figs/L09-EM-M-step.png" width="60%">
+Computational costs:
 
-</center>
+- Computing each $r_{nk}$ requires a sum of $K$ evaluations of the Gaussian PDF.
+- Updating $\boldsymbol{\mu}_k$ requires $N$ vector summations
+- Updating $\Sigma_k$ requires $N$ outer products
+- Updating $w_k$ requires a division (though we must compute $N_k$)
 
-*Step 2* __(Maximization)__: Using the cluster membership probabilities computed in the previous step, compute new clusters (parameters) and cluster probabilities.
-
-This is easy, using maximum likelihood estimates of the parameters $\theta$.
-
-$$w_j = P(C_j) = \frac{1}{n}\sum_{i=1}^n P(C_j\,|\,x_i)$$
-
-Likewise, compute new parameters for the clusters $C_1, C_2, \ldots, C_n$ using MLE.
-
-__Repeat__ Steps 1 and 2 until stabilization.
+## k-means vs GMMs
 
 Let's pause for a minute and compare GMM/EM with $k$-means.
 
-GMM/EM:
+__GMM/EM__
 
 1. Initialize randomly or using some rule
-2. Compute the probability that each point belongs in each cluster
-3. Update the clusters (weights, means and variances).
-4. Repeat 2-3 until convergence.
+1. Compute the probability that each point belongs in each cluster
+1. Update the clusters (weights, means and variances).
+1. Repeat 2-3 until convergence.
 
-$k$-means:
+__$k$-means__
 
 1. Initialize randomly or using some rule
-2. Assign each point to a single cluster
-3. Update the clusters (means).
-4. Repeat 2-3 until convergence.
+1. Assign each point to a single cluster
+1. Update the clusters (means).
+1. Repeat 2-3 until convergence.
 
-From a practical standpoint, the main difference is that in GMM, data points do not belong to a __single__ cluster, but have some probability of belonging to __each__ cluster.
+--- 
 
-In other words, GMM uses soft assignment.
+From a practical standpoint, the main difference is that in GMMs, data points do not belong to a __single__ cluster, but have some probability of belonging to __each__ cluster.
 
-For that reason, GMM is also sometimes called __soft $k$-means.__
+In other words, as stated previously, GMMs use soft assignment.
+
+For that reason, GMMs are also sometimes called __soft $k$-means.__
+
+---
 
 However, there is also an important conceptual difference. 
 
@@ -396,60 +662,41 @@ The GMM starts by making an __explicit assumption__ about how the data were gene
 
 It says: "the data came from a collection of multivariate Gaussians."
 
-Note that we made no such assumption when we came up with the $k$-means problem.   In that case, we simply defined an objective function and declared that it was a good one.
+We made no such assumption when we came up with the $k$-means problem. In that case, we simply defined an objective function and declared that it was a good one.
 
-Nonetheless, it appears that we were making a sort of Gaussian assumption when we formulated the $k$-means objective function.   However, __we didn't explicitly state it.__
+Nonetheless, it appears that we were making a sort of Gaussian assumption when we formulated the $k$-means objective function. However, __it wasn't explicitly stated.__
 
 The point is that because the GMM makes its assumptions explicit, we can
 
-* examine them and think about whether they are valid
-* replace them with different assumptions if we wish
+* examine them and think about whether they are valid, and
+* replace them with different assumptions if we wish.
 
-For example, it is perfectly possible to replace the Gaussian assumption with some other probility distribution.   As long as we can estimate the parameters of such distributions from data (eg, have MLEs), we can use EM in that case as well.
+For example, it is perfectly valid to replace the Gaussian assumption with some other probability distribution.  As long as we can estimate the parameters of such distributions from data (e.g., have MLEs), we can use EM in that case as well.
 
-## Instantiating EM with the Gaussian Model
+## Versatility of EM
 
-If we model each cluster as a multi-dimensional Gaussian, then we can instatiate every part of
-the algorithm. 
-
-This is the GMM (Gaussian Mixture Model) algorithm implemented in *sklearn.mixture* module.
-
-In that case $C_i$ is represented by $(\mu_i, \Sigma_i)$ and in EM Step 1 we compute:
-
-$$ P(x_i|C_j) = \frac{1}{\sqrt{(2\pi)^d |\Sigma_j|}} exp (-\frac{1}{2}(x_i-\mu_j)^T\Sigma_j^{-1}(x_i-\mu_j))$$
-
-In EM Step 2, we estimate the parameters of the Gaussian using the appropriate MLEs:
-
-$$\mu_j'=\frac{\sum_{i=1}^n P(C_j|x_i) x_i}{\sum_{i=1}^n P(C_j|x_i)}$$
-
-and
-
-$$\Sigma_j = \frac{\sum_{i=1}^n P(C_j|x_i) (x_i-\mu_j')(x_i-\mu_j')^T}{\sum_{i=1}^n P(C_j|x_i)}$$
-
-A final statement about EM generally.   EM is a versatile algorithm that can be used in many other settings.  What is the main idea behind it?
+A final statement about EM generally. EM is a versatile algorithm that can be used in many other settings.  What is the main idea behind it?
 
 Notice that the problem definition only required that we find the clusters, $C_i$, meaning that we were to find the $(\mu_i, \Sigma_i)$.
 
-However, the EM algorithm posited that we should find as well the $P(C_j|x_i)$, that is, the probability that each point is a member of each cluster.
+However, the EM algorithm posited that we should find as well the $P(C_j|x_i) = P(z=j | x_i)$, that is, the probability that each point is a member of each cluster.
 
 This is the true heart of what EM does.   
 
 The idea is called "data augmentation."
 
-By __adding parameters__ to the problem, it actually finds a way to make the problem solvable!
+By __adding parameters__ to the problem, it actually finds a way to make the problem solvable.
 
-These parameters don't show up in the solution.  They are sometimes called "hidden parameters."
+These are the latent parameters we introduced earlier. Latent parameters don't show up in the solution.
 
-So the basic strategy for using EM is: think up some __additional__ information which, if you had it, would make the problem solvable.
-
-Figure out how to estimate the additional information from a solved problem, and put the two steps into a loop.
-
+## Example
+::: {.content-hidden when-profile="slides"}
 Here is an example using **GMM**.
+:::
 
 We're going to create two clusters, one spherical, and one highly skewed.
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 # Number of samples of larger component
 n_samples = 1000
 
@@ -460,26 +707,24 @@ print(f'The covariance matrix of our skewed cluster will be:\n {C.T@C}')
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
-# make the sample deterministic
-np.random.seed(0)
+rng = np.random.default_rng(0)
 
 # now we construct a data matrix that has n_samples from the skewed distribution,
 # and n_samples/2 from a symmetric distribution offset to position (-4, 2)
-X = np.r_[(np.random.randn(n_samples, 2) @ C),
-          .7 * np.random.randn(n_samples//2, 2) + np.array([-4, 2])]
+X = np.r_[(rng.standard_normal((n_samples, 2)) @ C),
+          .7 * rng.standard_normal((n_samples//2, 2)) + np.array([-4, 2])]
 ```
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
 plt.scatter(X[:, 0], X[:, 1], s = 10, alpha = 0.8)
 plt.axis('equal')
-plt.axis('off');
+plt.axis('off')
+plt.show()
 ```
 
+--- 
+
 ```{python}
-#| slideshow: {slide_type: fragment}
 # Fit a mixture of Gaussians with EM using two components
 import sklearn.mixture
 gmm = sklearn.mixture.GaussianMixture(n_components=2, 
@@ -489,22 +734,16 @@ y_pred = gmm.fit_predict(X)
 ```
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+
 colors = ['bg'[p] for p in y_pred]
 plt.title('Clustering via GMM')
 plt.axis('off')
 plt.axis('equal')
-plt.scatter(X[:, 0], X[:, 1], color = colors, s = 10, alpha = 0.8);
+plt.scatter(X[:, 0], X[:, 1], color = colors, s = 10, alpha = 0.8)
+plt.show()
 ```
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| scrolled: true
-#| tags: [hide-input]
 for clus in range(2):
     print(f'Cluster {clus}:')
     print(f' weight: {gmm.weights_[clus]:0.3f}')
@@ -512,12 +751,9 @@ for clus in range(2):
     print(f' cov: \n{gmm.covariances_[clus]}\n')
 ```
 
+## Comparison with k-means
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 import sklearn.cluster
 kmeans = sklearn.cluster.KMeans(init = 'k-means++', n_clusters = 2, n_init = 100)
 y_pred_kmeans = kmeans.fit_predict(X)
@@ -526,47 +762,40 @@ plt.title('Clustering via $k$-means\n$k$-means centers: red, GMM centers: black'
 plt.axis('off')
 plt.axis('equal')
 plt.scatter(X[:, 0], X[:, 1], color = colors, s = 10, alpha = 0.8)
-plt.plot(kmeans.cluster_centers_[:,0], kmeans.cluster_centers_[:,1], 'ro')
-plt.plot(gmm.means_[:,0], gmm.means_[:,1], 'ko');
+plt.plot(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], 'ro')
+plt.plot(gmm.means_[:,0], gmm.means_[:, 1], 'ko')
+plt.show()
 ```
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| tags: [hide-input]
 for clus in range(2):
     print(f'Cluster {clus}:')
     print(f' center: {kmeans.cluster_centers_[clus]}\n')
 ```
 
+## Overlapping Clusters
+
 Now, let's construct __overlapping__ clusters.  What will happen?
 
 ```{python}
 #| slideshow: {slide_type: fragment}
-X = np.r_[np.random.randn(n_samples, 2) @ C,
-          0.7 * np.random.randn(n_samples, 2) ]
+X = np.r_[(rng.standard_normal((n_samples, 2)) @ C),
+          .7 * rng.standard_normal((n_samples//2, 2))]
 gmm = sklearn.mixture.GaussianMixture(n_components=2, covariance_type='full')
 y_pred_over = gmm.fit_predict(X)
 ```
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 colors = ['bgrky'[p] for p in y_pred_over]
 plt.title('GMM for overlapping clusters\nNote they have nearly the same center')
 plt.scatter(X[:, 0], X[:, 1], color = colors, s = 10, alpha = 0.8)
 plt.axis('equal')
 plt.axis('off')
-plt.plot(gmm.means_[:,0], gmm.means_[:,1], 'ro');
+plt.plot(gmm.means_[:,0], gmm.means_[:,1], 'ro')
+plt.show()
 ```
 
 ```{python}
-#| cell_style: split
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 for clus in range(2):
     print(f'Cluster {clus}:')
     print(f' weight: {gmm.weights_[clus]:0.3f}')
@@ -578,9 +807,9 @@ for clus in range(2):
 
 Most of the parameters in the model are contained in the covariance matrices.
 
-In the most general case, for $k$ clusters of points in $n$ dimensions, there are $k$ covariance matrices each of size $n \times n$.   
+In the most general case, for $K$ clusters of points in $d$ dimensions, there are $K$ covariance matrices each of size $d \times d$.   
 
-So we need $kn^2$ parameters to specify this model.
+So we need $Kd^2$ parameters to specify this model.
 
 It can happen that you may not have enough data to estimate so many parameters.
 
@@ -588,78 +817,92 @@ Also, it can happen that you believe that clusters should have some constraints 
 
 Here is where the GMM assumptions become __really__ useful.
 
+## Clusters with Equal Variance
+
 Let's say you believe all the clusters should have the same shape, but the shape can be arbitrary. 
 
-Then you only need to estimate __one__ covariance matrix - just $n^2$ parameters.
+Then you only need to estimate __one__ covariance matrix - just $d^2$ parameters.
 
 This is specified by the GMM parameter `covariance_type='tied'`.
 
+---
 ```{python}
-#| slideshow: {slide_type: fragment}
-X = np.r_[np.dot(np.random.randn(n_samples, 2), C),
-          0.7 * np.random.randn(n_samples, 2) ]
+X = np.r_[np.dot(rng.standard_normal((n_samples, 2)), C),
+          0.7 * rng.standard_normal((n_samples, 2))]
 gmm = sklearn.mixture.GaussianMixture(n_components=2, covariance_type='tied')
 y_pred = gmm.fit_predict(X)
 ```
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 colors = ['bgrky'[p] for p in y_pred]
 plt.scatter(X[:, 0], X[:, 1], color=colors, s=10, alpha=0.8)
 plt.title('Covariance type = tied')
 plt.axis('equal')
 plt.axis('off')
-plt.plot(gmm.means_[:,0],gmm.means_[:,1], 'ok');
+plt.plot(gmm.means_[:,0],gmm.means_[:,1], 'ok')
+plt.show()
 ```
+
+## Non-Skewed Clusters
 
 Perhaps you believe in even more restricted shapes: all clusters should have their axes aligned with the coordinate axes.
 
 That is, clusters are not skewed.
 
-
 Then you only need to estimate the diagonals of the covariance matrices - just $kn$ parameters.
 
 This is specified by the GMM parameter `covariance_type='diag'`.
 
+--- 
+
 ```{python}
-#| slideshow: {slide_type: fragment}
-X = np.r_[np.dot(np.random.randn(n_samples, 2), C),
-          0.7 * np.random.randn(n_samples, 2)]
+X = np.r_[np.dot(rng.standard_normal((n_samples, 2)), C),
+          0.7 * rng.standard_normal((n_samples, 2))]
 gmm = sklearn.mixture.GaussianMixture(n_components=4, covariance_type='diag')
 y_pred = gmm.fit_predict(X)
 ```
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 colors = ['bgrky'[p] for p in y_pred]
 plt.scatter(X[:, 0], X[:, 1], color = colors, s = 10, alpha = 0.8)
 plt.axis('equal')
 plt.axis('off')
-plt.plot(gmm.means_[:,0], gmm.means_[:,1], 'oc');
+plt.plot(gmm.means_[:,0], gmm.means_[:,1], 'oc')
+plt.show()
 ```
+
+## Round Clusters
 
 Finally, if you believe that all clusters should be round, then you only need to estimate the $k$ variances.  
 
 This is specified by the GMM parameter `covariance_type='spherical'`.
 
+--- 
+
 ```{python}
-X = np.r_[np.dot(np.random.randn(n_samples, 2), C),
-          0.7 * np.random.randn(n_samples, 2)]
+X = np.r_[np.dot(rng.standard_normal((n_samples, 2)), C),
+          0.7 * rng.standard_normal((n_samples, 2))]
 gmm = sklearn.mixture.GaussianMixture(n_components=2, covariance_type='spherical')
 y_pred = gmm.fit_predict(X)
 ```
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
 colors = ['bgrky'[p] for p in y_pred]
 plt.scatter(X[:, 0], X[:, 1], color = colors, s = 10, alpha = 0.8)
 plt.axis('equal')
 plt.axis('off')
-plt.plot(gmm.means_[:,0], gmm.means_[:,1], 'oc');
+plt.plot(gmm.means_[:,0], gmm.means_[:,1], 'oc')
+plt.show()
 ```
 
+::: {.content-hidden when-profile="web"}
+## Summary
+
+Today we covered:
+
+- Maximum likelihood estimators
+- Gaussian mixture models
+- Expectation Maximization
+
+A major benefit of GMMs is they are soft clustering technique that allows you to capture non-spherical clusters.
+:::
