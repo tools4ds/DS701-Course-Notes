@@ -195,8 +195,8 @@ plt.show()
 
 ## Likelihood Function
 
-The likelihood function $L(\mathbf{\theta}, x)$ represents the probability
-of observing the given data $x$ as a function of the parameters $\mathbf{\theta}$ of the distribution.
+The likelihood function $L(\boldsymbol{\theta}, x)$ represents the probability
+of observing the given data $x$ as a function of the parameters $\boldsymbol{\theta}$ of the distribution.
 
 The primary purpose of the likelihood function is to estimate the parameters that make the observed data $x$ most probable.
 
@@ -312,7 +312,7 @@ $$
 Given samples $x_{1}, \ldots, x_n$ drawn from a Gaussian distribution, we computed the maximum likelihood estimates by maximizing the log likelihood function
 
 $$
-\log{\left(L(\mu, \sigma^{2}, x_1, \ldots, x_n)\right)} = -\frac{N}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^{2}}\sum_{n=1}^{N}(x_n -\mu)^{2}.
+\log{\left(L(\mu, \sigma^{2}, x_1, \ldots, x_n)\right)} = -\frac{N}{2}\log{2\pi} - N\log{\sigma} - \frac{1}{2\sigma^{2}}\sum_{n=1}^{N}(x_n -\mu)^{2}.
 $$
 
 This gives us the maximum likelihood estimates
@@ -382,10 +382,10 @@ This could be a hypothetical situation with $K=4$ normally distributed clusters.
 Given data points $\mathbf{x}\in\mathbb{R}^{d}$, i.e., $d$-dimensional points, then we use the multivariate Gaussian to describe the clusters. The formula for the multivariate Gaussian is
 
 $$
-f(\mathbf{x}\vert \bar{\mu}, \Sigma) = \frac{1}{(2\pi)^{d/2}\vert \Sigma \vert^{1/2}}e^{-\frac{1}{2}(\mathbf{x}-\mathbf{\mu})^T\Sigma^{-1}(\mathbf{x}-\mathbf{\mu})},
+f(\mathbf{x}\vert \boldsymbol{\mu}, \Sigma) = \frac{1}{(2\pi)^{d/2}\vert \Sigma \vert^{1/2}}e^{-\frac{1}{2}(\mathbf{x}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{x}-\boldsymbol{\mu})},
 $$
 
-where $\Sigma\in\mathbb{R}^{d\times d}$ is the covariance matrix, $\vert \Sigma\vert$, denote the determinant of $\Sigma$, and $\mathbf{\mu}$ is the $d$-dimensional vector of expected values.
+where $\Sigma\in\mathbb{R}^{d\times d}$ is the covariance matrix, $\vert \Sigma\vert$, denote the determinant of $\Sigma$, and $\boldsymbol{\mu}$ is the $d$-dimensional vector of expected values.
 
 ::: {.content-hidden when-profile="web"}
 Recall also that the shape of a multivariate Gaussian – the direction of its axes
@@ -400,8 +400,8 @@ determines the extent to which vector components are correlated.
 The notation $x \sim \mathcal{N}(\mu, \sigma^2)$ is used to denote a _univariate_ random variable that is normally 
 distributed with expected value $\mu$ and variance $\sigma^{2}.$
 
-The notation $\mathbf{x} \sim \mathcal{N}(\mathbf{\mu}, \Sigma)$ is used to denote a _multivariate_
-random variable that is normally distributed with mean $\bar{\mathbf{\mu}}$ and covariance matrix $\Sigma$.
+The notation $\mathbf{x} \sim \mathcal{N}(\boldsymbol{\mu}, \Sigma)$ is used to denote a _multivariate_
+random variable that is normally distributed with mean $\boldsymbol{\mu}$ and covariance matrix $\Sigma$.
 
 ## Multivariate Example: Cars
 
@@ -418,26 +418,26 @@ It seems that the data can be described (roughly) as a mixture of __three__ __mu
 
 Given $K$ clusters, the goal with a GMM is to determine the probability for whether a point $\mathbf{x}\in\mathbb{R}^{d}$ belongs to a particular cluster. 
 
-We assume that each cluster is distributed normally, according to some (unknown) parameters $\mathbf{\mu}_i, \Sigma_i$. We also assume that the probability that a point belongs to a particular cluster is given by $w_i$.
+We assume that each cluster is distributed normally, according to some (unknown) parameters $\boldsymbol{\mu}_i, \Sigma_i$. We also assume that the probability that a point belongs to a particular cluster is given by $w_i$.
 
-A Gaussian mixture model is defined by these parameters $w_i, \mathbf{\mu}_i, \Sigma_i$ for $i=1, \ldots, K$. 
+A Gaussian mixture model is defined by these parameters $w_i, \boldsymbol{\mu}_i, \Sigma_i$ for $i=1, \ldots, K$. 
 
 We can use these parameters to compute the probability that a point $\mathbf{x}$ belongs to a particular cluster $C_k$.
 
-Similar to MLE, we must compute the parameters $w_i, \mathbf{\mu}_i, \Sigma_i$.
+Similar to MLE, we must compute the parameters $w_i, \boldsymbol{\mu}_i, \Sigma_i$.
 
 ## Learning the Parameters of a GMM
 
 Given some data how do we estimate the 
 
 * cluster probability $w_i$,
-* cluster mean $\mathbf{\mu}_i$, and 
+* cluster mean $\boldsymbol{\mu}_i$, and 
 * cluster covariance  $\Sigma_i$
 
 for each $i=1, \ldots, K$?
 
 :::: {.fragment}
-We will formulate a likelihood function for these parameters $\mathbf{\theta}_i = (w_i, \mathbf{\mu}_i, \Sigma_i)$ and then optimize this function.
+We will formulate a likelihood function for these parameters $\boldsymbol{\theta}_i = (w_i, \boldsymbol{\mu}_i, \Sigma_i)$ and then optimize this function.
 ::::
 
 ## Latent Variables
@@ -544,21 +544,21 @@ $$ P(\text{rich}\,|\,\text{age 25}) = \frac{\text{red}}{\text{red} \cdot P(\text
 
 ## GMM Likelihood
 
-Let's gather for all $i=1, \ldots, K$, the coefficients $w_i,\mathbf{\mu}_i, \Sigma_i$ into a vector $\mathbf{\theta}$.
+Let's gather for all $i=1, \ldots, K$, the coefficients $w_i,\boldsymbol{\mu}_i, \Sigma_i$ into a vector $\boldsymbol{\theta}$.
 
 The likelihood function for a Gaussian mixture model with $N$ data points
 
 $$
-L(\mathbf{\theta}, x_1, \ldots, x_n) = \prod_{n=1}^{N}\sum_{k=1}^{K}w_k \frac{1}{(2\pi)^{d/2}\vert \Sigma_k \vert^{1/2}}e^{-\frac{1}{2}(\mathbf{x}_n-\mathbf{\mu}_k)^T\Sigma_{k}^{-1}(\mathbf{x}_n-\mathbf{\mu}_{k})}
+L(\boldsymbol{\theta}, x_1, \ldots, x_n) = \prod_{n=1}^{N}\sum_{k=1}^{K}w_k \frac{1}{(2\pi)^{d/2}\vert \Sigma_k \vert^{1/2}}e^{-\frac{1}{2}(\mathbf{x}_n-\boldsymbol{\mu}_k)^T\Sigma_{k}^{-1}(\mathbf{x}_n-\boldsymbol{\mu}_{k})}
 $$
 
 The log-likelihood is
 
 $$
-\log{\left(L(\mathbf{\theta}, x_1, \ldots, x_n)\right)} = \sum_{n=1}^{N}\log{\left(\sum_{k=1}^{K}w_k \frac{1}{(2\pi)^{d/2}\vert \Sigma_k \vert^{1/2}}e^{-\frac{1}{2}(\mathbf{x}_n-\mathbf{\mu}_k)^T\Sigma_{k}^{-1}(\mathbf{x}_n-\mathbf{\mu}_{k})}\right)}.
+\log{\left(L(\boldsymbol{\theta}, x_1, \ldots, x_n)\right)} = \sum_{n=1}^{N}\log{\left(\sum_{k=1}^{K}w_k \frac{1}{(2\pi)^{d/2}\vert \Sigma_k \vert^{1/2}}e^{-\frac{1}{2}(\mathbf{x}_n-\boldsymbol{\mu}_k)^T\Sigma_{k}^{-1}(\mathbf{x}_n-\boldsymbol{\mu}_{k})}\right)}.
 $$
 
-Unlike the log of a product, the log of a sum does not simplify nicely. As a result, the partial derivatives with respect to $\mathbf{\mu}_k$, depend on the covariances and mixture weights (similarly for the other partial derivatives of $\Sigma_k$ and $w_k$).
+Unlike the log of a product, the log of a sum does not simplify nicely. As a result, the partial derivatives with respect to $\boldsymbol{\mu}_k$, depend on the covariances and mixture weights (similarly for the other partial derivatives of $\Sigma_k$ and $w_k$).
 
 To solve this problem we turn to __Expectation Maximization__.
 
@@ -584,25 +584,25 @@ Here is the EM algorithm.
 
 __Step 1 Initialization__
 
-Initialize the parameters $w_k, \mathbf{\mu}_k, \Sigma_k$ for $k=1, \dots, K$. The final result will be sensitive to this choice, so a good (and fast) initialization procedure is $k$-means.
+Initialize the parameters $w_k, \boldsymbol{\mu}_k, \Sigma_k$ for $k=1, \dots, K$. The final result will be sensitive to this choice, so a good (and fast) initialization procedure is $k$-means.
 
 __Step 2 Expectation__ 
 
-Use the current values for $w_k, \mathbf{\mu}_k, \Sigma_k$ and for each of the $N$ data points $x_n$, compute the posterior probabilities
+Use the current values for $w_k, \boldsymbol{\mu}_k, \Sigma_k$ and for each of the $N$ data points $x_n$, compute the posterior probabilities
 
 $$
-r_{nk} = \frac{w_k f(\mathbf{x}_n \vert \mathbf{\mu}_{k}, \Sigma_k)}{\sum_{i=1}^{K}w_i f(\mathbf{x}_n \vert \mathbf{\mu}_{j}, \Sigma_j)},
+r_{nk} = \frac{w_k f(\mathbf{x}_n \vert \boldsymbol{\mu}_{k}, \Sigma_k)}{\sum_{i=1}^{K}w_i f(\mathbf{x}_n \vert \boldsymbol{\mu}_{i}, \Sigma_i)},
 $$
 
-where $f(\mathbf{x}_n \vert \mathbf{\mu}_{k}, \Sigma_k)$ is the multivariate Gaussian.
+where $f(\mathbf{x}_n \vert \boldsymbol{\mu}_{k}, \Sigma_k)$ is the multivariate Gaussian.
 
 __Step 3 Maximization__ 
 
-Using the values $r_{nk}$ for $n=1,\ldots, N$ and $k=1, \ldots, K$. First compute $N_{k} = \sum_{n=1}^{N} r_{nk}$. Then compute updated $w_k, \mathbf{\mu}_k, \Sigma_k$ according to the formulas
+Using the values $r_{nk}$ for $n=1,\ldots, N$ and $k=1, \ldots, K$. First compute $N_{k} = \sum_{n=1}^{N} r_{nk}$. Then compute updated $w_k, \boldsymbol{\mu}_k, \Sigma_k$ according to the formulas
 
 $$
-\mathbf{\mu}_{k}= \frac{1}{N_k}\sum_{n=1}^{N} r_{nk} \mathbf{x}_n, \quad 
-\Sigma_{k} = \frac{1}{N_k}\sum_{n=1}^{N} (\mathbf{x}_n \mathbf{\mu}_k)^{T}(\mathbf{x}_n -\mathbf{\mu}_k), \quad
+\boldsymbol{\mu}_{k}= \frac{1}{N_k}\sum_{n=1}^{N} r_{nk} \mathbf{x}_n, \quad 
+\Sigma_{k} = \frac{1}{N_k}\sum_{n=1}^{N} (\mathbf{x}_n \boldsymbol{\mu}_k)^{T}(\mathbf{x}_n -\boldsymbol{\mu}_k), \quad
 w_k = \frac{N_k}{N}.
 $$
 
@@ -617,14 +617,14 @@ Storage costs:
 - There are $N$ $d$-dimensional points
 - There are $K$ clusters
 - There are $N\times K$ coefficients $r_{nk}$
-- There are $K$ $d$-dimensional cluster centers $\mathbf{\mu}_k$
+- There are $K$ $d$-dimensional cluster centers $\boldsymbol{\mu}_k$
 - There are $K$ $d\times d$ covariance matrices $\Sigma_k$
 - There are $K$ weights $w_k$
 
 Computational costs:
 
 - Computing each $r_{nk}$ requires a sum of $K$ evaluations of the Gaussian PDF.
-- Updating $\mathbf{\mu}_k$ requires $N$ vector summations
+- Updating $\boldsymbol{\mu}_k$ requires $N$ vector summations
 - Updating $\Sigma_k$ requires $N$ outer products
 - Updating $w_k$ requires a division (though we must compute $N_k$)
 
