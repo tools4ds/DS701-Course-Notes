@@ -763,7 +763,7 @@ linkage methods.
 This wraps up our _partitional_ Cluster topics. We covered:
 
 ::: {.incremental}
-* What the clusering problem is
+* What the clustering problem is
 * An overview of the $k$-means clustering algorithm including initialization with $k$-means++
 * Visualization techniques such as Multi-Dimensional Scaling
 * Cluster evaluation with (Adjusted) Rand Index and Silhouette Coefficient
