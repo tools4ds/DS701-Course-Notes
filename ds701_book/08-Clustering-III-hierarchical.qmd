@@ -378,7 +378,7 @@ plt.axis('off')
 plt.show()
 ```
 
-::: {.content-visible when-profile="slides "}
+::: {.content-visible when-profile="slides"}
 ## Single Linkage Advantages, cont.
 :::
 
