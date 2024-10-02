@@ -121,7 +121,7 @@ Our goal with Gaussian mixture models (GMMs) is to show how to compute the proba
 The main ideas behind GMMs are
 
 - Assume each cluster is normally distributed
-- Use the Expectation Maximization (EM) algorithm to iteratively determine the parameters of our the Gaussian clusters
+- Use the Expectation Maximization (EM) algorithm to iteratively determine the parameters of the Gaussian clusters
 - Determine probabilities on whether a data point belongs to a particular cluster
 
 We will see that GMMs are better suited for clustering non-spherical distributions of points.
@@ -191,7 +191,7 @@ plt.show()
 
 **Parameter estimation** is the process of determining the parameters of a distribution based on a sample of observed data.
 
-**Maximum likelihood estimation** is a method estimate the parameters of an assumed probability distribution given a sample of observed data.
+**Maximum likelihood estimation** is a method to estimate the parameters of an assumed probability distribution given a sample of observed data.
 
 ## Likelihood Function
 
@@ -284,14 +284,14 @@ How do we maximize (optimize) a function of parameters?
 ::::
 
 :::: {.fragment}
-To find the optimal parameters of a function, we compute partial derivatives of the function and set them equal to zero. The solution to these equations gives us a local optimal value for the parameters
+To find the optimal parameters of a function, we compute partial derivatives of the function and set them equal to zero. The solution to these equations gives us a local optimal value for the parameters.
 
 For the case of the Gaussian we compute
 
 $$
 \begin{align*}
-\nabla_{\mu} L(\mu, \sigma^{2}, x_1, \ldots, x_n) &= 0 \\
-\nabla_{\sigma} L(\mu, \sigma^{2}, x_1, \ldots, x_n) &= 0 \\
+\nabla_{\mu} L(\mu, \sigma^{2}, x_1, \ldots, x_n) &= 0, \\
+\nabla_{\sigma} L(\mu, \sigma^{2}, x_1, \ldots, x_n) &= 0. \\
 \end{align*}
 $$
 ::::
@@ -309,7 +309,7 @@ $$
 
 ## Summary of MLE
 
-Given samples $x_{1}, \ldots, x_n$ drawn from a Gaussian distribution, we computed the maximum likelihood estimates by maximizing the log likelihood function
+Given samples $x_{1}, \ldots, x_n$ drawn from a Gaussian distribution, we compute the maximum likelihood estimates by maximizing the log likelihood function
 
 $$
 \log{\left(L(\mu, \sigma^{2}, x_1, \ldots, x_n)\right)} = -\frac{N}{2}\log{2\pi} - N\log{\sigma} - \frac{1}{2\sigma^{2}}\sum_{n=1}^{N}(x_n -\mu)^{2}.
@@ -462,7 +462,7 @@ $$
 p(\mathbf{x}) = \sum_{i=1}^{K} w_i \cdot f(\mathbf{x}\vert \mu_i, \Sigma_i).
 $$
 
-If this is feeling a bit abstract, let's see how this applies to our the initial example where we were clustering a person as rich or poor based on their age.
+If this is feeling a bit abstract, let's see how this applies to the initial example where we were clustering a person as rich or poor based on their age.
 
 ## Rich vs Poor Example
 
@@ -471,7 +471,7 @@ We have our single data point $x=25$, and we have 2 Gaussians representing our c
 Our latent variables are the probabilities that we classify someone as either rich or poor, i.e., $w_1 = P(z = 1) = P(\text{rich})$ and $w_2 = P(z = 2) = P(\text{poor})$.
 
 
-Our interest in this problem is computing the posterior probability, which is, $P(C_1 | x) = P(z=1 \vert x) P(\text{rich} \vert \text{age 25})$
+Our interest in this problem is computing the posterior probability, which is, $P(C_1 | x) = P(z=1 \vert x) = P(\text{rich} \vert \text{age 25})$
 
 :::: {.fragment}
 How do we determine these posterior probabilities $P(C_i \vert x) = P(z=1 \vert x)$?
@@ -570,7 +570,7 @@ EM is formulated using a probabilistic model for data. It can solve a problem li
 
 > Given a set of data points and a parameter $K$, find the $(w_k, \mu_k, \Sigma_k)~k = 1,\dots,K$ that __maximizes the likelihood of the data__ assuming a GMM with those parameters.
 
-It can also solve lots of other problems involving maximizing likelihood of data under a different model.
+It can also solve lots of other problems involving maximizing the likelihood of data under a different model.
 
 Similar to $k$-means, this problem is NP-hard.  
 
@@ -602,7 +602,7 @@ Using the values $r_{nk}$ for $n=1,\ldots, N$ and $k=1, \ldots, K$. First comput
 
 $$
 \boldsymbol{\mu}_{k}= \frac{1}{N_k}\sum_{n=1}^{N} r_{nk} \mathbf{x}_n, \quad 
-\Sigma_{k} = \frac{1}{N_k}\sum_{n=1}^{N} (\mathbf{x}_n \boldsymbol{\mu}_k)^{T}(\mathbf{x}_n -\boldsymbol{\mu}_k), \quad
+\Sigma_{k} = \frac{1}{N_k}\sum_{n=1}^{N}  r_{nk}(\mathbf{x}_n - \boldsymbol{\mu}_k)(\mathbf{x}_n -\boldsymbol{\mu}_k)^{T}, \quad
 w_k = \frac{N_k}{N}.
 $$
 
@@ -636,7 +636,7 @@ __GMM/EM__
 
 1. Initialize randomly or using some rule
 1. Compute the probability that each point belongs in each cluster
-1. Update the clusters (weights, means and variances).
+1. Update the clusters (weights, means, and variances).
 1. Repeat 2-3 until convergence.
 
 __$k$-means__
@@ -849,7 +849,7 @@ Perhaps you believe in even more restricted shapes: all clusters should have the
 
 That is, clusters are not skewed.
 
-Then you only need to estimate the diagonals of the covariance matrices - just $kn$ parameters.
+Then you only need to estimate the diagonals of the covariance matrices - just $Kd$ parameters.
 
 This is specified by the GMM parameter `covariance_type='diag'`.
 
@@ -873,7 +873,7 @@ plt.show()
 
 ## Round Clusters
 
-Finally, if you believe that all clusters should be round, then you only need to estimate the $k$ variances.  
+Finally, if you believe that all clusters should be round, then you only need to estimate the $K$ variances.  
 
 This is specified by the GMM parameter `covariance_type='spherical'`.
 
