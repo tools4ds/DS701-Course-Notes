@@ -466,12 +466,29 @@ If this is feeling a bit abstract, let's see how this applies to the initial exa
 
 ## Rich vs Poor Example
 
-We have our single data point $x=25$, and we have 2 Gaussians representing our clusters, $C_1$ and $C_2$, with parameters $\mu_1 = 37, \sigma_1^{2}=14$ and $\mu_2 = 45, \sigma_2^{2}=11$, respectively.
+We have 
 
-Our latent variables are the probabilities that we classify someone as either rich or poor, i.e., $w_1 = P(z = 1) = P(\text{rich})$ and $w_2 = P(z = 2) = P(\text{poor})$.
+* our single data point $x=25$, and 
+* we have 2 Gaussians representing our clusters, 
+    * $C_1$ with parameters $\mu_1 = 37, \sigma_1^{2}=14$ and 
+    * $C_2$ with parameters $\mu_2 = 45, \sigma_2^{2}=11$, 
+
+our latent variables are the probabilities that we classify someone as either
+rich or poor, i.e., 
+$$
+w_1 = P(z = 1) = P(\text{rich})
+$$
+and
+$$
+w_2 = P(z = 2) = P(\text{poor}).
+$$
 
 
-Our interest in this problem is computing the posterior probability, which is, $P(C_1 | x) = P(z=1 \vert x) = P(\text{rich} \vert \text{age 25})$
+Our interest in this problem is computing the posterior probability, which is,
+
+$$
+P(C_1 | x) = P(z=1 \vert x) = P(\text{rich} \vert \text{age 25}).
+$$
 
 :::: {.fragment}
 How do we determine these posterior probabilities $P(C_i \vert x) = P(z=1 \vert x)$?
@@ -584,7 +601,8 @@ Here is the EM algorithm.
 
 __Step 1 Initialization__
 
-Initialize the parameters $w_k, \boldsymbol{\mu}_k, \Sigma_k$ for $k=1, \dots, K$. The final result will be sensitive to this choice, so a good (and fast) initialization procedure is $k$-means.
+Initialize the parameters $w_k, \boldsymbol{\mu}_k, \Sigma_k$ for $k=1, \dots, K$. 
+The final result will be sensitive to this choice, so a good (and fast) initialization procedure is $k$-means.
 
 __Step 2 Expectation__ 
 
@@ -606,7 +624,56 @@ $$
 w_k = \frac{N_k}{N}.
 $$
 
-__Step 4__ Stop if convergence criterion is satisfied. Otherwise repeat Steps 2 and 3.
+__Step 4__ Stop if **convergence criterion** is satisfied. Otherwise repeat Steps 2 and 3.
+
+## Convergence criteria
+
+The convergence criteria for the Expectation-Maximization (EM) algorithm 
+assess the _change across iterations_ of either the 
+
+* likelihood function, or
+* model parameters
+
+with usually a _limit on the maximum number of iterations_.
+
+Here are the common convergence criteria used:
+
+## Log-Likelihood Convergence
+
+$$
+|\mathcal{L}^{(t)} - \mathcal{L}^{(t-1)}| < \text{tol}
+$$
+
+Where:
+
+* $\mathcal{L}^{(t)}$ is the log-likelihood at iteration $t$,
+* $\text{tol}$ is a small positive number (e.g., $10^{-4}$).
+
+## Parameter Convergence
+
+$$
+||\theta^{(t)} - \theta^{(t-1)}||_2 < \text{tol}
+$$
+
+Where:
+
+* $\theta^{(t)}$ represents the model parameters (means, covariances, and weights) at iteration $t$,
+* $||\cdot||_2$ is the Euclidean (L2) norm,
+* $\text{tol}$ is a small positive number.
+
+## Maximum Number of Iterations
+
+The EM algorithm is typically capped at a maximum number of iterations to avoid
+long runtimes in cases where the log-likelihood or parameters converge very
+slowly or never fully stabilize.
+
+$$
+t > \text{max\_iterations}
+$$
+
+Where:
+
+* $\text{max\_iterations}$ is a predefined limit (e.g., 100 or 500 iterations).
 
 ## Storage and Computational Costs
 
@@ -681,9 +748,7 @@ Notice that the problem definition only required that we find the clusters, $C_i
 
 However, the EM algorithm posited that we should find as well the $P(C_j|x_i) = P(z=j | x_i)$, that is, the probability that each point is a member of each cluster.
 
-This is the true heart of what EM does.   
-
-The idea is called "data augmentation."
+This is the true heart of what EM does.
 
 By __adding parameters__ to the problem, it actually finds a way to make the problem solvable.
 
