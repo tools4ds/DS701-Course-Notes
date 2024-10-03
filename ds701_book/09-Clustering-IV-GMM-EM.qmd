@@ -204,7 +204,7 @@ The likelihood function for a set of samples $x_{n}~\text{for}~n=1, \ldots, N$ d
 
 $$
 L(\mu, \sigma^{2}, x_1, \ldots, x_n) \
-= \prod_{n=1}^{N}(x_n\vert \mu, \sigma^{2}) \
+= \prod_{n=1}^{N}\mathcal{N}(x_n\vert \mu, \sigma^{2}) \
 = \prod_{n=1}^{N}\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x_n-\mu)^{2}}{2\sigma^2}}.
 $$
 
