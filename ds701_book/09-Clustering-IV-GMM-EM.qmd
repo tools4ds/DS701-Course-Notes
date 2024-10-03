@@ -303,7 +303,7 @@ The maximum likelihood estimates for a Gaussian distribution are given by
 $$
 \begin{align*}
 \bar{\mu} &= \frac{1}{N}\sum_{n=1}^{N} x_{n}, \\
-\bar{\sigma}^2 &= \frac{1}{N}\sum_{n=1}^{N}(x_{n} - \mu)^{2}.
+\bar{\sigma}^2 &= \frac{1}{N}\sum_{n=1}^{N}(x_{n} - \bar{\mu})^{2}.
 \end{align*}
 $$
 
@@ -320,7 +320,7 @@ This gives us the maximum likelihood estimates
 $$
 \begin{align*}
 \bar{\mu} &= \frac{1}{N}\sum_{n=1}^{N} x_{n}, \\
-\bar{\sigma}^2 &= \frac{1}{N}\sum_{n=1}^{N}(x_{n} - \mu)^{2}.
+\bar{\sigma}^2 &= \frac{1}{N}\sum_{n=1}^{N}(x_{n} - \bar{\mu})^{2}.
 \end{align*}
 $$
 
