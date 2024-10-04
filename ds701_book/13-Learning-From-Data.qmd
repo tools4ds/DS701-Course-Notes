@@ -158,7 +158,7 @@ plt.ylabel('y', size = 16);
 
 :::
 
-The way we generated these points was to take $\mathbf{x}$ as equal spaced points on the range 0 to 1,
+The way we generated these points was to take $\mathbf{x}$ as equal spaced points in the range 0 to 1,
 and for each $x_i$, we take $y_i = \sin(2\pi x_i)$ __plus__ a sample of a Gaussian random variable.
 
 Many data sets are like this!  
@@ -390,8 +390,6 @@ These suggest techniques we may use to avoid overfitting:
 ## More Training Data
 
 It's not necessarily true that a order-3 polynomial is best for this problem.
-
-After all, we are fitting to a sine function, whose Taylor series includes polynomials of all orders.
 
 But the higher the order of polynomial we want to fit, the more data we need to avoid overfitting.
 
@@ -628,6 +626,6 @@ We've also seen that there are some subtleties to this approach that must be dea
 
 * Simply using the model that has lowest error on the training data will __overfit__.
 * We need to __hold out__ data to assess the generalization ability of each trained model.
-* We control model complexity using hyperparameters
+* We control model complexity using hyperparameters.
 * We choose the best hyperparameters based on performance on held out data.
 
