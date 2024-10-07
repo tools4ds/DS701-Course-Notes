@@ -1,25 +1,21 @@
 ---
 title: "Decision Trees and Random Forests"
 jupyter: python3
+bibliography: references.bib
+nocite: |
+  @Hastie2009
 ---
 
 ## Outline
 
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/14-Classification-I-Decision-Trees.ipynb)
+
 - Build a decision tree manually
-- Single and collective impurity measures
+- Look at single and collective impurity measures
 - Selecting splitting attributes and test conditions
 - Scikit-learn implementation
 - Model training and evaluation 
 - Random forests
-- Partial dependence plots
-- Pros and cons of decision trees and random forests
-
-
-## Data set options (remove)
-
-- [loans.csv](./data/loans.csv)
-- [vertebrate.csv](./data/vertebrate.csv)
-- [titanic](./data/titanic/)
 
 ## Introduction
 
@@ -41,10 +37,9 @@ We'll now start looking into how to build models to predict an outcome variable 
 - e.g. price of a house, salary of a person, etc.
 
 
-
 ## Loan Default Example
 
-We'll use an example from Intro to Data Mining.
+We'll use an example from [@Tan2018].
 
 ![](figs/L14-terrier-savings-logo.png){width="100px"}
 
@@ -214,7 +209,7 @@ How do we know if this tree is good? We arbitrarily picked the order of the fiel
 Is there a way to systematically pick the order of the fields to split on? This is called the **splitting criterion**.
 
 There's also the question of when to stop splitting, or the **stopping criterion**. So far, we stopped splitting when
-we reached a node of pure class but there reasons to stop splitting even without pure classes, which we'll see later.
+we reached a node of pure class but there are reasons to stop splitting even without pure classes, which we'll see later.
 
 ## Specifying the Test Condition
 
@@ -405,7 +400,7 @@ A __Continuous__ attribute can be handled two ways:
 
 ``` {python}
 #| echo: false
-#| fig-cap: 'It can thresholded to form a binary split.'
+#| fig-cap: 'It can be thresholded to form a binary split.'
 dot_data = """
 digraph Tree {
     node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
@@ -479,7 +474,7 @@ $$
 \end{aligned}
 $$
 
-where $p_i(t)$ is the relative frequency of training instances of class $i$ at a node $t$ and $c$ is the number of classes.
+where $p_i(t)$ is the **relative frequency** of training instances of class $i$ at a node $t$ and $c$ is the number of classes.
 
 By convention, we set $0 \log_2 0 = 0$ in entropy calculations.
 
@@ -603,10 +598,13 @@ $$
 I(\textnormal{children}) = \sum_{j=1}^{k} \frac{N(v_j)}{N}\; I(v_j)
 $$
 
+Here we split $N$ training instances into $k$ child nodes, $v_j$ for $j=1, \ldots, k$.
+
+$N(v_j)$ is the number of training instances at child node $v_j$ and $I(v_j)$ is the impurity at child node $v_j$.
 
 ## Impurity Example
 
-Let's compute collective impurity to see which feature to split on.
+Let's compute collective impurity on our loans dataset to see which feature to split on.
 
 ::: {layout-ncol=3}
 
@@ -687,7 +685,7 @@ The collective entropy for (c) is 0. Why would we not want to use this node?
 
 ## Gain Ratio
 
-From Intro to Data Mining:
+From Intro to Data Mining[@Tan2018, p. 127]:
 
 Having a low impurity value alone is insufficient to find a good attribute test condition for a node. 
 
@@ -727,31 +725,47 @@ The following table illustrates the process.
 
 ## Run Decision Tree on Loans Data Set
 
-Let's run the Scikit-learn Decision Tree on the loans data set.
+Let's run the Scikit-learn Decision Tree, `sklearn.tree`, on the loans data set.
 
-First we have to convert the categorical fields to numeric fields.
+`sklearn.tree` requires all fields to be numeric.
+
+So first we have to convert the categorical fields to category index numeric fields.
 
 ``` {python}
+#| code-fold: false
 loans['Defaulted Borrower'] = loans['Defaulted Borrower'].cat.codes
 loans['Home Owner'] = loans['Home Owner'].cat.codes
 loans['Marital Status'] = loans['Marital Status'].cat.codes
 loans
 ```
 
+---
+
 Then the independent variables are all the fields except the "Defaulted Borrower" field, which we'll assign to `X`.
 
 The dependent variable is the "Defaulted Borrower" field, which we'll assign to `y`.
 
 ``` {python}
+#| code-fold: false
 from sklearn import tree
 
 X = loans.drop('Defaulted Borrower', axis=1)
 y = loans['Defaulted Borrower']
+X.info()
+y.info()
+```
 
-clf = tree.DecisionTreeClassifier()
+---
+
+Let's fit a decision tree to the data.
+
+``` {python}
+#| code-fold: false
+clf = tree.DecisionTreeClassifier(criterion='gini', random_state=42)
 clf = clf.fit(X, y)
 ```
 
+Let's plot the tree.
 
 ``` {python}
 annotations = tree.plot_tree(clf, 
@@ -764,23 +778,321 @@ annotations = tree.plot_tree(clf,
 ```
 
 
+Interestingly, the tree was built using only the Income field.
 
-## References
+That's arguably an advantage of Decision Trees: they automatically perform feature selection.
 
-[1] J. Howard, Lecture on Random Forests, https://course.fast.ai/Lessons/lesson6.html
+## Ensemble Methods
 
-[2] J. Howard, "How random forests really work", https://www.kaggle.com/code/jhoward/how-random-forests-really-work/
+(See @Tan2018, Chapter 4)
 
-[3] T. Hastie, R. Tibshirani, and J. Friedman, The Elements of Statistical Learning -- Data Mining, Inference, and Prediction, 2nd Edition. 2009. [Online]. Available: https://hastie.su.domains/ElemStatLearn/
+Motivated around the idea that combining several noisy classifers can result in a better prediction
+under certain conditions.
 
-[4] T. Hastie, R. Tibshirani -- "Statistical Learning with R", Stanford Online course, starting with 8.1 Tree based methods, More details on trees, Classification Trees, etc.
+* The base classifiers are independent
+* The base classifiers are noisy (high variance)
+* The base classifiers are low (ideally zero) bias
 
-[5] https://developers.google.com/machine-learning/decision-forests
+## Random Forests
 
-fast.ai section on random forests
+Random forests are an ensemble of decision trees that:
+
+* Construct a set of base classifiers from random sub-samples of the training data.
+* Train each base classifier to completion.
+* Take a majority vote of the base classifiers to form the final prediction.
+
+## Titanic Example
+
+We'll use the [Titanic data set](https://www.kaggle.com/competitions/titanic) and
+excerpts of this [Kaggle tutorial](https://www.kaggle.com/code/jhoward/how-random-forests-really-work/)
+to illustrate the concepts of overfitting and random forests.
+
+``` {python}
+import pandas as pd
+
+df_train = pd.read_csv('data/titanic/train.csv', index_col='PassengerId')
+df_test = pd.read_csv('data/titanic/test.csv', index_col='PassengerId')
+```
+
+Let's look at the training data.
+
+``` {python}
+df_train.info()
+df_train.head()
+```
+
+We can see that there are 891 entries with 11 fields. 'Age', 'Cabin', and 'Embarked' have missing values.
+
+---
+
+Let's look at the test data.
+
+``` {python}
+df_test.info()
+df_test.head()
+```
+
+There are 418 entries in the test set with same fields except for 'Survived', which is what we need to predict.
+
+---
+
+We'll do some data cleaning and preparation.
+
+``` {python}
+import numpy as np
+
+def proc_data(df):
+    df['Fare'] = df.Fare.fillna(0)
+    df.fillna(modes, inplace=True) # Fill missing values with the mode
+    df['LogFare'] = np.log1p(df['Fare'])  # Create a new column for the log of the fare + 1
+    df['Embarked'] = pd.Categorical(df.Embarked)  # Convert to categorical
+    df['Sex'] = pd.Categorical(df.Sex)  # Convert to categorical
+
+modes = df_train.mode().iloc[0] # Get the mode for each column
+
+proc_data(df_train)
+proc_data(df_test)
+```
+
+Look at the dataframes again.
+
+:::: {.columns}
+::: {.column width="50%"}
+``` {python}
+df_train.info()
+```
+:::
+::: {.column width="50%"}
+``` {python}
+df_test.info()
+```
+:::
+::::
+
+---
+
+We'll create lists of features by type.
+
+``` {python}
+#| code-fold: false
+cats=["Sex","Embarked"]  # Categorical
+conts=['Age', 'SibSp', 'Parch', 'LogFare',"Pclass"]  # Continuous
+dep="Survived"  # Dependent variable
+```
+
+---
+
+Let's explore some fields starting with survival rate by gender.
+
+``` {python}
+import seaborn as sns
+import matplotlib.pyplot as plt
+fig,axs = plt.subplots(1,2, figsize=(11,5))
+sns.barplot(data=df_train, y='Survived', x="Sex", ax=axs[0], hue="Sex", palette=["#3374a1","#e1812d"]).set(title="Survival rate")
+sns.countplot(data=df_train, x="Sex", ax=axs[1], hue="Sex", palette=["#3374a1","#e1812d"]).set(title="Histogram");
+```
+
+Indeed, "women and children first" was enforced on the Titanic.
+
+---
+
+Since we don't have labels for the test data, we'll split the training data into training and validation.
+
+``` {python}
+#| code-fold: false
+from numpy import random
+from sklearn.model_selection import train_test_split
+
+random.seed(42)
+trn_df,val_df = train_test_split(df_train, test_size=0.25)
+
+# Replace categorical fields with numeric codes
+trn_df[cats] = trn_df[cats].apply(lambda x: x.cat.codes)
+val_df[cats] = val_df[cats].apply(lambda x: x.cat.codes)
+```
+
+---
+
+Let's split the independent (input) variables from the dependent (output) variable.
+
+``` {python}
+#| code-fold: false
+def xs_y(df):
+    xs = df[cats+conts].copy()
+    return xs,df[dep] if dep in df else None
+
+trn_xs,trn_y = xs_y(trn_df)
+val_xs,val_y = xs_y(val_df)
+```
+
+---
+
+Here's the predictions for our extremely simple model, where `female` is coded as `0`:
+
+```{python}
+#| code-fold: false
+preds = val_xs.Sex==0
+```
+
+We'll use mean absolute error to measure how good this model is:
+
+```{python}
+#| code-fold: false
+from sklearn.metrics import mean_absolute_error
+mean_absolute_error(val_y, preds)
+```
+
+---
+
+Alternatively, we could try splitting on a continuous column. We have to use a somewhat different chart to see how this might work -- here's an example of how we could look at `LogFare`:
+
+```{python}
+df_fare = trn_df[trn_df.LogFare>0]
+fig,axs = plt.subplots(1,2, figsize=(11,5))
+sns.boxenplot(data=df_fare, x=dep, y="LogFare", ax=axs[0], hue=dep, palette=["#3374a1","#e1812d"])
+sns.kdeplot(data=df_fare, x="LogFare", ax=axs[1]);
+```
+
+The [boxenplot](https://seaborn.pydata.org/generated/seaborn.boxenplot.html) above shows quantiles of `LogFare` for each group of `Survived==0` and `Survived==1`. It shows that the average `LogFare` for passengers that didn't survive is around `2.5`, and for those that did it's around `3.2`. So it seems that people that paid more for their tickets were more likely to get put on a lifeboat.
+
+---
+
+Let's create a simple model based on this observation:
+
+```{python}
+#| code-fold: false
+preds = val_xs.LogFare>2.7
+```
+
+...and test it out:
+
+```{python}
+#| code-fold: false
+mean_absolute_error(val_y, preds)
+```
+
+This is quite a bit less accurate than our model that used `Sex` as the single binary split.
+
+---
+
+Ok. Let's build a decision tree model using all the features.
+
+```{python}
+#| code-fold: false
+clf = tree.DecisionTreeClassifier(criterion='gini', random_state=42)
+clf = clf.fit(trn_xs, trn_y)
+```
+
+Let's draw the tree.
+
+```{python}
+#| code-fold: false
+annotations = tree.plot_tree(clf, 
+               filled=True, 
+               rounded=True,
+               feature_names=trn_xs.columns,
+               class_names=['No', 'Yes'])
+```
+
+---
+
+Let's see how it does on the validation set.
+
+```{python}
+#| code-fold: false
+preds = clf.predict(val_xs)
+mean_absolute_error(val_y, preds)
+```
+
+---
+
+Let's train the decision tree again but with stopping criteria based on the number of samples in a node.
+
+```{python}
+#| code-fold: false
+clf = tree.DecisionTreeClassifier(criterion='gini', random_state=42, min_samples_split=20)
+clf = clf.fit(trn_xs, trn_y)
+```
+
+Let's draw the tree.
+
+```{python}
+#| code-fold: false
+annotations = tree.plot_tree(clf, 
+               filled=True, 
+               rounded=True,
+               feature_names=trn_xs.columns,
+               class_names=['No', 'Yes'])
+```
+
+---
+
+Let's see how it does on the validation set.
+
+```{python}
+#| code-fold: false
+preds = clf.predict(val_xs)
+mean_absolute_error(val_y, preds)
+```
+
+---
+
+Let's train the decision tree again but with a maximum depth of 3.
+
+```{python}
+#| code-fold: false
+clf = tree.DecisionTreeClassifier(criterion='gini', random_state=42, max_depth=3)
+clf = clf.fit(trn_xs, trn_y)
+```
+
+Let's draw the tree.
+
+```{python}
+#| code-fold: false
+annotations = tree.plot_tree(clf, 
+               filled=True, 
+               rounded=True,
+               feature_names=trn_xs.columns,
+               class_names=['No', 'Yes'])
+```
+
+---
+
+Let's see how it does on the validation set.
+
+```{python}
+#| code-fold: false
+preds = clf.predict(val_xs)
+mean_absolute_error(val_y, preds)
+```
+
+## Random Forest
+
+Let's try a random forest.
+
+```{python}
+#| code-fold: false
+from sklearn.ensemble import RandomForestClassifier
+
+clf = RandomForestClassifier(n_estimators=100, random_state=42)
+clf = clf.fit(trn_xs, trn_y)
+```
+
+Let's see how it does on the validation set.
+
+```{python}
+#| code-fold: false
+preds = clf.predict(val_xs)
+mean_absolute_error(val_y, preds)
+```
 
 
-# Backup
+## Recap
+
+* Decision Trees
+* Impurity Measures
+* Avoiding Overfitting
+* Random Forests
 
 
 # Scikit-learn Decision Trees Package
@@ -791,6 +1103,8 @@ The `sklearn.tree` module includes the following classes:
 
 - `DecisionTreeClassifier` for classification
 - `DecisionTreeRegressor` for regression
+- `RandomForestClassifier` for classification
+- `RandomForestRegressor` for regression
 
 There are also useful utilities for visualizing and exporting the tree.
 
@@ -798,66 +1112,9 @@ There are also useful utilities for visualizing and exporting the tree.
 - `tree.export_graphviz` for exporting the tree to a graphviz file
 - `tree.export_text` for exporting the tree to a text file
 
-## Simple Example
 
-``` {python}
-from sklearn import tree
-X = [[0, 0], [1, 1]]
-Y = [0, 1]
-clf = tree.DecisionTreeClassifier()
-clf = clf.fit(X, Y)
+## References
 
-print(clf.predict([[2., 2.]]))
+::: {#refs}
+:::
 
-print(clf.predict_proba([[2., 2.]]))
-```
-
-## Iris Data Set Example
-
-Let's look at the classic Iris data set which consists of 150 samples representing3 types of irises:
-
-1. Setosa, 
-2. Versicolor, and 
-3. Virginica
-
-The features for each sample are the petal and sepal length and width in cm.
-
-``` {python}
-from sklearn.datasets import load_iris
-from sklearn import tree
-iris = load_iris()
-X, y = iris.data, iris.target
-clf = tree.DecisionTreeClassifier()
-clf = clf.fit(X, y)
-tree.plot_tree(clf, 
-               filled=True, 
-               max_depth=1, 
-               impurity=False, 
-               class_names=iris.target_names, 
-               feature_names=iris.feature_names)
-```
-
-``` {.python}
-# Render a PDF file of the tree
-import graphviz 
-dot_data = tree.export_graphviz(clf, out_file=None) 
-graph = graphviz.Source(dot_data) 
-graph.render("iris") 
-```
-
-``` {.python}
-# Render a PNG file of the tree
-graph.render("iris", format="png")
-```
-
-``` {python}
-import graphviz
-
-dot_data = tree.export_graphviz(clf, out_file=None, 
-                     feature_names=iris.feature_names,  
-                     class_names=iris.target_names,  
-                     filled=True, rounded=True,  
-                     special_characters=True)  
-graph = graphviz.Source(dot_data)  
-graph 
-```
