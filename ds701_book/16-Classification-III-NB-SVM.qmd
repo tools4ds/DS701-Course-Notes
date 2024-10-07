@@ -1,13 +1,13 @@
 ---
 title: Naive Bayes and Support Vector Machines
 jupyter: python3
+fig-align: center
 ---
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/16-Classification-III-NB-SVM.ipynb)
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-cell]
+#| echo: false
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -15,182 +15,180 @@ import pandas as pd
 import seaborn as sns
 import matplotlib as mp
 import sklearn
-from IPython.display import Image
-
-%matplotlib inline
 ```
 
+:::: {.columns}
+::: {.column width="50%"}
 
-<P><P><P><P>
-<center>
-
-<img src="figs/Thomas_Bayes.gif" alt="Figure" width="38%" align = "left">
-<img src="figs/L16-SVM-6.png" alt="Figure" width="40%" align = "right">
-    
-</center>
-
-<!--- By Unknown author - [2][3], Public Domain, https://commons.wikimedia.org/w/index.php?curid=14532025 --->
-
+![Thomas Bayes](figs/Thomas_Bayes.gif){height="300px"}
+:::
+::: {.column width="50%"}
+![SVM](figs/L16-SVM-6.png){height="300px"}
+:::
+::::
 
 Today we'll look at two more very commonly-used, widely-applicable classification methods.
 
 * the _Naive Bayes Classifier_
 * the _Support Vector Machine_
 
-## Naive Bayes
+# Naive Bayes
 
-The classification problem most generally seeks to associate a label $y$ with a set of features $\mathbf{x}$.  
+The classification problem is given a data point $\mathbf{x}$ predict the corresponding label $y$.  
 
-Perhaps the most fundamental way to attack this problem is via probability.
+A fundamental way to attack this problem is via probability.
 
-We'll now consider how to use probability to directly address the classification problem.
+A key tool will be __Bayes Rule__.
 
-A key tool will be __Bayes Rule,__ so let's review that.
+## Bayes Rule
 
-### Bayes Rule
-
-We'll start from the definition of conditional probability:
-
-$$ P[A\,|\,C] = \frac{P[A \text{ and } C]}{P[C]} $$
-
-So:
-
-$$ P[A \text{ and } C] = P[A\,|\,C] \cdot P[C]. $$
-
-```{python}
-#| hide_input: true
-#| tags: [hide-input]
-plt.figure(figsize = (6,6))
-ax=plt.gcf().gca()
-circle = mp.patches.Circle([1, 1], 0.7, facecolor = 'blue', alpha = 0.2)
-ax.add_artist(circle)
-circle = mp.patches.Circle([1.7, 1], 0.4, facecolor = 'red', alpha = 0.2)
-ax.add_artist(circle)
-ax.axis('square')
-ax.axis('off')
-plt.xlim([0, 2.5])
-plt.ylim([0, 2])
-plt.text(1, .95, 'A', fontsize = 16)
-plt.text(1.85, .95, 'C', fontsize = 16)
-plt.text(1.35, .95, 'A & C', fontsize = 16);
-# plt.title(r'$P[C\,|\,A]\,P[A] = P[A\,|\,C]\,P[C]$'); 
-```
-
-Switching the roles of $A$ and $C$, we can equally say:
-
-$$ P[C \text{ and } A] = P[C\,|\,A] \cdot P[A]. $$
-
-Now $P[C \text{ and } A] = P[A \text{ and } C]$, so:
+Let $A, B$ be events from a sample space $\Omega$. Recall that Bayes' rule states
     
-$$ P[A\,|\,C] \cdot P[C] = P[C\,|\,A] \cdot P[A] $$
+$$ P(A \vert B) = \frac{P(B\vert A) \cdot P(A)}{P(B)}. $$
 
-Rearranging, we get __Bayes' Rule__:
-    
-$$ P[A\,|\,C] = \frac{P[C\,|\,A] \cdot P[A]}{P[C]}. $$
+This was derived in our [Probability and Statistics Refresher](03-Probability-and-Statistics-Refresher.qmd).
 
-So there is nothing "magic" about Bayes' Rule: it simply follows from the basic laws of probability.
+We've now seen several examples of the importance of Bayes' rule (e.g., [GMMs](09-Clustering-IV-GMM-EM.qmd)) where we computed the *unknown* quantity $P(A \vert B)$ by using the *known* values for $P(B\vert A)$, $P(A)$, and $P(B)$.
 
-However, it is __very__ useful!
 
-The reason is that often, $P[A\,|\,C]$ is __not__ known, but the expressions on the right __are__ known.
+## Using Bayes Rule in a Classifier
 
-(We've already seen how this is used in the EM algorithm for Gaussian Mixture Modeling.)
+Let's start with a simple example
 
-### Using Bayes Rule in a Classifier
+> A doctor knows that meningitis causes a stiff neck 75% of the time, i.e., $P(S\vert M) = 0.75$
 
-Let's start with a simple example:
-   * A doctor knows that meningitis causes a stiff neck 75% of the time.
-   * This is $P[S\,|\,M]$. 
-   
-A patient presents with a stiff neck.  What is the probability she has meningitis?
+:::: {.fragment}
+If a patient comes in with a stiff neck, what is the probability she has meningitis, i.e., what is $P(M\vert S)$?
+::::
 
-Well, we can't say.  
 
-What we know is $P[S\,|\,M]$, but what we want to know is $P[M\,|\,S]$!
+:::: {.fragment}
+We only currently know $P(S\vert M)$ so we would need additional information to compute $P(M\vert S)$.
+::::
 
-Now perhaps the doctor _also_ knows that 
-   * 1 in 20 people in the population have a stiff neck at any given time
-       * $P[S] = 1/20$
-   * 1 in 10,000 people in the population have meningitis at any given time
-       * $P[M] = 1/10000$
+---
 
-   
-Now, we can calculate the answer needed:
+If the doctor _also_ knows the following information 
 
-$$ P[M\,|\,S] = \frac{P[S\,|\,M]}{P[S]}\cdot P[M] = \frac{3/4}{1/20} \cdot 1/10000 = \fbox{$15 \cdot 1/10000$} = 0.0015. $$
+:::: {.incremental}
+* 1 in 20 people in the population have a stiff neck at any given time, i.e., $P(S) = 0.05$
+* 1 in 10,000 people in the population have meningitis at any given time, i.e., $P(M) = 0.0001$
+::::
 
-I wrote the expressions above that way to point out the essence of Bayesian reasoning:
+:::: {.fragment}
+Then we can calculate the answer needed
 
-* A random person has probability 1/10000 of having meningitis
-* When __we learn__ that the person has a stiff neck, it __increases their probability__ by a factor of 15.
+$$ P(M\vert S) = \frac{P(S\vert M)}{P(S)}\cdot P(M)= \frac{0.75}{0.05} \cdot 0.00001 = \fbox{$15 \cdot 1/10000$} = 0.0015. $$
+::::
 
-We give these probabilities names according to their roles:
 
+---
+::: {.content-visible when-profile="slides"}
+$$ P(M\vert S) = \frac{P(S\vert M)}{P(S)}\cdot P(M)= \frac{0.75}{0.05} \cdot 0.00001 = \fbox{$15 \cdot 1/10000$} = 0.0015. $$
+:::
+
+
+The above expressions shows the essence of Bayesian reasoning
+
+:::: {.incremental}
+* We have prior knowledge about the probability of someone having meningitis, i.e., a random person has probability 1/10000 of having meningitis.
+* When __we learn__ that the person has a stiff neck, it __increases their probability__ of having meningitis by a factor of 15.
+::::
+
+## Priors and Posteriors
+
+We give these probabilities names according to their roles.
+
+:::: {.incremental}
 * The random person's probability (1/10000) is called the __prior__ probability
 * The specific patient's probability (15 $\cdot$ 1/10000) is called the __posterior__ probability.
+::::
 
-We are going to use this same principle to construct a classifier.
+:::: {.fragment}
+We use this same principle to construct a classifier.
+::::
 
-Given a set of items with features and class labels:
+## Probabilistic Classification
 
-The __class label__ will play the role of "meningitis" and the various __attributes__ of the item will play the role of "stiff neck."
+In classification problems we assume that we are given a set of data points $\mathbf{x}\in\mathbb{R}^{d}$ with $d$ features and corresponding class labels $y$. 
 
-We will then ask "how does the value of each feature change the probability of the class label?"
+In our meningitis example, there is a single __attribute__ which is stiff neck. 
 
-More formally:
-    
-Consider an item $\mathbf{x}$ having attributes $x_1, x_2, \dots, x_n$.
+The __class label__ is either meningitis or no meningitis.
 
-There are various classes (labels) for items: $C_1, \dots, C_k$.
+:::: {.fragment}
+How does the value of each feature change the probability of the class label?
+::::
+
+---
+
+More generally, consider a data point $\mathbf{x}$ having attributes $x_1, x_2, \dots, x_d$ and various classes (labels) for items: $C_1, \dots, C_k$.
 
 Our goal is to predict the class of $\mathbf{x}$.
 
-
-To do that, we will compute $P[C_1\,|\,\mathbf{x}], P[C_2\,|\,\mathbf{x}], \dots, P[C_k\,|\,\mathbf{x}]$.
+To do that, we will compute 
+$$P(C_1\vert\mathbf{x}), P(C_2\vert\mathbf{x}), \ldots, P(C_k\vert\mathbf{x}).$$
 
 These form a __soft classification__ of $\mathbf{x}$.
 
-From them, we can form a hard classification.  One way would simply be to choose the class with highest probability.
+
+## Maximum A Posteriori
+
+From the soft labels, we can form a hard classification. One way would be to choose the class with the highest probability.
 
 This is the MAP (_Maximum A Posteriori_) Estimate: 
 
-$$\hat{C} = \arg\max_{\{C_i\}} P[C_i\,|\,\mathbf{x}].$$
+$$\hat{C} = \arg\max_{\{C_i\}} P(C_i\vert\mathbf{x}).$$
 
-Now $P[C_i\,|\,\mathbf{x}] = P[C_i\,|\,x_1, x_2, \dots, x_n]$
+Now $P(C_i\vert\mathbf{x}) = P(C_i\vert x_1, x_2, \ldots, x_d)$
 
-How can we approach the problem of computing $P[C_i\,|\,\mathbf{x}]$?
+:::: {.fragment}
+How can we approach the problem of computing $P(C_i\vert\mathbf{x})$?
+::::
 
-The __key idea__ is that Bayes Rule makes clear that 
+--- 
 
-$$ P[C_i\,|\,\mathbf{x}] = \frac{P[\mathbf{x}\,|\,C_i]}{P[\mathbf{x}]} \cdot P[C_i] $$
+The __key idea__ is that Bayes' Rule makes clear that 
 
-Now, when we vary $C_i$ in the above expression, $P[\mathbf{x}]$ is not changing.
+$$ P(C_i\vert\mathbf{x}) = \frac{P(\mathbf{x}\vert C_i)}{P(\mathbf{x})} \cdot P(C_i).$$
 
-So ... 
+When we vary $C_i$ in the above expression, $P(\mathbf{x})$ is not changing. 
 
-The $\hat{C}$ that maximizes 
+This implies that the $\hat{C}$ that maximizes 
 
-$$P[C_i\,|\,x_1, x_2, \dots, x_n]$$
+$$P(C_i\vert x_1, x_2, \ldots, x_d)$$
 
 is the __same__ as the $\hat{C}$ that maximizes 
 
-$$P[x_1, x_2, \dots, x_n\,|\,C_i]\cdot P[C_i].$$
+$$P(x_1, x_2, \ldots, x_d\vert C_i)\cdot P(C_i).$$
 
-This gives us an angle of attack on the problem.
+---
 
-The difficult problem that remains is how to estimate
+::: {.content-visible when-profile="web"}
+This gives us an possible way to solve the problem.
+:::
 
-$$ P[x_1, x_2, \dots, x_n\,|\,C_i]. $$
+The issue that remains is how to estimate
 
-To see the challenge, imagine if we tried to compute $P[x_1, x_2, \dots, x_n\,|\,C_i]$ directly from data. 
+$$ P(x_1, x_2, \ldots, x_d\vert C_i).$$
 
-Attacking head-on, we could use a histogram to estimate the necessary distribution.  In other words, simply count up how many times we see each combination of feature values.
+:::: {.fragment}
+Why is this difficult?
+::::
 
-Let's say there are 20 features ($n = 20$), and 10 possible values for each feature. 
+:::: {.fragment}
+Imagine if we tried to compute $P(x_1, x_2, \ldots, x_d\vert C_i)$ directly from data. 
 
-Then for each class $C_i$ we need to construct a histogram with $10^{20}$ bins!   
+We could use a histogram to estimate the necessary distribution, i.e.,  count how many times we see each combination of feature values.
 
-We would never have enough data to fill all those bins.
+If there were 20 features ($d = 20$) and 10 possible labels for each feature, then for each class $C_i$ we need to construct a histogram with $10^{20}$ bins.
+::::
+
+:::: {.fragment}
+This is impossible.
+::::
+
+---
 
 The underlying problem we face is the high dimensionality of the feature space.
 
@@ -198,103 +196,107 @@ The size of our histogram is __exponential__ in the number of features.
 
 So, we need to find a way to reduce the exponential size of the estimation problem.
 
-We will do that by __factoring__ the distribution $P[x_1, x_2, \dots, x_n\,|\,C_i]$.
+We will do that by __factoring__ the distribution $P(x_1, x_2, \ldots, x_d\vert C_i)$.
 
-Here is where the "Naive" part comes in.
+Here is where the *naive* part comes in.
+
+## Naive Bayes
 
 We will __assume__ that __attributes are independent__ in their assignment to items.
 
-That is, for two sets of attributes, the values of the attributes in one set do not affect the values in the other set.    So all correlations among attributes are zero.
+That is, for two sets of attributes, the values of the attributes in one set do not affect the values in the other set, i.e., all correlations among attributes are zero.
 
-This is indeed a "naive" assumption ... but it can be surprisingly effective in practice.
+This is indeed a *naive* assumption ... but it can be surprisingly effective in practice.
 
-That implies that:
+The assumption implies
     
-$$ P[x_1, x_2, \dots, x_n\,|\,C_i] = P[x_1\,|\,C_i] \cdot P[x_2\,|\,C_i] \cdot \dots P[x_n\,|\,C_i]  $$
+$$ P(x_1, x_2, \ldots, x_d\vert C_i) = P(x_1\vert C_i) \cdot P(x_2\vert C_i) \cdots P(x_d\vert C_i)  $$
 
-This is very helpful computationally, because the factors $P[x_j\,|\,C_i]$ are individually much lower-dimensional than the full distribution.
+This is very helpful computationally, because the individual factors $P(x_j\vert C_i)$ reside in a lower-dimensional space than the full distribution.
+
+---
 
 In a naive Bayes model, the quantity we calculate for each class $C_i$ is
 
-$$ \left(P[x_1\,|\,C_i] \cdot P[x_2\,|\,C_i] \cdot \dots P[x_n\,|\,C_i]\right) \cdot P[C_i] $$
+$$ \left(P(x_1\vert C_i) \cdot P(x_2\vert C_i) \cdot \dots P(x_d\vert C_i)\right) \cdots P(C_i).$$
 
-You can see each conditional probability as a "correction factor" to $P[C_i]$.
+You can see each conditional probability as a "correction factor" to $P(C_i)$.
 
-Each factor $P[x_j\,|\,C_i]$ tells us how we should update our confidence in $C_i$ based on the value of a particular feature $x_j$.
+Each factor $P(x_j\vert C_i)$ tells us how we should update our confidence in $C_i$ based on the value of a particular feature $x_j$.
 
-So, what remains then is to estimate $P[x_j\,|\,C_i]$ for all $x_j$ and $C_i$.
+So, what remains then is to estimate $P(x_j\vert C_i)$ for all $x_j$ and $C_i$.
 
 We will estimate these quantities from our training data.
 
+## Steps of Naive Bayes
+
 To summarize the steps of Naive Bayes:
 
-__Training__
+__Train__
 
-* Compute all the per-class attribute probabilities $P[x_j\,|\,C_i]$ from training data.
-* Compute all the class probabilities $P[C_i]$ from the training data.
+* Compute all the per-class attribute probabilities $P(x_j\vert C_i)$ from training data.
+* Compute all the class probabilities $P(C_i)$ from the training data.
 
-__Predicting__
+__Predict__
 
-* For a given item $\mathbf{x} = (x_1, x_2, \dots, x_n)$, 
-    * For each class $C_i,$ compute $P[x_1\,|\,C_i] \cdot P[x_2\,|\,C_i] \cdot \dots P[x_n\,|\,C_i] \cdot P[C_i]$
-    * For a hard classification, return the class that maximizes the above expression.
-        * That is, the MAP estimate.
+* For a given data point $\mathbf{x} = (x_1, x_2, \dots, x_d)$, 
+    * For each class $C_i,$ compute $P(x_1\vert C_i) \cdot P(x_2\vert C_i) \cdot \dots P(x_d\vert C_i) \cdot P(C_i)$
+    * For a hard classification return the  MAP estimate, i.e., the class that maximizes the above expression, 
 
-### Computing Attribute Probabilities from Data
+## Computing Attribute Probabilities from Data
 
 All that remains is to compute the conditional attribute probabilities from data.
 
-The strategy depends on the attribute type: __discrete__ or __continuous.__
+The strategy depends on the attribute type 
 
-<center>
-    
-<img src="figs/L16-sample-data.png" alt="Figure" width="40%">
-    
-</center>
+- __discrete__ or 
+- __continuous.__
 
-__Discrete Attributes__.
+
+## Discrete Attributes
 
 Discrete attributes, such as categorical or ordinal attributes, can be handled via histograms.
 
-In the above table, to handle the <font color = "blue"> Marital Status </font> attribute for the <font color = "blue"> $\text{Evade} = \text{No}$ </font> class,  we need to compute
 
-$$ P[\text{Single}\,|\,\text{Evade }=\text{ No}] = 2 / 7 = 0.29 $$
+In the table, to handle the <font color = "blue"> Marital Status </font> attribute for the <font color = "blue"> $\text{Evade} = \text{No}$ </font> class,  we need to compute the following
 
-and
-
-$$ P[\text{Married}\,|\,\text{Evade }=\text{ No}] = 4 / 7 = 0.57 $$
-
-and
-
-$$ P[\text{Divorced}\,|\,\text{Evade }=\text{ No}] = 1 / 7 = 0.14 $$
+:::: {.columns}
+::: {.column width="65%"}
+$$ 
+\begin{align*}
+P(\text{Single}\vert\text{Evade } &=\text{ No}) = 2 / 7 = 0.29,\\
+P(\text{Married}\vert\text{Evade } &=\text{ No}) = 4 / 7 = 0.57,\\
+P(\text{Divorced}\vert\text{Evade }&=\text{ No}) = 1 / 7 = 0.14.
+\end{align*}
+$$
+:::
+::: {.column width="35%"}
+![](figs/L16-sample-data.png){height="250px"}
+:::
+::::
 
 One problem that can arise is when a histogram bin has zero entries.  Then the conditional probability for this attribute value is zero, which overrides all the other factors and yields a zero probability.
 
+::: {.content-visible when-profile="web"}
 There are various strategies for making small corrections to the counts that avoid this problem.
+:::
 
-<center>
-    
-<img src="figs/L16-sample-data.png" alt="Figure" width="40%">
-    
-</center>
+##  Continuous Attributes
 
-__Continuous Attributes.__
+Continuous attributes can be handled via histograms as well. This is done by binning up the values.   
 
-Continuous attributes can be handled via histograms as well, by binning up the values.   
+In the previous example, we could create bins to hold ranges of the continuous values for <font color = "blue"> Taxable Income </font>.
 
-In the above example, we could create bins to hold ranges of values for <font color = "blue"> Taxable Income </font>.
+However, another commonly used approach is to assume that the data follow a parametric probability distribution, such as a Normal (Gaussian) distribution.
 
-However, another commonly used approach is to assume that the data follow a parametric probability distribution.
+---
 
-Most often the Gaussian is used (of course).
+We can form conditional probabilities for <font color = "blue"> Taxable Income </font> as
 
-So we might form conditional probabilities for <font color = "blue"> Taxable Income </font> as
-
-$$ P[\text{Taxable Income} = x\,|\,\text{Evade }=\text{ No}] = \mathcal{N}(x; \mu_\text{No}, \sigma_\text{No}) $$
+$$ P(\text{Taxable Income} = x\vert\text{Evade }=\text{ No}) = \mathcal{N}(\mu_\text{No}, \sigma_\text{No}).$$
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
+#| fig-align: center
 from scipy.stats import norm
 eno = np.array([125000, 100000, 70000, 120000, 60000, 220000, 75000])
 eyes = np.array([95000, 85000, 75000])
@@ -311,67 +313,66 @@ plt.xlim([0, 200000])
 plt.xlabel('Taxable Income', size=14)
 plt.legend(loc = 'best')
 plt.title('Class-Conditional Distributions')
-plt.ylabel(r'$p(x)$', size=14);
+plt.ylabel(r'$p(x)$', size=14)
+plt.show()
 ```
+
+## NB Summary
 
 In summary:
     
-* Naive Bayes attacks the classification problem through probability, 
-    * which is perhaps the most natural formal tool for the problem.
-* Training is very simple, based on estimating class-conditional histograms or parametric densities of features.
-* Naive Bayes can work well in high-dimensional settings (many features) 
-    * Many times the correct label is the MAP estimate, even if individual probabilities are less accurate.
-* Its principal drawback is its assumption of __independence__ among the features.
+* Naive Bayes solves the classification problem through probability.
+* Training is simple, based on estimating class-conditional histograms or parametric densities of features.
+* Naive Bayes can work well in high-dimensional settings
+* Many times the correct label is the MAP estimate, even if individual probabilities are less accurate.
+* Its principal drawback is the assumption of __independence__ among the features.
 
-## Support Vector Machines
+# Support Vector Machines
 
 We now turn to the support vector machine (SVM).  
 
 The SVM is based on explicit __geometric__ considerations about how best to build a classifier.
 
+---
+
 As an example, here is a set of training data, considered as points in $\mathbb{R}^d$:
 
-<center>
-    
-<img src="figs/L16-SVM-1.png" alt="Figure" width="40%">
-    
-</center>
+![](figs/L16-SVM-1.png){width="40%"}
 
-We will start with the idea of a __linear separator__.
+## Linear Separator
 
-This is a hyperplane that forms a decision boundary.
+We will start with the idea of a __linear separator__. This is a hyperplane that forms a decision boundary.
 
-Here is one possible separator:
+:::: {.columns}
+::: {.column width="50%"}
+Here is one possible separator
 
-<center>
-    
-<img src="figs/L16-SVM-2.png" alt="Figure" width="40%">
-    
-</center>
+![](figs/L16-SVM-2.png){height="400px"}
+:::
+::: {.column width="5-%"}
+Here is another possible separator
 
-Here is another possible separator:
+![](figs/L16-SVM-3.png){height="400px"}
+:::
+::::
 
-<center>
-    
-<img src="figs/L16-SVM-3.png" alt="Figure" width="40%">
-    
-</center>
-
+:::: {.fragment}
 Which separator is __better__?
+::::
+
+---
 
 Well, they both perfectly separate the two classes in the training data.
 
-<center>
-    
-<img src="figs/L16-SVM-4.png" alt="Figure" width="40%">
-    
-</center>
+![](figs/L16-SVM-4.png){width="40%"}
 
-But what we really care about is accuracy on the test data -- __generalization__ ability.
+But what we really care about is accuracy on the test data, i.e., __generalization__ ability.
 
-It seems that $B_1$ is a better choice, because it is __farther__ from __both__ classes.
+It seems that $B_1$ is a better choice because it is __farther__ from __both__ classes.
 
-So, new data falling in the region between training classes is more likely to be correctly classified by $B_1$.
+New data falling in the region between training classes is more likely to be correctly classified by $B_1$.
+
+## Criterion for Best Separator
 
 This leads to a principle for choosing the best separator:
     
@@ -380,19 +381,15 @@ This leads to a principle for choosing the best separator:
 
 In fact, there are theoretical results suggesting that this is an optimal strategy for choosing a separator that has good generalization ability.
 
-<center>
+![](figs/L16-SVM-5.png){width="40%"}
     
-<img src="figs/L16-SVM-5.png" alt="Figure" width="40%">
-    
-</center>
-
-### Linear SVM: Separable Case
+## Linear SVM: Separable Case
 
 Let's see how we can train an SVM.
 
-As usual, our training data consists of tuples $(\mathbf{x}_i, y_i)$, where $\mathbf{x}_i \in \mathbb{R}^d$, and (by convention) $y_i \in \{-1, 1\}$.
+Consider a training dataset consisting of tuples $\{(\mathbf{x}_i, y_i)\}$, where $\mathbf{x}_i \in \mathbb{R}^d$ and $y_i \in \{-1, 1\}$.
 
-We're going to assume (for now) that our data can be perfectly separated by a hyperplane.
+We're going to assume that our data can be perfectly separated by a hyperplane.
 
 Any hyperplane (such as $B_1$ below) can be written as:
 
@@ -402,216 +399,235 @@ or more concisely:
 
 $$ \mathbf{w}^T\mathbf{x} + b = 0. $$
 
-So our decision boundary (ie, our classifier) has parameters $\{w_i\}$ and $b$.
+So our decision boundary (i.e., our classifier) has parameters $\{w_i\}$ and $b$.
 
-<center>
-    
-<img src="figs/L16-SVM-5.png" alt="Figure" width="40%">
-    
-</center>
+---
 
+:::: {.columns}
+::: {.column width="60%"}
 For any $\mathbf{x}_+$ from the positive class (circle) located __above__ the decision boundary, 
 
 $$ \mathbf{w}^T\mathbf{x}_+ + b = k $$
 
 for some __positive__ $k$.
 
-<center>
-    
-<img src="figs/L16-SVM-6.png" alt="Figure" width="40%">
-    
-</center>
-
-
 Likewise for any $\mathbf{x}_-$ from the negative class (square) located __below__ the decision boundary, 
 
 $$ \mathbf{w}^T\mathbf{x}_- + b = -k $$
 
 for the same $k$.
+:::
+::: {.column width="40%"}
+![](figs/L16-SVM-6.png)
+:::
+::::
 
-We'll rescale the parameters $\mathbf{w}$ and $b$ by dividing through by $k$, thus obtaining new equations for the __same__ hyperplanes:
+---
 
-$$ b_{11}: \mathbf{w}^T\mathbf{x}_+ + b = 1 $$
-$$ b_{12}: \mathbf{w}^T\mathbf{x}_- + b = -1 $$
+Rescaling the parameters $\mathbf{w}$ and $b$ by $k$, we obtain new equations for the __same__ hyperplanes
 
+$$ 
+\begin{align*}
+b_{11}: \mathbf{w}^T\mathbf{x}_+ + b &= 1 \\
+b_{12}: \mathbf{w}^T\mathbf{x}_- + b &= -1 
+\end{align*}
+$$
+
+:::: {.fragment}
 How far apart are these hyperplanes?
+::::
+
+---
 
 The vector $\mathbf{w}$ is orthogonal to the hyperplanes $b_{11}$ and $b_{12}$.
 
-So the distance between the two hyperplanes is the component of $(\mathbf{x}_+ - \mathbf{x}_-)$ that is in the direction of $\mathbf{w}$.
+So the distance between the two hyperplanes is the magnitude of the component of $(\mathbf{x}_+ - \mathbf{x}_-)$ that is in the direction of $\mathbf{w}$.
 
-In other words, the projection of $(\mathbf{x}_+ - \mathbf{x}_-)$ onto $\mathbf{w}$.
+Specifically it is the magnitude of the projection of $(\mathbf{x}_+ - \mathbf{x}_-)$ onto $\mathbf{w}$.
 
-Which is given by $$d = \frac{\mathbf{w}^T}{\Vert\mathbf{w}\Vert}(\mathbf{x}_+ - \mathbf{x}_-).$$
+This is given by 
 
-But subtracting the equations for the hyperplanes, we get:
+$$d = \frac{\mathbf{w}^T}{\Vert\mathbf{w}\Vert}(\mathbf{x}_+ - \mathbf{x}_-).$$
 
-$$ \mathbf{w}^T(\mathbf{x}_+ - \mathbf{x}_-) = 2 $$
+But subtracting the equations for the hyperplanes, we get
 
-So we conclude:
+$$ \mathbf{w}^T(\mathbf{x}_+ - \mathbf{x}_-) = 2.$$
 
-$$ d = \frac{2}{\Vert\mathbf{w}\Vert}. $$
+This implies that
+
+$$ d = \frac{2}{\Vert\mathbf{w}\Vert}.$$
+
+---
 
 Now, we have a measure for how good a separator is in terms of its parameters $\mathbf{w}$.
 
-We want the separator to maximize $ d = \frac{2}{\Vert\mathbf{w}\Vert},$ or equivalently, minimize $ \Vert\mathbf{w}\Vert$.
+We want the separator to maximize $d=\frac{2}{\Vert\mathbf{w}\Vert},$ or equivalently, minimize $\Vert\mathbf{w}\Vert$.
 
-What separators should we consider (ie, search through)?
+:::: {.fragment}
+What separators should we consider?
+::::
 
-The answer is, we consider all separators that correctly classify each point.
+:::: {.fragment}
+We consider all separators that correctly classify each point.
+::::
 
-That is, for all training points ($\mathbf{x}_i, y_i)$:
+:::: {.fragment}
+That is, for all training points $\{(\mathbf{x}_i, y_i)\}$:
     
 $$ \mathbf{w}^T\mathbf{x}_i + b \ge 1 \text{ if } y_i = 1 $$
 
 and 
 
-$$ \mathbf{w}^T\mathbf{x}_i + b \le -1 \text{ if } y_i = -1 $$
+$$ \mathbf{w}^T\mathbf{x}_i + b \le -1 \text{ if } y_i = -1.$$
+::::
 
-So now we can formally state the problem of defining the __maximum margin separator__:
+## Maximum Margin Separator
 
-$$ \mathbf{w}^* = \arg\min_\mathbf{w} \Vert\mathbf{w}\Vert$$
+We now formally state the problem of defining the __maximum margin separator__.
 
-Subject to:
+Minimize
 
-$$ \mathbf{w}^T\mathbf{x}_i + b \ge 1 \text{ if } y_i = 1 $$
+$$ \mathbf{w}^* = \arg\min_\mathbf{w} \Vert\mathbf{w}\Vert^{2},$$
 
-$$ \mathbf{w}^T\mathbf{x}_i + b \le -1 \text{ if } y_i = -1 $$
+subject to
+
+$$ 
+\begin{align*}
+\mathbf{w}^T\mathbf{x}_i + b \ge 1 \text{ if } y_i &= 1, \\
+\mathbf{w}^T\mathbf{x}_i + b \le -1 \text{ if } y_i &= -1. 
+\end{align*}
+$$
 
 This is a __constrained obtimization problem__ with a __quadratic objective function.__
 
-The quadratic form $\Vert \mathbf{w}\Vert$ is positive definite, so it is strictly convex (it has a unique global minimum).
+The quadratic form $\Vert \mathbf{w}\Vert^{2}$ is positive definite, i.e., it is strictly convex and has a unique global minimum.
+
+## Quadratic Programs
 
 Such problems are called <font color = "blue">quadratic programs.</font>   
 
-There are standard methods for solving them.   The methods are effective but can be slow.
+There are standard methods for solving them. The methods are effective but can be slow.
 
-The complexity of the problem grows with the number of constraints (ie, the number of training points).
+The complexity of the problem grows with the number of constraints, i.e., the number of training points.
 
 Ultimately, only a subset of the training points (constraints) will determine the final solution.
 
-The points that determine the solution "support" it.  They are the __support vectors.__
+The points that determine the solution *support* it and are called the __support vectors.__
 
-<center>
-    
-<img src="figs/L16-SVM-6.png" alt="Figure" width="40%">
-    
-</center>
+![](figs/L16-SVM-6.png){width="40%"}
 
-### Linear SVM: Non-Separable Case
+## Linear SVM: Non-Separable Case
 
 It may well happen that there is no hyperplane that perfectly separates the classes.
 
-<center>
-    
-<img src="figs/L16-SVM-7.png" alt="Figure" width="40%">
-    
-</center>
+![](figs/L16-SVM-7.png){width="40%"}
 
 In this case, we allow points to fall on the "wrong" side of their separator, but we add a penalty for this occurrence.
 
-To express this formally, we introduce __slack__ variables, one per data point: $\xi_i$.   
+To express this formally, we introduce __slack__ variables $\xi_i$.   
 
 Each $\xi_i$ measures how far the data point is on the "wrong side" of its separator.
 
-So the constraints are loosened:
+---
 
-$$ \mathbf{w}^T\mathbf{x}_i + b \ge 1-\xi_i \text{ if } y_i = 1 $$
+The new problem is minimize
 
-$$ \mathbf{w}^T\mathbf{x}_i + b \le -1+\xi_i \text{ if } y_i = -1 $$
+$$ \mathbf{w}^* = \arg\min_\mathbf{w} \left(\Vert\mathbf{w}\Vert + C \left(\sum_{i=1}^N \xi_i\right)^k\right),$$
 
-$$ \xi_i \ge 0.$$
+subject to
 
-And the new problem is:
+$$
+\begin{align*} 
+\mathbf{w}^T\mathbf{x}_i + b \ge 1-\xi_i \text{ if } y_i &= 1, \\
+\mathbf{w}^T\mathbf{x}_i + b \le -1+\xi_i \text{ if } y_i &= -1,\\
+\xi_i &\ge 0.
+\end{align*}
+$$
 
-$$ \mathbf{w}^* = \arg\min_\mathbf{w} \left(\Vert\mathbf{w}\Vert + C (\sum_{i=1}^N \xi_i)^k\right),$$
+---
 
-subject to the above constraints.
+Notice we have introduced a hyperparameter $C$, which controls the complexity of the SVM.  This hyperparameter needs to be set by cross-validation.
 
-Notice we have introduced a hyperparameter: $C$.
-    
-$C$ essentially controls the complexity of the SVM.  
+A small value of $C$ allows many points to fall on the wrong side of their corresponding hyperplane (having a nonzero $\xi_i$) and results in a large number of support vectors. Small $C$ results in a more stable decision boundary.
 
-Hence it needs to be set by cross-validation.
+Large $C$ values will penalize violations heavily, and will result in fewer nonzero $\xi_i$'s, leading to fewer support vectors.
 
-A small value of $C$ will result in allowing many points to fall on the wrong side of their corresponding hyperplane (having a nonzero $\xi_i$) resulting in a large number of support vectors.   So small $C$ results in a more stable decision boundary.
-
-Large $C$ values will penalize violations heavily, and will result in fewer nonzero $\xi_i$s, leading to fewer support vectors.
-
-### Nonlinear SVM
+## Nonlinear SVM
 
 Finally, we consider the case in which the decision boundary is strongly nonlinear.
 
-<center>
-    
-<img src="figs/L16-SVM-8.png" alt="Figure" width="40%">
-    
-</center>
+![](figs/L16-SVM-8.png){width="40%"}
+
+---
 
 The basic idea here is that we take the data and transform it into another, higher-dimensional space.
 
 Here is the same dataset on transformed coordinates:
 
-$$ x_1 \rightarrow x_1 $$
+$$ 
+\begin{align*}
+x_1 &\rightarrow x_1 \\
+x_2 &\rightarrow (x_1 + x_2)^4 
+\end{align*}
+$$
 
-$$ x_2 \rightarrow (x_1 + x_2)^4 $$
+![](figs/L16-SVM-9.png){fig-align="center" width="35%"}
 
-<center>
-    
-<img src="figs/L16-SVM-9.png" alt="Figure" width="40%">
-    
-</center>
-
-(We are not showing more dimensions here, but the principle is the same.)
+::: aside
+We are not showing more dimensions here, but the principle is the same.
+:::
 
 In the higher dimensional space, the points may be (approximately) separable.
 
-To achieve this using the framework of the SVM, we use a __kernel__.
+## Kernels
 
-A kernel is a similarity function $K(\mathbf{x}, \mathbf{y})$.
+To achieve this using the framework of the SVM we use a __kernel__.
+
+A kernel is a  function $K(\mathbf{x}, \mathbf{y})$.
 
 There are many ways to define kernels. 
 
 The most popular kernels are:
     
-* Linear (aka Inner Product): $K(\mathbf{x}, \mathbf{y}) = \mathbf{x}^T\mathbf{y}$
+* Linear (inner product): $K(\mathbf{x}, \mathbf{y}) = \mathbf{x}^T\mathbf{y}$
 * Polynomial: $K(\mathbf{x}, \mathbf{y}) = (\mathbf{x}^T\mathbf{y})^d$
 * Gaussian: $K(\mathbf{x}, \mathbf{y}) = \text{exp}(-\gamma\Vert\mathbf{x}-\mathbf{y}\Vert^2)$
 
-The Gaussian kernel is also called a "Radial Basis Function".   
-
+::: aside
+The Gaussian kernel is also called a *Radial Basis Function*.  
+:::
+---
+ 
 There is an efficient way to train an SVM using a kernel for a similarity function.
 
 The basic idea is that the standard linear SVM is trained using Euclidean distance.
 
-However, the squared Euclidean distance between two vectors is:
+However, the squared Euclidean distance between two vectors is
     
-$$ \Vert\mathbf{x} - \mathbf{y}\Vert^2 = (\mathbf{x} - \mathbf{y})^T(\mathbf{x} - \mathbf{y}) = \mathbf{x}^T\mathbf{x} + \mathbf{y}^T\mathbf{y} - 2\mathbf{x}^T\mathbf{y}$$
+$$ \Vert\mathbf{x} - \mathbf{y}\Vert^2 = (\mathbf{x} - \mathbf{y})^T(\mathbf{x} - \mathbf{y}) = \mathbf{x}^T\mathbf{x} + \mathbf{y}^T\mathbf{y} - 2\mathbf{x}^T\mathbf{y}.$$
 
-So the Euclidean distance can be defined entirely in terms of the __inner product__ kernel!
+So the Euclidean distance can be defined entirely in terms of the __inner product__ kernel.
 
-To train an SVM with a different kernel, we just replace all the inner products with calls to our new kernel function. 
+To train an SVM with a different kernel, we replace all the inner products with calls to our new kernel function. 
 
-The result is that we can obtain highly curved decision boundaries (we'll demonstrate next).
+The result is that we can obtain highly curved decision boundaries.
 
 In practice, RBF works well in many cases.
 
-### SVM: Summary
+## SVM: Summary
 
 * In practice, SVMs have shown good results on many problems.
-
 * In particular, it is effective at dealing with high-dimensional data and avoids the curse of dimensionality.
-
 * Since all data is represented as vectors, and we are relying on distance functions like Euclidean distance, it is important to pay attention to feature scaling when using SVMs.
 
 ## SVM and Naive Bayes in Python
 
-We work with a dataset describing Italian wine samples (https://archive.ics.uci.edu/ml/datasets/Wine). 
+We work with a dataset describing [Italian wine samples](https://archive.ics.uci.edu/ml/datasets/Wine). 
 
-We will take the alcohol content of the wine, and its Malic acid content, and use it to predict the grape type (cultivar).
+We will use as features the alcohol content of the wine and its Malic acid content to predict the grape type (cultivar).
 
 ```{python}
-#| slideshow: {slide_type: fragment}
+#| echo: false
 import sklearn.utils as utils
 import sklearn.svm as svm
 import sklearn.model_selection as model_selection
@@ -619,54 +635,47 @@ import sklearn.datasets as datasets
 ```
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 wine = pd.read_table("data/wine.data", sep=',')
 
-wine.columns = [
-            'region',
-            'Alcohol',
-            'Malic acid',
-            'Ash',
-            'Alcalinity of ash',
-            'Magnesium',
-            'Total phenols',
-            'Flavanoids',
-            'Nonflavanoid phenols',
-            'Proanthocyanins',
-            'Color intensity',
-            'Hue',
-            'OD280/OD315 of diluted wines',
-            'Proline']
+wine.columns = ['region',
+                'Alcohol',
+                'Malic acid',
+                'Ash',
+                'Alcalinity of ash',
+                'Magnesium',
+                'Total phenols',
+                'Flavanoids',
+                'Nonflavanoid phenols',
+                'Proanthocyanins',
+                'Color intensity',
+                'Hue',
+                'OD280/OD315 of diluted wines',
+                'Proline']
 
 X = wine[['Alcohol', 'Malic acid']].values
 y = wine['region'].values
 ```
 
-We'll first fit a linear SVM to the data:
+We'll first fit a linear SVM to the data.
 
 ```{python}
 np.random.seed(0)
-X_train, X_test, y_train, y_test = model_selection.train_test_split(X, 
-                                                                    y, 
-                                                                    test_size = 0.5)
+X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y,test_size = 0.5)
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
 svc = svm.SVC(kernel = 'linear')
 svc.fit(X_train, y_train)
 y_pred_test = svc.predict(X_test)
 print(f'Accuracy of SVM on test set: {svc.score(X_test, y_test):0.3f}')
 ```
 
-Let's visualize the decision boundaries:
+---
+
+Let's visualize the decision boundaries.
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
+#| fig-align: center
 from matplotlib.colors import ListedColormap
 # Create color maps for 3-class classification problem, as with iris
 cmap_light = ListedColormap(['#FFAAAA', '#AAFFAA', '#AAAAFF'])
@@ -694,35 +703,36 @@ def plot_estimator(estimator, X, y):
     # Plot also the training points
     plt.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap_bold)
     plt.axis('tight')
-    # plt.axis('off')
     plt.tight_layout()
+plt.show()
 ```
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
 plot_estimator(svc, X, y)
 plt.xlabel('Alcohol')
-plt.ylabel('Malic Acid');
+plt.ylabel('Malic Acid')
+plt.show()
 ```
 
-Note that in practice we should pay attention to feature scaling when using SVMs.  We haven't done that here.
+---
 
-As described already, the SVM gets its name from the samples in the dataset from each class that lie closest to the other class. 
+Note that in practice we should pay attention to feature scaling when using SVMs. We haven't done that here.
+
+As described already, the SVM gets its name from the samples in the dataset from each class that lies closest to the other class. 
 
 These training samples are called "support vectors" because changing their position in the $d$-dimensional feature space would change the location of the decision boundary.
 
 In `scikit-learn`, the indices of the support vectors for each class can be found in the `support_vectors_` attribute of the SVC object. 
 
+---
+
 Here, we will use just two of the three classes for clarity. 
 
-The support vectors are circled.   Can you visualize the two separator hyperplanes?
+The support vectors are circled.  Can you visualize the two separator hyperplanes?
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
+#| fig-align: center
 # Extract classes 1 and 2
 X, y = X[np.in1d(y, [1, 2])], y[np.in1d(y, [1, 2])]
 
@@ -735,11 +745,12 @@ plt.scatter(svc.support_vectors_[:, 0],
            facecolors='none', 
            edgecolors = 'k',
            linewidths=2,
-           zorder=10);
-plt.title(f'2-class accuracy on entire dataset: {svc.score(X, y):0.3f}');
+           zorder=10)
+plt.title(f'2-class accuracy on entire dataset: {svc.score(X, y):0.3f}')
+plt.show()
 ```
 
-### Regularization
+## Regularization
 
 Since the classes are not linearly separable, there are nonzero slack variables, each of which is associated with a support vector.
 
@@ -749,24 +760,31 @@ In practice, a large $C$ value means that the number of support vectors is small
 
 `scikit-learn` sets a default value of $C=1$.
 
+## Large $C$
+
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
 svc = svm.SVC(kernel='linear', C=1e4)
 plot_estimator(svc, X, y)
 plt.scatter(svc.support_vectors_[:, 0], svc.support_vectors_[:, 1], s=80, 
             facecolors='none', edgecolors = 'k', linewidths=2, zorder=10)
-plt.title(f'C = 10000: small number of support vectors (acc: {svc.score(X, y):0.3f})');
+plt.title(f'C = 10000: small number of support vectors (acc: {svc.score(X, y):0.3f})')
+plt.show()
+```
 
+## Small $C$
+
+```{python}
+#| fig-align: center
 svc = svm.SVC(kernel='linear', C=1e-2)
 plot_estimator(svc, X, y)
 plt.scatter(svc.support_vectors_[:, 0], svc.support_vectors_[:, 1], s=80, 
             facecolors='none', edgecolors = 'k', linewidths=2, zorder=10)
-plt.title(f'C = 0.01: high number of support vectors (acc: {svc.score(X, y):0.3f})');
+plt.title(f'C = 0.01: high number of support vectors (acc: {svc.score(X, y):0.3f})')
+plt.show()
 ```
 
-### Kernels
+## Kernels
 
 We can also choose from a suite of available kernels:
 
@@ -780,61 +798,57 @@ Or, a custom kernel can be passed as a function.
 
 Note that the radial basis function (rbf) kernel is just a Gaussian kernel, but with parameter $\gamma = \frac{1}{\sigma^2}$.
 
-__Linear Kernel__
+## Linear Kernel
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
+#| fig-align: center
 svc_lin = svm.SVC(kernel = 'linear')
 plot_estimator(svc_lin, X, y)
 plt.scatter(svc_lin.support_vectors_[:, 0], svc_lin.support_vectors_[:, 1], 
             s=80, facecolors='none', edgecolors = 'k', linewidths=2, zorder=10)
 plt.title('Linear kernel')
 y_pred_test = svc_lin.predict(X_test)
-plt.title(f'Accuracy on test set: {svc.score(X_test, y_pred_test):0.3f}');
+plt.title(f'Accuracy on test set: {svc.score(X_test, y_pred_test):0.3f}')
+plt.show()
 ```
 
-__Polynomial Kernel__
+## Polynomial Kernel
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
+#| fig-align: center
 svc_poly = svm.SVC(kernel='poly', degree=4)
 plot_estimator(svc_poly, X, y)
 plt.scatter(svc_poly.support_vectors_[:, 0], svc_poly.support_vectors_[:, 1], 
            s=80, facecolors='none', edgecolors = 'k', linewidths=2, zorder=10)
 plt.title('Polynomial kernel')
 y_pred_test = svc_poly.predict(X_test)
-plt.title(f'Accuracy on test set: {svc.score(X_test, y_pred_test):0.3f}');
+plt.title(f'Accuracy on test set: {svc.score(X_test, y_pred_test):0.3f}')
+plt.show()
 ```
 
-__RBF kernel__
+## RBF Kernel
 
 ```{python}
-#| hide_input: false
-#| slideshow: {slide_type: '-'}
-#| tags: [hide-input]
+#| fig-align: center
 svc_rbf = svm.SVC(kernel='rbf', gamma=100, C = 1e2)
 plot_estimator(svc_rbf, X, y)
 plt.scatter(svc_rbf.support_vectors_[:, 0], svc_rbf.support_vectors_[:, 1], 
            s=80, facecolors='none', edgecolors = 'k', linewidths=2, zorder=10)
 plt.title('RBF kernel')
 y_pred_test = svc_rbf.predict(X_test)
-plt.title(f'Accuracy on test set: {svc.score(X_test, y_pred_test):0.3f}');
+plt.title(f'Accuracy on test set: {svc.score(X_test, y_pred_test):0.3f}')
+plt.show()
 ```
 
-### Cross-Validation
+## Cross-Validation
 
 Let's evaluate our choice of hyperparameter $C$.
 
 We have seen how to tune hyperparameters already using `model_selection.train_test_split()`.
 
-Now we'll use a utility `model_selection.cross_val_score()` which will do $k$-fold cross validation for us, for a single hyperparmeter setting, automatically:
+Now we'll use a utility `model_selection.cross_val_score()` which will automatically do $k$-fold cross validation for us, for a single hyperparmeter.
 
 ```{python}
-#| slideshow: {slide_type: '-'}
 f = svm.SVC(kernel = 'linear', C = 1)
 scores = model_selection.cross_val_score(f, 
                                          wine[['Alcohol', 'Malic acid']], 
@@ -845,11 +859,11 @@ print(f'Scores: {scores}')
 print(f'Accuracy: {scores.mean():0.2f} (+/- {scores.std()/np.sqrt(5):0.2f})')
 ```
 
-Let's use this to do a grid search to tune $C$:
+---
+
+Let's use this to do a grid search to tune $C$.
 
 ```{python}
-#| hide_input: false
-#| slideshow: {slide_type: '-'}
 means = []
 stds = []
 folds = 5
@@ -865,24 +879,21 @@ C_s = np.array(C_vals)
 ```
 
 ```{python}
-#| hide_input: false
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
 plt.errorbar(np.log10(C_vals), acc, stderr)
 plt.xlabel('log10(C)')
 plt.ylabel('Accuracy')
-plt.title(r'Generalization Accuracy of Linear SVM as Function of $C$');
+plt.title(r'Generalization Accuracy of Linear SVM as Function of $C$')
+plt.show()
 ```
 
-### SVM and NB: the Iris Data
+## SVM and NB: the Iris Dataset
 
 To compare SVM and Naive Bayes, we'll look at the Iris dataset again, and just using two features for visualization.
 
 We will not hold out data since we're just interested in the shapes of the decision boundaries.
 
 ```{python}
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
 iris = datasets.load_iris()
 X = iris.data[:, :2]                     
 y = iris.target
@@ -896,7 +907,10 @@ rbf_svc = svm.SVC(kernel = 'rbf', gamma = 0.7, C = C).fit(X, y)
 poly_svc = svm.SVC(kernel = 'poly', degree = 3, C = C).fit(X, y)
 ```
 
-To use Naive Bayes "out of the box", one has to treat all the features as either:
+---
+
+To use Naive Bayes, one has to treat all the features as either
+
 * Gaussian
 * Multinomial (Categorical)
 * Binary
@@ -905,17 +919,15 @@ To use Naive Bayes "out of the box", one has to treat all the features as either
 
 We'll use the Gaussian.
 
+---
+
 ```{python}
-#| slideshow: {slide_type: fragment}
 from sklearn.naive_bayes import GaussianNB
 
 gnb = GaussianNB().fit(X, y)
 ```
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
 # create a mesh to plot in
 h = .02  # step size in the mesh
 x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
@@ -953,5 +965,16 @@ for i, clf in enumerate((svc, gnb, rbf_svc, poly_svc)):
     plt.title(titles[i], size = 20)
 
 plt.tight_layout()
+plt.show()
 ```
 
+::: {.content-visible when-profile="slides"}
+## Recap
+
+We covered the following classifiers
+
+- Naive Bayes
+- Support vector machines
+
+We then compared the two classifiers on the Iris dataset.
+:::
