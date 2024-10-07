@@ -1,162 +1,226 @@
 ---
-title: Decision Trees
+title: "Decision Trees and Random Forests"
 jupyter: python3
+bibliography: references.bib
+nocite: |
+  @Hastie2009
 ---
+
+## Outline
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/14-Classification-I-Decision-Trees.ipynb)
+
+- Build a decision tree manually
+- Look at single and collective impurity measures
+- Selecting splitting attributes and test conditions
+- Scikit-learn implementation
+- Model training and evaluation 
+- Random forests
 
 ## Introduction
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/14-Classification-I-Decision-Trees.ipynb)
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [remove-cell]
-%matplotlib inline
-%config InlineBackend.figure_format='retina'
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from IPython.display import Image, display_html, display, Math, HTML;
+``` {python}
+#| echo: false
+from sklearn import tree
 ```
 
+We'll now start looking into how to build models to predict an outcome variable from labeled data.
+
+**Classification** problems:
+
+- predict a category
+- e.g. spam/not spam, fraud/not fraud, default/not default, malignant/benign, etc.
+
+**Regression** problems:
+
+- predict a numeric value
+- e.g. price of a house, salary of a person, etc.
 
 
-We start our study of __classification__ methods.
+## Loan Default Example
 
-::: {.fragment}
-Recall that in a classification problem, we have data tuples $(\mathbf{x}, y)$ in which the $\mathbf{x}$ are the features, and the $y$ values are __categorical__ data.  
+We'll use an example from [@Tan2018].
 
-We typically call the $y$ values "labels" or "classes."
-:::
+![](figs/L14-terrier-savings-logo.png){width="100px"}
 
-:::: {.fragment}
-Some examples of classification tasks:
+You are a loan officer at **Terrier Savings and Loan**. 
 
-* Predicting tumor cells as malignant or benign
-* Classifying credit card transactions as legitimate or fraudulent
-* Classifying secondary structures of a protein as alpha-helix, beta-sheet, or other
-* Categorizing news stories as finance, weather, entertainment, sports, etc
-::::
+You have a dataset on loans that you have made in the past.
 
----
+You want to build a model to predict whether a loan will default.
 
-The first classification method we will consider is called the __decision tree.__
+``` {python}
+import pandas as pd
 
-It is a __very__ popular method, and has some nice properties as we will see.
+loans = pd.read_csv('data/loans.csv', index_col=0)
+loans
+```
 
-## Decision Trees in Action
+Here's the summary info of the data set.
 
-::: {.callout-note}
-This section and a number of following sections are based on Chapter 4 of "Introduction to Data Mining," by Tan, Steinbach, and Kumar (2004) and companion slides.
-:::
+``` {python}
+loans.info()
+```
 
-We will start by describing how a decision tree works.
+Since some of the fields are categorical, let's convert them to categorical data types.
 
-We are assuming a decision tree has been built to solve the following classification problem:
+``` {python}
+loans['Home Owner'] = loans['Home Owner'].astype('category')
+loans['Marital Status'] = loans['Marital Status'].astype('category')
+loans['Defaulted Borrower'] = loans['Defaulted Borrower'].astype('category')
+loans.info()
+```
 
-Given an individual's Tax Refund Status, Marital Status, and Taxable Income, predict whether they will repay a loan.
+## Simple Model
 
-![](figs/L14-DT-Example-1.png){width="800px"}
+Looking at the table, let's just start with the simplest model possible and just
+predict that no one will default.
 
----
+So the output of our model is just to always predict "No".
 
-We then step through the tree, making a decision at each node that takes us to another node in the tree.
+``` {python}
+import graphviz
 
-Each decision examines a single feature in the item being classified.
+dot_data = """
+digraph Tree {
+    node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="values = [# No, # Yes] =[7,3]\\ndefaulted = No\\nerror = 30%", fillcolor="#ffffff"] ;
+}
+"""
 
-![](figs/L14-DT-Example-2.png){width="800px"}
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
 
----
-
-![](figs/L14-DT-Example-3.png){width="800px"}
-
----
-
-![](figs/L14-DT-Example-4.png){width="800px"}
-
----
-
-![](figs/L14-DT-Example-5.png){width="800px"}
-
----
-
-![](figs/L14-DT-Example-6.png){width="800px"}
-
-We conclude that this record is classified as "Not Repay" is "No".
-
----
-
-Note also that decision trees can be used to predict numeric values, so they are used for regression as well.
-
-The general term "Classification and Regression Tree" (CART) is sometimes used -- although this term also refers to a specific decision tree learning algorithm.
-
-## Learning a Decision Tree
-
-![](figs/L14-DT-Overview.png){width="800px"}
-
-We've discussed how to apply a decision tree to data (lower portion of this figure).
-
-But how does one train a decision tree?   What algorithm can we use?
+We see a 30% error rate since 3 out of 10 loans defaulted.
 
 ---
 
-A number of algorithms have been proposed for building decision trees:
+Let's split the data based on the "Home Owner" field.
 
-* Hunt's algorithm (one of the earliest)
-* CART
-* ID3, C4.5
-* SLIQ, SPRINT
-* etc
+``` {python}
+import graphviz
 
-We will look at Hunt's Algorithm as our example.
+dot_data = """
+digraph Tree {
+    node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Home Owner\\n---\\nsamples = 10\\nvalues = [7, 3]\\ndefaulted = No\\nerror = 30%", fillcolor="#ffffff"] ;
+    1 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
+    2 [label="samples = 7\\nvalue = [4, 3]\\ndefaulted = Yes\\nerror = 43%", fillcolor="#ffffff"] ;
+    0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="Yes"] ;
+    0 -> 2 [labeldistance=2.5, labelangle=-45, headlabel="No"] ;}
+"""
 
-## Hunt's Algorithm
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
 
-Hunt's Algorithm builds the tree node by node, starting from the root.
+We see that the left node (home owner == yes) has a 0% error rate since all the samples are no. We don't split this node since all the samples are of the same class. We call this node a **leaf node** and we'll color it orange.
 
-As we build the tree, we divide the training data up.
+The right node (home owner == no) has a 43% error rate since 3 out of 7 loans defaulted. 
 
-:::: {.columns}
-::: {.column width="55%"}
-Let $D_t$ be the set of training records that reach node $t$.
-    
- * If $D_t$ contains records that all belong to a single class $y_t$, then $t$ is a leaf node labeled as $y_t$.
- * If $D_t$ is an empty set, then $t$ is a leaf node labeled by the default class $y_d$.
- * If $D_t$ contains records that belong to more than one class, use an attribute to split $D_t$ into smaller subsets, and assign that splitting-rule to node $t$.
-    
-Recursively apply the above procedure until a stopping criterion is met.
-
-:::
-::: {.column width="40%"}
-
-![](figs/L14-DT-Data-Example.png) 
-
-:::
-::::
+Let's split this node into two nodes based on the "Marital Status" field.
 
 ---
 
-So as Hunt's algorithm progresses, records are divided up and assigned to leaf nodes.   The most challenging step in Hunt's algorithm is deciding which leaf node to split next, and how to specify the split.
+Let's split on the "Marital Status" field.
 
-In general, we use a greedy strategy.  We will split a set of records based on an attribute test that optimizes some criterion.
+We see that the 3 defaulted loans are all for married people. Since the node is
+all one class, we don't split this node and we call it a **leaf node**.
 
-We choose the set to split that provides the __largest improvement in our criterion.__
+``` {python}
+import graphviz
 
-Once we have chosen the set to split, the remaining questions are:
-    
-* Determining how to split the record set
-    * How should we specify the attribute test condition?
-    * How should we determine the best split for a set based on a given attribute?
-* Determining when to stop splitting.
+dot_data = """
+digraph Tree {
+    node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Home Owner\\n---\\nsamples = 10\\nvalues = [7, 3]\\ndefaulted = No\\nerror = 30%", fillcolor="#ffffff"] ;
+    1 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
+    2 [label="Marital Status\\n---\\nsamples = 7\\nvalue = [4, 3]\\ndefaulted = Yes", fillcolor="#ffffff"] ;
+    3 [label="samples = 4\\nvalue = [1, 3]\\ndefaulted = Yes\\nerror = 25%", fillcolor="#ffffff"] ;
+    4 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
+    0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="Yes"] ;
+    0 -> 2 [labeldistance=2.5, labelangle=-45, headlabel="No"] ;
+    2 -> 3 [labeldistance=2.5, labelangle=45, headlabel="Single,\\nDivorced"] ;
+    2 -> 4 [labeldistance=2.5, labelangle=-45, headlabel="Married"] ;}
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+We can list the subsets for the two criteria to calculate the error rate.
+
+``` {python}
+#| fig-cap: 'Table: Home Owner == No and Marital Status == Single or Divorced --> Defaulted == Yes'
+#| fig-cap-location: top
+loans[(loans['Home Owner'] == "No") & (loans['Marital Status'].isin(['Single', 'Divorced']))]
+```
+
+``` {python}
+#| fig-cap: 'Table: Home Owner == No and Marital Status == Married --> Defaulted == No'
+#| fig-cap-location: top
+loans[(loans['Home Owner'] == "No") & (loans['Marital Status'] == "Married")]
+```
+
+---
+
+Let's try to split on the "Annual Income" field. We see that the person with income of 70K doesn't default, so we split the node into two nodes based on the "Income" field. We arbitrarily pick a threshold of $75K.
+
+``` {python}
+import graphviz
+
+dot_data = """
+digraph Tree {
+    node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Home Owner\\n---\\nsamples = 10\\nvalues = [7, 3]\\ndefaulted = No\\nerror = 30%", fillcolor="#ffffff"] ;
+    1 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
+    2 [label="Marital Status\\n---\\nsamples = 7\\nvalue = [4, 3]\\ndefaulted = Yes", fillcolor="#ffffff"] ;
+    3 [label="Income <= 75K\\nsamples = 4\\nvalue = [1, 3]\\ndefaulted = Yes\\nerror = 25%", fillcolor="#ffffff"] ;
+    4 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
+    5 [label="samples = 1\\nvalue = [1, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
+    6 [label="samples = 3\\nvalue = [0, 3]\\ndefaulted = Yes\\nerror = 0%", fillcolor="#e58139"] ;
+    0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="Yes"] ;
+    0 -> 2 [labeldistance=2.5, labelangle=-45, headlabel="No"] ;
+    2 -> 3 [labeldistance=2.5, labelangle=45, headlabel="Single,\\nDivorced"] ;
+    2 -> 4 [labeldistance=2.5, labelangle=-45, headlabel="Married"] ;
+    3 -> 5 [labeldistance=2.5, labelangle=45, headlabel="Yes"] ;
+    3 -> 6 [labeldistance=2.5, labelangle=-45, headlabel="No"] ;}
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+## Evaluating the Model
+
+We've dispositioned every data point by walking down the tree to a leaf node.
+
+How do we know if this tree is good? We arbitrarily picked the order of the fields to split on.
+
+Is there a way to systematically pick the order of the fields to split on? This is called the **splitting criterion**.
+
+There's also the question of when to stop splitting, or the **stopping criterion**. So far, we stopped splitting when
+we reached a node of pure class but there are reasons to stop splitting even without pure classes, which we'll see later.
 
 ## Specifying the Test Condition
 
-How we specify a test condition depends on the attribute type:
+Before we continue, we should take a moment to consider how we specify a test condition of a node.
 
-* Nominal (Categorical)
-* Ordinal (eg, Small, Medium, Large)
-* Continuous
+How we specify a test condition depends on the attribute type which can be:
+
+* Binary (Boolean)
+* Nominal (Categorical, e.g. cat, dog, bird)
+* Ordinal (e.g. Small, Medium, Large)
+* Continuous (e.g., 1.5, 2.1, 3.7)
 
 And depends on the number of ways to split - __multi-way__ or __binary__:
 
@@ -166,36 +230,221 @@ For a __Nominal__ attribute:
 
 In a __Multi-way split__ we can use as many partitions as there are distinct values of the attribute:
 
-![](figs/L14-split-1.png){width="300px"}
+``` {python}
+import graphviz
+
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Marital Status", fillcolor="#ffffff"] ;
+    1 [label="Single", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Divorced", fillcolor="#ffffff", shape="none"] ;
+    3 [label="Married", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ;
+    0 -> 3 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
 
 ---
 
 In a __Binary split__ we divide the values into two groups.  
 
-In this case, we need to find an optimal partitioning of values into groups.
+In this case, we need to find an optimal partitioning of values into groups, which we discuss shortly.
 
-![](figs/L14-split-2.png){width="600px"}
+::: {layout-ncol=3}
+
+``` {python}
+#| echo: false
+import graphviz
+
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Marital Status", fillcolor="#ffffff"] ;
+    1 [label="Single,\\nDivorced", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Married", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+``` {python}
+#| echo: false
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Marital Status", fillcolor="#ffffff"] ;
+    1 [label="Single", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Married,\\nDivorced", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+``` {python}
+#| echo: false
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Marital Status", fillcolor="#ffffff"] ;
+    1 [label="Single,\\nMarried", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Divorced", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+:::
 
 ---
 
-An __Ordinal__ attribute is similar to a Nominal attribute, except that since
-attributes have an ordering, we can specify the test in terms of a threshold.  
+For an __Ordinal__ attribute, we can use a multi-way split with as many partitions
+as there are distinct values.
 
-This simplifies the search for a good paritition.
+``` {python}
+#| echo: false
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Shirt\\nSize", fillcolor="#ffffff"] ;
+    1 [label="Small", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Medium", fillcolor="#ffffff", shape="none"] ;
+    3 [label="Large", fillcolor="#ffffff", shape="none"] ;
+    4 [label="X-Large", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ;
+    0 -> 3 ;
+    0 -> 4 ; }
+"""
 
-![](figs/L14-split-3.png){width="600px"}
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+---
+
+Or we can use a binary split as long we preserve the ordering of the values.
+
+::: {layout-ncol=2}
+
+``` {python}
+#| echo: false
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Shirt\\nSize", fillcolor="#ffffff"] ;
+    1 [label="Small,\\nMedium", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Large,\\nX-Large", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+``` {python}
+#| echo: false
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Shirt\\nSize", fillcolor="#ffffff"] ;
+    1 [label="Small", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Medium, Large,\\nX-Large", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+:::
+
+::: {.callout-warning}
+Be careful not to violate the ordering of values such as {Small, Large} and {Medium, X-Large}.
+:::
 
 ---
 
 A __Continuous__ attribute can be handled two ways:
-    
-It can be __discretized__ to form an ordinal categorical attribute
 
-![](figs/L14-split-4.png){width="400px"}
+::: {layout-ncol=2}
 
-Or it can be partitioned via a threshold to form for a binary split.
+``` {python}
+#| echo: false
+#| fig-cap: 'It can be thresholded to form a binary split.'
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Income\\n<= 75K", fillcolor="#ffffff"] ;
+    1 [label="Yes", fillcolor="#ffffff", shape="none"] ;
+    2 [label="No", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ; }
+"""
 
-![](figs/L14-split-5.png){width="200px"}
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+
+
+``` {python}
+#| echo: false
+#| fig-cap: 'Or it can be split into contiguous ranges to form an ordinal categorical attribute.'
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Income", fillcolor="#ffffff"] ;
+    1 [label="< 10K", fillcolor="#ffffff"shape="none"] ;
+    2 [label="[10K, 25K)", fillcolor="#ffffff", shape="none"] ;
+    3 [label="[25K, 50K)", fillcolor="#ffffff", shape="none"] ;
+    4 [label="[50K, 75K)", fillcolor="#ffffff", shape="none"] ;
+    5 [label="> 75K", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ;
+    0 -> 3 ;
+    0 -> 4 ;
+    0 -> 5 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+:::
 
 ---
 
@@ -205,203 +454,667 @@ possibly involving combinatorial searching of groupings.
 However for ordinal or continuous attributes, sweeping through a range of
 threshold values can be more efficient.
 
-## Determining the Best Split
+## Measures for Selecting Attribute and Test Condition
 
-Our algorithmic strategy is to split record sets so as to improve classification
-accuracy on the training data.
+Ideally, we want to pick attributes and test conditions that maximize the homogeneity of the splits.
 
-When is classification accuracy maximized?   
+We can use a impurity index to measure the homogeneity of a split.
+
+We'll look at ways of measuring impurity of a node and the collective impurity of its child nodes.
+
+## Impurity Measures
+
+The following are three impurity indices:
+
+$$
+\begin{aligned}
+\textnormal{Entropy} &= -\sum_{i=0}^{c-1}  p_i(t) \log_2 p_i(t) \\
+\textnormal{Gini index} &= 1 - \sum_{i=0}^{c-1}  p_i(t)^2 \\
+\textnormal{Classification error} &= 1 - \max_i p_i(t)
+\end{aligned}
+$$
+
+where $p_i(t)$ is the **relative frequency** of training instances of class $i$ at a node $t$ and $c$ is the number of classes.
+
+By convention, we set $0 \log_2 0 = 0$ in entropy calculations.
+
+All three impurity indices equal 0 when all the records at a node belong to the same class.
+
+All three impurity indices reach their maximum value when the classes are evenly distributed among the child nodes.
+
+---
+
+:::: {.columns}
+::: {.column width="40%"}
+
+| Node $N_1$ | Count |
+| --- | --- |
+| Class=0 | 0 |
+| Class=1 | 6 |
+
+:::
+::: {.column width="60%"}
+
+$$
+\begin{aligned}
+\textnormal{Gini} &= 1 - \left(\frac{0}{6}\right)^2 - \left(\frac{6}{6}\right)^2 = 0 \\
+\textnormal{Entropy} &= -\left(\frac{0}{6} \log_2 \frac{0}{6} - \frac{6}{6} \log_2 \frac{6}{6}\right) = 0 \\
+\textnormal{Error} &= 1 - \max\left[\frac{0}{6}, \frac{6}{6}\right] = 0
+\end{aligned}
+$$
+
+:::
+::::
+
+---
+
+:::: {.columns}
+::: {.column width="40%"}
+
+| Node $N_2$ | Count |
+| --- | --- |
+| Class=0 | 1 |
+| Class=1 | 5 |
+
+:::
+::: {.column width="60%"}
+
+$$
+\begin{aligned}
+\textnormal{Gini} &= 1 - \left(\frac{1}{6}\right)^2 - \left(\frac{5}{6}\right)^2 = 0.278 \\
+\textnormal{Entropy} &= -\left(\frac{1}{6} \log_2 \frac{1}{6} - \frac{5}{6} \log_2 \frac{5}{6}\right) = 0.650 \\
+\textnormal{Error} &= 1 - \max\left[\frac{1}{6}, \frac{5}{6}\right] = 0.167
+\end{aligned}
+$$
+
+:::
+::::
+
+---
+
+:::: {.columns}
+::: {.column width="40%"}
+
+| Node $N_3$ | Count |
+| --- | --- |
+| Class=0 | 3 |
+| Class=1 | 3 |
+
+:::
+::: {.column width="60%"}
+
+$$
+\begin{aligned}
+\textnormal{Gini} &= 1 - \left(\frac{3}{6}\right)^2 - \left(\frac{3}{6}\right)^2 = 0.5 \\
+\textnormal{Entropy} &= -\left(\frac{3}{6} \log_2 \frac{3}{6} - \frac{3}{6} \log_2 \frac{3}{6}\right) = 1 \\
+\textnormal{Error} &= 1 - \max\left[\frac{3}{6}, \frac{3}{6}\right] = 0.5
+\end{aligned}
+$$
+
+:::
+::::
+
+---
+
+We can plot the three impurity indices to get a sense of how they behave for binary classification problems.
+
+``` {python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define probability values
+p = np.linspace(0, 1, 100)
+
+# Calculate impurity measures
+entropy = -p * np.log2(p + 1e-9) - (1 - p) * np.log2(1 - p + 1e-9)  # Adding small epsilon to avoid log(0)
+gini = 2 * p * (1 - p)
+misclassification_error = 1 - np.maximum(p, 1 - p)
+
+# Create the plot
+plt.figure(figsize=(8, 6))
+plt.plot(p, entropy, label='Entropy', linewidth=2)
+plt.plot(p, gini, '--', label='Gini', linewidth=2)
+plt.plot(p, misclassification_error, '-.', label='Misclassification error', linewidth=2)
+
+# Add labels and title
+plt.xlabel('p')
+plt.ylabel('Impurity')
+plt.title('Comparison among the impurity measures for binary classification problems')
+plt.legend()
+plt.grid(True)
+
+# Display the plot
+plt.show()
+```
+
+They all maintain the same ordering for every relative frequency, i.e. Entropy > Gini > Misclassification error.
+
+## Collective Impurity of Child Nodes
+
+We can compute the collective impurity of child nodes by taking a weighted sum of the impurities of the child nodes.
+
+$$
+I(\textnormal{children}) = \sum_{j=1}^{k} \frac{N(v_j)}{N}\; I(v_j)
+$$
+
+Here we split $N$ training instances into $k$ child nodes, $v_j$ for $j=1, \ldots, k$.
+
+$N(v_j)$ is the number of training instances at child node $v_j$ and $I(v_j)$ is the impurity at child node $v_j$.
+
+## Impurity Example
+
+Let's compute collective impurity on our loans dataset to see which feature to split on.
+
+::: {layout-ncol=3}
+
+``` {python}
+#| echo: false
+#| fig-cap: '(a) Collective Entropy: 0.690'
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Home\\nOwner", fillcolor="#ffffff"] ;
+    1 [label="Yes: 0\\nNo: 3", fillcolor="#ffffff", shape="square"] ;
+    2 [label="Yes: 3\\nNo: 4", fillcolor="#ffffff", shape="square"] ;
+    0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="Yes"] ;
+    0 -> 2 [labeldistance=2.5, labelangle=-45, headlabel="No"] ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+``` {python}
+#| echo: false
+#| fig-cap: '(b) Collective Entropy: 0.686'
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Marital\\nStatus", fillcolor="#ffffff"] ;
+    1 [label="Yes: 2\\nNo: 3", fillcolor="#ffffff", shape="square"] ;
+    2 [label="Yes: 0\\nNo: 3", fillcolor="#ffffff", shape="square"] ;
+    3 [label="Yes: 1\\nNo: 1", fillcolor="#ffffff", shape="square"] ;
+    0 -> 1 [xlabel="Single"] ;
+    0 -> 2 [label="Married"] ;
+    0 -> 3 [xlabel="Divorced"] ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+``` {python}
+#| echo: false
+#| fig-cap: '(c) Collective Entropy index: 0.00'
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="ID", fillcolor="#ffffff"] ;
+    1 [label="Yes: 0\\nNo: 1", fillcolor="#ffffff", shape="square"] ;
+    2 [label="...", fillcolor="#ffffff", shape="none"] ;
+    3 [label="Yes: 1\\nNo: 0", fillcolor="#ffffff", shape="square"] ;
+    4 [label="Yes: 0\\nNo: 1", fillcolor="#ffffff", shape="square"] ;
+    5 [label="Yes: 1\\nNo: 0", fillcolor="#ffffff", shape="square"] ;
+    0 -> 1 [xlabel="1"] ;
+    0 -> 2 [xlabel="2", color="white"] ;
+    0 -> 3 [xlabel="8"] ;
+    0 -> 4 [xlabel="9"] ;
+    0 -> 5 [xlabel="10"] ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+:::
+
+::: {.callout-tip}
+Try calculating the collective Entropy for (a) and (b) and see if you get the same values.
+:::
 
 ::: {.callout-important}
-When each leaf node contains records that all have the same label.
+The collective entropy for (c) is 0. Why would we not want to use this node?
 :::
 
+## Gain Ratio
+
+From Intro to Data Mining[@Tan2018, p. 127]:
+
+Having a low impurity value alone is insufficient to find a good attribute test condition for a node. 
+
+Having more number of child nodes can make a decision tree more complex and consequently more susceptible to overfitting. 
+
+Hence, the number of children produced by the splitting attribute should also be taken into consideration while deciding the best attribute test condition. 
+
+There are two ways to overcome this problem. 
+
+1. One way is to _generate only binary decision trees_, thus avoiding the difficulty of handling attributes with varying
+   number of partitions. This strategy is employed by decision tree classifiers such as **CART**. 
+2. Another way is to modify the splitting criterion to take into account the number of partitions produced by the
+   attribute. For example, in the **C4.5** decision tree algorithm, a measure known as **gain ratio** is used to compensate
+   for attributes that produce a large number of child nodes.
+
+## Identifying the Best Attribute Test Condition
+
+![](figs/L14-splitting-criteria-gini.png)
+
+Here's an example of how to identify the best attribute test condition using the Gini impurity index.
+
+## Splitting Continuous Attributes
+
+For quantitative attributes like _Annual Income_, we need to find some threshold $\tau$ that
+minimizes the impurity index.
+
+The following table illustrates the process.
+
+![](figs/L14-splitting-continuous-attribs.png)
+
+**Procedure:**
+
+1. Sort all the training instances by _Annual Income_ in increasing order.
+2. Pick thresholds half way between consecutive values.
+3. Compute the Gini impurity index for each threshold.
+4. Select the threshold that minimizes the Gini impurity index.
+
+## Run Decision Tree on Loans Data Set
+
+Let's run the Scikit-learn Decision Tree, `sklearn.tree`, on the loans data set.
+
+`sklearn.tree` requires all fields to be numeric.
+
+So first we have to convert the categorical fields to category index numeric fields.
+
+``` {python}
+#| code-fold: false
+loans['Defaulted Borrower'] = loans['Defaulted Borrower'].cat.codes
+loans['Home Owner'] = loans['Home Owner'].cat.codes
+loans['Marital Status'] = loans['Marital Status'].cat.codes
+loans
+```
+
 ---
 
-![](figs/L14-split-6.png){width="700px"}
+Then the independent variables are all the fields except the "Defaulted Borrower" field, which we'll assign to `X`.
 
-Consider this case:
-    
-At some node in the tree, before splitting that node's records, we have
+The dependent variable is the "Defaulted Borrower" field, which we'll assign to `y`.
 
-* 10 records from class 0, and
-* 10 records from class 1
+``` {python}
+#| code-fold: false
+from sklearn import tree
 
-There are three attributes we can split on.   Which split is best?
+X = loans.drop('Defaulted Borrower', axis=1)
+y = loans['Defaulted Borrower']
+X.info()
+y.info()
+```
 
 ---
 
-::: {.content-visible when-profile="slides"}
-![](figs/L14-split-6.png){width="700px"}
+Let's fit a decision tree to the data.
+
+``` {python}
+#| code-fold: false
+clf = tree.DecisionTreeClassifier(criterion='gini', random_state=42)
+clf = clf.fit(X, y)
+```
+
+Let's plot the tree.
+
+``` {python}
+annotations = tree.plot_tree(clf, 
+               filled=True, 
+               rounded=True,
+               # max_depth=2,
+               # impurity=False,
+               feature_names=loans.drop('Defaulted Borrower', axis=1).columns,
+               class_names=['No', 'Yes'])
+```
+
+
+Interestingly, the tree was built using only the Income field.
+
+That's arguably an advantage of Decision Trees: they automatically perform feature selection.
+
+## Ensemble Methods
+
+(See @Tan2018, Chapter 4)
+
+Motivated around the idea that combining several noisy classifers can result in a better prediction
+under certain conditions.
+
+* The base classifiers are independent
+* The base classifiers are noisy (high variance)
+* The base classifiers are low (ideally zero) bias
+
+## Random Forests
+
+Random forests are an ensemble of decision trees that:
+
+* Construct a set of base classifiers from random sub-samples of the training data.
+* Train each base classifier to completion.
+* Take a majority vote of the base classifiers to form the final prediction.
+
+## Titanic Example
+
+We'll use the [Titanic data set](https://www.kaggle.com/competitions/titanic) and
+excerpts of this [Kaggle tutorial](https://www.kaggle.com/code/jhoward/how-random-forests-really-work/)
+to illustrate the concepts of overfitting and random forests.
+
+``` {python}
+import pandas as pd
+
+df_train = pd.read_csv('data/titanic/train.csv', index_col='PassengerId')
+df_test = pd.read_csv('data/titanic/test.csv', index_col='PassengerId')
+```
+
+Let's look at the training data.
+
+``` {python}
+df_train.info()
+df_train.head()
+```
+
+We can see that there are 891 entries with 11 fields. 'Age', 'Cabin', and 'Embarked' have missing values.
+
+---
+
+Let's look at the test data.
+
+``` {python}
+df_test.info()
+df_test.head()
+```
+
+There are 418 entries in the test set with same fields except for 'Survived', which is what we need to predict.
+
+---
+
+We'll do some data cleaning and preparation.
+
+``` {python}
+import numpy as np
+
+def proc_data(df):
+    df['Fare'] = df.Fare.fillna(0)
+    df.fillna(modes, inplace=True) # Fill missing values with the mode
+    df['LogFare'] = np.log1p(df['Fare'])  # Create a new column for the log of the fare + 1
+    df['Embarked'] = pd.Categorical(df.Embarked)  # Convert to categorical
+    df['Sex'] = pd.Categorical(df.Sex)  # Convert to categorical
+
+modes = df_train.mode().iloc[0] # Get the mode for each column
+
+proc_data(df_train)
+proc_data(df_test)
+```
+
+Look at the dataframes again.
+
+:::: {.columns}
+::: {.column width="50%"}
+``` {python}
+df_train.info()
+```
 :::
-
-The "Car Type" attribute yields more homogeneous splits.
-
-Using the "Student ID" attribute yields perfect accuracy on the training data.
-
-... but what would it do on the test data?
-
-... using the "Student ID" attribute would lead to __overfitting__
-
-We'll talk about how to avoid overfitting shortly.
+::: {.column width="50%"}
+``` {python}
+df_test.info()
+```
+:::
+::::
 
 ---
 
-For now, let's just focus on maximizing the homogeneity of splits.
+We'll create lists of features by type.
 
-We need a measure of homogeneity:
-
-![](figs/L14-split-7.png){width="700px"}
-
-A number of measures have been proposed:
-
-* GINI Index
-* Entropy
-* Misclassification Error
-
-We will review GINI, as it is a typical measure. 
-
-It's used, for example, in CART, SLIQ, and SPRINT.
-
-## Computing GINI
-
-We will think of the set of records at each node as defining a distribution over the classes. 
-
-For a given node $t$, we will use $p(j\,|\,t)$ to denote the frequency of class $j$ at node $t$.
-
-The GINI coefficient measures the degree of "balance" in a distribution.
-
-It is defined as:
-
-$$
-\text{GINI}(t) = 1 - \sum_j [p(j\,|\,t)]^2
-$$
+``` {python}
+#| code-fold: false
+cats=["Sex","Embarked"]  # Categorical
+conts=['Age', 'SibSp', 'Parch', 'LogFare',"Pclass"]  # Continuous
+dep="Survived"  # Dependent variable
+```
 
 ---
 
-As nodes are split in building the tree, we will be decreasing the GINI score.
+Let's explore some fields starting with survival rate by gender.
 
-![](figs/L14-GINI-1.png){width="80%"}
+``` {python}
+import seaborn as sns
+import matplotlib.pyplot as plt
+fig,axs = plt.subplots(1,2, figsize=(11,5))
+sns.barplot(data=df_train, y='Survived', x="Sex", ax=axs[0], hue="Sex", palette=["#3374a1","#e1812d"]).set(title="Survival rate")
+sns.countplot(data=df_train, x="Sex", ax=axs[1], hue="Sex", palette=["#3374a1","#e1812d"]).set(title="Histogram");
+```
 
----
-
-How do we compute the improvement in GINI when a node is split?
-
-Remember that we would like to create large, homogeneous nodes.
-
-So we will weight each node's GINI score by the number of records it contains. 
-
-So the improvement in GINI score when splitting a node $t$ with $n$ records will be computed as:
-    
-$$
-\text{GINI}_{\text{new}} = \sum_i \frac{n_i}{n}\; \text{GINI}(i)
-$$
-
-where new node $i$ contains $n_i$ records;
-
-and the improvement in GINI score will be defined as
-
-$$
-\text{GINI}(t) - \text{GINI}_{\text{new}}
-$$
-
-## GINI for Binary Partitions
-
-Here is an example of computing the new GINI score for a partition:
-    
-![](figs/L14-GINI-2.png){width="80%"}
-
-## GINI for Nominal Attributes
-
-* For each distinct value, gather counts for each class in the dataset
-* Use the count matrix to evaluate groupings
-
-![](figs/L14-GINI-3.png){width="80%"}
-
-## GINI for Continuous Attributes
-
-To find the best threshold efficiently:
-* Sort the attribute on values
-* Linearly scan the values, 
-    * each time updating a count matrix and
-    * computing the new GINI score
-* Choose the split position with the smallest GINI index
-
-![](figs/L14-GINI-4.png){width="80%"}
-
-## When to Stop Splitting
-
-We now see how the decision tree is built, node by node, by splitting nodes in a
-way that steadily improves the overall GINI score.
-
-Clearly, we could keep on splitting nodes until every leaf node contains only
-unique training records.
-
-For example, each leaf node could contain just a single training record - a
-fully-grown tree.
-
-This would certainly be overfitting! 
-
-We would have as many leaf nodes (parameters) as training data records.
-
-And we would not expect the decision tree to generalize well.
+Indeed, "women and children first" was enforced on the Titanic.
 
 ---
 
-There are two strategies that can be used to control the complexity of a decision tree:
+Since we don't have labels for the test data, we'll split the training data into training and validation.
 
-1. Early-stopping: stop the algorithm before the tree becomes fully-grown 
-2. Post-pruning: grow decision tree fully, then prune nodes from leaves upward
+``` {python}
+#| code-fold: false
+from numpy import random
+from sklearn.model_selection import train_test_split
 
-## Early Stopping
+random.seed(42)
+trn_df,val_df = train_test_split(df_train, test_size=0.25)
 
-Do not expand the current node, even though it still has multiple records.
+# Replace categorical fields with numeric codes
+trn_df[cats] = trn_df[cats].apply(lambda x: x.cat.codes)
+val_df[cats] = val_df[cats].apply(lambda x: x.cat.codes)
+```
 
-Default stopping conditions include:
+---
 
-* Stop if all records belong to the same class
-* Stop if all the records have the same attributes
+Let's split the independent (input) variables from the dependent (output) variable.
 
-More restrictive stopping conditions include:
+``` {python}
+#| code-fold: false
+def xs_y(df):
+    xs = df[cats+conts].copy()
+    return xs,df[dep] if dep in df else None
 
-* Stop if number of records in current node is less than a specified value
-* Stop if expanding the current node does not improve homogeneity (eg, GINI score)
-* Stop if splitting current node would create node smaller than a specified value
+trn_xs,trn_y = xs_y(trn_df)
+val_xs,val_y = xs_y(val_df)
+```
 
-## Post-Pruning
+---
 
-Assumes that we can assess generalization error 
+Here's the predictions for our extremely simple model, where `female` is coded as `0`:
 
-* For example, using held-out data
+```{python}
+#| code-fold: false
+preds = val_xs.Sex==0
+```
 
-Then:
+We'll use mean absolute error to measure how good this model is:
 
-* Grow decision tree to its entirety
-* Trim the nodes of the tree in bottom-up fashion
-    * Replace nodes with majority class
-* If generalization error improves after trimming, replace sub-tree by a leaf node
+```{python}
+#| code-fold: false
+from sklearn.metrics import mean_absolute_error
+mean_absolute_error(val_y, preds)
+```
 
-Note that this is computationally more demanding than early-stopping.
+---
 
-## Interpretability
+Alternatively, we could try splitting on a continuous column. We have to use a somewhat different chart to see how this might work -- here's an example of how we could look at `LogFare`:
 
-Decision Trees are a very popular technique.  
+```{python}
+df_fare = trn_df[trn_df.LogFare>0]
+fig,axs = plt.subplots(1,2, figsize=(11,5))
+sns.boxenplot(data=df_fare, x=dep, y="LogFare", ax=axs[0], hue=dep, palette=["#3374a1","#e1812d"])
+sns.kdeplot(data=df_fare, x="LogFare", ax=axs[1]);
+```
 
-They have a number of advantages:
+The [boxenplot](https://seaborn.pydata.org/generated/seaborn.boxenplot.html) above shows quantiles of `LogFare` for each group of `Survived==0` and `Survived==1`. It shows that the average `LogFare` for passengers that didn't survive is around `2.5`, and for those that did it's around `3.2`. So it seems that people that paid more for their tickets were more likely to get put on a lifeboat.
 
-* They are relatively inexpensive to construct
-* They are extremely fast at classifying unknown data
-* Their accuracy can be quite good in many cases
-* And oftentimes they are __interpretable__
+---
 
-We will explore interpretation of decision trees in a following lecture.
+Let's create a simple model based on this observation:
+
+```{python}
+#| code-fold: false
+preds = val_xs.LogFare>2.7
+```
+
+...and test it out:
+
+```{python}
+#| code-fold: false
+mean_absolute_error(val_y, preds)
+```
+
+This is quite a bit less accurate than our model that used `Sex` as the single binary split.
+
+---
+
+Ok. Let's build a decision tree model using all the features.
+
+```{python}
+#| code-fold: false
+clf = tree.DecisionTreeClassifier(criterion='gini', random_state=42)
+clf = clf.fit(trn_xs, trn_y)
+```
+
+Let's draw the tree.
+
+```{python}
+#| code-fold: false
+annotations = tree.plot_tree(clf, 
+               filled=True, 
+               rounded=True,
+               feature_names=trn_xs.columns,
+               class_names=['No', 'Yes'])
+```
+
+---
+
+Let's see how it does on the validation set.
+
+```{python}
+#| code-fold: false
+preds = clf.predict(val_xs)
+mean_absolute_error(val_y, preds)
+```
+
+---
+
+Let's train the decision tree again but with stopping criteria based on the number of samples in a node.
+
+```{python}
+#| code-fold: false
+clf = tree.DecisionTreeClassifier(criterion='gini', random_state=42, min_samples_split=20)
+clf = clf.fit(trn_xs, trn_y)
+```
+
+Let's draw the tree.
+
+```{python}
+#| code-fold: false
+annotations = tree.plot_tree(clf, 
+               filled=True, 
+               rounded=True,
+               feature_names=trn_xs.columns,
+               class_names=['No', 'Yes'])
+```
+
+---
+
+Let's see how it does on the validation set.
+
+```{python}
+#| code-fold: false
+preds = clf.predict(val_xs)
+mean_absolute_error(val_y, preds)
+```
+
+---
+
+Let's train the decision tree again but with a maximum depth of 3.
+
+```{python}
+#| code-fold: false
+clf = tree.DecisionTreeClassifier(criterion='gini', random_state=42, max_depth=3)
+clf = clf.fit(trn_xs, trn_y)
+```
+
+Let's draw the tree.
+
+```{python}
+#| code-fold: false
+annotations = tree.plot_tree(clf, 
+               filled=True, 
+               rounded=True,
+               feature_names=trn_xs.columns,
+               class_names=['No', 'Yes'])
+```
+
+---
+
+Let's see how it does on the validation set.
+
+```{python}
+#| code-fold: false
+preds = clf.predict(val_xs)
+mean_absolute_error(val_y, preds)
+```
+
+## Random Forest
+
+Let's try a random forest.
+
+```{python}
+#| code-fold: false
+from sklearn.ensemble import RandomForestClassifier
+
+clf = RandomForestClassifier(n_estimators=100, random_state=42)
+clf = clf.fit(trn_xs, trn_y)
+```
+
+Let's see how it does on the validation set.
+
+```{python}
+#| code-fold: false
+preds = clf.predict(val_xs)
+mean_absolute_error(val_y, preds)
+```
+
 
 ## Recap
 
-* Classification: predicting a nominal or categorical variable
-* Decision Trees: a popular classification method
-* Hunt's algorithm: a simple decision tree algorithm
-* Greedy strategy: split node with largest information gain
-* Overfitting: when a model matches the training data too closely
-* Early stopping: stop splitting when a criterion is met
-* Post-pruning: grow tree fully, then prune
+* Decision Trees
+* Impurity Measures
+* Avoiding Overfitting
+* Random Forests
+
+
+# Scikit-learn Decision Trees Package
+
+## Scikit-learn Decision Trees Package
+
+The `sklearn.tree` module includes the following classes:
+
+- `DecisionTreeClassifier` for classification
+- `DecisionTreeRegressor` for regression
+- `RandomForestClassifier` for classification
+- `RandomForestRegressor` for regression
+
+There are also useful utilities for visualizing and exporting the tree.
+
+- `tree.plot_tree` for visualizing the tree
+- `tree.export_graphviz` for exporting the tree to a graphviz file
+- `tree.export_text` for exporting the tree to a text file
+
+
+## References
+
+::: {#refs}
+:::
+

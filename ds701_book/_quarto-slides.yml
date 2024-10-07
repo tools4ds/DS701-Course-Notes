@@ -20,7 +20,6 @@ project:
     - 12-Anomaly-Detection-SVD-III.qmd
     - 13-Learning-From-Data.qmd
     - 14-Classification-I-Decision-Trees.qmd
-    - 14alt-DecTrees-RandForests.qmd
     - 15-Classification-II-kNN.qmd
     - 16-Classification-III-NB-SVM.qmd
     - 17-Regression-I-Linear.qmd
