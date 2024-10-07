@@ -28,7 +28,7 @@ Before discussing this model we'll introduce the notion of parametric and nonpar
 
 There are many ways to define models (whether supervised or unsupervised).
 
-However a key distinction is this: does the model have a fixed number of parameters or does the number of parameters grow with the training data?
+However a key distinction is this: does the model have a fixed number of parameters or does the number of parameters grow with the training data.
 
 If the model has a __fixed number__ of parameters, it is called __parametric.__
 
@@ -239,7 +239,7 @@ These are more likely to show good generalization ability.
 
 Working with a $k$-NN classifier can involve some challenges.
 
-1. The computational cost of classification grows with the size of the training data. The classification time grows linearly with the data set size. There is a tradeoff here. The training step is trivial, but the classification step can be prohibitively expensive.
+1. The computational cost of classification grows linearly with the size of the training data. Note that the training step is trivial, but the classification step can be prohibitively expensive.
 
 2. Euclidean distance is the most common distance function used in $k$-NN so data scaling is important. As previously discussed, features should be scaled to prevent distance measures from being dominated by a potentially small subset of features.
     
@@ -258,15 +258,15 @@ The phrase `curse of dimensionality' was coined by the mathematician Richard Bel
 ![](figs/L15-curse-frankenstein-edited.jpeg)
 :::
 ::: {.column width="80%"}
-The Curse of Dimensionality is a somewhat tongue in cheek term for serious problems that arise when we use geometric algorithms in high dimensions.
+The **curse of dimensionality** is a somewhat tongue-in-cheek term for serious problems that arise when we use geometric algorithms in high dimensions.
 :::
 ::::
 
-There are various aspects of the Curse that affect $k$-NN.
+There are various aspects of the curse that affect $k$-NN.
 
 ---
 
-__1. Points are far apart in high dimension.__
+__1. Points are far apart in high dimensions.__
 
 $k$-NN relies on there being one or more "close" points to the test point $x$.   
 
@@ -278,11 +278,10 @@ So the amount of data we need to maintain a given density also grows exponential
 
 Hence, points in high-dimensional spaces tend not to be close to one another at all.
 
-One very intuitive way to think about it is this:
+One very intuitive way to think about it is this.
 
-In order for two points to be close in $\mathbb{R}^d$, they must be close in __each__ of the $d$ dimensions.
-
-As the number of dimensions grows, it becomes harder and harder for a pair of points to be close in __each__ dimension.
+>In order for two points to be close in $\mathbb{R}^d$, they must be close in __each__ of the $d$ dimensions.
+>As the number of dimensions grows, it becomes harder and harder for a pair of points to be close in __each__ dimension.
 
 ::: aside
 For a fascinating exploration of the properties of unit spheres in high dimension, see [An Adventure in the Nth Dimension](https://www.americanscientist.org/article/an-adventure-in-the-nth-dimension) by Brian Hayes in _American Scientist._
@@ -290,7 +289,7 @@ For a fascinating exploration of the properties of unit spheres in high dimensio
 
 ---
 
-__2. Points tend to all be at similar distances in high dimension.__
+__2. Points tend to all be at similar distances in high dimensions.__
 
 This one is a little harder to visualize.  We'll use formulas instead to guide us.
 
@@ -304,13 +303,14 @@ This is proportional to the volume of a hypersphere with radius 1.
 
 Now, the volume of a hypersphere is $k_d r^d$. For each $d$ there is a different $k_d$.  
 
-* For $d = 2$, $k_d$ is $4\pi$
+* For $d = 2$, $k_d$ is $\pi$
 * For $d = 3$, $k_d$ is $\frac{4\pi}{3}$ 
 * The general formula is $k_d = \frac{\pi^{d/2}}{\Gamma(d/2) + 1}$, where $\Gamma(z) = \int_{0}^{\infty}t^{z-1}e^{-t}dt$ is the gamma function.
 
 --- 
 
 ```{python}
+#| fig-align: center
 ax = plt.figure(figsize = (4, 4)).add_subplot(projection = '3d')
 # coordinates of sphere surface
 u, v = np.mgrid[0:2*np.pi:50j, 0:np.pi:50j]
@@ -336,6 +336,7 @@ The new distance can be thought of as $1 - \epsilon$ for some small $\epsilon$.
 The number of points then of course is proportional to $k_d (1-\epsilon)^d$
 
 ```{python}
+#| fig-align: center
 ax = plt.figure(figsize = (4, 4)).add_subplot(projection = '3d')
 # coordinates of sphere surface
 u, v = np.mgrid[0:2*np.pi:50j, 0:np.pi:50j]
@@ -381,6 +382,7 @@ This means that as $d\rightarrow \infty$, all of the points that are __within__ 
 ---
 
 ```{python}
+#| fig-align: center
 ax = plt.figure(figsize = (7,7)).add_subplot(projection = '3d')
 # coordinates of sphere surface
 u, v = np.mgrid[0:2*np.pi:50j, 0:np.pi:50j]
@@ -413,7 +415,7 @@ Let's demonstrate this effect in practice.
 
 What we will do is create 100 points, scattered at random within a $d$-dimensional space.
 
-We will look at two quantities as we vary $d$
+We will look at two quantities as we vary $d$.
 
 * The __minimum__ distance between any two points.
 * The __average__ distance between any two points.
@@ -560,7 +562,7 @@ plt.show()
 
 Recall that we always want to test on data separate from our training data.
 
-For now, we will something very simple: take the first 50 examples for training and the rest for testing.
+For now, we will do something very simple: take the first 50 examples for training and the rest for testing.
 
 ```{python}
 X_train = X[:50]
@@ -1226,7 +1228,7 @@ NIST used to be called the "National Bureau of Standards." These are the folks w
 
 NIST constructed datasets for machine learning of handwritten digits. These were collected from Census Bureau employees and also from high-school students.
 
-These data have been used repeatedly for many years to evaluate classifiers. For a peek at some of the work done with this dataset you can visit http://yann.lecun.com/exdb/mnist/. 
+This dataset has been used repeatedly for many years to evaluate classifiers. For a peek at some of the work done with this dataset you can visit this [link](http://yann.lecun.com/exdb/mnist/). 
 
 
 ## MNIST Digits
