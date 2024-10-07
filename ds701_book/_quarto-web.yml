@@ -19,6 +19,7 @@ project:
     - 09-Clustering-IV-GMM-EM.qmd
     - 13-Learning-From-Data.qmd
     - 14-Classification-I-Decision-Trees.qmd
+    - 14alt-DecTrees-RandForests.qmd
     - 15-Classification-II-kNN.qmd
     - 16-Classification-III-NB-SVM.qmd
     - 10-Low-Rank-and-SVD.qmd
@@ -66,6 +67,7 @@ website:
       contents:
         - 13-Learning-From-Data.qmd
         - 14-Classification-I-Decision-Trees.qmd
+        - 14alt-DecTrees-RandForests.qmd
         - 15-Classification-II-kNN.qmd
         - 16-Classification-III-NB-SVM.qmd
     - section: "Dimensionality Reduction"

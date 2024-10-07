@@ -1,0 +1,744 @@
+---
+title: "Decision Trees and Random Forests"
+jupyter: python3
+---
+
+## Outline
+
+- An example of decision tree from dataset
+- Formally introduce decision trees
+- Metrics for tree quality
+- Random forests
+- Example of random forests
+- Parameter tuning
+- Variable importance
+- Partial dependence plots
+- Bias-variance trade-off
+- Pros and cons of decision trees and random forests
+
+
+## Data set options
+
+- [loans.csv](./data/loans.csv)
+- [vertebrate.csv](./data/vertebrate.csv)
+- [titanic](./data/titanic/)
+
+## Introduction
+
+``` {python}
+#| echo: false
+from sklearn import tree
+```
+
+We'll now start looking into how to build models to predict an outcome variable from labeled data.
+
+**Classification** problems:
+
+- predict a category
+- e.g. spam/not spam, fraud/not fraud, default/not default, malignant/benign, etc.
+
+**Regression** problems:
+
+- predict a numeric value
+- e.g. price of a house, salary of a person, etc.
+
+
+
+## Loan Default Example
+
+We'll use an example from Intro to Data Mining.
+
+![](figs/L14-terrier-savings-logo.png){width="100px"}
+
+You are a loan officer at **Terrier Savings and Loan**. 
+
+You have a dataset on loans that you have made in the past.
+
+You want to build a model to predict whether a loan will default.
+
+``` {python}
+import pandas as pd
+
+loans = pd.read_csv('data/loans.csv', index_col=0)
+loans
+```
+
+Here's the summary info of the data set.
+
+``` {python}
+loans.info()
+```
+
+Since some of the fields are categorical, let's convert them to categorical data types.
+
+``` {python}
+loans['Home Owner'] = loans['Home Owner'].astype('category')
+loans['Marital Status'] = loans['Marital Status'].astype('category')
+loans['Defaulted Borrower'] = loans['Defaulted Borrower'].astype('category')
+loans.info()
+```
+
+## Simple Model
+
+Looking at the table, let's just start with the simplest model possible and just
+predict that no one will default.
+
+So the output of our model is just to always predict "No".
+
+``` {python}
+import graphviz
+
+dot_data = """
+digraph Tree {
+    node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="values = [# No, # Yes] =[7,3]\\ndefaulted = No\\nerror = 30%", fillcolor="#ffffff"] ;
+}
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+We see a 30% error rate since 3 out of 10 loans defaulted.
+
+---
+
+Let's split the data based on the "Home Owner" field.
+
+``` {python}
+import graphviz
+
+dot_data = """
+digraph Tree {
+    node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Home Owner\\n---\\nsamples = 10\\nvalues = [7, 3]\\ndefaulted = No\\nerror = 30%", fillcolor="#ffffff"] ;
+    1 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
+    2 [label="samples = 7\\nvalue = [4, 3]\\ndefaulted = Yes\\nerror = 43%", fillcolor="#ffffff"] ;
+    0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="Yes"] ;
+    0 -> 2 [labeldistance=2.5, labelangle=-45, headlabel="No"] ;}
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+We see that the left node (home owner == yes) has a 0% error rate since all the samples are no. We don't split this node since all the samples are of the same class. We call this node a **leaf node** and we'll color it orange.
+
+The right node (home owner == no) has a 43% error rate since 3 out of 7 loans defaulted. 
+
+Let's split this node into two nodes based on the "Marital Status" field.
+
+---
+
+Let's split on the "Marital Status" field.
+
+We see that the 3 defaulted loans are all for married people. Since the node is
+all one class, we don't split this node and we call it a **leaf node**.
+
+``` {python}
+import graphviz
+
+dot_data = """
+digraph Tree {
+    node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Home Owner\\n---\\nsamples = 10\\nvalues = [7, 3]\\ndefaulted = No\\nerror = 30%", fillcolor="#ffffff"] ;
+    1 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
+    2 [label="Marital Status\\n---\\nsamples = 7\\nvalue = [4, 3]\\ndefaulted = Yes", fillcolor="#ffffff"] ;
+    3 [label="samples = 4\\nvalue = [1, 3]\\ndefaulted = Yes\\nerror = 25%", fillcolor="#ffffff"] ;
+    4 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
+    0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="Yes"] ;
+    0 -> 2 [labeldistance=2.5, labelangle=-45, headlabel="No"] ;
+    2 -> 3 [labeldistance=2.5, labelangle=45, headlabel="Single,\\nDivorced"] ;
+    2 -> 4 [labeldistance=2.5, labelangle=-45, headlabel="Married"] ;}
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+We can list the subsets for the two criteria to calculate the error rate.
+
+``` {python}
+#| fig-cap: 'Table: Home Owner == No and Marital Status == Single or Divorced --> Defaulted == Yes'
+#| fig-cap-location: top
+loans[(loans['Home Owner'] == "No") & (loans['Marital Status'].isin(['Single', 'Divorced']))]
+```
+
+``` {python}
+#| fig-cap: 'Table: Home Owner == No and Marital Status == Married --> Defaulted == No'
+#| fig-cap-location: top
+loans[(loans['Home Owner'] == "No") & (loans['Marital Status'] == "Married")]
+```
+
+---
+
+Let's try to split on the "Annual Income" field. We see that the person with income of 70K doesn't default, so we split the node into two nodes based on the "Income" field. We arbitrarily pick a threshold of $75K.
+
+``` {python}
+import graphviz
+
+dot_data = """
+digraph Tree {
+    node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Home Owner\\n---\\nsamples = 10\\nvalues = [7, 3]\\ndefaulted = No\\nerror = 30%", fillcolor="#ffffff"] ;
+    1 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
+    2 [label="Marital Status\\n---\\nsamples = 7\\nvalue = [4, 3]\\ndefaulted = Yes", fillcolor="#ffffff"] ;
+    3 [label="Income <= 75K\\nsamples = 4\\nvalue = [1, 3]\\ndefaulted = Yes\\nerror = 25%", fillcolor="#ffffff"] ;
+    4 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
+    5 [label="samples = 1\\nvalue = [1, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
+    6 [label="samples = 3\\nvalue = [0, 3]\\ndefaulted = Yes\\nerror = 0%", fillcolor="#e58139"] ;
+    0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="Yes"] ;
+    0 -> 2 [labeldistance=2.5, labelangle=-45, headlabel="No"] ;
+    2 -> 3 [labeldistance=2.5, labelangle=45, headlabel="Single,\\nDivorced"] ;
+    2 -> 4 [labeldistance=2.5, labelangle=-45, headlabel="Married"] ;
+    3 -> 5 [labeldistance=2.5, labelangle=45, headlabel="Yes"] ;
+    3 -> 6 [labeldistance=2.5, labelangle=-45, headlabel="No"] ;}
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+## Evaluating the Model
+
+We've dispositioned every data point by walking down the tree to a leaf node.
+
+How do we know if this tree is good? We arbitrarily picked the order of the fields to split on.
+
+Is there a way to systematically pick the order of the fields to split on? This is called the **splitting criterion**.
+
+There's also the question of when to stop splitting, or the **stopping criterion**. So far, we stopped splitting when
+we reached a node of pure class but there reasons to stop splitting even without pure classes, which we'll see later.
+
+## Specifying the Test Condition
+
+Before we continue, we should take a moment to consider how we specify a test condition of a node.
+
+How we specify a test condition depends on the attribute type which can be:
+
+* Binary (Boolean)
+* Nominal (Categorical, e.g. cat, dog, bird)
+* Ordinal (e.g. Small, Medium, Large)
+* Continuous (e.g., 1.5, 2.1, 3.7)
+
+And depends on the number of ways to split - __multi-way__ or __binary__:
+
+---
+
+For a __Nominal__ attribute:
+
+In a __Multi-way split__ we can use as many partitions as there are distinct values of the attribute:
+
+``` {python}
+import graphviz
+
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Marital Status", fillcolor="#ffffff"] ;
+    1 [label="Single", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Divorced", fillcolor="#ffffff", shape="none"] ;
+    3 [label="Married", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ;
+    0 -> 3 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+---
+
+In a __Binary split__ we divide the values into two groups.  
+
+In this case, we need to find an optimal partitioning of values into groups, which we discuss shortly.
+
+::: {layout-ncol=3}
+
+``` {python}
+#| echo: false
+import graphviz
+
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Marital Status", fillcolor="#ffffff"] ;
+    1 [label="Single,\\nDivorced", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Married", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+``` {python}
+#| echo: false
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Marital Status", fillcolor="#ffffff"] ;
+    1 [label="Single", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Married,\\nDivorced", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+``` {python}
+#| echo: false
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Marital Status", fillcolor="#ffffff"] ;
+    1 [label="Single,\\nMarried", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Divorced", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+:::
+
+---
+
+For an __Ordinal__ attribute, we can use a multi-way split with as many partitions
+as there are distinct values.
+
+``` {python}
+#| echo: false
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Shirt\\nSize", fillcolor="#ffffff"] ;
+    1 [label="Small", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Medium", fillcolor="#ffffff", shape="none"] ;
+    3 [label="Large", fillcolor="#ffffff", shape="none"] ;
+    4 [label="X-Large", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ;
+    0 -> 3 ;
+    0 -> 4 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+---
+
+Or we can use a binary split as long we preserve the ordering of the values.
+
+::: {layout-ncol=2}
+
+``` {python}
+#| echo: false
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Shirt\\nSize", fillcolor="#ffffff"] ;
+    1 [label="Small,\\nMedium", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Large,\\nX-Large", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+``` {python}
+#| echo: false
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Shirt\\nSize", fillcolor="#ffffff"] ;
+    1 [label="Small", fillcolor="#ffffff", shape="none"] ;
+    2 [label="Medium, Large,\\nX-Large", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+:::
+
+::: {.callout-warning}
+Be careful not to violate the ordering of values such as {Small, Large} and {Medium, X-Large}.
+:::
+
+---
+
+A __Continuous__ attribute can be handled two ways:
+
+::: {layout-ncol=2}
+
+``` {python}
+#| echo: false
+#| fig-cap: 'It can thresholded to form a binary split.'
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Income\\<= 75K", fillcolor="#ffffff"] ;
+    1 [label="Yes", fillcolor="#ffffff", shape="none"] ;
+    2 [label="No", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+
+
+``` {python}
+#| echo: false
+#| fig-cap: 'Or it can be split into contiguous ranges to form an ordinal categorical attribute.'
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Income", fillcolor="#ffffff"] ;
+    1 [label="< 10K", fillcolor="#ffffff"shape="none"] ;
+    2 [label="[10K, 25K)", fillcolor="#ffffff", shape="none"] ;
+    3 [label="[25K, 50K)", fillcolor="#ffffff", shape="none"] ;
+    4 [label="[50K, 75K)", fillcolor="#ffffff", shape="none"] ;
+    5 [label="> 75K", fillcolor="#ffffff", shape="none"] ;
+    0 -> 1 ;
+    0 -> 2 ;
+    0 -> 3 ;
+    0 -> 4 ;
+    0 -> 5 ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+:::
+
+---
+
+Note that finding good partitions for nominal attributes can be expensive, 
+possibly involving combinatorial searching of groupings.  
+
+However for ordinal or continuous attributes, sweeping through a range of
+threshold values can be more efficient.
+
+## Measures for Selecting Attribute and Test Condition
+
+Ideally, we want to pick attributes and test conditions that maximize the homogeneity of the splits.
+
+We can use a impurity index to measure the homogeneity of a split.
+
+We'll look at ways of measuring impurity of a node and the collective impurity of its child nodes.
+
+## Impurity Measures
+
+The following are three impurity indices:
+
+$$
+\begin{aligned}
+\textnormal{Entropy} &= -\sum_{i=0}^{c-1}  p_i(t) \log_2 p_i(t) \\
+\textnormal{Gini index} &= 1 - \sum_{i=0}^{c-1}  p_i(t)^2 \\
+\textnormal{Classification error} &= 1 - \max_i p_i(t)
+\end{aligned}
+$$
+
+where $p_i(t)$ is the relative frequency of training instances of class $i$ at a node $t$ and $c$ is the number of classes.
+
+By convention, we set $0 \log_2 0 = 0$ in entropy calculations.
+
+All three impurity indices equal 0 when all the records at a node belong to the same class.
+
+All three impurity indices reach their maximum value when the classes are evenly distributed among the child nodes.
+
+---
+
+:::: {.columns}
+::: {.column width="40%"}
+
+| Node $N_1$ | Count |
+| --- | --- |
+| Class=0 | 0 |
+| Class=1 | 6 |
+
+:::
+::: {.column width="60%"}
+
+$$
+\begin{aligned}
+\textnormal{Gini} &= 1 - \left(\frac{0}{6}\right)^2 - \left(\frac{6}{6}\right)^2 = 0 \\
+\textnormal{Entropy} &= -\left(\frac{0}{6} \log_2 \frac{0}{6} - \frac{6}{6} \log_2 \frac{6}{6}\right) = 0 \\
+\textnormal{Error} &= 1 - \max\left[\frac{0}{6}, \frac{6}{6}\right] = 0
+\end{aligned}
+$$
+
+:::
+::::
+
+---
+
+:::: {.columns}
+::: {.column width="40%"}
+
+| Node $N_2$ | Count |
+| --- | --- |
+| Class=0 | 1 |
+| Class=1 | 5 |
+
+:::
+::: {.column width="60%"}
+
+$$
+\begin{aligned}
+\textnormal{Gini} &= 1 - \left(\frac{1}{6}\right)^2 - \left(\frac{5}{6}\right)^2 = 0.278 \\
+\textnormal{Entropy} &= -\left(\frac{1}{6} \log_2 \frac{1}{6} - \frac{5}{6} \log_2 \frac{5}{6}\right) = 0.650 \\
+\textnormal{Error} &= 1 - \max\left[\frac{1}{6}, \frac{5}{6}\right] = 0.167
+\end{aligned}
+$$
+
+:::
+::::
+
+---
+
+:::: {.columns}
+::: {.column width="40%"}
+
+| Node $N_3$ | Count |
+| --- | --- |
+| Class=0 | 3 |
+| Class=1 | 3 |
+
+:::
+::: {.column width="60%"}
+
+$$
+\begin{aligned}
+\textnormal{Gini} &= 1 - \left(\frac{3}{6}\right)^2 - \left(\frac{3}{6}\right)^2 = 0.5 \\
+\textnormal{Entropy} &= -\left(\frac{3}{6} \log_2 \frac{3}{6} - \frac{3}{6} \log_2 \frac{3}{6}\right) = 1 \\
+\textnormal{Error} &= 1 - \max\left[\frac{3}{6}, \frac{3}{6}\right] = 0.5
+\end{aligned}
+$$
+
+:::
+::::
+
+---
+
+We can plot the three impurity indices to get a sense of how they behave for binary classification problems.
+
+``` {python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define probability values
+p = np.linspace(0, 1, 100)
+
+# Calculate impurity measures
+entropy = -p * np.log2(p + 1e-9) - (1 - p) * np.log2(1 - p + 1e-9)  # Adding small epsilon to avoid log(0)
+gini = 2 * p * (1 - p)
+misclassification_error = 1 - np.maximum(p, 1 - p)
+
+# Create the plot
+plt.figure(figsize=(8, 6))
+plt.plot(p, entropy, label='Entropy', linewidth=2)
+plt.plot(p, gini, '--', label='Gini', linewidth=2)
+plt.plot(p, misclassification_error, '-.', label='Misclassification error', linewidth=2)
+
+# Add labels and title
+plt.xlabel('p')
+plt.ylabel('Impurity')
+plt.title('Comparison among the impurity measures for binary classification problems')
+plt.legend()
+plt.grid(True)
+
+# Display the plot
+plt.show()
+```
+
+They all maintain the same ordering for every relative frequency, i.e. Entropy > Gini > Misclassification error.
+
+## Collective Impurity of Child Nodes
+
+We can compute the collective impurity of child nodes by taking a weighted sum of the impurities of the child nodes.
+
+$$
+I(\textnormal{children}) = \sum_{j=1}^{k} \frac{N(v_j)}{N}\; I(v_j)
+$$
+
+
+## Run Decision Tree on Loans Data Set
+
+Let's run the Scikit-learn Decision Tree on the loans data set.
+
+First we have to convert the categorical fields to numeric fields.
+
+``` {python}
+loans['Defaulted Borrower'] = loans['Defaulted Borrower'].cat.codes
+loans['Home Owner'] = loans['Home Owner'].cat.codes
+loans['Marital Status'] = loans['Marital Status'].cat.codes
+loans
+```
+
+Then the independent variables are all the fields except the "Defaulted Borrower" field, which we'll assign to `X`.
+
+The dependent variable is the "Defaulted Borrower" field, which we'll assign to `y`.
+
+``` {python}
+from sklearn import tree
+
+X = loans.drop('Defaulted Borrower', axis=1)
+y = loans['Defaulted Borrower']
+
+clf = tree.DecisionTreeClassifier()
+clf = clf.fit(X, y)
+```
+
+
+``` {python}
+annotations = tree.plot_tree(clf, 
+               filled=True, 
+               rounded=True,
+               # max_depth=2,
+               # impurity=False,
+               feature_names=loans.drop('Defaulted Borrower', axis=1).columns,
+               class_names=['No', 'Yes'])
+```
+
+
+
+## References
+
+[1] J. Howard, Lecture on Random Forests, https://course.fast.ai/Lessons/lesson6.html
+
+[2] J. Howard, "How random forests really work", https://www.kaggle.com/code/jhoward/how-random-forests-really-work/
+
+[3] T. Hastie, R. Tibshirani, and J. Friedman, The Elements of Statistical Learning -- Data Mining, Inference, and Prediction, 2nd Edition. 2009. [Online]. Available: https://hastie.su.domains/ElemStatLearn/
+
+[4] T. Hastie, R. Tibshirani -- "Statistical Learning with R", Stanford Online course, starting with 8.1 Tree based methods, More details on trees, Classification Trees, etc.
+
+[5] https://developers.google.com/machine-learning/decision-forests
+
+fast.ai section on random forests
+
+
+# Backup
+
+
+# Scikit-learn Decision Trees Package
+
+## Scikit-learn Decision Trees Package
+
+The `sklearn.tree` module includes the following classes:
+
+- `DecisionTreeClassifier` for classification
+- `DecisionTreeRegressor` for regression
+
+There are also useful utilities for visualizing and exporting the tree.
+
+- `tree.plot_tree` for visualizing the tree
+- `tree.export_graphviz` for exporting the tree to a graphviz file
+- `tree.export_text` for exporting the tree to a text file
+
+## Simple Example
+
+``` {python}
+from sklearn import tree
+X = [[0, 0], [1, 1]]
+Y = [0, 1]
+clf = tree.DecisionTreeClassifier()
+clf = clf.fit(X, Y)
+
+print(clf.predict([[2., 2.]]))
+
+print(clf.predict_proba([[2., 2.]]))
+```
+
+## Iris Data Set Example
+
+Let's look at the classic Iris data set which consists of 150 samples representing3 types of irises:
+
+1. Setosa, 
+2. Versicolor, and 
+3. Virginica
+
+The features for each sample are the petal and sepal length and width in cm.
+
+``` {python}
+from sklearn.datasets import load_iris
+from sklearn import tree
+iris = load_iris()
+X, y = iris.data, iris.target
+clf = tree.DecisionTreeClassifier()
+clf = clf.fit(X, y)
+tree.plot_tree(clf, 
+               filled=True, 
+               max_depth=1, 
+               impurity=False, 
+               class_names=iris.target_names, 
+               feature_names=iris.feature_names)
+```
+
+``` {.python}
+# Render a PDF file of the tree
+import graphviz 
+dot_data = tree.export_graphviz(clf, out_file=None) 
+graph = graphviz.Source(dot_data) 
+graph.render("iris") 
+```
+
+``` {.python}
+# Render a PNG file of the tree
+graph.render("iris", format="png")
+```
+
+``` {python}
+import graphviz
+
+dot_data = tree.export_graphviz(clf, out_file=None, 
+                     feature_names=iris.feature_names,  
+                     class_names=iris.target_names,  
+                     filled=True, rounded=True,  
+                     special_characters=True)  
+graph = graphviz.Source(dot_data)  
+graph 
+```
