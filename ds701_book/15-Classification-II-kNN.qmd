@@ -15,52 +15,53 @@ import pandas as pd
 import seaborn as sns
 import matplotlib as mp
 import sklearn
-from IPython.display import Image
 
 from sklearn.neighbors import KNeighborsClassifier 
 import sklearn.datasets as datasets
 ```
 
-<!-- ## What do we know going into the lecture
+In this lecture we'll introduce our first classification technique, $k$-Nearest Neighbors.
 
-- Supervised learning and finding parameters of model (regression)
-- Decision trees, RandomForests, Boosting
-
-
-## k-NN introduction
-
-## Parametric vs Non parametric
-
-## When to use k-NN (end) -->
-
-
-In this lecture we'll expand our repertoire of classification techniques.
-
-In so doing we'll look at a first example of a new kind of model: nonparametric.
+Before discussing this model we'll introduce the notion of parametric and nonparametric models.
 
 ## Parametric vs. Nonparametric Models
 
 There are many ways to define models (whether supervised or unsupervised).
 
-However a key distinction is this: does the model have a fixed number of parameters, or does the number of parameters grow with the training data?
+However a key distinction is this: does the model have a fixed number of parameters or does the number of parameters grow with the training data?
 
 If the model has a __fixed number__ of parameters, it is called __parametric.__
 
 If the number of parameters grows with the data, the model is called __nonparametric.__
 
-Parametric models have 
+---
 
-* the advantage of often being faster to use, 
-* but the disadvantage of making strong assumptions about the nature of data distributions.
+**Parametric models** 
 
-Nonparametric models are
+* have fixed parameters independent of the training data
+* have the advantage of (often) being faster to use
+* have the disadvantage of making strong assumptions about the nature of the underlying data distributions.
 
-* more flexible,
-* but can be computationally intractable for large datasets.
+**Nonparametric models**
 
-## Examples
+* have parameters that grow with the size of the training data
+* are more flexible
+* can be computationally intractable for large datasets
 
-The classic example of a nonparametric classifier is __$k$-Nearest Neighbors.__
+
+## Parametric Models
+- **Linear Regression**: Assumes a linear relationship between the input variables and the output.
+- **Logistic Regression**: Used for binary classification problems.
+- **Polynomial Regression**: Extends linear regression by considering polynomial relationships.
+- **Support Vector Machines (SVM)**: With a linear kernel.
+- **Naive Bayes**: Based on Bayes' theorem with strong independence assumptions.
+- **Generalized Linear Models (GLM)**: Extends linear models to allow for response variables that have error distribution models other than a normal distribution.
+
+## Nonparametric Models
+- **K-Nearest Neighbors (KNN)**: Classifies a data point based on how its neighbors are classified.
+- **Decision Trees**: Splits the data into subsets based on the value of input features.
+- **Random Forest**: An ensemble of decision trees.
+- **Support Vector Machines (SVM)**: With non-linear kernels like RBF.
 
 ```{python}
 #| echo: false
@@ -494,14 +495,13 @@ Alternative approaches to mitigate this issue
 ::::
 ::::
 
-## Model Selection
+## More on Model Selection
 
-Let's compare two classification methods
+Recall that each value of $k$ provides a different model.
 
-* Decision Trees
-* k-Nearest Neighbors
-
-To compare them, we will need to understand methods for __model selection.__
+:::: {.fragment}
+To better understand __model selection__, we need a way to evaluate our different models.
+::::
 
 :::: {.fragment}
 How do we evaluate a classifier?
@@ -534,7 +534,7 @@ Using the confusion matrix we can define some more useful measures:
    * __Precision__ - defined as the fraction of classified positives correctly classified
        * TP/(TP + FP)
 
-## Evaluating $k$- Nearest Neighbors and Decision Trees
+## Evaluating $k$- Nearest Neighbors
 
 First we'll generate some synthetic data to work with.
 
@@ -795,7 +795,7 @@ plt.show()
 
 ---
 
-Based on the generalization error (i.e., accuracy on the test (held-out) data), it looks like $k = 2$ is the best choice. 
+Based on the generalization error, i.e., accuracy on the held-out test data, it looks like $k = 2$ is the best choice. 
 
 Here is the __decision boundary__ for $k$-NN with $k = 2$.
 
@@ -843,6 +843,8 @@ plt.title(f'{k}-NN - Test Data\nAccuracy: {knn.score(X_test, y_test)}')
 plt.show()
 ```
 
+
+<!--
 ## Decision Tree
 
 Next, we'll use a decision tree on the same data set.
@@ -946,6 +948,8 @@ plt.imshow(img)
 plt.axis('off')
 plt.show()
 ```
+
+-->
 
 # Real Data
 
@@ -1117,7 +1121,8 @@ plt.show()
 
 There are a few artifacts, though overall this looks like a reasonably smooth set of decision boundaries.
 
-## Hyperparameters: Decistion Tree
+<!--
+## Hyperparameters: Decision Tree
 
 How do we control the complexity of a Decision Tree?
 
@@ -1212,6 +1217,8 @@ plt.ylim(yy.min(), yy.max())
 plt.title(f"3-Class DT Classification\n{best_leaf} leaf nodes")
 plt.show()
 ```
+
+-->
 
 ## MNIST dataset
 
@@ -1388,4 +1395,5 @@ We covered the following topics:
 - $k$-NN algorithm
 - Curse of Dimensionality
 - Worked with real datasets to perform model selection
+- Metrics like precision and recall for evaluating classifier performance
 :::
