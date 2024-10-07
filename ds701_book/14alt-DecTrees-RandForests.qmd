@@ -5,19 +5,17 @@ jupyter: python3
 
 ## Outline
 
-- An example of decision tree from dataset
-- Formally introduce decision trees
-- Metrics for tree quality
+- Build a decision tree manually
+- Single and collective impurity measures
+- Selecting splitting attributes and test conditions
+- Scikit-learn implementation
+- Model training and evaluation 
 - Random forests
-- Example of random forests
-- Parameter tuning
-- Variable importance
 - Partial dependence plots
-- Bias-variance trade-off
 - Pros and cons of decision trees and random forests
 
 
-## Data set options
+## Data set options (remove)
 
 - [loans.csv](./data/loans.csv)
 - [vertebrate.csv](./data/vertebrate.csv)
@@ -412,7 +410,7 @@ dot_data = """
 digraph Tree {
     node [shape=oval, style="filled, rounded", color="black", fontname="helvetica"] ;
     edge [fontname="helvetica"] ;
-    0 [label="Income\\<= 75K", fillcolor="#ffffff"] ;
+    0 [label="Income\\n<= 75K", fillcolor="#ffffff"] ;
     1 [label="Yes", fillcolor="#ffffff", shape="none"] ;
     2 [label="No", fillcolor="#ffffff", shape="none"] ;
     0 -> 1 ;
@@ -605,6 +603,127 @@ $$
 I(\textnormal{children}) = \sum_{j=1}^{k} \frac{N(v_j)}{N}\; I(v_j)
 $$
 
+
+## Impurity Example
+
+Let's compute collective impurity to see which feature to split on.
+
+::: {layout-ncol=3}
+
+``` {python}
+#| echo: false
+#| fig-cap: '(a) Collective Entropy: 0.690'
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Home\\nOwner", fillcolor="#ffffff"] ;
+    1 [label="Yes: 0\\nNo: 3", fillcolor="#ffffff", shape="square"] ;
+    2 [label="Yes: 3\\nNo: 4", fillcolor="#ffffff", shape="square"] ;
+    0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="Yes"] ;
+    0 -> 2 [labeldistance=2.5, labelangle=-45, headlabel="No"] ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+``` {python}
+#| echo: false
+#| fig-cap: '(b) Collective Entropy: 0.686'
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="Marital\\nStatus", fillcolor="#ffffff"] ;
+    1 [label="Yes: 2\\nNo: 3", fillcolor="#ffffff", shape="square"] ;
+    2 [label="Yes: 0\\nNo: 3", fillcolor="#ffffff", shape="square"] ;
+    3 [label="Yes: 1\\nNo: 1", fillcolor="#ffffff", shape="square"] ;
+    0 -> 1 [xlabel="Single"] ;
+    0 -> 2 [label="Married"] ;
+    0 -> 3 [xlabel="Divorced"] ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+``` {python}
+#| echo: false
+#| fig-cap: '(c) Collective Entropy index: 0.00'
+dot_data = """
+digraph Tree {
+    node [shape=oval, style="filled", color="black", fontname="helvetica"] ;
+    edge [fontname="helvetica"] ;
+    0 [label="ID", fillcolor="#ffffff"] ;
+    1 [label="Yes: 0\\nNo: 1", fillcolor="#ffffff", shape="square"] ;
+    2 [label="...", fillcolor="#ffffff", shape="none"] ;
+    3 [label="Yes: 1\\nNo: 0", fillcolor="#ffffff", shape="square"] ;
+    4 [label="Yes: 0\\nNo: 1", fillcolor="#ffffff", shape="square"] ;
+    5 [label="Yes: 1\\nNo: 0", fillcolor="#ffffff", shape="square"] ;
+    0 -> 1 [xlabel="1"] ;
+    0 -> 2 [xlabel="2", color="white"] ;
+    0 -> 3 [xlabel="8"] ;
+    0 -> 4 [xlabel="9"] ;
+    0 -> 5 [xlabel="10"] ; }
+"""
+
+# Use graphviz to render the dot file
+graph = graphviz.Source(dot_data)  
+graph
+```
+
+:::
+
+::: {.callout-tip}
+Try calculating the collective Entropy for (a) and (b) and see if you get the same values.
+:::
+
+::: {.callout-important}
+The collective entropy for (c) is 0. Why would we not want to use this node?
+:::
+
+## Gain Ratio
+
+From Intro to Data Mining:
+
+Having a low impurity value alone is insufficient to find a good attribute test condition for a node. 
+
+Having more number of child nodes can make a decision tree more complex and consequently more susceptible to overfitting. 
+
+Hence, the number of children produced by the splitting attribute should also be taken into consideration while deciding the best attribute test condition. 
+
+There are two ways to overcome this problem. 
+
+1. One way is to _generate only binary decision trees_, thus avoiding the difficulty of handling attributes with varying
+   number of partitions. This strategy is employed by decision tree classifiers such as **CART**. 
+2. Another way is to modify the splitting criterion to take into account the number of partitions produced by the
+   attribute. For example, in the **C4.5** decision tree algorithm, a measure known as **gain ratio** is used to compensate
+   for attributes that produce a large number of child nodes.
+
+## Identifying the Best Attribute Test Condition
+
+![](figs/L14-splitting-criteria-gini.png)
+
+Here's an example of how to identify the best attribute test condition using the Gini impurity index.
+
+## Splitting Continuous Attributes
+
+For quantitative attributes like _Annual Income_, we need to find some threshold $\tau$ that
+minimizes the impurity index.
+
+The following table illustrates the process.
+
+![](figs/L14-splitting-continuous-attribs.png)
+
+**Procedure:**
+
+1. Sort all the training instances by _Annual Income_ in increasing order.
+2. Pick thresholds half way between consecutive values.
+3. Compute the Gini impurity index for each threshold.
+4. Select the threshold that minimizes the Gini impurity index.
 
 ## Run Decision Tree on Loans Data Set
 
