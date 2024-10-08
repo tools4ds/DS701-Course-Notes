@@ -128,7 +128,7 @@ digraph Tree {
     edge [fontname="helvetica"] ;
     0 [label="Home Owner?\\n---\\nsamples = 10\\nvalues = [7, 3]\\ndefaulted = No\\nerror = 30%", fillcolor="#ffffff"] ;
     1 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
-    2 [label="samples = 7\\nvalue = [4, 3]\\ndefaulted = Yes\\nerror = 43%", fillcolor="#ffffff"] ;
+    2 [label="samples = 7\\nvalue = [4, 3]\\ndefaulted = No\\nerror = 43%", fillcolor="#ffffff"] ;
     0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="Yes"] ;
     0 -> 2 [labeldistance=2.5, labelangle=-45, headlabel="No"] ;}
 """
@@ -1200,7 +1200,7 @@ mean_absolute_error(val_y, preds)
 
 ![](figs/qrcode_course_feedback.png)
 
-[https://forms.gle/SuoGugkJLmbGG1798](https://forms.gle/SuoGugkJLmbGG1798)
+[https://bit.ly/3NeAwgx](https://bit.ly/3NeAwgx)
 
 :::
 ::::
