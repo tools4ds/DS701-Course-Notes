@@ -13,7 +13,7 @@
 <g id="node1" class="node">
 <title>0</title>
 <path fill="#ffffff" stroke="black" d="M154.5,-321C154.5,-321 74,-321 74,-321 68,-321 62,-315 62,-309 62,-309 62,-235 62,-235 62,-229 68,-223 74,-223 74,-223 154.5,-223 154.5,-223 160.5,-223 166.5,-229 166.5,-235 166.5,-235 166.5,-309 166.5,-309 166.5,-315 160.5,-321 154.5,-321"/>
-<text text-anchor="middle" x="114.25" y="-303.7" font-family="Helvetica,sans-Serif" font-size="14.00">Home Owner</text>
+<text text-anchor="middle" x="114.25" y="-303.7" font-family="Helvetica,sans-Serif" font-size="14.00">Home Owner?</text>
 <text text-anchor="middle" x="114.25" y="-288.7" font-family="Helvetica,sans-Serif" font-size="14.00">&#45;&#45;&#45;</text>
 <text text-anchor="middle" x="114.25" y="-273.7" font-family="Helvetica,sans-Serif" font-size="14.00">samples = 10</text>
 <text text-anchor="middle" x="114.25" y="-258.7" font-family="Helvetica,sans-Serif" font-size="14.00">values = [7, 3]</text>
@@ -40,7 +40,7 @@
 <g id="node3" class="node">
 <title>2</title>
 <path fill="#ffffff" stroke="black" d="M220.12,-187C220.12,-187 134.38,-187 134.38,-187 128.38,-187 122.38,-181 122.38,-175 122.38,-175 122.38,-116 122.38,-116 122.38,-110 128.38,-104 134.38,-104 134.38,-104 220.12,-104 220.12,-104 226.12,-104 232.12,-110 232.12,-116 232.12,-116 232.12,-175 232.12,-175 232.12,-181 226.12,-187 220.12,-187"/>
-<text text-anchor="middle" x="177.25" y="-169.7" font-family="Helvetica,sans-Serif" font-size="14.00">Marital Status</text>
+<text text-anchor="middle" x="177.25" y="-169.7" font-family="Helvetica,sans-Serif" font-size="14.00">Marital Status?</text>
 <text text-anchor="middle" x="177.25" y="-154.7" font-family="Helvetica,sans-Serif" font-size="14.00">&#45;&#45;&#45;</text>
 <text text-anchor="middle" x="177.25" y="-139.7" font-family="Helvetica,sans-Serif" font-size="14.00">samples = 7</text>
 <text text-anchor="middle" x="177.25" y="-124.7" font-family="Helvetica,sans-Serif" font-size="14.00">value = [4, 3]</text>

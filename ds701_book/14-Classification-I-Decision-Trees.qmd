@@ -64,8 +64,8 @@ if not os.path.exists('data'):
 if not os.path.exists('data/loans.csv'):
     url = 'https://github.com/tools4ds/DS701-Course-Notes/blob/main/ds701_book/data/loans.csv'
     urllib.request.urlretrieve(url, 'data/loans.csv')
-else:
-    loans = pd.read_csv('data/loans.csv', index_col=0)
+
+loans = pd.read_csv('data/loans.csv', index_col=0)
 loans
 ```
 
@@ -126,7 +126,7 @@ dot_data = """
 digraph Tree {
     node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;
     edge [fontname="helvetica"] ;
-    0 [label="Home Owner\\n---\\nsamples = 10\\nvalues = [7, 3]\\ndefaulted = No\\nerror = 30%", fillcolor="#ffffff"] ;
+    0 [label="Home Owner?\\n---\\nsamples = 10\\nvalues = [7, 3]\\ndefaulted = No\\nerror = 30%", fillcolor="#ffffff"] ;
     1 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
     2 [label="samples = 7\\nvalue = [4, 3]\\ndefaulted = Yes\\nerror = 43%", fillcolor="#ffffff"] ;
     0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="Yes"] ;
@@ -148,7 +148,7 @@ Let's split this node into two nodes based on the "Marital Status" field.
 
 Let's split on the "Marital Status" field.
 
-We see that the 3 defaulted loans are all for married people. Since the node is
+We see that the 3 defaulted loans are all for single or divorced people. Since the node is
 all one class, we don't split this node and we call it a **leaf node**.
 
 ``` {python}
@@ -158,9 +158,9 @@ dot_data = """
 digraph Tree {
     node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;
     edge [fontname="helvetica"] ;
-    0 [label="Home Owner\\n---\\nsamples = 10\\nvalues = [7, 3]\\ndefaulted = No\\nerror = 30%", fillcolor="#ffffff"] ;
+    0 [label="Home Owner?\\n---\\nsamples = 10\\nvalues = [7, 3]\\ndefaulted = No\\nerror = 30%", fillcolor="#ffffff"] ;
     1 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
-    2 [label="Marital Status\\n---\\nsamples = 7\\nvalue = [4, 3]\\ndefaulted = Yes", fillcolor="#ffffff"] ;
+    2 [label="Marital Status?\\n---\\nsamples = 7\\nvalue = [4, 3]\\ndefaulted = Yes", fillcolor="#ffffff"] ;
     3 [label="samples = 4\\nvalue = [1, 3]\\ndefaulted = Yes\\nerror = 25%", fillcolor="#ffffff"] ;
     4 [label="samples = 3\\nvalue = [3, 0]\\ndefaulted = No\\nerror = 0%", fillcolor="#e58139"] ;
     0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="Yes"] ;
@@ -871,14 +871,14 @@ if not os.path.exists('data/titanic'):
 if not os.path.exists('data/titanic/train.csv'):
     url = 'https://github.com/tools4ds/DS701-Course-Notes/blob/main/ds701_book/data/titanic/train.csv'
     urllib.request.urlretrieve(url, 'data/titanic/train.csv')
-else:
-    df_train = pd.read_csv('data/titanic/train.csv', index_col='PassengerId')
+
+df_train = pd.read_csv('data/titanic/train.csv', index_col='PassengerId')
 
 if not os.path.exists('data/titanic/test.csv'):
     url = 'https://github.com/tools4ds/DS701-Course-Notes/blob/main/ds701_book/data/titanic/test.csv'
     urllib.request.urlretrieve(url, 'data/titanic/test.csv')
-else:
-    df_test = pd.read_csv('data/titanic/test.csv', index_col='PassengerId')
+
+df_test = pd.read_csv('data/titanic/test.csv', index_col='PassengerId')
 ```
 
 ---
