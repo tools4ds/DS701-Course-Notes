@@ -1181,12 +1181,31 @@ mean_absolute_error(val_y, preds)
 ```
 
 
-## Recap
+::: {.content-visible when-profile="slides"}
+
+## Recap and Feedback
+
+:::: {.columns}
+::: {.column width="40%"}
+
+**Recap:**
 
 * Decision Trees
 * Impurity Measures
 * Avoiding Overfitting
 * Random Forests
+
+:::
+::: {.column width="60%"}
+
+![](figs/qrcode_course_feedback.png)
+
+[https://forms.gle/SuoGugkJLmbGG1798](https://forms.gle/SuoGugkJLmbGG1798)
+
+:::
+::::
+
+:::
 
 
 ## References
