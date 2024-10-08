@@ -14,7 +14,7 @@ nocite: |
 - Look at single and collective impurity measures
 - Selecting splitting attributes and test conditions
 - Scikit-learn implementation
-- Model training and evaluation 
+- Model training and evaluation
 - Random forests
 
 ## Introduction
@@ -54,7 +54,18 @@ You want to build a model to predict whether a loan will default.
 ``` {python}
 import pandas as pd
 
-loans = pd.read_csv('data/loans.csv', index_col=0)
+import os
+import urllib.request
+
+# Check if the directory exists, if not, create it
+if not os.path.exists('data'):
+    os.makedirs('data')
+
+if not os.path.exists('data/loans.csv'):
+    url = 'https://github.com/tools4ds/DS701-Course-Notes/blob/main/ds701_book/data/loans.csv'
+    urllib.request.urlretrieve(url, 'data/loans.csv')
+else:
+    loans = pd.read_csv('data/loans.csv', index_col=0)
 loans
 ```
 
@@ -850,8 +861,24 @@ to illustrate the concepts of overfitting and random forests.
 ``` {python}
 import pandas as pd
 
-df_train = pd.read_csv('data/titanic/train.csv', index_col='PassengerId')
-df_test = pd.read_csv('data/titanic/test.csv', index_col='PassengerId')
+import os
+import urllib.request
+
+# Check if the directory exists, if not, create it
+if not os.path.exists('data/titanic'):
+    os.makedirs('data/titanic')
+
+if not os.path.exists('data/titanic/train.csv'):
+    url = 'https://github.com/tools4ds/DS701-Course-Notes/blob/main/ds701_book/data/titanic/train.csv'
+    urllib.request.urlretrieve(url, 'data/titanic/train.csv')
+else:
+    df_train = pd.read_csv('data/titanic/train.csv', index_col='PassengerId')
+
+if not os.path.exists('data/titanic/test.csv'):
+    url = 'https://github.com/tools4ds/DS701-Course-Notes/blob/main/ds701_book/data/titanic/test.csv'
+    urllib.request.urlretrieve(url, 'data/titanic/test.csv')
+else:
+    df_test = pd.read_csv('data/titanic/test.csv', index_col='PassengerId')
 ```
 
 ---
