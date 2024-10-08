@@ -41,13 +41,15 @@ We'll now start looking into how to build models to predict an outcome variable 
 
 We'll use an example from [@Tan2018].
 
-![](figs/L14-terrier-savings-logo.png){width="100px"}
+![](figs/L14-terrier-savings-logo.png){height="200px"}
 
 You are a loan officer at **Terrier Savings and Loan**. 
 
 You have a dataset on loans that you have made in the past.
 
 You want to build a model to predict whether a loan will default.
+
+## Loans Data Set
 
 ``` {python}
 import pandas as pd
@@ -62,9 +64,12 @@ Here's the summary info of the data set.
 loans.info()
 ```
 
+---
+
 Since some of the fields are categorical, let's convert them to categorical data types.
 
 ``` {python}
+#| code-fold: false
 loans['Home Owner'] = loans['Home Owner'].astype('category')
 loans['Marital Status'] = loans['Marital Status'].astype('category')
 loans['Defaulted Borrower'] = loans['Defaulted Borrower'].astype('category')
@@ -93,6 +98,9 @@ digraph Tree {
 graph = graphviz.Source(dot_data)  
 graph
 ```
+
+<!-- TODO: Look at this reference to consider pydotplus for size control -->
+
 
 We see a 30% error rate since 3 out of 10 loans defaulted.
 
@@ -155,6 +163,8 @@ graph = graphviz.Source(dot_data)
 graph
 ```
 
+--- 
+
 We can list the subsets for the two criteria to calculate the error rate.
 
 ``` {python}
@@ -206,10 +216,14 @@ We've dispositioned every data point by walking down the tree to a leaf node.
 
 How do we know if this tree is good? We arbitrarily picked the order of the fields to split on.
 
-Is there a way to systematically pick the order of the fields to split on? This is called the **splitting criterion**.
+Is there a way to systematically pick the order of the fields to split on? 
 
-There's also the question of when to stop splitting, or the **stopping criterion**. So far, we stopped splitting when
-we reached a node of pure class but there are reasons to stop splitting even without pure classes, which we'll see later.
+* This is called the **splitting criterion**.
+
+There's also the question of when to stop splitting, or the **stopping criterion**. 
+
+So far, we stopped splitting when we reached a node of pure class but there are 
+reasons to stop splitting even without pure classes, which we'll see later.
 
 ## Specifying the Test Condition
 
@@ -222,7 +236,10 @@ How we specify a test condition depends on the attribute type which can be:
 * Ordinal (e.g. Small, Medium, Large)
 * Continuous (e.g., 1.5, 2.1, 3.7)
 
-And depends on the number of ways to split - __multi-way__ or __binary__:
+And depends on the number of ways to split:
+
+* __multi-way__
+* __binary__
 
 ---
 
@@ -476,13 +493,15 @@ $$
 
 where $p_i(t)$ is the **relative frequency** of training instances of class $i$ at a node $t$ and $c$ is the number of classes.
 
+::: {.callout-note}
 By convention, we set $0 \log_2 0 = 0$ in entropy calculations.
+:::
 
 All three impurity indices equal 0 when all the records at a node belong to the same class.
 
 All three impurity indices reach their maximum value when the classes are evenly distributed among the child nodes.
 
----
+## Impurity Example 1
 
 :::: {.columns}
 ::: {.column width="40%"}
@@ -506,7 +525,7 @@ $$
 :::
 ::::
 
----
+## Impurity Example 2
 
 :::: {.columns}
 ::: {.column width="40%"}
@@ -530,7 +549,7 @@ $$
 :::
 ::::
 
----
+## Impurity Example 3
 
 :::: {.columns}
 ::: {.column width="40%"}
@@ -685,13 +704,14 @@ The collective entropy for (c) is 0. Why would we not want to use this node?
 
 ## Gain Ratio
 
-From Intro to Data Mining[@Tan2018, p. 127]:
+From [@Tan2018, p. 127]:
 
-Having a low impurity value alone is insufficient to find a good attribute test condition for a node. 
-
-Having more number of child nodes can make a decision tree more complex and consequently more susceptible to overfitting. 
+* Having a low impurity value alone is insufficient to find a good attribute test condition for a node. 
+* Having more number of child nodes can make a decision tree more complex and consequently more susceptible to overfitting. 
 
 Hence, the number of children produced by the splitting attribute should also be taken into consideration while deciding the best attribute test condition. 
+
+---
 
 There are two ways to overcome this problem. 
 
@@ -736,7 +756,7 @@ So first we have to convert the categorical fields to category index numeric fie
 loans['Defaulted Borrower'] = loans['Defaulted Borrower'].cat.codes
 loans['Home Owner'] = loans['Home Owner'].cat.codes
 loans['Marital Status'] = loans['Marital Status'].cat.codes
-loans
+loans.head()
 ```
 
 ---
@@ -751,9 +771,27 @@ from sklearn import tree
 
 X = loans.drop('Defaulted Borrower', axis=1)
 y = loans['Defaulted Borrower']
+```
+
+<br>
+
+:::: {.columns}
+::: {.column width="50%"}
+`X`:
+``` {python}
+#| echo: false
 X.info()
+```
+:::
+::: {.column width="50%"}
+`y`:
+``` {python}
+#| echo: false
 y.info()
 ```
+:::
+::::
+
 
 ---
 
@@ -768,6 +806,7 @@ clf = clf.fit(X, y)
 Let's plot the tree.
 
 ``` {python}
+#| echo: false
 annotations = tree.plot_tree(clf, 
                filled=True, 
                rounded=True,
@@ -777,10 +816,11 @@ annotations = tree.plot_tree(clf,
                class_names=['No', 'Yes'])
 ```
 
-
 Interestingly, the tree was built using only the Income field.
 
 That's arguably an advantage of Decision Trees: they automatically perform feature selection.
+
+
 
 ## Ensemble Methods
 
@@ -814,14 +854,21 @@ df_train = pd.read_csv('data/titanic/train.csv', index_col='PassengerId')
 df_test = pd.read_csv('data/titanic/test.csv', index_col='PassengerId')
 ```
 
+---
+
 Let's look at the training data.
 
 ``` {python}
 df_train.info()
-df_train.head()
 ```
 
 We can see that there are 891 entries with 11 fields. 'Age', 'Cabin', and 'Embarked' have missing values.
+
+---
+
+``` {python}
+df_train.head()
+```
 
 ---
 
@@ -953,7 +1000,11 @@ sns.boxenplot(data=df_fare, x=dep, y="LogFare", ax=axs[0], hue=dep, palette=["#3
 sns.kdeplot(data=df_fare, x="LogFare", ax=axs[1]);
 ```
 
-The [boxenplot](https://seaborn.pydata.org/generated/seaborn.boxenplot.html) above shows quantiles of `LogFare` for each group of `Survived==0` and `Survived==1`. It shows that the average `LogFare` for passengers that didn't survive is around `2.5`, and for those that did it's around `3.2`. So it seems that people that paid more for their tickets were more likely to get put on a lifeboat.
+The [boxenplot](https://seaborn.pydata.org/generated/seaborn.boxenplot.html) above shows quantiles of `LogFare` for each group of `Survived==0` and `Survived==1`. 
+
+It shows that the average `LogFare` for passengers that didn't survive is around `2.5`, and for those that did it's around `3.2`. 
+
+So it seems that people that paid more for their tickets were more likely to get put on a lifeboat.
 
 ---
 
@@ -973,7 +1024,7 @@ mean_absolute_error(val_y, preds)
 
 This is quite a bit less accurate than our model that used `Sex` as the single binary split.
 
----
+## Full Decision Tree
 
 Ok. Let's build a decision tree model using all the features.
 
@@ -994,7 +1045,7 @@ annotations = tree.plot_tree(clf,
                class_names=['No', 'Yes'])
 ```
 
----
+## Full Tree -- Evaluation Error
 
 Let's see how it does on the validation set.
 
@@ -1004,7 +1055,11 @@ preds = clf.predict(val_xs)
 mean_absolute_error(val_y, preds)
 ```
 
----
+:::: {.fragment}
+That is quite a bit worse than splitting on `Sex` alone!!
+::::
+
+## Stopping Criteria -- Minimum Samples Split
 
 Let's train the decision tree again but with stopping criteria based on the number of samples in a node.
 
@@ -1025,7 +1080,7 @@ annotations = tree.plot_tree(clf,
                class_names=['No', 'Yes'])
 ```
 
----
+## Min Samples Split -- Evaluation Error
 
 Let's see how it does on the validation set.
 
@@ -1035,7 +1090,8 @@ preds = clf.predict(val_xs)
 mean_absolute_error(val_y, preds)
 ```
 
----
+
+## Decision Tree -- Maximum Depth
 
 Let's train the decision tree again but with a maximum depth of 3.
 
@@ -1056,7 +1112,7 @@ annotations = tree.plot_tree(clf,
                class_names=['No', 'Yes'])
 ```
 
----
+## Maximum Depth -- Evaluation Error
 
 Let's see how it does on the validation set.
 
@@ -1093,24 +1149,6 @@ mean_absolute_error(val_y, preds)
 * Impurity Measures
 * Avoiding Overfitting
 * Random Forests
-
-
-# Scikit-learn Decision Trees Package
-
-## Scikit-learn Decision Trees Package
-
-The `sklearn.tree` module includes the following classes:
-
-- `DecisionTreeClassifier` for classification
-- `DecisionTreeRegressor` for regression
-- `RandomForestClassifier` for classification
-- `RandomForestRegressor` for regression
-
-There are also useful utilities for visualizing and exporting the tree.
-
-- `tree.plot_tree` for visualizing the tree
-- `tree.export_graphviz` for exporting the tree to a graphviz file
-- `tree.export_text` for exporting the tree to a text file
 
 
 ## References
