@@ -62,7 +62,7 @@ if not os.path.exists('data'):
     os.makedirs('data')
 
 if not os.path.exists('data/loans.csv'):
-    url = 'https://github.com/tools4ds/DS701-Course-Notes/blob/main/ds701_book/data/loans.csv'
+    url = 'https://raw.githubusercontent.com/tools4ds/DS701-Course-Notes/refs/heads/main/ds701_book/data/loans.csv'
     urllib.request.urlretrieve(url, 'data/loans.csv')
 
 loans = pd.read_csv('data/loans.csv', index_col=0)
@@ -486,7 +486,7 @@ threshold values can be more efficient.
 
 Ideally, we want to pick attributes and test conditions that maximize the homogeneity of the splits.
 
-We can use a impurity index to measure the homogeneity of a split.
+We can use an **impurity index** to measure the homogeneity of a split.
 
 We'll look at ways of measuring impurity of a node and the collective impurity of its child nodes.
 
@@ -692,7 +692,7 @@ digraph Tree {
     4 [label="Yes: 0\\nNo: 1", fillcolor="#ffffff", shape="square"] ;
     5 [label="Yes: 1\\nNo: 0", fillcolor="#ffffff", shape="square"] ;
     0 -> 1 [xlabel="1"] ;
-    0 -> 2 [xlabel="2", color="white"] ;
+    0 -> 2 [color="white"] ;
     0 -> 3 [xlabel="8"] ;
     0 -> 4 [xlabel="9"] ;
     0 -> 5 [xlabel="10"] ; }
@@ -713,15 +713,6 @@ Try calculating the collective Entropy for (a) and (b) and see if you get the sa
 The collective entropy for (c) is 0. Why would we not want to use this node?
 :::
 
-## Gain Ratio
-
-From [@Tan2018, p. 127]:
-
-* Having a low impurity value alone is insufficient to find a good attribute test condition for a node. 
-* Having more number of child nodes can make a decision tree more complex and consequently more susceptible to overfitting. 
-
-Hence, the number of children produced by the splitting attribute should also be taken into consideration while deciding the best attribute test condition. 
-
 ---
 
 There are two ways to overcome this problem. 
@@ -731,6 +722,26 @@ There are two ways to overcome this problem.
 2. Another way is to modify the splitting criterion to take into account the number of partitions produced by the
    attribute. For example, in the **C4.5** decision tree algorithm, a measure known as **gain ratio** is used to compensate
    for attributes that produce a large number of child nodes.
+
+## Gain Ratio
+
+See [@Tan2018, Chap. 3, p. 127]:
+
+* Having a low impurity value alone is insufficient to find a good attribute test condition for a node. 
+* Having more number of child nodes can make a decision tree more complex and consequently more susceptible to overfitting. 
+
+Hence, the number of children produced by the splitting attribute should also be taken into consideration while deciding the best attribute test condition. 
+
+---
+
+$$
+\text{Gain ratio} = \frac{\Delta_{\text{info}}}{\text{Split Info}} = \frac{\text{Entropy(Parent)} - \sum_{i=1}^{k} \frac{N(v_i)}{N} \text{Entropy}(v_i)}{- \sum_{i=1}^{k} \frac{N(v_i)}{N} \log_2 \frac{N(v_i)}{N}}
+$$
+
+where $N(v_i)$ is the number of instances assigned to node $v_i$ and $k$ is the total number of splits. 
+
+The split information measures the entropy of splitting a node into its child nodes and evaluates if the split results
+in a larger number of equally-sized child nodes or not.
 
 ## Identifying the Best Attribute Test Condition
 
@@ -869,13 +880,13 @@ if not os.path.exists('data/titanic'):
     os.makedirs('data/titanic')
 
 if not os.path.exists('data/titanic/train.csv'):
-    url = 'https://github.com/tools4ds/DS701-Course-Notes/blob/main/ds701_book/data/titanic/train.csv'
+    url = 'https://raw.githubusercontent.com/tools4ds/DS701-Course-Notes/refs/heads/main/ds701_book/data/titanic/train.csv'
     urllib.request.urlretrieve(url, 'data/titanic/train.csv')
 
 df_train = pd.read_csv('data/titanic/train.csv', index_col='PassengerId')
 
 if not os.path.exists('data/titanic/test.csv'):
-    url = 'https://github.com/tools4ds/DS701-Course-Notes/blob/main/ds701_book/data/titanic/test.csv'
+    url = 'https://raw.githubusercontent.com/tools4ds/DS701-Course-Notes/refs/heads/main/ds701_book/data/titanic/test.csv'
     urllib.request.urlretrieve(url, 'data/titanic/test.csv')
 
 df_test = pd.read_csv('data/titanic/test.csv', index_col='PassengerId')
