@@ -15,6 +15,7 @@ nocite: |
 - Selecting splitting attributes and test conditions
 - Scikit-learn implementation
 - Model training and evaluation
+- Bias and Variance
 - Random forests
 
 ## Introduction
@@ -29,12 +30,12 @@ We'll now start looking into how to build models to predict an outcome variable 
 **Classification** problems:
 
 - predict a category
-- e.g. spam/not spam, fraud/not fraud, default/not default, malignant/benign, etc.
+- e.g., spam/not spam, fraud/not fraud, default/not default, malignant/benign, etc.
 
 **Regression** problems:
 
 - predict a numeric value
-- e.g. price of a house, salary of a person, etc.
+- e.g., price of a house, salary of a person, etc.
 
 
 ## Loan Default Example
@@ -243,8 +244,8 @@ Before we continue, we should take a moment to consider how we specify a test co
 How we specify a test condition depends on the attribute type which can be:
 
 * Binary (Boolean)
-* Nominal (Categorical, e.g. cat, dog, bird)
-* Ordinal (e.g. Small, Medium, Large)
+* Nominal (Categorical, e.g., cat, dog, bird)
+* Ordinal (e.g., Small, Medium, Large)
 * Continuous (e.g., 1.5, 2.1, 3.7)
 
 And depends on the number of ways to split:
@@ -618,7 +619,7 @@ plt.grid(True)
 plt.show()
 ```
 
-They all maintain the same ordering for every relative frequency, i.e. Entropy > Gini > Misclassification error.
+They all maintain the same ordering for every relative frequency, i.e., Entropy > Gini > Misclassification error.
 
 ## Collective Impurity of Child Nodes
 
@@ -723,12 +724,16 @@ There are two ways to overcome this problem.
    attribute. For example, in the **C4.5** decision tree algorithm, a measure known as **gain ratio** is used to compensate
    for attributes that produce a large number of child nodes.
 
+::: aside
+CART stands for Classification And Regression Tree.
+:::
+
 ## Gain Ratio
 
 See [@Tan2018, Chap. 3, p. 127]:
 
 * Having a low impurity value alone is insufficient to find a good attribute test condition for a node. 
-* Having more number of child nodes can make a decision tree more complex and consequently more susceptible to overfitting. 
+* Having more child nodes can make a decision tree more complex and consequently more susceptible to overfitting. 
 
 Hence, the number of children produced by the splitting attribute should also be taken into consideration while deciding the best attribute test condition. 
 
@@ -848,12 +853,41 @@ That's arguably an advantage of Decision Trees: they automatically perform featu
 
 (See @Tan2018, Chapter 4)
 
-Motivated around the idea that combining several noisy classifers can result in a better prediction
+Motivated around the idea that combining several noisy classifiers can result in a better prediction
 under certain conditions.
 
 * The base classifiers are independent
 * The base classifiers are noisy (high variance)
 * The base classifiers are low (ideally zero) bias
+
+## Bias and Variance
+
+__Bias__
+
+* Definition: Error due to overly simplistic models.
+* High bias: Model underfits the data.
+    * Example: Shallow decision trees.
+* Low bias: Model accurately captures the underlying patterns in the data.
+    * Example: Deep decision trees.
+
+__Variance__
+
+* Definition: Error due to overly complex models.
+* High Variance: Model overfits the data.
+    * Example: Deep decision trees.
+* Low variance: Model predictions are stable and consistent across different training datasets.
+
+---
+
+![](figs/bias_variance_tradeoff.png){fig-align="center"}
+
+## Bias Variance Trade-Off
+
+Goal: Find a balance to minimize total error.
+
+Bias-Variance Trade-off: Low bias and low variance are ideal but challenging to achieve simultaneously.
+
+![[Source](https://serokell.io/blog/bias-variance-tradeoff)](figs/bias_variance_tradeoff2.png){fig-align="center"}
 
 ## Random Forests
 
@@ -1179,7 +1213,6 @@ Let's see how it does on the validation set.
 preds = clf.predict(val_xs)
 mean_absolute_error(val_y, preds)
 ```
-
 
 ::: {.content-visible when-profile="slides"}
 

@@ -1357,7 +1357,7 @@ plt.show()
 These plots illustrate show two important principles.
     
 * With more training data the classifier performs better.
-* With less testing data, the testing results are more variable. Though testing is fasters
+* With less testing data, the testing results are more variable. Though testing is faster.
     
 The key decision here is what value to choose for $k$. So it makes sense to use the 33% test split, because the smaller error bars give us better confidence in our decision.
    
