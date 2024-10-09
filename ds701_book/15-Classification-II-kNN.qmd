@@ -20,7 +20,7 @@ from sklearn.neighbors import KNeighborsClassifier
 import sklearn.datasets as datasets
 ```
 
-In this lecture we'll introduce our first classification technique, $k$-Nearest Neighbors.
+In this lecture we'll introduce another classification technique, $k$-Nearest Neighbors.
 
 Before discussing this model we'll introduce the notion of parametric and nonparametric models.
 
@@ -247,9 +247,7 @@ Working with a $k$-NN classifier can involve some challenges.
 
 This is subtle but important, so we will now look at the curse of dimensionality more closely.
 
-::: aside
-The phrase `curse of dimensionality' was coined by the mathematician Richard Bellman in 1957 in his book _Dynamic Programming._
-:::
+
 
 ## The Curse of Dimensionality
 
@@ -264,7 +262,12 @@ The **curse of dimensionality** is a somewhat tongue-in-cheek term for serious p
 
 There are various aspects of the curse that affect $k$-NN.
 
+::: aside
+The phrase `curse of dimensionality' was coined by the mathematician Richard Bellman in 1957 in his book _Dynamic Programming._
+:::
+
 ---
+
 
 __1. Points are far apart in high dimensions.__
 
@@ -1392,10 +1395,24 @@ plt.show()
 ::: {.content-visible when-profile="slides"}
 ## Summary
 
+:::: {.columns}
+::: {.column width="40%"}
+
 We covered the following topics:
 
 - $k$-NN algorithm
 - Curse of Dimensionality
 - Worked with real datasets to perform model selection
 - Metrics like precision and recall for evaluating classifier performance
+
+:::
+::: {.column width="60%"}
+
+![](figs/qrcode_course_feedback.png)
+
+[https://bit.ly/3NeAwgx](https://bit.ly/3NeAwgx)
+
+:::
+::::
+
 :::
