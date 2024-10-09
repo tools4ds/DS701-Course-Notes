@@ -529,7 +529,7 @@ All three impurity indices reach their maximum value when the classes are evenly
 $$
 \begin{aligned}
 \textnormal{Gini} &= 1 - \left(\frac{0}{6}\right)^2 - \left(\frac{6}{6}\right)^2 = 0 \\
-\textnormal{Entropy} &= -\left(\frac{0}{6} \log_2 \frac{0}{6} - \frac{6}{6} \log_2 \frac{6}{6}\right) = 0 \\
+\textnormal{Entropy} &= -\left(\frac{0}{6} \log_2 \frac{0}{6} + \frac{6}{6} \log_2 \frac{6}{6}\right) = 0 \\
 \textnormal{Error} &= 1 - \max\left[\frac{0}{6}, \frac{6}{6}\right] = 0
 \end{aligned}
 $$
@@ -553,7 +553,7 @@ $$
 $$
 \begin{aligned}
 \textnormal{Gini} &= 1 - \left(\frac{1}{6}\right)^2 - \left(\frac{5}{6}\right)^2 = 0.278 \\
-\textnormal{Entropy} &= -\left(\frac{1}{6} \log_2 \frac{1}{6} - \frac{5}{6} \log_2 \frac{5}{6}\right) = 0.650 \\
+\textnormal{Entropy} &= -\left(\frac{1}{6} \log_2 \frac{1}{6} + \frac{5}{6} \log_2 \frac{5}{6}\right) = 0.650 \\
 \textnormal{Error} &= 1 - \max\left[\frac{1}{6}, \frac{5}{6}\right] = 0.167
 \end{aligned}
 $$
@@ -577,7 +577,7 @@ $$
 $$
 \begin{aligned}
 \textnormal{Gini} &= 1 - \left(\frac{3}{6}\right)^2 - \left(\frac{3}{6}\right)^2 = 0.5 \\
-\textnormal{Entropy} &= -\left(\frac{3}{6} \log_2 \frac{3}{6} - \frac{3}{6} \log_2 \frac{3}{6}\right) = 1 \\
+\textnormal{Entropy} &= -\left(\frac{3}{6} \log_2 \frac{3}{6} + \frac{3}{6} \log_2 \frac{3}{6}\right) = 1 \\
 \textnormal{Error} &= 1 - \max\left[\frac{3}{6}, \frac{3}{6}\right] = 0.5
 \end{aligned}
 $$
