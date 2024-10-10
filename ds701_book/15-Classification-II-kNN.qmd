@@ -22,17 +22,21 @@ import sklearn.datasets as datasets
 
 In this lecture we'll introduce another classification technique, $k$-Nearest Neighbors.
 
-Before discussing this model we'll introduce the notion of parametric and nonparametric models.
+First we'll introduce the notion of **parametric** and **nonparametric** models.
 
 ## Parametric vs. Nonparametric Models
 
 There are many ways to define models (whether supervised or unsupervised).
 
-However a key distinction is this: does the model have a fixed number of parameters or does the number of parameters grow with the training data.
+However a key distinction is this: 
 
-If the model has a __fixed number__ of parameters, it is called __parametric.__
+* does the model have a _fixed number_ of parameters or 
+* does the number of parameters _grow with the training data_.
 
-If the number of parameters grows with the data, the model is called __nonparametric.__
+::: {.incremental}
+* **Parametric:** If the model has a __fixed number__ of parameters, it is called __parametric.__
+* **Nonparametric:** If the number of parameters grows with the data, the model is called __nonparametric.__
+:::
 
 ---
 
@@ -89,7 +93,7 @@ demo_y = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
 demo_X = np.array([[-3,1], [-2, 4], [-2, 2], [-1.5, 1], [-1, 3], [0, 0], [1, 1.5], [2, 0.5], [2, 3], [2, 0], [3, 1], [4, 4], [0, 1]])
 test_X = [-0.3, 0.7]
 #
-plt.scatter(demo_X[:,0], demo_X[:,1], c=demo_y, cmap=cmap_bold)
+plt.scatter(demo_X[:,0], demo_X[:,1], c=demo_y, cmap=cmap_bold, s=80)
 plt.axis('equal')
 plt.axis('off')
 plt.title('Training Points: 2 Classes')
@@ -98,13 +102,16 @@ plt.show()
 
 --- 
 
-The idea of the $k$-Nearest Neighbors classifier is that, at test time, it simply "looks at" the $k$ points in the training set that are nearest to the test input $x$, and makes a decision based on the labels on those points.
+At test time, simply 
+
+* "look at" the $k$ points in the training set that are nearest to the test input $x$, and 
+* make a decision based on the labels on those points, e.g. majority vote
 
 By "nearest" we usually mean in Euclidean distance.
 
 ```{python}
-plt.scatter(demo_X[:, 0], demo_X[:, 1], c=demo_y, cmap=cmap_bold)
-plt.plot(test_X[0], test_X[1], 'ok')
+plt.scatter(demo_X[:, 0], demo_X[:, 1], c=demo_y, cmap=cmap_bold, s=80)
+plt.plot(test_X[0], test_X[1], 'ok', markersize=10)
 plt.annotate('Test Point', test_X, [75, 25], 
              textcoords = 'offset points', fontsize = 14, 
              arrowprops = {'arrowstyle': '->'})
@@ -117,8 +124,8 @@ plt.show()
 ## 1-Nearest Neighbor
 
 ```{python}
-plt.scatter(demo_X[:, 0], demo_X[:, 1], c=demo_y, cmap=cmap_bold)
-plt.plot(test_X[0], test_X[1], 'ok')
+plt.scatter(demo_X[:, 0], demo_X[:, 1], c=demo_y, cmap=cmap_bold, s=80)
+plt.plot(test_X[0], test_X[1], 'ok', markersize=10)
 ax=plt.gcf().gca()
 circle = mp.patches.Circle(test_X, 0.5, facecolor = 'red', alpha = 0.2)
 plt.axis('equal')
@@ -131,9 +138,9 @@ plt.show()
 ## 2-Nearest Neighbors
 ```{python}
 
-plt.scatter(demo_X[:,0], demo_X[:,1], c=demo_y, cmap=cmap_bold)
+plt.scatter(demo_X[:,0], demo_X[:,1], c=demo_y, cmap=cmap_bold, s=80)
 test_X = [-0.3, 0.7]
-plt.plot(test_X[0], test_X[1], 'ok')
+plt.plot(test_X[0], test_X[1], 'ok', markersize=10)
 ax=plt.gcf().gca()
 circle = mp.patches.Circle(test_X, 0.9, facecolor = 'gray', alpha = 0.3)
 plt.axis('equal')
@@ -151,9 +158,9 @@ plt.figure(figsize=(7, 6))
 ax=plt.gcf().gca()
 circle = mp.patches.Circle(test_X, 1.4, facecolor = 'blue', alpha = 0.2)
 ax.add_artist(circle)
-plt.scatter(demo_X[:,0], demo_X[:,1], c=demo_y, cmap=cmap_bold)
+plt.scatter(demo_X[:,0], demo_X[:,1], c=demo_y, cmap=cmap_bold, s=80)
 test_X = [-0.3, 0.7]
-plt.plot(test_X[0], test_X[1], 'ok')
+plt.plot(test_X[0], test_X[1], 'ok', markersize=10)
 plt.axis('equal')
 plt.axis('off')
 plt.title('3-Nearest-Neighbor: Classification: Blue')
@@ -161,29 +168,29 @@ plt.tight_layout()
 plt.show()
 ```
 
----
+## Hard vs. Soft Classification
 
-Note that $k$-Nearest Neighbors can do either __hard__ or __soft__ classification.
+$k$-Nearest Neighbors can do either __hard__ or __soft__ classification.
 
-As a hard classifier, it returns the majority vote of the labels on the $k$ Nearest Neighbors.
+* As a **hard classifier**, it returns the majority vote of the labels on the $k$ Nearest Neighbors.
 
 Which may be indeterminate, as above.
 
-It is also reasonable to weight the votes of neighborhood points according to their distance from $x$.
-
-As a soft classifier it returns:
+* As a **soft classifier**, it returns the fraction of points in the neighborhood with label $c$.
     
-$$ p(x = c\,|\,\mathbf{x}, k) = \frac{\text{number of points in neighborhood with label } c}{k} $$
+$$
+p(x = c\,|\,\mathbf{x}, k) = \frac{\text{number of points in neighborhood with label } c}{k} 
+$$
 
 ## Model Selection for $k$-NN
 
-Each value of $k$ results in a different model.
+Each value of $k$ results in a different "model".
 
 The complexity of the resulting model is therefore controlled by the hyperparameter $k$.
 
-Hence we will want to select $k$ using held-out data to avoid over-fitting.
+We will want to select $k$ using held-out data to avoid over-fitting.
 
----
+## Varying $k$
 
 Consider this dataset where items fall into three classes:
 
@@ -241,11 +248,13 @@ Working with a $k$-NN classifier can involve some challenges.
 
 1. The computational cost of classification grows linearly with the size of the training data. Note that the training step is trivial, but the classification step can be prohibitively expensive.
 
-2. Euclidean distance is the most common distance function used in $k$-NN so data scaling is important. As previously discussed, features should be scaled to prevent distance measures from being dominated by a potentially small subset of features.
-    
+2. Euclidean distance is the most common distance function used in $k$-NN so data scaling is important. As previously
+   [discussed](https://tools4ds.github.io/DS701-Course-Notes/06-Clustering-I-kmeans.html#feature-scales), features
+   should be scaled to prevent distance measures from being dominated by a potentially small subset of features.
+
 3. The __curse of dimensionality.__ If the training data lives in a high dimensional space, Euclidean distance measures become less effective.
 
-This is subtle but important, so we will now look at the curse of dimensionality more closely.
+This last point is subtle but important, so we will now look at the curse of dimensionality more closely.
 
 # The Curse of Dimensionality
 
@@ -267,7 +276,7 @@ The phrase `curse of dimensionality' was coined by the mathematician Richard Bel
 :::
 
 
-## Points are far apart in high dimensions
+## Points are far apart in high D
 
 $k$-NN relies on there being one or more "close" points to the test point $x$.   
 
@@ -275,25 +284,35 @@ In other words, we need the training data to be relatively dense, so there are "
 
 Unfortunately, the amount of space we work in grows exponentially with the dimension $d$.
 
+::: {.content-visible when-profile="slides"}
+## Points are far apart in high D
+:::
+
 ::: {layout-ncol="2"}
 
-![10x10 grid](figs/L15-10x10-grid.png){width="200px"}  
+![10x10 grid with $10^2$ bins](figs/L15-10x10-grid.png){width="200px"}  
 
-![10x10x10 grid](figs/L15-10x10x10-grid.png){width="200px"}
+![10x10x10 grid with $10^3$ bins](figs/L15-10x10x10-grid.png){width="200px"}
 
 :::
 
-Image we have 10,000 (e.g. $10^4$) data points each with 40 features (e.g. $d = 40$).
+::: {.incremental}
+* Imagine we have 10,000 (e.g. $10^4$) data points each with 40 features (e.g. $d = 40$).
+* Consider quantizing each dimension into 10 bins.
+* So in 40-D we have $10^{40}$ possible bins.
+* On average, we will only have 1 data point per $10^{36}$ bins. Most will be empty!!
+* So the amount of data we need to maintain a given density also grows exponentially with dimension $d$.
+:::
 
-Consider quantizing each dimension into 10 bins.
-
-So in 40-D we have $10^{40}$ possible bins.
-
-On average, we will only have 1 data point per $10^{35}$ bins. Most will be empty!!
-
-So the amount of data we need to maintain a given density also grows exponentially with dimension $d$.
-
+:::: {.fragment}
+::: {.callout-important}
 Hence, points in high-dimensional spaces tend not to be close to one another at all.
+:::
+::::
+
+::: {.content-visible when-profile="slides"}
+## Points are far apart in high D
+:::
 
 One very intuitive way to think about it is this.
 
@@ -451,7 +470,7 @@ where $\Gamma$  is Euler's gamma function and simplifies to $\Gamma(d) = (d - 1)
 
 ## Hypersphere volume in increasing dimensions
 
-Let's calculate the volume of a hypersphere of a given radius and dimension.
+Here's a function to calculate the volume of a hypersphere of a given radius and dimension.
 
 ```{python}
 import scipy.special as sci
@@ -462,7 +481,7 @@ def volume_of_hypersphere(radius, dimensions):
     return volume
 ```
 
-And now let's calculate the volume of a hypersphere of unit radius for dimensions 1 to 20.
+And now let's calculate the volume of a hypersphere of unit radius for dimensions 1 to 20 and store it in a list.
 
 ```{python}
 radius = 1.0
@@ -515,6 +534,9 @@ plt.show()
 ```
 
 The fraction quickly goes to zero as the dimension increases.
+
+Perhaps an intuition is to think about the space in the "corners" of the hypercube.
+As the dimension grows, there are more corners.
 
 ## Proportion of hypersphere in outer shell
 
@@ -593,15 +615,17 @@ What is the fraction $f_d$ of all the points that are within a unit distance, bu
 Let
 
 $$
-K_d(R) = \frac{\pi^{d/2}}{\Gamma\bigl(\tfrac d2 + 1\bigr)}
+K_d = \frac{\pi^{d/2}}{\Gamma\bigl(\tfrac d2 + 1\bigr)}
 $$
+
+so that the volume of a hypersphere of radius $R$ is $K_d \times R^d$.
 
 Then for $R=1$ and $R=1-\epsilon$ we have:
 
 $$ 
 \begin{align*}
 f_d &= \frac{\text{Volume of Shell}}{\text{Volume of unit hypersphere}} \\
-&=\frac{K_d(1) - K_d(1-\epsilon)}{K_d(1)} \\
+&= \frac{K_d\times(1)^d - K_d\times(1-\epsilon)^d}{K_d\times(1)^d} \\
 &= 1 - (1-\epsilon)^d
 \end{align*}
 $$
@@ -719,15 +743,22 @@ How do we evaluate a classifier?
 
 ## Binary classification
 
-In the simple case of a binary classifier, we can call one class the 'Positive' class and one the 'Negative' class.
+In the simple case of a binary classifier, we can call
 
-The most basic measure of success for a classifier is __accuracy__; the fraction of test points that are correctly classified.
+* one class the 'Positive' class or index 1
+* the other class the 'Negative' class or index 0.
 
-Accuracy is important, however  it may not convey enough useful information.
+The most basic measure of success for a classifier is __accuracy__:
+
+* **Accuracy** is the fraction of test points that are correctly classified.
+
+Accuracy is important, however it may not convey enough useful information.
 
 For example, let's say we have a dataset showing __class imbalance__, e.g., 90% of the data are the Positive class and 10% are the Negative class.
 
-For this dataset, consider a classifier that always predicts 'Positive'. Its accuracy is 90%, but it is not an effective classifier.
+For this dataset, consider a classifier that always predicts 'Positive'. 
+
+Its accuracy is 90%, but it is not an effective classifier.
 
 ## Precision and Recall
 
