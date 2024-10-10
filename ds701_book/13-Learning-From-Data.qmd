@@ -3,12 +3,13 @@ title: Learning From Data
 jupyter: python3
 ---
 
+## Introduction
+
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/13-Learning-From-Data.ipynb)
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [remove-cell]
+#| echo: false
+
 %matplotlib inline
 %config InlineBackend.figure_format='retina'
 import numpy as np
@@ -19,10 +20,10 @@ from IPython.display import Image, display_html, display, Math, HTML;
 ```
 
 
-
 We are now beginnging to discuss how to learn from data.
 
-The idea of learning from data is one of the most important shifts in thinking about computing to come about in the past 50 years.
+The idea of learning from data is one of the most important shifts in thinking
+about computing to come about in the past 50 years.
 
 Consider the commonly heard phrase:
 
@@ -32,6 +33,18 @@ or
 
 >"Computers can not create anything new.  They can only do what we already know how to do."
 
+---
+
+<!-- SSPL/Getty -->
+
+:::: {.columns}
+::: {.column width="40%"}
+
+![](figs/ada_lovelace.jpeg){height=500px}
+
+:::
+::: {.column width="60%"}
+
 This line of argument goes back to Lady Ada Lovelace, often credited as the first programmer.
 
 Working with Charles Babbage, she wrote about the Analytical Engine:
@@ -39,6 +52,11 @@ Working with Charles Babbage, she wrote about the Analytical Engine:
 >The Analytical Engine has no pretensions whatever to originate anything. It can do whatever we know how to order it to perform. It can follow analysis; but it has no power of anticipating any analytical relations or truths.
 
 Ada Augusta Lovelace, Commentary on "Sketch of the Analytical Engine" (1843)
+
+:::
+::::
+
+---
 
 However, it is clear that this viewpoint is entirely __wrong.__
 
@@ -68,6 +86,8 @@ We use the term "features" to refer to the components of $\mathbf{x}$.
 
 The collection $\{(\mathbf{x}_i, y_i)\,|\,i = 1,\dots,N\}$ is called the __training data.__
 
+---
+
 If $y$ is a discrete value (a label, for example) then the problem is called __classification.__
 
 For example, in image recognition, the features $\mathbf{x}$ could be a vector that represents the pixels of the image, and $y$ could be a label such as "tiger," "tree," etc.
@@ -78,18 +98,21 @@ For example, in predicting housing prices, the features $\mathbf{x}$ could be a 
 
 In the regression case, you will usually be satisfied if your prediction is __close__ to the true $y$ (it doesn't have to be exact to be useful).
 
+---
+
 What do we have to assume to make this problem tractable?
 
 We assume two things:
+
 1. There is a set of functions ("rules") that could be used to predict $y_i$ from $\mathbf{x}_i$.   This allows us to turn the learning problem into one that searches through this set for the "right" function.   However, this set is probably __very__ large!
 
 2. The rule for predicting $y_i$ from $\mathbf{x}_i$ is the same as the rule for predicting $y_j$ from the new item $\mathbf{x}_j$. Speaking probabilistically, we say that $(\mathbf{x}_i, y_i)$ and $(\mathbf{x}_j, y_j)$ are drawn from the __same distribution.__
 
 ## A Toy Example
 
-```{note}
+::: {.callout-note}
 The following is based on _Pattern Recognition and Machine Learning,_ Christopher Bishop (2006), Section 1.1.
-```
+:::
 
 In order to explore these ideas a bit, we'll use a toy example: a regression problem.
 
@@ -97,43 +120,50 @@ This is a very artificial example, but it will expose some important wrinkles in
 
 We will consider polynomial curve fitting.
 
+## Polynomial Curve Fitting
+
 Suppose we are given a training set comprising $N$ observations of a scalar value $x_i$, which we'll collect into the vector $\mathbf{x}$.  
 
 For each $x_i$ we have a corresponding numeric value $y_i$, and these form $\mathbf{y}$.
 
 Here is a plot of the 10 training points:
 
+::: {layout-ncol=2}
+
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| echo: false
+#| fig-cap: "The training data."
 N = 10
 x = np.linspace(0, 1, N)
 from numpy.random import default_rng
 y = np.sin(2 * np.pi * x) + default_rng(2).normal(size = N, scale = 0.20)
-# plt.figure(figsize = (3, 2))
+plt.figure(figsize = (5, 3))
 plt.plot(x, y, 'ro', markersize = 8, fillstyle = 'none')
 plt.xlabel('x', size = 16)
 plt.ylabel('y', size = 16);
 ```
 
-The way we generated these points was to take $\mathbf{x}$ as equal spaced points on the range 0 to 1,
-
-and for each $x_i$, we take $y_i = \sin(2\pi x_i)$ __plus__ a sample of a Gaussian random variable.
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| echo: false
+#| fig-cap: "The underlying sine curve."
 cx = np.linspace(0, 1, 1000)
 cy = np.sin(2 * np.pi * cx)
+plt.figure(figsize = (5, 3))
 plt.plot(cx, cy, lw = 2)
 plt.plot(x, y, 'ro', markersize = 8, fillstyle = 'none')
 plt.xlabel('x', size = 16)
 plt.ylabel('y', size = 16);
 ```
 
+:::
+
+The way we generated these points was to take $\mathbf{x}$ as equal spaced points in the range 0 to 1,
+and for each $x_i$, we take $y_i = \sin(2\pi x_i)$ __plus__ a sample of a Gaussian random variable.
+
 Many data sets are like this!  
+
+---
 
 In many cases, there is some component of $y$ that depends on $x$, and some component that we treat as random, called "noise."
 
@@ -147,13 +177,17 @@ $$ y = \sin(2\pi x) $$
 
 and the Gaussian random addition does not depend on $x$ so we cannot hope to predict it.
 
+---
+
 OK, let's learn from this data.
 
 We will consider a simple approach based on curve fitting.
 
 The class of models we will consider are polynomials.   They are of the form:
 
-$$ y(x, \mathbf{w}) = w_0 + w_1 x + w_2 x^2 + \dots + w_k x^k = \sum_{j = 0}^k w_jx^j $$
+$$
+y(x, \mathbf{w}) = w_0 + w_1 x + w_2 x^2 + \dots + w_k x^k = \sum_{j = 0}^k w_jx^j 
+$$
 
 where $k$ is the _order_ of the polynomial.
 
@@ -167,23 +201,29 @@ This model is linear in its parameters -- it is called a __linear model.__
 
 Linear models are particularly easy to fit to data.
 
-### Model Fitting
+## Model Fitting
 
 How will we fit our model, that is, learn the best parameters $\mathbf{w}$?
 
-We will use a objective function to guide our search through the space of model parameters.
+We will use an objective function to guide our search through the space of model parameters.
 
 The objective function we will use is called the __least squares criterion__:
 
-$$ E(\mathbf{w}) = \sum_{n=1}^N [y(x_n, \mathbf{w}) - y_n]^2 $$
+$$
+E(\mathbf{w}) = \sum_{n=1}^N [y(x_n, \mathbf{w}) - y_n]^2 
+$$
 
 This is a nonnegative function which is zero if the polynomial passes through every point exactly.
+
+---
 
 We often write $\hat{y}_n$ for $y(x_n, \mathbf{w})$.
 
 Then:
 
-$$ E(\mathbf{w}) = \Vert \hat{\mathbf{y}} - \mathbf{y} \Vert^2. $$
+$$
+E(\mathbf{w}) = \Vert \hat{\mathbf{y}} - \mathbf{y} \Vert^2. 
+$$
 
 In other words, the error function $E(\cdot)$ measures the distance or dissimilarity between the data and the predictions.
 
@@ -191,7 +231,7 @@ Finding a $\mathbf{w}$ that minimizes $E(\mathbf{w})$ is a least-squares problem
 
 The resulting solution $\mathbf{w}^*$ is the set of parameters that __minimizes the error on the training data.__
 
-### Model Selection
+## Model Selection
 
 So we are done, correct?
 
@@ -206,9 +246,7 @@ Let's look at constant (order 0), linear (order 1), and cubic (order 3) models.
 We will fit each one using the least squares criterion:
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
+#| echo: false
 # y = Aw, A is design matrix 1, [1, x^T], [1, x^T, x^T^2], etc, and w-hat = (A^TA)^-1 A^Ty
 def design_matrix(x, k):
     N = len(x)
@@ -228,10 +266,7 @@ w_hat_3 = fit_poly(x, y, 3)
 ```
 
 ```{python}
-#| hide_input: true
-#| scrolled: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| echo: false
 fig, axs = plt.subplots(1, 3, sharey = True, figsize = (12, 5))
 #
 cy = 1000 * [w_hat_0]
@@ -266,6 +301,8 @@ So it looks like a third-order polynomial ($k$ = 3) is a good fit!
 
 How do we know it's good?   Well, the training error $E(\mathbf{w})$ is small.
 
+---
+
 But ... can we make the training error __smaller__?
 
 Yes, we can, if we increase the order of the polynomial.
@@ -275,9 +312,7 @@ In fact, we can reduce the error to zero!
 By setting $k = 9$, we get the following polynomial fit to the data:
 
 ```{python}
-#| hide_input: true
-#| scrolled: true
-#| tags: [hide-input]
+#| echo: false
 w_hat_9 = fit_poly(x, y, 9)
 cy = design_matrix(cx, 9) @ w_hat_9
 plt.plot(cx, cy, lw = 2, label = r'$k$ = 9')
@@ -288,6 +323,8 @@ plt.title(r'$k$ = 9' + '\n' + r'$E(\mathbf{w})$ =' + ' {:0.2f}'.format(0));
 ```
 
 So ... is the 9th order polynomial a "better" model for this dataset?
+
+---
 
 __Absolutely not!__
 
@@ -302,13 +339,14 @@ the model's __generalization__ ability.
 
 The 9th degree polynomial would seem to have poor generalization ability.
 
+---
+
 Let's assess generalization error.   For each polynomial (value of $k$) we will use new data, called __test__ data.  This is data that was __not__ used to train the model, but comes from the same source.
 
 In our case, we know how the data is generated -- $\sin(2\pi x)$ plus noise -- so we can easily generate more.
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
+#| echo: false
 test_y = np.sin(2 * np.pi * x) + default_rng(8).normal(size = N, scale = 0.20)
 max_k = N
 train_err = [np.linalg.norm(y - N * [w_hat_0])]
@@ -335,6 +373,8 @@ The phenomenon in which training error declines, but testing error does not, is 
 
 In a sense we are fitting the training data "too well".
 
+---
+
 There are two ways to think about overfitting:
 
 1. The number of parameters in the model is too large, compared to the size of the training data.   We can see this in the fact that we have only 10 training points, and the 9th order polynomial has 10 coefficents. 
@@ -347,29 +387,23 @@ These suggest techniques we may use to avoid overfitting:
 
 2. Limit the complexity of the model.  Model complexity is often controlled via __hyperparameters__.
 
-### More Training Data
+## More Training Data
 
 It's not necessarily true that a order-3 polynomial is best for this problem.
-
-After all, we are fitting to a sine function, whose Taylor series includes polynomials of all orders.
 
 But the higher the order of polynomial we want to fit, the more data we need to avoid overfitting.
 
 Here we use an order-9 polynomial for increasing amounts of training data (N = 15, 50, 200):
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
+#| echo: false
 Ns = [15, 50, 200]
 xs = {Nval: np.linspace(0, 1, Nval) for Nval in Ns}
 ys = {Nval: np.sin(2 * np.pi * xs[Nval]) + default_rng(3).normal(size = Nval, scale = 0.20) for Nval in Ns}
 ```
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| echo: false
 fig, axs = plt.subplots(1, 3, sharey = True, figsize = (12, 5))
 #
 cx = np.linspace(0, 1, 1000)
@@ -389,7 +423,7 @@ fig.tight_layout();
 
 We see that with enough training data, the high order polynomial begins to capture the sine wave well.
 
-### Parameters and Hyperparameters
+## Parameters and Hyperparameters
 
 Many times however, we cannot simply get more training data, or enough training data, to solve the overfitting problem. 
 
@@ -411,7 +445,7 @@ So, to avoid overfitting, we need to choose the proper value for the hyperparame
 
 We do that by __holding out data.__
 
-### Holding Out Data
+## Holding Out Data
 
 The idea behind holding out data is simple.
 
@@ -423,19 +457,19 @@ Let's assume that we have 20 data points to work with, stored in arrays `x` and 
 
 `scikit-learn` has some functions that can be helpful. 
 
+---
+
 We will use `train_test_split()`:
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
+#| echo: false
 N = 20
 x = np.linspace(0, 1, N)
 y = np.sin(2 * np.pi * x) + default_rng(2).normal(size = N, scale = 0.20)
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
+#| echo: false
 import sklearn.model_selection as model_selection
 
 x_train, x_test, y_train, y_test = model_selection.train_test_split(
@@ -448,11 +482,10 @@ Notice that `train_test_split()` splits the data __randomly.__
 
 This will be important.
 
+---
+
 ```{python}
-#| hide_input: true
-#| scrolled: false
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| echo: false
 fig, axs = plt.subplots(1, 2, sharey = True, figsize = (8, 5))
 #
 axs[0].plot(x_train, y_train, 'ro', markersize = 8, fillstyle = 'none')
@@ -468,18 +501,18 @@ fig.tight_layout();
 ```
 
 Our strategy will be:
-   * For each possible value of the hyperparameter $k$:
-        * randomly split the data 5 times
-        * compute the mean testing and training error over the 5 random splits
+* For each possible value of the hyperparameter $k$:
+    * randomly split the data 5 times
+    * compute the mean testing and training error over the 5 random splits
 
 What are good possible values for the hyperparameter?  It can depend on the problem, and may involve trial and error.
+
+---
 
 This strategy of trying all possible values of the hyperparameter is called a __grid search__.
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
+#| echo: false
 def model_error(x_train, y_train, x_test, y_test, k):
     '''
     This function fits a polynomial of degree k to the training data
@@ -494,7 +527,7 @@ np.random.seed(7)
 ```
 
 ```{python}
-#| slideshow: {slide_type: fragment}
+#| echo: false
 # 
 # fraction of data used for testing
 #
@@ -526,9 +559,12 @@ df = pd.DataFrame(err, columns = ['k', 'split', 'Training Error', 'Testing Error
 df.head(10)
 ```
 
+---
+
 Let's plot the mean for each value of `k` and its standard error ($\sigma/\sqrt{n}$):
 
 ```{python}
+#| echo: false
 df.groupby('k').mean()[['Training Error', 'Testing Error']].plot(
     yerr = df.groupby('k').std()/np.sqrt(n_splits))
 plt.ylabel('Error')
@@ -537,7 +573,7 @@ plt.ylim([0, 5]);
 
 From this plot we can conclude that, for this dataset, a polynomial of degree $k = 3$ shows the best generalization ability.
 
-### Hold Out Strategies
+## Hold Out Strategies
 
 Deciding how much, and which, data to hold out depends on a number of factors.
 
@@ -551,11 +587,15 @@ There are two ways to address these problems:
 * Random subsampling
 * Cross-validation
 
+---
+
 In __random subsampling__ one partitions the data randomly between train and test sets.  This is what the function `train_test_split()` does.
 
 This ensures there is no dependence between the test and train sets.
 
 One needs to perform a reasonable number of random splits - usually five at least.
+
+---
 
 In __cross-validation__, the data is partitioned once, and then each partition is used as the test data once.
 
@@ -563,11 +603,8 @@ This ensures that all the data gets equal weight in the training and in the test
 
 We divide the data into $k$ "folds".
 
-<center>
-    
-<img src="figs/L13-k-fold.png" alt="Figure" width="50%">
-    
-</center>  
+![](figs/L13-k-fold.png){width="50%"}
+
 
 The value of $k$ can vary up to the size of the dataset.
 
@@ -580,13 +617,15 @@ In the extreme case where $k$ is equal to the data size, then each data item is 
 We have seen strategies that allow us to learn from data.
 
 The strategies include:
-   * Define a set of possible models
-   * Define an error function that tells us when the model is predicting well
-   * Using the error function, search through the space of models to find the best performer
+
+* Define a set of possible models
+* Define an error function that tells us when the model is predicting well
+* Using the error function, search through the space of models to find the best performer
 
 We've also seen that there are some subtleties to this approach that must be dealt with to avoid problems:
-   * Simply using the model that has lowest error on the training data will __overfit__.
-   * We need to __hold out__ data to assess the generalization ability of each trained model.
-   * We control model complexity using hyperparameters
-   * We choose the best hyperparameters based on performance on held out data.
+
+* Simply using the model that has lowest error on the training data will __overfit__.
+* We need to __hold out__ data to assess the generalization ability of each trained model.
+* We control model complexity using hyperparameters.
+* We choose the best hyperparameters based on performance on held out data.
 
