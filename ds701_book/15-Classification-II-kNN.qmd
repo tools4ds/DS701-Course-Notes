@@ -247,15 +247,15 @@ Working with a $k$-NN classifier can involve some challenges.
 
 This is subtle but important, so we will now look at the curse of dimensionality more closely.
 
-
+# The Curse of Dimensionality
 
 ## The Curse of Dimensionality
 
 :::: {.columns}
-::: {.column width="20%"}
+::: {.column width="30%"}
 ![](figs/L15-curse-frankenstein-edited.jpeg)
 :::
-::: {.column width="80%"}
+::: {.column width="70%"}
 The **curse of dimensionality** is a somewhat tongue-in-cheek term for serious problems that arise when we use geometric algorithms in high dimensions.
 :::
 ::::
@@ -266,16 +266,30 @@ There are various aspects of the curse that affect $k$-NN.
 The phrase `curse of dimensionality' was coined by the mathematician Richard Bellman in 1957 in his book _Dynamic Programming._
 :::
 
----
 
-
-__1. Points are far apart in high dimensions.__
+## Points are far apart in high dimensions
 
 $k$-NN relies on there being one or more "close" points to the test point $x$.   
 
 In other words, we need the training data to be relatively dense, so there are "close" points everywhere.
 
 Unfortunately, the amount of space we work in grows exponentially with the dimension $d$.
+
+::: {layout-ncol="2"}
+
+![10x10 grid](figs/L15-10x10-grid.png){width="200px"}  
+
+![10x10x10 grid](figs/L15-10x10x10-grid.png){width="200px"}
+
+:::
+
+Image we have 10,000 (e.g. $10^4$) data points each with 40 features (e.g. $d = 40$).
+
+Consider quantizing each dimension into 10 bins.
+
+So in 40-D we have $10^{40}$ possible bins.
+
+On average, we will only have 1 data point per $10^{35}$ bins. Most will be empty!!
 
 So the amount of data we need to maintain a given density also grows exponentially with dimension $d$.
 
@@ -286,57 +300,227 @@ One very intuitive way to think about it is this.
 >In order for two points to be close in $\mathbb{R}^d$, they must be close in __each__ of the $d$ dimensions.
 >As the number of dimensions grows, it becomes harder and harder for a pair of points to be close in __each__ dimension.
 
-::: aside
-For a fascinating exploration of the properties of unit spheres in high dimension, see [An Adventure in the Nth Dimension](https://www.americanscientist.org/article/an-adventure-in-the-nth-dimension) by Brian Hayes in _American Scientist._
-:::
+## Distances shrink in high dimensions
 
----
+Let's see how distances shrink in high dimensions by way of an example.
 
-__2. Points tend to all be at similar distances in high dimensions.__
+Let's generate 1000 normally distributed points in 2D, 3D, 100D, and 1000D and
+look at the ratio of the largest to smallest distance between points.
 
-This one is a little harder to visualize.  We'll use formulas instead to guide us.
-
-Let's say points are uniformly distributed in space, so that number of points in a region is proportional to the region's volume.  
-
-How does volume relate to distance as dimension $d$ grows?
-
-Consider you are at some point in space (say, the test point $x$), and you want to know how many points are within a unit distance from you.
-
-This is proportional to the volume of a hypersphere with radius 1.
-
-Now, the volume of a hypersphere is $k_d r^d$. For each $d$ there is a different $k_d$.  
-
-* For $d = 2$, $k_d$ is $\pi$
-* For $d = 3$, $k_d$ is $\frac{4\pi}{3}$ 
-* The general formula is $k_d = \frac{\pi^{d/2}}{\Gamma(d/2) + 1}$, where $\Gamma(z) = \int_{0}^{\infty}t^{z-1}e^{-t}dt$ is the gamma function.
-
---- 
+First, let's generate the data.
 
 ```{python}
-#| fig-align: center
-ax = plt.figure(figsize = (4, 4)).add_subplot(projection = '3d')
-# coordinates of sphere surface
-u, v = np.mgrid[0:2*np.pi:50j, 0:np.pi:50j]
-x = np.cos(u)*np.sin(v)
-y = np.sin(u)*np.sin(v)
-z = np.cos(v)
-#
-ax.plot_surface(x, y, z, color='r', alpha = 0.3)
-s3 = 1/np.sqrt(3)
-ax.quiver(0, 0, 0, s3, s3, s3, color = 'b')
-ax.text(s3/2, s3/2, s3/2-0.2, 'r', size = 14)
-ax.set_axis_off()
-plt.title('Hypersphere in $d$ dimensions\nVolume is $k_d \,r^d$')
+import numpy as np
+
+# Fix the random seed so we all have the same random numbers
+np.random.seed(0)
+
+n_data = 1000
+
+# Create 1000 data examples (columns) each with 2 dimensions (rows)
+n_dim = 2
+x_2D = np.random.normal(size=(n_data, n_dim))
+
+# Create 1000 data examples (columns) each with 3 dimensions (rows)
+n_dim = 3
+x_3D = np.random.normal(size=(n_data, n_dim))
+
+# Create 1000 data examples (columns) each with 100 dimensions (rows)
+n_dim = 100
+x_100D = np.random.normal(size=(n_data, n_dim))
+
+# Create 1000 data examples (columns) each with 1000 dimensions (rows)
+n_dim = 1000
+x_1000D = np.random.normal(size=(n_data, n_dim))
+```
+
+##  Scatter plot of 2D data
+
+```{python}
+import matplotlib.pyplot as plt
+
+# scatter plot of the 2D data
+plt.scatter(x_2D[:,0], x_2D[:,1])
+plt.title('2D data')
 plt.show()
 ```
 
---- 
+## Scatter plot of 3D data
 
-Let's also ask how many points are within a slightly smaller distance, let's say 0.99.  
+```{python}
+# make an interactive scatter plot of the 3D data
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(x_3D[:,0], x_3D[:,1], x_3D[:,2])
+plt.title('3D data')
+plt.show()
+```
 
-The new distance can be thought of as $1 - \epsilon$ for some small $\epsilon$.
+## Closest/farthest distance ratios
 
-The number of points then of course is proportional to $k_d (1-\epsilon)^d$
+Define a function to calculate the ratio of the largest to smallest distance between points in a dataset.
+
+```{python}
+from scipy.spatial import distance
+def distance_ratio(x, metric='euclidean'):
+
+    if metric == 'euclidean':
+        ord = 2
+    elif metric == 'manhattan':
+        ord = 1
+    elif metric == 'cosine':
+        pass
+    else:
+        raise ValueError(f"Metric {metric} not supported")
+
+    smallest_dist = np.inf
+    largest_dist = 0
+    for i in range(x.shape[0]):
+        for j in range(i + 1, x.shape[0]): # start from i+1 to avoid redundant calcuations
+            if i != j:
+                if metric == 'euclidean' or metric == 'manhattan':
+                    dist = np.linalg.norm(x[i,:] - x[j,:], ord=ord) 
+                elif metric == 'cosine':
+                    dist = distance.cosine(x[i,:].flatten(), x[j,:].flatten())
+            if dist < smallest_dist:
+              smallest_dist = dist
+            if dist > largest_dist:
+              largest_dist = dist
+
+    # print(f"smallest_dist = {smallest_dist}, largest_dist = {largest_dist}")
+
+    # Calculate the ratio and return
+    dist_ratio = largest_dist / smallest_dist
+    return dist_ratio
+```
+
+And then calculate the ratio for each dataset.
+
+```{python}
+dist_ratio_2d = distance_ratio(x_2D)
+print('Ratio of largest to smallest distance 2D: %3.3f'%(dist_ratio_2d))
+
+dist_ratio_3d = distance_ratio(x_3D)
+print('Ratio of largest to smallest distance 3D: %3.3f'%(dist_ratio_3d))
+
+dist_ratio_100d = distance_ratio(x_100D)
+print('Ratio of largest to smallest distance 100D: %3.3f'%(dist_ratio_100d))
+
+dist_ratio_1000d = distance_ratio(x_1000D)
+print('Ratio of largest to smallest distance 1000D: %3.3f'%(dist_ratio_1000d))
+```
+
+## Plot the closest/farthest distance ratios.
+
+```{python}
+plt.scatter([2,3,100,1000], [dist_ratio_2d, dist_ratio_3d, dist_ratio_100d, dist_ratio_1000d])
+plt.plot([2,3,100,1000], [dist_ratio_2d, dist_ratio_3d, dist_ratio_100d, dist_ratio_1000d], '--', color='lightgray')
+plt.xscale('log')
+plt.title('Euclidean Distance ratio')
+plt.xlabel('Dimension')
+plt.ylabel('Distance ratio')
+plt.show()
+```
+
+You see that the ratio of the largest to smallest distance drops dramatically as the dimension increases.
+
+## Volume of a hypersphere
+
+The above phenomenon is related to the strange phenomenon of the volume of a
+hypersphere (or n-ball) in increasing dimensions.
+
+::: aside
+For a fascinating exploration of the properties of unit spheres in high dimension,
+see [An Adventure in the Nth Dimension](https://www.americanscientist.org/article/an-adventure-in-the-nth-dimension) 
+by Brian Hayes in _American Scientist._
+:::
+
+Now, the volume of a hypersphere in 2D and 3D is:
+
+* For $d = 2$, $\pi r^2$,  which is $\pi$ for a unit radius.
+* For $d = 3$, $\frac{4\pi}{3} r^3$, which is $\frac{4}{3} \pi$ for a unit radius.
+
+The [general equation](https://en.wikipedia.org/wiki/Volume_of_an_n-ball#Formulas)
+for a hypersphere of radius $R$ in $d$ dimensions is:
+
+$$
+V_d(R) = \frac{\pi^{d/2}}{\Gamma\bigl(\tfrac d2 + 1\bigr)}R^d,
+$$
+
+where $\Gamma$  is Euler's gamma function and simplifies to $\Gamma(d) = (d - 1)!$ for all positive integers $d$. 
+
+## Hypersphere volume in increasing dimensions
+
+Let's calculate the volume of a hypersphere of a given radius and dimension.
+
+```{python}
+import scipy.special as sci
+
+def volume_of_hypersphere(radius, dimensions):
+    pi = np.pi
+    volume = (pi ** (dimensions / 2)) / (sci.gamma(dimensions / 2 + 1)) * (radius ** dimensions)
+    return volume
+```
+
+And now let's calculate the volume of a hypersphere of unit radius for dimensions 1 to 20.
+
+```{python}
+radius = 1.0
+vols = []
+for c_dim in range(1,21):
+  vols.append(volume_of_hypersphere(radius, c_dim))
+  # print("Volume of unit radius hypersphere in %d dimensions is %3.3f"%(c_dim, volume_of_hypersphere(radius, c_dim)))
+```
+
+## Plot volumes of hyperspheres
+
+And plot the results.
+
+```{python}
+# plot vols
+plt.scatter(range(1,21), vols)
+plt.xlabel('Dimensions')
+plt.ylabel('Volume')
+plt.title('Volume of unit radius hypersphere')
+plt.show()
+```
+
+The volume decreases to almost nothing in high dimensions.  
+
+## Ratio of unit hypersphere volume and enclosing hypercube volume
+
+Another strange phenomenon to think about is via another example.
+
+Assume you have data _uniformly_ distributed in a hypercube with side length 2 which will exactly fit a unit hypersphere.
+
+![](figs/L15-circle-in-square.png){fig-align="center"}
+
+As the dimension grows, we want to know what fraction of the data is within unit distance of the center.
+
+```{python}
+side_length = 2
+cube_volumes = [(lambda side, dim: side ** dim)(side_length, dim) for dim in range(1, 21)]
+
+vol_ratios = [vols[i] / cube_volumes[i] for i in range(len(vols))]
+```
+
+## Plot volume ratios
+
+```{python}
+plt.scatter(range(1,21), vol_ratios)
+plt.xlabel('Dimensions')
+plt.ylabel('Volume ratio')
+plt.title('Volume of unit radius hypersphere / Volume of enclosing hypercube')
+plt.show()
+```
+
+The fraction quickly goes to zero as the dimension increases.
+
+## Proportion of hypersphere in outer shell
+
+Another strange thing about high dimensions is that most of the volume of a hypersphere is in the outer shell.
+
+We can compare the volumes of hyperspheres of radius $1$ and $1-\epsilon$ for a small $\epsilon$.
 
 ```{python}
 #| fig-align: center
@@ -362,51 +546,72 @@ plt.title('Inner and Outer Hyperspheres')
 plt.show()
 ```
 
-:::: {.fragment}
-What is the fraction $f_d$ of all the points that are within a unit distance, but __not__ within a distance of 0.99?
-::::
+## Proportion of volume in outer shell
 
----
+Let's create a function to calculate the proportion of the volume of a hypersphere that is in the outer $\epsilon$ of the radius.
 
-This is precisely
+```{python}
+def get_prop_of_volume_in_outer_epsilon(dimension, epsilon):
+  
+  outer_radius = 1.0
+  outer_volume = volume_of_hypersphere(outer_radius, dimension)
+
+  inner_radius = 1 - epsilon
+  inner_volume = volume_of_hypersphere(inner_radius, dimension)
+  proportion = (outer_volume - inner_volume) / outer_volume
+
+  # print(f"Outer volume: {outer_volume}, Inner volume: {inner_volume}")
+  return proportion
+```
+
+Let's calculate the proportion of the volume in the outer 1% of the radius for dimensions 1 to 300.
+
+```{python}
+propvols = []
+for c_dim in [1,2,10,20,50,100,150,200,250,300]:
+  propvols.append(get_prop_of_volume_in_outer_epsilon(c_dim, 0.01))
+  print('Proportion of volume in outer 1 percent of radius in %d dimensions =%3.3f'%(c_dim, get_prop_of_volume_in_outer_epsilon(c_dim, 0.01)))
+```
+
+## Plot outer shell proportion
+
+```{python}
+# plot propvols
+plt.scatter([1,2,10,20,50,100,150,200,250,300], propvols)
+plt.xlabel('Dimensions')
+plt.ylabel('Proportion of volume in outer 1%')
+plt.title('Proportion of volume in outer 1% of diameter of hypersphere')
+plt.show()
+```
+
+By the time we get to 300 dimensions most of the volume is in the outer 1 percent.
+
+## Fraction of points in outer shell
+
+What is the fraction $f_d$ of all the points that are within a unit distance, but __not__ within a distance of $1-\epsilon$?
+
+Let
+
+$$
+K_d(R) = \frac{\pi^{d/2}}{\Gamma\bigl(\tfrac d2 + 1\bigr)}
+$$
+
+Then for $R=1$ and $R=1-\epsilon$ we have:
 
 $$ 
 \begin{align*}
 f_d &= \frac{\text{Volume of Shell}}{\text{Volume of unit hypersphere}} \\
-&=\frac{k_d1^d - k_d(1-\epsilon)^d}{k_d1^d} \\
+&=\frac{K_d(1) - K_d(1-\epsilon)}{K_d(1)} \\
 &= 1 - (1-\epsilon)^d
 \end{align*}
 $$
 
+:::: {.fragment}
 Observe that $(1-\epsilon)^d$ goes to 0 as $d \rightarrow \infty$ and $f_d\rightarrow 1$ as $d \rightarrow \infty$.
 
-This means that as $d\rightarrow \infty$, all of the points that are __within__ 1 unit of our location, are almost __exactly__ 1 unit from our location.
+This means that as $d\rightarrow \infty$, all of the points that are __within__ 1 unit of our location, are almost __exactly__ 1 unit from our location. 
+::::
 
----
-
-```{python}
-#| fig-align: center
-ax = plt.figure(figsize = (7,7)).add_subplot(projection = '3d')
-# coordinates of sphere surface
-u, v = np.mgrid[0:2*np.pi:50j, 0:np.pi:50j]
-x = np.cos(u)*np.sin(v)
-y = np.sin(u)*np.sin(v)
-z = np.cos(v)
-#
-ax.plot_surface(x, y, z, color='r', alpha = 0.2)
-s3 = 1/np.sqrt(3)
-ax.quiver(0, 0, 0, s3, s3, s3, color = 'b')
-ax.text(s3/2, s3/2, s3/2-0.2, '1', size = 14)
-#
-eps = 0.9
-#
-ax.plot_surface(eps * x, eps * y, eps * z, color='b', alpha = 0.2)
-ax.quiver(0, 0, 0, eps, 0, 0, color = 'k')
-ax.text(1/2-0.2, 0, -0.4, r'$1-\epsilon$', size = 14)
-ax.set_axis_off()
-plt.title('In high-$d$, All Points Lie in Outer Shell')
-plt.show()
-```
 
 ## Curse of Dimensionality Example
 
@@ -414,9 +619,9 @@ plt.show()
 The following example is based on _Data Science from Scratch,_ Joel Grus, Second Edition, Chapter 12.  
 :::
 
-Let's demonstrate this effect in practice.
+Here's another example.
 
-What we will do is create 100 points, scattered at random within a $d$-dimensional space.
+We create 100 points, scattered at random within a $d$-dimensional space.
 
 We will look at two quantities as we vary $d$.
 
@@ -493,8 +698,8 @@ The problem is that you simply cannot have enough data to do a good job using $k
 Alternative approaches to mitigate this issue
 
 :::: {.incremental}
-- Use a different dissimilarity metric, since Euclidean distance is not useful.
-    - You may use cosine distance as your distance function instead. This does not suffer from the same problems as Euclidean distance, but you will have to decide if it is a good distance function for your problem.
+- Use a different dissimilarity metric
+    - For example cosine distance behaves a little better, but you will have to decide if it is a good distance function for your problem.
 - __Reduce__ the dimension of your data.
     - We will discuss dimensionality reduction techniques in lectures [SVD I](10-Low-Rank-and-SVD.qmd) and [SVD II](11-Dimensionality-Reduction-SVD-II.qmd).
 ::::
@@ -538,6 +743,13 @@ Using the confusion matrix we can define some more useful measures:
        * TP/(TP + FN)
    * __Precision__ - defined as the fraction of classified positives correctly classified
        * TP/(TP + FP)
+
+
+## Precision and Recall Illustration
+
+![](figs/Precisionrecall.svg){fig-align="center"}
+
+<!-- By Walber - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=36926283 -->
 
 ## Evaluating $k$- Nearest Neighbors
 
@@ -620,8 +832,8 @@ Here is the confusion matrix:
 ```{python}
 y_pred_test = knn5.predict(X_test)
 pd.DataFrame(metrics.confusion_matrix(y_test, y_pred_test), 
-             columns = ['Predicted +', 'Predicted -'], 
-             index = ['Actual +', 'Actual -'])
+             columns = ['Predicted 1', 'Predicted 0'], 
+             index = ['Actual 1', 'Actual 0'])
 ```
 
 Looks like the classifier is getting all of the Negative class correct, but only achieving accuracy of 50% on the Positive class.
