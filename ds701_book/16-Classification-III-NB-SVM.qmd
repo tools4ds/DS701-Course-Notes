@@ -17,20 +17,126 @@ import matplotlib as mp
 import sklearn
 ```
 
+Today we'll look at two more very commonly-used, widely-applicable classification methods.
+
 :::: {.columns}
 ::: {.column width="50%"}
 
-![Thomas Bayes](figs/Thomas_Bayes.gif){height="300px"}
+![Thomas Bayes](figs/Thomas_Bayes.gif){height="250px"}
 :::
 ::: {.column width="50%"}
-![SVM](figs/L16-SVM-6.png){height="300px"}
+![SVM](figs/L16-SVM-6.png){height="250px"}
 :::
 ::::
 
-Today we'll look at two more very commonly-used, widely-applicable classification methods.
 
 * the _Naive Bayes Classifier_
 * the _Support Vector Machine_
+
+Before we dive into this material we will briefly touch on the topic of validation and testing.
+
+# Validation and Testing
+
+## Validation and Test Sets
+
+### Validation Set
+
+- **Purpose:** Used to tune model parameters and select the best model.
+- **Usage:** Helps in model selection and hyperparameter tuning.
+- **Size:** Typically 10-20% of the dataset.
+- **Example:** Adjusting the learning rate in a neural network.
+
+---
+
+### Test Set
+
+- **Purpose:** Used to evaluate the final model's performance.
+- **Usage:** Provides an unbiased evaluation of the model.
+- **Size:** Typically 10-20% of the dataset.
+- **Example:** Assessing the accuracy of a trained model on unseen data.
+
+---
+
+### Key Differences
+- **Validation Set:** Used during model training.
+- **Test Set:** Used after model training is complete.
+- **Goal:** Ensure the model generalizes well to new data.
+
+## Train/Test Split
+
+- **Purpose:** Simple method to evaluate model performance.
+- **Usage:** Split the dataset into two parts: training and testing.
+- **Typical Split:** 80% training, 20% testing.
+- **Pros:** Easy to implement, quick evaluation.
+- **Cons:** May not provide the best model tuning.
+
+## Train/Validate/Test Split
+
+- **Purpose:** More robust method for model evaluation and tuning.
+- **Usage:** Split the dataset into three parts: training, validation, and testing.
+- **Typical Split:** 60% training, 20% validation, 20% testing.
+- **Pros:** Allows for model tuning and unbiased evaluation.
+- **Cons:** Requires more data, more complex.
+
+## Key Differences
+
+- **Train/Test Split:** 
+  - Simpler, faster.
+  - May lead to overfitting or underfitting.
+
+- **Train/Validate/Test Sets:**
+  - More comprehensive.
+  - Better for hyperparameter tuning and model selection.
+
+## K-Fold Cross Validation
+
+### What is k-Fold Cross-Validation?
+
+- **Definition:** A technique to evaluate the performance of a model by dividing the data into k subsets (folds).
+- **Process:**
+
+  1. Split the dataset into k equal-sized folds.
+  2. Train the model on k-1 folds.
+  3. Validate the model on the remaining fold.
+  4. Repeat the process k times, each time with a different fold as the validation set.
+  5. Average the results to get the final performance metric.
+
+--- 
+
+### Benefits
+
+- **More Reliable Estimates:** Provides a better estimate of model performance compared to a single train/test split.
+- **Efficient Use of Data:** Utilizes the entire dataset for both training and validation.
+- **Reduces Overfitting:** Helps in detecting overfitting by validating on multiple subsets.
+
+---
+
+### Example
+
+- **5-Fold Cross-Validation:** The dataset is split into 5 folds. The model is trained and validated 5 times, each time with a different fold as the validation set.
+
+### Key Points
+
+- **Choice of k:** Common choices are 5 or 10, but it can vary depending on the dataset size.
+- **Computational Cost:** More computationally intensive than a single train/test split.
+
+## Implementing 5-Fold Cross-Validation in sklearn
+
+```python
+from sklearn.model_selection import cross_val_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import load_iris
+
+data = load_iris()
+X, y = data.data, data.target
+
+model = RandomForestClassifier()
+
+scores = cross_val_score(model, X, y, cv=5)
+
+print("Cross-Validation Scores:", scores)
+print("Mean Score:", scores.mean())
+```
 
 # Naive Bayes
 
@@ -83,6 +189,7 @@ $$ P(M\vert S) = \frac{P(S\vert M)}{P(S)}\cdot P(M)= \frac{0.75}{0.05} \cdot 0.0
 
 
 ---
+
 ::: {.content-visible when-profile="slides"}
 $$ P(M\vert S) = \frac{P(S\vert M)}{P(S)}\cdot P(M)= \frac{0.75}{0.05} \cdot 0.00001 = \fbox{$15 \cdot 1/10000$} = 0.0015. $$
 :::
