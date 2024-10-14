@@ -1,17 +1,289 @@
 ---
-title: Low Rank Approximation and the SVD
+title: SVD - Low Rank Approximations
 jupyter: python3
 ---
 
-::: {.content-hidden when-profile="slides"}
-Today, we move on.   
-
-However, let's look back and try to put the modeling we've done into a larger context.
-:::
-
-## Models are simplifications
+# Low Rank Approximations
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/10-Low-Rank-and-SVD.ipynb)
+
+We now consider applications of the Singular Value Decomposition (SVD).
+
+> SVD is "the Swiss Army Knife of Numerical Linear Algebra.”
+
+Dianne O’Leary, MMDS ’06 (Workshop on Algorithms for Modern Massive Data Sets)
+
+---
+
+We will see how the SVD is used for
+
+:::: {.incremental}
+- low rank approximations
+- dimensionality reduction
+::::
+
+
+## Singular Value Decomposition
+
+The SVD of a matrix $A\in\mathbb{R}^{m\times n}$ (where $m>n$) is
+
+$$
+A = U\Sigma V^{T},
+$$
+
+where
+
+:::: {.incremental}
+- $U$ has dimension $m\times n$. The columns of $U$ are orthogonal. The columns of $U$ are the left singular vectors.
+- $\Sigma$ has dimension $n\times n$. The only non-zero values are on the main diagonal and they are nonnegative real numbers  $\sigma_1\geq \sigma_2 \geq \ldots \geq \sigma_n$.
+- $V$ has dimension $n \times n$. The columns of $V$ are orthogonal. The columns of $V$ are the right singular vectors.
+::::
+
+---
+
+```{python}
+#| fig-align: center
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
+# Create a figure and axis
+fig, ax = plt.subplots()
+
+# Draw matrix A
+rect_A = patches.Rectangle((0, 0), 2, 3, linewidth=1, edgecolor='black', facecolor='none')
+ax.add_patch(rect_A)
+ax.text(1, 1.5, r'$A$', fontsize=20, ha='center', va='center')
+ax.text(1, -0.5, r'$(m \times n)$', fontsize=12, ha='center', va='center')
+
+# Draw equal sign
+ax.text(2.5, 1.5, r'$=$', fontsize=20, ha='center', va='center')
+
+# Draw matrix U
+rect_U = patches.Rectangle((3, 0), 2, 3, linewidth=1, edgecolor='black', facecolor='none')
+ax.add_patch(rect_U)
+ax.text(4, 1.5, r'$U$', fontsize=20, ha='center', va='center')
+ax.text(4, -0.5, r'$(m \times n)$', fontsize=12, ha='center', va='center')
+
+# Draw Sigma
+rect_Sigma = patches.Rectangle((5.5, 1), 2, 1, linewidth=1, edgecolor='black', facecolor='none')
+ax.add_patch(rect_Sigma)
+ax.text(6.5, 1.5, r'$\Sigma$', fontsize=20, ha='center', va='center')
+ax.text(6.5, 0.5, r'$(n \times n)$', fontsize=12, ha='center', va='center')
+
+# Draw matrix V^T with the same dimensions as Sigma
+rect_VT = patches.Rectangle((8, 1), 2, 1, linewidth=1, edgecolor='black', facecolor='none')
+ax.add_patch(rect_VT)
+ax.text(9, 1.5, r'$V^T$', fontsize=20, ha='center', va='center')
+ax.text(9, 0.5, r'$(n \times n)$', fontsize=12, ha='center', va='center')
+
+# Set limits and remove axes
+ax.set_xlim(-1, 11)
+ax.set_ylim(-2, 4)
+ax.axis('off')
+
+# Show the plot
+plt.show()
+```
+
+---
+
+The SVD of a matrix always exists.
+
+The existence of the SVD was proven in 1936 by Carl Eckart and Gale Young.
+
+It is sometimes referred to as the Eckart-Young theorem.
+
+The singular values are uniquely determined.
+
+The left and right singular vectors are uniquely determined up to a complex sign (complex factor of modulus 1).
+
+## Outer Products
+
+The SVD can also be represented as a sum of outer products
+
+$$ 
+A = \sum_{i=1}^{n} \sigma_{i}\mathbf{u}_i\mathbf{v}_{i}^{T},
+$$
+
+where $\mathbf{u}_i, \mathbf{v}_{i}$ are the $i$-th rows of $U$ and $V$, respectively.
+
+---
+
+An outer product 
+
+$$\mathbf{u}_i\mathbf{v}_{i}^{T}=
+\begin{bmatrix}
+u_{i1}v_{i1} & u_{i1}v_{i2} & \cdots & u_{i1}v_{in} \\
+u_{i2}v_{i1} & u_{i2}v_{i2}  & \cdots & u_{i2}v_{in} \\
+\vdots & \vdots & \ddots & \vdots \\
+u_{im}v_{i1} &  u_{i2}v_{in}  & \cdots & u_{im}v_{in} \\
+\end{bmatrix}
+$$
+
+is a rank-1 matrix.
+
+The SVD decomposes $A$ into a linear combination of rank-1 matrices. 
+
+The singular value tells us the weight (contribution) of each rank-1 matrix to the matrix $A$.
+
+## Topics Covered
+
+In this lecture we first discuss:
+
+Theoretical properties of the SVD related to
+    
+- matrix rank
+- determining the best low rank approximations to a matrix
+
+We will then apply these results when we consider data matrices from the following applications 
+
+- traffic data
+- social media data
+- image data
+- traffic data
+- movie data
+
+# SVD Properties
+
+## Matrix Rank
+
+::: {.content-visible when-profile="web"}
+Let's review some definitions.
+:::
+
+Let $A\in\mathbb{R}^{m\times n}$ be a real matrix such that with $m>n$.
+
+:::: {.fragment}
+The __rank__ of $A$ is the number of linearly independent rows or columns of the matrix. 
+::::
+
+:::: {.fragment}
+The largest value that a matrix rank can take is $\min(m,n)$. Since we assumed $m>n$, the largest value of the rank is $n$.
+::::
+
+:::: {.fragment}
+If the matrix $A$ has rank equal to $n$, then we say it is full rank.
+::::
+
+:::: {.fragment}
+However, it can happen that the rank of a matrix is __less__ than $\min(m,n)$. In this case we say that $A$ is rank-deficient.
+::::
+
+---
+
+::: {.content-visible when-profile="web"}
+Recall that the dimension of a vector space is the smallest number of linearly independent vectors needed to span the space.
+:::
+
+The dimension of the column space of $A$ is the __smallest number of vectors that suffice to construct the columns of $A$.__
+
+:::: {.fragment}
+If the dimension of the column spaces is $k$, then there exists a set of vectors $\{\mathbf{c}_1, \mathbf{c}_2, \dots, \mathbf{c}_k\}$ such that every column $\mathbf{a}_i$ of $A$ can be expressed as:
+
+$$\mathbf{a}_i = r_{1i}\mathbf{c}_1 + r_{2i}\mathbf{c}_2 + \dots + r_{ki}\mathbf{c}_k\quad i=1,\ldots,n.$$
+::::
+
+---
+
+To store a matrix $A \in \mathbb{R}^{m\times n}$ we need to store $mn$ values.
+
+However, if $A$ has rank $k$, it can be factored as $A = CR$,
+$$
+A =
+\begin{bmatrix} 
+\bigg| & \bigg| &   & \bigg| \\
+\mathbf{c}_1   & \mathbf{c}_2  & \dots  & \mathbf{c}_k  \\
+\bigg| & \bigg| &  & \bigg|
+\end{bmatrix}
+\begin{bmatrix}
+\vert & \vert &   & \vert \\
+\mathbf{r}_1   & \mathbf{r}_2  & \dots  & \mathbf{r}_n  \\
+\vert & \vert &  & \vert
+\end{bmatrix}
+$$
+
+where $C \in \mathbb{R}^{m\times k}$ and $R \in \mathbb{R}^{k \times n}$.
+
+This only requires $k(m+n)$ values, which could be much smaller than $mn$.
+
+## Low Effective Rank
+
+In many situations we want to __approximate__ a matrix $A$ with a low-rank matrix $A^{(k)}.$
+
+:::: {.fragment}
+To talk about when one matrix *approximates* another, we need a norm for matrices.  
+::::
+
+:::: {.fragment}
+We will use the __Frobenius norm__, which is defined as
+
+$$\Vert A\Vert_F = \sqrt{\sum a_{ij}^2}.$$
+::::
+
+:::: {.fragment}
+Observe that this is the $\ell_2$ norm for a vectorized matrix, i.e., by  stacking the columns of the matrix $A$ to form a vector of length $mn$. 
+::::
+
+---
+
+To quantify when one matrix is *close* to another, we define the distance function:
+
+$$ 
+\operatorname{dist}(A,B) = \Vert A-B\Vert_F. 
+$$
+
+This can be viewed as Euclidean distance between $mn$-dimensional vectors.
+
+We define the optimal __rank-$k$ approximation__ to $A$ as 
+
+$$
+A^{(k)} =\mathop{\arg\min}\limits_{\{B~|~\operatorname{Rank} B = k\}} \Vert A-B\Vert_F.
+$$
+
+In other words, $A^{(k)}$ is the closest rank-$k$ matrix to $A$.
+
+## Finding Rank-$k$ Approximations
+
+How can we find the optimal rank-$k$ approximation to a matrix $A$?
+
+:::: {.fragment}
+The __Singular Value Decomposition (SVD).__
+::::
+
+:::: {.fragment}
+Why?
+::::
+
+:::: {.fragment}
+The SVD  gives the best rank-$k$ approximation to $A$ for __every__ $k$ up to the rank of $A$.
+::::
+
+---
+
+To form the best rank-$k$ approximation to using the SVD you calculate
+
+$$ A^{(k)} = U'\Sigma'(V')^T,$$
+
+where
+
+:::: {.incremental}
+* $U'$ are the $k$ leftmost columns of $U$, 
+* $\Sigma'$ is the $k\times k$ upper left sub-matrix of $\Sigma$, and 
+* $V'$ is the $k$ leftmost columns of $V$.
+::::
+
+
+---
+
+For a matrix $A$ of rank $n$, we can prove that
+
+$$\Vert A-A^{(k)}\Vert_F^2 = \sum_{i=k+1}^n\sigma^2_i.$$
+
+This means that the distance (in Frobenius norm) of the best rank-$k$ approximation $A^{(k)}$ from $A$ is equal to $\sqrt{\sum_{i=k+1}^n\sigma^2_i}$.
+
+# Low Rank Approximations in Practice 
+
+## Models are simplifications
 
 One way of thinking about modeling or clustering is that we are building a __simplification__ of the data. 
 
@@ -27,9 +299,7 @@ That is, why does it happen so often that a large dataset can be described in te
 
 I don't know.
 
-::: {.content-visible when-profile="slides"}
-## Occam's Razor
-:::
+## William of Ockham
 
 :::: {.columns}
 ::: {.column width="40%"}
@@ -58,16 +328,15 @@ by which he meant:
 > Among competing hypotheses, the one with the fewest assumptions should be selected.
 ::::
 
-
-::: {.content-visible when-profile="web"}
-Which has come to be known as "Occam's razor."
-:::
 :::
 ::::
 
-::: {.content-visible when-profile="slides"}
-## Occam's razor
+::: aside
+This has come to be known as "Occam's razor."
 :::
+
+
+## Occam's Razor
 
 William was saying that it is more common for a set of observations to be determined by a simple process than a complex process.
 
@@ -76,315 +345,26 @@ In other words, the world is full of simple (but often hidden) patterns.
 ::::
 
 :::: {.fragment}
-From which one can justify the observation that "modeling works suprisingly often."
-::::
-
-## Data Matrices
-
-Now we'll consider a (seemingly) very different approximation of data, applicable to data when it is in matrix form. Let $A\in\mathbb{R}^{m\times n}$
-
-$$
-A =
-\begin{bmatrix}
-a_{11} & \cdots & a_{1j} & \cdots & a_{1n} \\
-\vdots & \ddots & \vdots & \ddots & \vdots \\
-a_{i1} & \cdots & a_{ij} & \cdots & a_{1n} \\
-\vdots & \ddots & \vdots & \ddots & \vdots \\
-a_{m1} & \cdots & a_{mj} & \cdots & a_{mn} \\
-\end{bmatrix}.
-$$
-
-The $m$ rows are the data objects and the $n$ columns are the features.
-
-::: {.content-visible when-profile="slides"}
-## Data matrix examples
-:::
-
-<table>
-<tr><th>Data Type</th><th>Rows</th><th>Columns</th><th>Elements</th></tr>
-<tr><td>Network Traffic<td>Sources</td><td>Destinations</td><td>Number of Bytes</td></tr>
-<tr><td>Social Media</td><td>Users</td><td>time bins</td><td>Number of Posts/Tweets/Likes</td></tr>
-<tr><td>Web Browsing</td><td>Users</td><td>Content Categories</td><td>Visit Counts/Bytes Downloaded</td></tr>
-<tr><td>Web Browsing</td><td>Users</td><td>time bins</td><td>Visit Counts/Bytes Downloaded</td></tr>
-</table>
-
-## Matrix Rank
-
-::: {.content-visible when-profile="web"}
-Let's briefly review some definitions.
-:::
-
-We'll consider a real matrix $A\in\mathbb{R}^{m\times n}$ with $m>n$.
-
-:::: {.fragment}
-The __rank__ of $A$ is the number of linearly independent rows or columns of the matrix. 
-::::
-
-:::: {.fragment}
-The largest value that a matrix rank can take is $\min(m,n)$. Since we assumed $m>n$, the largest value of the rank is $n$.
-::::
-
-:::: {.fragment}
-If the matrix $A$ has rank equal to $n$, then we say it is full rank.
-::::
-
-:::: {.fragment}
-However, it can happen that the rank of a matrix is __less__ than $\min(m,n)$. In this case we say that $A$ is rank-deficient.
-::::
-
-::: {.content-visible when-profile="slides"}
-## Matrix Rank continued
-:::
-
-The dimension of a vector space is the smallest number of (linearly independent) vectors needed to span the space.
-
-:::: {.fragment}
-The dimension of the column space of $A$ is the __smallest number of vectors that suffice to construct the columns of $A$.__
-::::
-
-:::: {.fragment}
-If the dimension of the column spaces is $p$, then there exists a set of vectors $\{\mathbf{u}_1, \mathbf{u}_2, \dots, \mathbf{u}_p\}$ such that every column $\mathbf{a}_i$ can be expressed as:
-
-$$\mathbf{a}_i = c_{i1}\mathbf{u}_1 + c_{i2}\mathbf{u}_2 + \dots + c_{ip}\mathbf{u}_p\quad i=1,\ldots,n.$$
-::::
-
-::: {.content-visible when-profile="slides"}
-## Matrix Rank continued
-:::
-
-Now to store a matrix $A \in \mathbb{R}^{m\times n}$ we need to store $mn$ values.
-
-However, if $A$ has rank $k$, it can be factored as $A = UV$,
-$$
-\begin{bmatrix}
-a_{11} & \cdots & a_{1j} & \cdots & a_{1n} \\
-\vdots & \ddots & \vdots & \ddots & \vdots \\
-a_{i1} & \cdots & a_{ij} & \cdots & a_{1n} \\
-\vdots & \ddots & \vdots & \ddots & \vdots \\
-a_{m1} & \cdots & a_{mj} & \cdots & a_{mn} \\
-\end{bmatrix} =
-\begin{bmatrix}
-\vdots &  \vdots  \\
-\vdots &  \vdots  \\
-\mathbf{u}_1 & \mathbf{u}_{k} \\
-\vdots& \vdots  \\
-\vdots &  \vdots  \\
-\end{bmatrix}
-\begin{bmatrix}
-\cdots & \cdots & \mathbf{v}_1 & \cdots  & \cdots  \\
-\cdots & \cdots & \mathbf{v}_k & \cdots  & \cdots  \\
-\end{bmatrix}
-$$
-
-where $U \in \mathbb{R}^{m\times k}$ and $V \in \mathbb{R}^{k \times n}$.
-
-This only requires $k(m+n)$ values, which could be much smaller than $mn$.
-
-## Low Effective Rank
-
-In many situations we may wish to __approximate__ a data matrix $A$ with a low-rank matrix $A^{(k)}.$
-
-:::: {.fragment}
-To talk about when one matrix "approximates" another, we need a norm for matrices.  
-::::
-
-:::: {.fragment}
-We will use the __Frobenius norm__, whic his defined as
-
-$$\Vert A\Vert_F = \sqrt{\sum a_{ij}^2}.$$
-::::
-
-:::: {.fragment}
-Observe that this is the $\ell_2$ norm for a vectorized matrix, i.e., by  stacking the columns of the matrix $A$ to form a vector of length $mn$. 
-::::
-
-::: {.content-visible when-profile="slides"}
-## Low Effective Rank continued
-:::
-
-To quantify when one matrix is "close" to another, we define the distance function:
-
-$$\mbox{dist}(A,B) = \Vert A-B\Vert_F.$$
-
-:::: {.fragment}
-This can be viewed as Euclidean distance between $mn$-dimensional vectors (vectorized matrices of dimension $m\times n$).
-::::
-
-:::: {.fragment}
-We define the __rank-$k$ approximation__ to $A$ as follows.
-
-Let $k < \operatorname{Rank} A$, then the rank-$k$ approximation to $A$ is 
-
-$$A^{(k)} =\mathop{\arg\min}\limits_{\{B~|~\operatorname{Rank} B = k\}} \Vert A-B\Vert_F.$$
-::::
-
-:::: {.fragment}
-This means that $A^{(k)}$ is the closest rank-$k$ matrix to $A$, or, alternatively, the best rank-$k$ approximation to $A$ in a least-squares sense.
-::::
-
-::: {.content-visible when-profile="slides"}
-## Low Effective Rank continued
-:::
-
-Let's say we have $A^{(k)}$, the rank-$k$ approximation to $A$.  
-
-:::: {.fragment}
-By definition, there is a set $~\mathcal{U}$ consisting of $k$ vectors such that each column of $A^{(k)}$ can be expressed as a linear combination of vectors in $~\mathcal{U}$.  
-::::
- 
-:::: {.fragment}
-Let us call the matrix formed by those vectors $U$.
-::::
-
-:::: {.fragment}
-We have that 
-
-$$A^{(k)} = UV^T,$$
-
-for some set of coefficients $V^T$ that describe the linear combinations of $U$ that yield the columns of $A^{(k)}$. 
-::::
-
-:::: {.fragment}
-So $U$ is $m\times k$ and $V$ is $n\times k$.
-::::
-
-::: {.content-visible when-profile="slides"}
-## Low Effective Rank continued
-:::
-If we approximate $A$ by $A^{(k)}$, then the error we incur is:
-
-$$\Vert A-A^{(k)}\Vert_F.$$
-
-:::: {.fragment}
-Hence, a rank-$k$ approximation $A^{(k)}$ is valuable if 
-
-:::: {.incremental}
-* $\Vert A-A^{(k)}\Vert_F$ is small compared to $\Vert A\Vert_F$, and 
-* $k$ is small compared to $m$ and $n$.
-::::
-::::
-
-:::: {.fragment}
-In that case we have achieved a simplification of the data without a great loss in accuracy.
-::::
-
-## Finding Rank-$k$ Approximations
-
-There is a celebrated method for finding the best rank-$k$ approximation to any matrix: the __Singular Value Decomposition (SVD).__
-
-:::: {.fragment}
-> SVD is "the Rolls-Royce and the Swiss Army Knife of Numerical Linear Algebra.”
-
-Dianne O’Leary, MMDS ’06
-::::
-
-:::: {.fragment}
-Recall from our [linear algebra refresher](04-Linear-Algebra-Refresher.qmd) that for any matrix $A\in\mathbb{R}^{m\times n}$ with $m>n$, then $A$ admits a decomposition
-
-$$
-A = U\Sigma V^{T}.
-$$
-::::
-
-
-::: {.content-visible when-profile="slides"}
-## SVD
-:::
-
-In particular, the singular value decomposition of a rank-$r$ matrix $A$ has the form:
-
-$$
-\underbrace{\begin{bmatrix}
-\vdots & \vdots &  & \vdots \\
-\mathbf{a}_{1} & \mathbf{a}_{2} & \cdots & \mathbf{a}_{n} \\
-\vdots & \vdots &  & \vdots \\
-\end{bmatrix}}_{A} =
-\underbrace{\begin{bmatrix}
-\vdots &  \vdots  \\
-\mathbf{u}_1 & \mathbf{u}_{r} \\
-\vdots& \vdots  \\
-\end{bmatrix}}_{U}
-\underbrace{\begin{bmatrix}
-\sigma_{1} & &    \\
- & \ddots &    \\
-&  & \sigma_{r}  \\
-\end{bmatrix}}_{\Sigma}
-\underbrace{\begin{bmatrix}
-\cdots & \mathbf{v}_1 & \cdots   \\
-\cdots & \mathbf{v}_r & \cdots   \\
-\end{bmatrix}}_{V^T}
-$$
-
-:::: {.fragment}
-where 
-
-:::: {.incremental}
-1. $U$ is $m\times r$
-2. The columns of $U$ are mutually orthogonal and unit length, i.e., $U^TU = I$.
-3. $V$ is $n\times r$.
-4. The columns of $V$ are mutually orthogonal and unit length, i.e., $V^TV = I$.
-5. The matrix $\Sigma$ is an $r\times r$ diagonal matrix, whose diagonal values are $\sigma_1 \geq \sigma_2 \geq \dots \geq \sigma_r > 0$.
-::::
-::::
-
-::: {.content-visible when-profile="slides"}
-## SVD continued
-:::
-
-The SVD is _incredibly useful_ for finding matrix approximations.
-
-In particular, for an $m\times n$ matrix $A$, the SVD does two things:
-
-:::: {.incremental}
-1. It gives the best rank-$k$ approximation to $A$ for __every__ $k$ up to the rank of $A$.
-2. It gives the __distance__ of the best approximation $A^{(k)}$ from $A$ for each $k$.
-::::
-
-:::: {.fragment}
-In terms of the singular value decomposition, the best rank-$k$ approximation to $A$ is formed by taking 
-
-:::: {.incremental}
-* $U'$ are the $k$ leftmost columns of $U$, 
-* $\Sigma'$ is the $k\times k$ upper left submatrix of $\Sigma$, and 
-* $V'$ is the $k$ leftmost columns of $V$, and constructing 
-::::
-
-:::: {.fragment}
-$$ A^{(k)} = U'\Sigma'(V')^T.$$
-::::
-::::
-
-::: {.content-visible when-profile="slides"}
-## SVD continued
-:::
-
-Furthermore, the distance (in Frobenius norm) of the best rank-$k$ approximation $A^{(k)}$ from $A$ is equal to $\sqrt{\sum_{i=k+1}^r\sigma^2_i}$.
-
-That is, if you construct $A^{(k)}$ as shown above, then:
-
-$$\Vert A-A^{(k)}\Vert_F^2 = \sum_{i=k+1}^r\sigma^2_i.$$
-
-:::: {.fragment}
-Try to prove this yourself!
+From which one can justify the observation that "modeling works surprisingly often."
 ::::
 
 ## Low Effective Rank of Data Matrices
 
-In general, a data matrix $A\in\mathbb{R}^{m\times n}$  is usually __full rank__, meaning that $\operatorname{Rank} A = \min(m, n)$.
+In general, a data matrix $A\in\mathbb{R}^{m\times n}$  is usually __full rank__, meaning that $\operatorname{Rank}(A)\equiv p = \min(m, n)$.
 
 :::: {.fragment}
-However, it is possible to encounter data matrices that have __low effective rank.__
+However, it is possible to encounter data matrices that have __low effective rank__.
 ::::
 
 :::: {.fragment}
-By this we mean that one can usefully approximate $A$ by some $A^{(k)}$ for which $k \ll \min(m,n)$.
+This means that we can approximate $A$ by some $A^{(k)}$ for which $k \ll p$.
 ::::
 
 :::: {.fragment}
 For any data matrix, we can judge when this is the case by looking at its singular values, because the singular values tell us the distance to the nearest rank-$k$ matrix.
 ::::
 
-## Empirical Evidence
+## Traffic Data
 
 Let's see how this theory can be used in practice  and investigate some real data.
 
@@ -407,9 +387,7 @@ Atraf.index = dates
 Atraf
 ```
 
-::: {.content-visible when-profile="slides"}
-## Empirical Evidence continued
-:::
+---
 
 ```{python}
 #| code-fold: false
@@ -432,9 +410,7 @@ The `numpy` routine for computing the SVD is `np.linalg.svd`:
 u, s, vt = np.linalg.svd(Atraf)
 ```
 
-::: {.content-visible when-profile="slides"}
-## Empirical Evidence continued
-:::
+---
 
 Now let's look at the singular values of `Atraf` to see if it can be usefully approximated as a low-rank matrix:
 
@@ -451,9 +427,7 @@ plt.show()
 
 This classic, sharp-elbow tells us that a few singular values are very large, and most singular values are quite small.
 
-::: {.content-visible when-profile="slides"}
-## Empirical Evidence continued
-:::
+---
 
 Zooming in for just small $k$ values, we can see that the elbow is around 4 - 6 singular values:
 
@@ -472,9 +446,7 @@ plt.show()
 
 This pattern of singular values suggests __low effective rank.__
 
-::: {.content-visible when-profile="slides"}
-## Empirical Evidence continued
-:::
+---
 
 Let's use the formula above to compute the relative error of a rank-$k$ approximation to $A$:
 
@@ -495,9 +467,7 @@ plt.show()
 
 Remarkably, we are down to 9% relative error using only a rank 20 approximation to $A$.
 
-::: {.content-visible when-profile="slides"}
-## Empirical Evidence continued
-:::
+---
 
 So instead of storing 
 
@@ -522,13 +492,7 @@ We consider the following examples:
 * Images.
 ::::
 
-::: {.content-visible when-profile="slides"}
 ## Likes on Facebook
-:::
-
-::: {.content-visible when-profile="web"}
-__Likes on Facebook.__
-:::
 
 Here, the matrices are 
 
@@ -544,14 +508,7 @@ Here, the matrices are
 Source: [Viswanath et al., Usenix Security, 2014]
 ::::
 
-::: {.content-visible when-profile="slides"}
 ## Social Media Activity
-:::
-
-::: {.content-visible when-profile="web"}
-__Social Media Activity.__
-:::
-
 
 Here, the matrices are 
 
@@ -568,13 +525,7 @@ Source: [Viswanath et al., Usenix Security, 2014]
 ::::
 
 
-::: {.content-visible when-profile="slides"}
-## User preferences over items
-:::
-
-::: {.content-visible when-profile="web"}
-__User preferences over items.__
-:::
+## Netflix
 
 Example: the Netflix prize worked with partially-observed matrices like this:
 
@@ -601,14 +552,7 @@ Source: [Koren et al, IEEE Computer, 2009]
 ::::
 
 
-::: {.content-visible when-profile="slides"}
 ## Images
-:::
-
-::: {.content-visible when-profile="web"}
-__Images.__
-
-:::
 
 Image data often shows low effective rank.
 
@@ -623,11 +567,9 @@ plt.axis('off')
 plt.show()
 ```
 
-::: {.content-visible when-profile="slides"}
-## Images continued
-:::
+---
 
-Let's look at its spectrum:
+Let's look at the singular values.
 
 ```{python}
 u, s, vt = np.linalg.svd(boat, full_matrices=False)
@@ -638,9 +580,7 @@ plt.title('Singular Values of Boat Image', size=16)
 plt.show()
 ```
 
-::: {.content-visible when-profile="slides"}
-## Images continued
-:::
+---
 
 This image is 512 $\times$ 512. As a matrix, it has rank of 512.   
 
@@ -683,13 +623,7 @@ There are two helpful interpretations:
 ::::
 ::::
 
-::: {.content-visible when-profile="slides"}
 ## Low Rank Implies Common Patterns
-:::
-
-::: {.content-visible when-profile="web"}
-### Low Rank Implies Common Patterns
-:::
 
 The first interpretation of low-rank behavior is in answering the question:
 
@@ -721,9 +655,7 @@ How can this be helpful?
 ::::
 
 
-::: {.content-visible when-profile="slides"}
-## Common Patterns Traffic Example
-:::
+## Common Patterns: Traffic Example
 
 Consider the set of traffic traces. There are clearly some common patterns. How can we find them?
 
@@ -742,9 +674,8 @@ plt.subplots_adjust(hspace=1)
 plt.suptitle('Twelve Example Traffic Traces', size=20)
 plt.show()
 ```
-::: {.content-visible when-profile="slides"}
-## Common Patterns Traffic Example continued
-:::
+
+---
 
 Let's use as our example $\mathbf{a}_1,$ the first column of $A$.
 
@@ -756,9 +687,7 @@ $$\mathbf{a}_1 \approx v_{11}\sigma_1\mathbf{u}_1 + v_{12}\sigma_2\mathbf{u}_2 +
 
 In other words, $\mathbf{u}_1$ (the first column of $U$) is the "strongest" pattern occurring in $A$, and its strength is measured by $\sigma_1$.
 
-::: {.content-visible when-profile="slides"}
-## Common Patterns Traffic Example continued
-:::
+---
 
 Here is a view of the first 2 columns of $U\Sigma$ for the traffic matrix data.
 
@@ -774,13 +703,7 @@ plt.title('First Two Columns of $U$')
 plt.show()
 ```
 
-::: {.content-visible when-profile="slides"}
 ## Low Rank Defines Latent Factors
-:::
-
-::: {.content-visible when-profile="web"}
-### Low Rank Defines Latent Factors
-:::
 
 The next interpretation of low-rank behavior is that it exposes "latent factors" that describe the data.
 
@@ -796,9 +719,7 @@ Let's say we are working with a matrix of users and items.
 In particular, let the items be movies and matrix entries be ratings, as in the Netflix prize.
 ::::
 
-::: {.content-visible when-profile="slides"}
-## Low Rank Defines Latent Factors Netflix example
-:::
+## Latent Factors: Netflix example
 
 Recall the structure from earlier:
 
@@ -828,9 +749,7 @@ In other words:
     
 $$ a_{ij} = \tilde{\mathbf{u}}_i^T \mathbf{v}_j.$$
 
-::: {.content-visible when-profile="slides"}
-## Netflix example
-:::
+---
 
 We can therefore think of user $i$'s preferences as being captured by $\tilde{\mathbf{u}}_i = \sigma_i\mathbf{u}_i$, i.e., a point in $\mathbb{R}^k$.  
 
@@ -858,9 +777,7 @@ For example, the winning entry in the Netflix prize competition modeled user pre
 The remarkable thing is that a person's preferences for all 18,000 movies can be reasonably well captured in a 20-element vector!
 ::::
 
-::: {.content-visible when-profile="slides"}
-## Netflix example continued
-:::
+---
 
 Here is a figure from the paper that described the winning strategy in the Netflix prize.
 
@@ -872,9 +789,7 @@ Source: Koren et al, IEEE Computer, 2009
 
 In practice, this is perhaps a 20- or 40-dimensional space.
 
-::: {.content-visible when-profile="slides"}
-## Netflix example continued
-:::
+---
 
 Here are some representations of movies in that space (reduced to 2-D).
 
@@ -892,8 +807,6 @@ Source: Koren et al, IEEE Computer, 2009
 * This property can be explored precisely using the Singular Value Decomposition of the matrix.
 * When low effective rank is present
     * the matrix can be compressed with only small loss of accuracy,
-    * we can extract the "strongest" patterns in the data,
+    * we can extract the *strongest* patterns in the data,
     * we can describe each data item in terms of the inner product of __latent factors__.
 ::::
-
-
