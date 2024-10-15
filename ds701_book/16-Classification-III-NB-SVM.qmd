@@ -317,7 +317,7 @@ This is indeed a *naive* assumption ... but it can be surprisingly effective in 
 
 The assumption implies
     
-$$ P(x_1, x_2, \ldots, x_d\vert C_i) = P(x_1\vert C_i) \cdot P(x_2\vert C_i) \cdots P(x_d\vert C_i)  $$
+$$ P(x_1, x_2, \ldots, x_d\vert C_i) = P(x_1\vert C_i) \cdot P(x_2\vert C_i) \cdot P(x_d\vert C_i)  $$
 
 This is very helpful computationally, because the individual factors $P(x_j\vert C_i)$ reside in a lower-dimensional space than the full distribution.
 
@@ -325,7 +325,7 @@ This is very helpful computationally, because the individual factors $P(x_j\vert
 
 In a naive Bayes model, the quantity we calculate for each class $C_i$ is
 
-$$ \left(P(x_1\vert C_i) \cdot P(x_2\vert C_i) \cdot \dots P(x_d\vert C_i)\right) \cdots P(C_i).$$
+$$ \left(P(x_1\vert C_i) \cdot P(x_2\vert C_i) \cdots P(x_d\vert C_i)\right) \cdot P(C_i).$$
 
 You can see each conditional probability as a "correction factor" to $P(C_i)$.
 
@@ -347,8 +347,8 @@ __Train__
 __Predict__
 
 * For a given data point $\mathbf{x} = (x_1, x_2, \dots, x_d)$, 
-    * For each class $C_i,$ compute $P(x_1\vert C_i) \cdot P(x_2\vert C_i) \cdot \dots P(x_d\vert C_i) \cdot P(C_i)$
-    * For a hard classification return the  MAP estimate, i.e., the class that maximizes the above expression, 
+    * For each class $C_i,$ compute $P(x_1\vert C_i) \cdot P(x_2\vert C_i) \cdots P(x_d\vert C_i) \cdot P(C_i)$
+    * For a hard classification return the  MAP estimate, i.e., the class that maximizes the above expression
 
 ## Computing Attribute Probabilities from Data
 
@@ -469,7 +469,7 @@ Which separator is __better__?
 
 ---
 
-Well, they both perfectly separate the two classes in the training data.
+They both perfectly separate the two classes in the training data.
 
 ![](figs/L16-SVM-4.png){width="40%"}
 
@@ -605,7 +605,7 @@ $$
 \end{align*}
 $$
 
-This is a __constrained obtimization problem__ with a __quadratic objective function.__
+This is a __constrained optimization problem__ with a __quadratic objective function.__
 
 The quadratic form $\Vert \mathbf{w}\Vert^{2}$ is positive definite, i.e., it is strictly convex and has a unique global minimum.
 
@@ -639,7 +639,9 @@ Each $\xi_i$ measures how far the data point is on the "wrong side" of its separ
 
 The new problem is minimize
 
-$$ \mathbf{w}^* = \arg\min_\mathbf{w} \left(\Vert\mathbf{w}\Vert + C \left(\sum_{i=1}^N \xi_i\right)^k\right),$$
+$$ 
+\mathbf{w}^* = \arg\min_\mathbf{w} \left(\Vert\mathbf{w}\Vert^2 + C \left(\sum_{i=1}^N \xi_i\right)\right),
+$$
 
 subject to
 
@@ -724,7 +726,7 @@ In practice, RBF works well in many cases.
 ## SVM: Summary
 
 * In practice, SVMs have shown good results on many problems.
-* In particular, it is effective at dealing with high-dimensional data and avoids the curse of dimensionality.
+* In particular, it is effective at dealing with high-dimensional data through the use of kernels.
 * Since all data is represented as vectors, and we are relying on distance functions like Euclidean distance, it is important to pay attention to feature scaling when using SVMs.
 
 ## SVM and Naive Bayes in Python
@@ -766,11 +768,13 @@ y = wine['region'].values
 We'll first fit a linear SVM to the data.
 
 ```{python}
+#| code-fold: false
 np.random.seed(0)
 X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y,test_size = 0.5)
 ```
 
 ```{python}
+#| code-fold: false
 svc = svm.SVC(kernel = 'linear')
 svc.fit(X_train, y_train)
 y_pred_test = svc.predict(X_test)
@@ -836,7 +840,7 @@ In `scikit-learn`, the indices of the support vectors for each class can be foun
 
 Here, we will use just two of the three classes for clarity. 
 
-The support vectors are circled.  Can you visualize the two separator hyperplanes?
+The support vectors are circled.
 
 ```{python}
 #| fig-align: center
@@ -898,10 +902,9 @@ We can also choose from a suite of available kernels:
 * linear, 
 * poly, 
 * rbf, 
-* sigmoid, or 
-* precomputed.
+* sigmoid.
 
-Or, a custom kernel can be passed as a function. 
+We can also pass in a custom kernel. 
 
 Note that the radial basis function (rbf) kernel is just a Gaussian kernel, but with parameter $\gamma = \frac{1}{\sigma^2}$.
 
@@ -956,6 +959,7 @@ We have seen how to tune hyperparameters already using `model_selection.train_te
 Now we'll use a utility `model_selection.cross_val_score()` which will automatically do $k$-fold cross validation for us, for a single hyperparmeter.
 
 ```{python}
+#| code-fold: false
 f = svm.SVC(kernel = 'linear', C = 1)
 scores = model_selection.cross_val_score(f, 
                                          wine[['Alcohol', 'Malic acid']], 
@@ -996,17 +1000,16 @@ plt.show()
 
 ## SVM and NB: the Iris Dataset
 
-To compare SVM and Naive Bayes, we'll look at the Iris dataset again, and just using two features for visualization.
+To compare SVM and Naive Bayes, we'll look at the Iris dataset. We will use two features for visualization.
 
 We will not hold out data since we're just interested in the shapes of the decision boundaries.
 
 ```{python}
+#| code-fold: false
 iris = datasets.load_iris()
 X = iris.data[:, :2]                     
 y = iris.target
-```
 
-```{python}
 C = 1.0  
 
 svc = svm.SVC(kernel = 'linear', C = C).fit(X, y)
