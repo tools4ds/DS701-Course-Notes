@@ -23,6 +23,95 @@ We will see how the SVD is used for
 ::::
 
 
+## Singular Vectors and Values
+
+For $A\in\mathbb{R}^{m\times n}$ with $m>n$ and rank $r$,
+there exists a set of orthogonal vectors $\{\mathbf{v}_1, \mathbf{v}_2, \dots, \mathbf{v}_n\}$ 
+and a set of orthogonal vectors $\{\mathbf{u}_1, \mathbf{u}_2, \dots, \mathbf{u}_m\}$ such that
+
+$$
+A\mathbf{v}_1 = \sigma_1 \mathbf{u}_1 \cdots A\mathbf{v}_r = \sigma_r \mathbf{u}_r \quad\quad A\mathbf{v}_{r+1} = 0 \cdots A\mathbf{v}_n = 0
+$$
+
+:::: {.fragment}
+
+We can collect the vectors $\mathbf{v}_i$ into a matrix $V$ and the vectors $\mathbf{u}_i$ into a matrix $U$.
+$$
+A
+\begin{bmatrix}
+\vert & \vert &   & \vert \\
+\mathbf{v}_1   & \mathbf{v}_2  & \dots  & \mathbf{v}_n  \\
+\vert & \vert &  & \vert
+\end{bmatrix} =
+\begin{bmatrix}
+\vert & \vert &   & \vert \\
+\mathbf{u}_1   & \mathbf{u}_2  & \dots  & \mathbf{u}_m  \\
+\vert & \vert &  & \vert
+\end{bmatrix}
+\left[
+\begin{array}{c|c}
+\begin{matrix}
+\sigma_1 & \cdots & 0 \\
+\vdots & \ddots & \vdots \\
+0 & \cdots & \sigma_r
+\end{matrix}
+&
+\mathbf{0}
+\\
+\hline
+\mathbf{0} & \mathbf{0}
+\end{array}
+\right]
+$$
+
+We call the $\mathbf{v}_i$ the __right singular vectors__ and the $\mathbf{u}_i$ the __left singular vectors__.
+
+::::
+
+:::: {.fragment}
+
+And because $V$ is an orthogonal matrix, we have $V V^T = I$, so we can right multiply both sides by $V^T$ to get
+
+$$
+A
+ =
+\begin{bmatrix}
+\vert & \vert &   & \vert \\
+\mathbf{u}_1   & \mathbf{u}_2  & \dots  & \mathbf{u}_m  \\
+\vert & \vert &  & \vert
+\end{bmatrix}
+\left[
+\begin{array}{c|c}
+\begin{matrix}
+\sigma_1 & \cdots & 0 \\
+\vdots & \ddots & \vdots \\
+0 & \cdots & \sigma_r
+\end{matrix}
+&
+\mathbf{0}
+\\
+\hline
+\mathbf{0} & \mathbf{0}
+\end{array}
+\right]
+\begin{bmatrix}
+\vert & \vert &   & \vert \\
+\mathbf{v}_1   & \mathbf{v}_2  & \dots  & \mathbf{v}_n  \\
+\vert & \vert &  & \vert
+\end{bmatrix}^T
+$$
+
+::::
+
+:::: {.fragment}
+
+We can write this as
+
+$$
+A = U\Sigma V^{T},
+$$
+::::
+
 ## Singular Value Decomposition
 
 The SVD of a matrix $A\in\mathbb{R}^{m\times n}$ (where $m>n$) is
@@ -34,9 +123,9 @@ $$
 where
 
 :::: {.incremental}
-- $U$ has dimension $m\times n$. The columns of $U$ are orthogonal. The columns of $U$ are the left singular vectors.
-- $\Sigma$ has dimension $n\times n$. The only non-zero values are on the main diagonal and they are nonnegative real numbers  $\sigma_1\geq \sigma_2 \geq \ldots \geq \sigma_n$.
-- $V$ has dimension $n \times n$. The columns of $V$ are orthogonal. The columns of $V$ are the right singular vectors.
+- $U$ has dimension $m\times n$. The columns of $U$ are orthogonal. The columns of $U$ are the __left singular vectors__.
+- $\Sigma$ has dimension $n\times n$. The only non-zero values are on the main diagonal and they are nonnegative real numbers  $\sigma_1\geq \sigma_2 \geq \ldots \geq \sigma_r$ and $\sigma_{r+1} = \ldots = \sigma_n = 0$. These are called the __singular values__ of $A$.
+- $V$ has dimension $n \times n$. The columns of $V$ are orthogonal. The columns of $V$ are the __right singular vectors__.
 ::::
 
 ---
@@ -107,7 +196,7 @@ where $\mathbf{u}_i, \mathbf{v}_{i}$ are the $i$-th columns of $U$ and $V$, resp
 
 ---
 
-An outer product 
+An outer product of a $m\times 1$ vector and a $1\times n$ vector is a $m\times n$ matrix.
 
 $$\mathbf{u}_i\mathbf{v}_{i}^{T}=
 \begin{bmatrix}
@@ -120,9 +209,13 @@ $$
 
 is a rank-1 matrix.
 
+:::: {.fragment}
+**Alternate Interpretation:**
+
 The SVD decomposes $A$ into a linear combination of rank-1 matrices. 
 
 The singular value tells us the weight (contribution) of each rank-1 matrix to the matrix $A$.
+::::
 
 ## Topics Covered
 
@@ -282,19 +375,22 @@ This means that the distance (in Frobenius norm) of the best rank-$k$ approximat
 
 ## Models are simplifications
 
-One way of thinking about modeling or clustering is that we are building a __simplification__ of the data. 
+One way of thinking about modeling or clustering is that we are building a 
+__simplification__ of the data. 
 
 That is, a model is a description of the data, that is simpler than the data.
 
-In particular, instead of thinking of the data as thousands or millions of individual data points, we might think of it in terms of a small number of clusters, or a parametric distribution, etc.
+In particular, instead of thinking of the data as thousands or millions of 
+individual data points, we might think of it in terms of a small number of 
+clusters, or a parametric distribution, etc.
 
 From this simpler description, we hope to gain __insight.__
 
 There is an interesting question here:  __why__ does this process often lead to insight?   
 
-That is, why does it happen so often that a large dataset can be described in terms of a much simpler model?
+That is, why does it happen so often that a large dataset can be described in
+terms of a much simpler model?
 
-I don't know.
 
 ## William of Ockham
 
@@ -305,10 +401,9 @@ I don't know.
 [Source](https://commons.wikimedia.org/w/index.php?curid=5523066)
 :::
 ::: {.column width="60%"}
-However, I think that William of Ockham (c. 1300 AD) was on the right track.
+William of Ockham (c. 1300 AD) said:
 
 :::: {.fragment}
-He said:
 
 > Non sunt multiplicanda entia sine necessitate
 ::::
