@@ -103,7 +103,7 @@ $$
 A = \sum_{i=1}^{n} \sigma_{i}\mathbf{u}_i\mathbf{v}_{i}^{T},
 $$
 
-where $\mathbf{u}_i, \mathbf{v}_{i}$ are the $i$-th rows of $U$ and $V$, respectively.
+where $\mathbf{u}_i, \mathbf{v}_{i}$ are the $i$-th columns of $U$ and $V$, respectively.
 
 ---
 
