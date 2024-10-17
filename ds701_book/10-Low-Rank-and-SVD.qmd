@@ -228,10 +228,9 @@ Theoretical properties of the SVD related to
 
 We will then apply these results when we consider data matrices from the following applications 
 
-- traffic data
+- internet traffic data
 - social media data
 - image data
-- traffic data
 - movie data
 
 # SVD Properties
