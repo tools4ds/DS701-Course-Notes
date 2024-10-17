@@ -708,7 +708,7 @@ plt.show()
 The next interpretation of low-rank behavior is that it exposes "latent factors" that describe the data.
 
 :::: {.fragment}
-In this interpretation, we think of each element of $A^{(k)}=U'\Sigma'(V')^T$ as the inner product of a row of $U'\Sigma'$ and a row of $V'$.
+In this interpretation, we think of each element of $A^{(k)}=U'\Sigma'(V')^T$ as the inner product of a row of $U'\Sigma'$ and a column of $(V')^{T}$ (equivalently a row of $V'$).
 ::::
 
 :::: {.fragment}
@@ -730,28 +730,34 @@ $$
 \vdots & \vdots &  & \vdots \\
 \end{bmatrix} 
 \approx
+\underbrace{
 \begin{bmatrix}
 \vdots &  \vdots  \\
 \sigma_1 \mathbf{u}_1 & \sigma_k \mathbf{u}_{k} \\
 \vdots& \vdots  \\
 \end{bmatrix}
+}_{\tilde{U}\in\mathbb{R}^{m\times k}}
+\underbrace{
 \begin{bmatrix}
-\cdots & \mathbf{v}_1 & \cdots   \\
-\cdots & \mathbf{v}_k & \cdots   \\
-\end{bmatrix},
+\cdots & \mathbf{v}_{1}^{T} & \cdots   \\
+\cdots & \mathbf{v}_{k}^{T} & \cdots   \\
+\end{bmatrix}
+}_{\tilde{V}\in\mathbb{R}^{k\times n}},
 $$
 
 where the rows of $A$ are the users and the columns are movie ratings.
 
-Then the rating that a user gives a movie is the inner product of a $k$ element vector that corresponds to the user, and a $k$ element vector that corresponds to the movie.
+Then the rating that a user gives a movie is the inner product of a $k$-element vector that corresponds to the user, and a $k$-element vector that corresponds to the movie.
 
-In other words:
+In other words we have:
     
-$$ a_{ij} = \tilde{\mathbf{u}}_i^T \mathbf{v}_j.$$
+$$ 
+a_{ij} = \sum_{p=1}^{k} \tilde{U}_{ip} \tilde{V}_{pj}.
+$$
 
 ---
 
-We can therefore think of user $i$'s preferences as being captured by $\tilde{\mathbf{u}}_i = \sigma_i\mathbf{u}_i$, i.e., a point in $\mathbb{R}^k$.  
+We can think of user $i$'s preferences as being captured by row $i$ of $\tilde{U}$, which is a point in $\mathbb{R}^k$.  
 
 :::: {.fragment}
 We have described everything we need to know to predict user $i$'s ratings via a $k$-element vector.
@@ -762,7 +768,7 @@ The $k$-element vector is called a __latent factor.__
 ::::
 
 :::: {.fragment}
-Likewise, we can think of $\mathbf{v}_j$ as a "description" of movie $j$ (another latent factor).
+Likewise, we can think of column $j$ of $\tilde{V}$ as a "description" of movie $j$ (another latent factor).
 ::::
 
 :::: {.fragment}
@@ -770,11 +776,11 @@ The value in using latent factors comes from the summarization of user preferenc
 ::::
 
 :::: {.fragment}
-For example, the winning entry in the Netflix prize competition modeled user preferences with a 20-element latent factor.
+For example, the winning entry in the Netflix prize competition modeled user preferences with 20 latent factors.
 ::::
 
 :::: {.fragment}
-The remarkable thing is that a person's preferences for all 18,000 movies can be reasonably well captured in a 20-element vector!
+The remarkable thing is that a person's preferences for all 18,000 movies can be reasonably well captured in a vector of dimension 20!
 ::::
 
 ---
