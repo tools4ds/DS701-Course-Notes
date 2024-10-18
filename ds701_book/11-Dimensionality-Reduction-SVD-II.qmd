@@ -1,5 +1,5 @@
 ---
-title: SVD - PCA and Dimensionality Reduction
+title: Dimensionality Reduction - PCA and t-SNE
 jupyter: python3
 ---
 
@@ -9,6 +9,7 @@ We previously learned how to use the SVD as a tool for constructing low-rank mat
 
 We now consider it as a tool for transforming (i.e., reducing the dimension) our data. 
 
+We will consider
 
 ## Overview
 
@@ -21,37 +22,191 @@ We have seen some of these reasons already, in particular:
 - computational complexity, high-dimensional data requires more computing power and memory,
 - visualization, where high-dimensional data makes understanding and interpreting the data difficult our data.
 
-:::: {.fragment}
+--- 
+
 How can we reduce the dimension of our data but still preserve the most important features?
+
+:::: {.fragment}
+We consider two techniques:
+
+:::: {.incremental}
+- Principle Component Analysis (PCA)
+- t-distributed stochastic neighbor embedding (t-SNE)
+::::
 ::::
 
 :::: {.fragment}
-The answer is Principal Component Analysis (PCA) and we will demonstrate how PCA is related to the SVD.
+We will demonstrate the relationship between PCA and the SVD.
+
+t-SNE is an alternative nonlinear method for dimensionality reduction.
 ::::
 
 
 # PCA
 
-
 # Relationship between PCA and SVD
 
 ## SVD
 
-Let $A\in\mathbb{R}^{m\times n}$, recall that the SVD is
 
-$$
-A = U\Sigma V^T,
-$$
+# High-Dimensional Data
 
-where $U\in\mathbb{R}^{m\times m}$ is an orthogonal matrix, $\Sigma\in\mathbb{R}^{m\times n}$ is a rectangular diagonal matrix, and $V\in\mathbb{R}^{n\times n}$ is an orthogonal matrix.
+## Image Data
 
-Notice that $U$ contains a row for each data object.   
+Consider the following image dataset.
 
-::: {.content-visible when-profile="slides"}
-## Dimensionality reduction
+:::: {.columns}
+::: {.column width="40%"}
+ ![Image Credit: The Extended Yale B face database](figs/Extended_Yale_B_DB_cropped.png)
 :::
+::: {.column width="60%"}
 
-We can select the $k$ largest singular values and form the matrix:
+- Database: 64 images for 38 people.
+    
+    $\Rightarrow 2432$ images
+
+- Image size: $192 \times 168$ pixels. 
+
+    $\Rightarrow 32256$ pixels
+
+- Each pixel: $0-255$.
+:::
+::::
+
+:::: {.fragment}
+In tabular representation: 2432 rows $\times$ **32256** columns.
+::::
+
+---
+
+High-dimensional data consists of a large number of features(columns) for each observation.
+
+Examples include
+
+:::: {.incremental}
+- biomedical data
+- educational data
+- financial records
+::::
+
+## Issues
+
+What can be problematic about high-dimensional data?
+
+![](figs/elephant_perspective.png){fig-align="center" width=50%}
+
+:::: {.fragment}
+- High-dimensional data is difficult to visualize and interpret
+- Not all dimensions are equally important
+- The curse of dimensionality
+::::
+
+:::: {.fragment}
+__Goal__: reduce the number of dimensions while preserving the most information.
+::::
+
+
+# Dimensionality Reduction
+
+## PCA
+
+Input: $\mathbf{x}_1,\dots, \mathbf{x}_m$ with  $\mathbf{x}_i \in \mathbb{R}^n \: \: \forall \: i \in \{1, \dots, n\}.$
+
+Output: $\mathbf{y}_1,\dots, \mathbf{y}_m$  with  $\mathbf{y}_i \in \mathbb{R}^d \: \: \forall \: i \in \{1, \dots, n\}$. 
+
+The goal is to compute the new data points $\mathbf{y}_i$ such that <font color="red"> $d << n$ </font> while still preserving the most information contained in the data points $\mathbf{x}_i$.
+
+$$
+X_0 = 
+\begin{bmatrix} 
+x_{11} & x_{12} & \dots & x_{1p} \\
+x_{21} & x_{22} & \dots & x_{2p} \\
+\vdots & \vdots & \ddots & \vdots \\
+x_{n1} & x_{n2} & \dots & x_{np} 
+\end{bmatrix} \:
+\xrightarrow[\text{PCA}]{} \:
+Y = \begin{bmatrix} 
+y_{11} & y_{12} & \dots & y_{1d} \\
+y_{21} & y_{22} & \dots & y_{2d} \\
+\vdots & \vdots & \ddots & \vdots \\
+y_{n1} & y_{n2} & \dots & y_{nd} 
+\end{bmatrix}
+$$
+
+## Genes Mirror Geography
+
+
+
+## Maximize Projection Variance
+
+
+## Least Squares Interpretation
+
+## Covariance Matrix
+
+## Spectral Decomposition
+
+## Essentials of PCA
+
+## Selection of Principal Components
+
+## Case Study: Digits
+
+## Relationship to the SVD
+
+The SVD of a matrix $A\in\mathbb{R}^{m\times n}$, recall that the SVD is
+
+$$
+A = U\Sigma V^T.
+$$
+
+```{python}
+#| fig-align: center
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
+# Create a figure and axis
+fig, ax = plt.subplots()
+
+# Draw matrix A
+rect_A = patches.Rectangle((0, 0), 2, 3, linewidth=1, edgecolor='black', facecolor='none')
+ax.add_patch(rect_A)
+ax.text(1, 1.5, r'$A$', fontsize=20, ha='center', va='center')
+ax.text(1, -0.5, r'$(m \times n)$', fontsize=12, ha='center', va='center')
+
+# Draw equal sign
+ax.text(2.5, 1.5, r'$=$', fontsize=20, ha='center', va='center')
+
+# Draw matrix U
+rect_U = patches.Rectangle((3, 0), 2, 3, linewidth=1, edgecolor='black', facecolor='none')
+ax.add_patch(rect_U)
+ax.text(4, 1.5, r'$U$', fontsize=20, ha='center', va='center')
+ax.text(4, -0.5, r'$(m \times n)$', fontsize=12, ha='center', va='center')
+
+# Draw Sigma
+rect_Sigma = patches.Rectangle((5.5, 1), 2, 1, linewidth=1, edgecolor='black', facecolor='none')
+ax.add_patch(rect_Sigma)
+ax.text(6.5, 1.5, r'$\Sigma$', fontsize=20, ha='center', va='center')
+ax.text(6.5, 0.5, r'$(n \times n)$', fontsize=12, ha='center', va='center')
+
+# Draw matrix V^T with the same dimensions as Sigma
+rect_VT = patches.Rectangle((8, 1), 2, 1, linewidth=1, edgecolor='black', facecolor='none')
+ax.add_patch(rect_VT)
+ax.text(9, 1.5, r'$V^T$', fontsize=20, ha='center', va='center')
+ax.text(9, 0.5, r'$(n \times n)$', fontsize=12, ha='center', va='center')
+
+# Set limits and remove axes
+ax.set_xlim(-1, 11)
+ax.set_ylim(-2, 4)
+ax.axis('off')
+
+# Show the plot
+plt.show()
+```   
+
+## Dimensionality Reduction
+
+By selecting the $k$ largest singular values we form the rank-$k$ matrix
 
 $$
 A^{(k)} =
@@ -877,4 +1032,5 @@ g.map(pltColor)
 plt.show()
 ```
 
+## t-SNE
 
