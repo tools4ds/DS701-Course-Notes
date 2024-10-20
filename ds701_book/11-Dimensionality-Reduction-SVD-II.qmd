@@ -1,30 +1,36 @@
 ---
-title: Dimensionality Reduction - PCA and t-SNE
+title: Dimensionality Reduction - PCA + t-SNE
 jupyter: python3
+bibliography: references.bib
+nocite: |
+  @novembre2008genes, @strang2022introduction
 ---
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/11-Dimensionality-Reduction-SVD-II.ipynb)
 
 We previously learned how to use the SVD as a tool for constructing low-rank matrices.
 
-We now consider it as a tool for transforming (i.e., reducing the dimension) our data. 
-
-We will consider
+We now consider it as a tool for transforming (i.e., reducing the dimension of) our data. 
 
 ## Overview
 
 Collected data is often high-dimensional. The high-dimensionality of, or the large number of features in a dataset is challenging to work with. 
 
-We have seen some of these reasons already, in particular:
+![](figs/elephant_perspective.png){fig-align="center" width=50%}
 
+## High-Dimensional Challenges
+
+We have seen some of these challenges already, in particular:
+
+:::: {.incremental}
 - the curse of dimensionality, where data points become sparse in higher dimensions and distance metrics have less meaning,
 - overfitting, where high-dimensional data can lead models becoming overly complex and fitting to noise in the data as opposed to the actual signal,
 - computational complexity, high-dimensional data requires more computing power and memory,
 - visualization, where high-dimensional data makes understanding and interpreting the data difficult our data.
-
+::::
 --- 
 
-How can we reduce the dimension of our data but still preserve the most important features?
+How can we reduce the dimension of our data but still preserve the most important information in our dataset?
 
 :::: {.fragment}
 We consider two techniques:
@@ -41,76 +47,11 @@ We will demonstrate the relationship between PCA and the SVD.
 t-SNE is an alternative nonlinear method for dimensionality reduction.
 ::::
 
+# PCA 
 
-# PCA
+## Dimensionality Reduction 
 
-# Relationship between PCA and SVD
-
-## SVD
-
-
-# High-Dimensional Data
-
-## Image Data
-
-Consider the following image dataset.
-
-:::: {.columns}
-::: {.column width="40%"}
- ![Image Credit: The Extended Yale B face database](figs/Extended_Yale_B_DB_cropped.png)
-:::
-::: {.column width="60%"}
-
-- Database: 64 images for 38 people.
-    
-    $\Rightarrow 2432$ images
-
-- Image size: $192 \times 168$ pixels. 
-
-    $\Rightarrow 32256$ pixels
-
-- Each pixel: $0-255$.
-:::
-::::
-
-:::: {.fragment}
-In tabular representation: 2432 rows $\times$ **32256** columns.
-::::
-
----
-
-High-dimensional data consists of a large number of features(columns) for each observation.
-
-Examples include
-
-:::: {.incremental}
-- biomedical data
-- educational data
-- financial records
-::::
-
-## Issues
-
-What can be problematic about high-dimensional data?
-
-![](figs/elephant_perspective.png){fig-align="center" width=50%}
-
-:::: {.fragment}
-- High-dimensional data is difficult to visualize and interpret
-- Not all dimensions are equally important
-- The curse of dimensionality
-::::
-
-:::: {.fragment}
-__Goal__: reduce the number of dimensions while preserving the most information.
-::::
-
-
-# Dimensionality Reduction
-
-## PCA
-
-Input: $\mathbf{x}_1,\dots, \mathbf{x}_m$ with  $\mathbf{x}_i \in \mathbb{R}^n \: \: \forall \: i \in \{1, \dots, n\}.$
+Input: $\mathbf{x}_1,\ldots, \mathbf{x}_m$ with  $\mathbf{x}_i \in \mathbb{R}^n \: \: \forall \: i \in \{1, \ldots, n\}.$
 
 Output: $\mathbf{y}_1,\dots, \mathbf{y}_m$  with  $\mathbf{y}_i \in \mathbb{R}^d \: \: \forall \: i \in \{1, \dots, n\}$. 
 
@@ -119,48 +60,388 @@ The goal is to compute the new data points $\mathbf{y}_i$ such that <font color=
 $$
 X_0 = 
 \begin{bmatrix} 
-x_{11} & x_{12} & \dots & x_{1p} \\
-x_{21} & x_{22} & \dots & x_{2p} \\
+x_{11} & x_{12} & \dots & x_{1n} \\
+x_{21} & x_{22} & \dots & x_{2n} \\
 \vdots & \vdots & \ddots & \vdots \\
-x_{n1} & x_{n2} & \dots & x_{np} 
+x_{m1} & x_{m2} & \dots & x_{mn} 
 \end{bmatrix} \:
 \xrightarrow[\text{PCA}]{} \:
 Y = \begin{bmatrix} 
 y_{11} & y_{12} & \dots & y_{1d} \\
 y_{21} & y_{22} & \dots & y_{2d} \\
 \vdots & \vdots & \ddots & \vdots \\
-y_{n1} & y_{n2} & \dots & y_{nd} 
+y_{m1} & y_{m2} & \dots & y_{md} 
 \end{bmatrix}
 $$
 
-## Genes Mirror Geography
+## PCA Application: Genes Mirror Geography
 
+We consider a dataset from @novembre2008genes. The authors collected DNA data called SNPs (single nucleotide polymorphism) from 3000 individuals in Europe. 
 
+SNPs describe the changes in DNA from a common base pair (A,T,C,G). A value of 0 means no changes to the base pair, a value of 1 means 1 change to the base pair, and a value of 2 means both base pairs change.
 
-## Maximize Projection Variance
+The data for each individual consisted of approximately 500k SNPs.
 
+---
+
+The authors performed PCA and plotted 1387 of the individuals in the reduced dimensions.
+
+![Image Credit @novembre2008genes](figs/PCA_genes_Europe.png)
+
+---
+
+Key observations:
+
+:::: {.incremental}
+- the first principal components of the data almost reproduce the map of Europe
+- SNPs are similar geographically
+- DNA of an individual reveals their birthplace within a few hundred kilometers
+::::
+
+:::: {.fragment}
+Would a similar study in the USA be effective?
+::::
+
+## PCA Steps
+
+Input: $X_0\in\mathbb{R}^{m\times n}$
+
+Output: $Y\in\mathbb{R}^{m\times d}$ with $d << n$.
+
+1. Center the data (subtract the mean across rows): $X_0 \rightarrow X$.
+
+    Example:
+    $$
+    X_0 = 
+    \begin{bmatrix}
+    90 & 60 & 60\\
+    80 & 60 & 70 \end{bmatrix}
+    $$
+
+    The mean across rows is:
+    $$
+    \boldsymbol{\mu} = \begin{bmatrix} 85 & 60 & 65 \end{bmatrix}
+    $$
+
+---
+
+2. Find the direction of the largest variance. This is the first principal component (PC1).
+
+3. From the $d-1$ directions orthogonal to PC1, find the one with the largest variance. This is the second principal component (PC2).
+
+4. Repeat step 3 until you have accounted for all $d$ directions.
+
+5. Project the data into the direction of the PCs.
 
 ## Least Squares Interpretation
 
+Centered data often clusters along a line (or other low-dimensional subspace of $\mathbb{R}^{n}$).
+
+:::: {.columns}
+::: {.column width="50%"}
+![](figs/PCA_variance.png)
+The sum of **variances** (squared distances to the mean) of the projected points is a **maximum**.
+:::
+::: {.column width="50%"}
+![](figs/PCA_residual.png)
+The sum of **residuals** (squared distances from the points to the line) is a **minimum**.
+:::
+::::
+
+:::: {.fragment}
+What is the statistical entity that measures the variability in the data?
+::::
+
 ## Covariance Matrix
+
+Let $X\in\mathbb{R}^{m\times n}$ contained the centered data. Recall that the sample covariance matrix is defined by
+
+$$
+S = \frac{1}{m-1}X^{T}X
+$$
+
+Example:
+Example:     
+$$
+X = \begin{bmatrix}
+5 & 0 & -5\\
+-5 & 0 & 5 \end{bmatrix} 
+$$
+
+$$ 
+S =  
+\begin{bmatrix}
+5 & -5\\
+0 & 0\\
+-5 & 5 \end{bmatrix} 
+\begin{bmatrix}
+5 & 0 & -5\\
+-5 & 0 & 5 \end{bmatrix}
+=
+\begin{bmatrix}
+50 & 0 & -50\\
+0 & 0 & 0\\
+-50 & 0 & 50 \end{bmatrix}
+$$
 
 ## Spectral Decomposition
 
+Observe that the matrix $S$ is symmetric, i.e., $S = S^{T}.$
+
+Every real symmetric matrix $S$ has the factorization $V\Lambda V^{T}$, where $\Lambda$ is a diagonal matrix that contains the eigenvalues of S and teh columns of $V$ are orthogonal eigenvectors of $S$.
+
+You can refresh your memory about this in the [Linear Algebra Refresher](04-Linear-Algebra-Refresher.qmd).
+
+---
+
+The covariance matrix $S \in \mathbb{R}^{n\times n}$ can be written as $S = V\Lambda V^T$ where
+
+$$
+\Lambda = 
+\begin{bmatrix}
+\lambda_1                                   \\
+& \lambda_2             &   & \text{\Large0}\\
+&               & \ddots                \\
+& \text{\Large0} &   & \lambda_{n-1}            \\
+&               &   &   & \lambda_n
+\end{bmatrix}
+$$
+with $\lambda_1 \geq \lambda_2 \geq \dots \geq \lambda_{n-1} \geq \lambda_n$, and
+$$
+V = \begin{bmatrix} 
+\bigg| & \bigg| &  & \bigg| & \bigg| \\
+\mathbf{v}_1   & \mathbf{v}_2  & \dots & \mathbf{v}_{n-1}   & \mathbf{v}_n  \\
+\bigg| & \bigg| & & \bigg| & \bigg|
+\end{bmatrix}
+ $$ 
+ 
+with $S\mathbf{v}_i = \lambda_i \mathbf{v}_i$ and $\mathbf{v}_i \perp \mathbf{v}_j$ for $i\neq j$.
+
+
 ## Essentials of PCA
 
-## Selection of Principal Components
+- The columns of $V$ are the principal directions (or components).
+- The principal components are the projection of the data into principal directions: $XV$.
+- The total variance $T$ in the data is the sum of all eigenvalues: $T = \lambda_1 + \lambda_2 + \dots + \lambda_n.$
+- The first eigenvector $\mathbf{v}_1$ points in the most significant direction of the data. This direction explains the largest fraction $\lambda_1/T$ of the total variance.
+- The second eigenvector $\mathbf{v}_2$ accounts for a smaller fraction $\lambda_2/T$.
+
+## Case Study: Weight and Height
+
+Let's consider some randomly generated data consisting of 2 features, height and weight.
+
+```{python}
+#| fig-align: center
+import numpy as np
+import matplotlib.pyplot as plt
+
+rng = np.random.default_rng(seed=42)
+
+height = rng.normal(loc=173, scale=6.35, size = 100)
+weight = rng.normal(loc=90, scale=10, size = 100)
+
+X0 = np.stack((height, weight), axis=-1)
+
+X = X0-X0.mean(axis=0)
+
+plt.scatter(X[:, 0], X[:, 1])
+plt.title("Height vs. Weight mean centered")
+plt.xlabel("Height in cm")
+plt.ylabel("Weight in kg")
+plt.show()
+```
+
+---
+
+Let's do PCA and plot the principle components over our dataset.
+
+```{python}
+#| fig-align: center
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
+pca = PCA(n_components=2)
+principal_components = pca.fit_transform(X)
+
+plt.scatter(X[:, 0], X[:, 1], label='Original Data')
+origin = np.array([0, 0])
+for i, component in enumerate(pca.components_):
+    plt.arrow(origin[0], origin[1], 5*component[0], 20*component[1], 
+              color=['#D55E00', '#009E73'][i], width=0.2, head_width=0.35, label=f'PC{i+1}')
+plt.legend()
+plt.title("Height vs. Weight mean centered")
+plt.xlabel("Height in cm")
+plt.ylabel("Weight in kg")
+plt.show()
+```
+
+---
+
+We can also plot the data in our transformed space.
+
+
+```{python}
+#| fig-align: center
+plt.scatter(principal_components[:, 0], principal_components[:, 1], color="#CC79A7")
+plt.title("Transformed Height and Weight Data")
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+plt.show()
+```
 
 ## Case Study: Digits
 
+Let's consider another example using the MNIST dataset.
+
+```{python}
+#| fig-align: center
+from sklearn import datasets
+digits = datasets.load_digits()
+
+plt.figure(figsize=(8, 8),)
+for i in range(8):
+    plt.subplot(2, 4, i + 1)
+    plt.imshow(digits.images[i], cmap='gray_r')
+    plt.axis('off')
+plt.tight_layout()
+plt.show()
+```
+
+---
+
+We first vectorize each digit and perform PCA on the 64-D representation of the digits.
+
+We can plot the explained variance ratio and the total explained variance ratio.
+
+```{python}
+#| fig-align: center
+from sklearn.decomposition import PCA
+
+X = digits.data
+y = digits.target
+
+pca = PCA()
+X_pca = pca.fit_transform(X)
+
+# Create subplots
+fig, axs = plt.subplots(2, 1, figsize=(6, 5))
+
+# Scree plot (explained variance ratio)
+axs[0].plot(np.arange(1, len(pca.explained_variance_ratio_) + 1), pca.explained_variance_ratio_, marker='o', linestyle='--')
+axs[0].set_title('Scree Plot')
+axs[0].set_xlabel('Principal Component')
+axs[0].set_ylabel('Explained Variance Ratio')
+axs[0].grid(True)
+
+# Cumulative explained variance plot
+axs[1].plot(np.arange(1, len(pca.explained_variance_ratio_) + 1), np.cumsum(pca.explained_variance_ratio_), marker='o', linestyle='--')
+axs[1].set_title('Cumulative Explained Variance Plot')
+axs[1].set_xlabel('Principal Component')
+axs[1].set_ylabel('Cumulative Explained Variance')
+axs[1].grid(True)
+
+# Adjust layout
+plt.tight_layout()
+plt.show()
+```
+
+---
+
+Let's plot the data in the first 2 principal component directions. We'll use the digit labels to color each digit in the reduced space.
+
+```{python}
+#| fig-align: center
+plt.figure(figsize=(7, 7))
+scatter = plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y, cmap='tab20', edgecolor='k', s=50)
+plt.title('Digits in PC1 and PC2 Space')
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+
+# Create a legend with discrete labels
+legend_labels = np.unique(y)
+handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=plt.cm.tab20(i / 9), markersize=10) for i in legend_labels]
+plt.legend(handles, legend_labels, title="Digit Label", loc="best")
+
+plt.show()
+```
+
+
+## To scale or not to scale
+
+Consider a situation where we have age (years) and height (feet) data for 4 people.
+
+:::: {.columns}
+::: {.column width="50%"}
+| Person | Age [years] | Height [feet] |
+|--------|-------------|---------------|
+| A      | 25          | 6.232         |
+| B      | 30          | 6.232         |
+| C      | 25          | 5.248         |
+| D      | 30          | 5.248         |
+
+:::
+::: {.column width="50%"}
+![](figs/Scaling_feet.png)
+:::
+::::
+
+---
+
+What if the height is in cm?
+
+:::: {.columns}
+::: {.column width="50%"}
+| Person | Age [years] | Height [cm] |
+|--------|-------------|-------------|
+| A      | 25          | 189.95      |
+| B      | 30          | 189.95      |
+| C      | 25          | 159.96      |
+| D      | 30          | 159.96      |
+
+:::
+::: {.column width="50%"}
+![](figs/Scaling_cm.png)
+:::
+::::
+
+---
+
+Let's standardize our data.
+
+:::: {.columns}
+::: {.column width="50%"}
+| Person | Age [years] | Height [cm] |
+|--------|-------------|-------------|
+| A      | -1          | 1           |
+| B      | 1           | 1           |
+| C      | -1          | -1          |
+| D      | 1           | -1          |
+
+:::
+::: {.column width="50%"}
+![](figs/Scaling.png)
+:::
+::::
+
+--- 
+
+What quantity is represented by $\frac{Cov(X, Y)}{\sigma_X\sigma_Y}$, where $X$ and $Y$ represent the random variables associated to sampling a person with that Age and Height?
+
+:::: {.fragment}
+This is the correlation matrix. When you standardize your data you are no longer working with the covariance matrix but the correlation matrix.
+::::
+
 ## Relationship to the SVD
 
-The SVD of a matrix $A\in\mathbb{R}^{m\times n}$, recall that the SVD is
+Recall that the SVD of a mean-centered data matrix $X\in\mathbb{R}^{m\times n}$ ($m>n$) is
 
 $$
-A = U\Sigma V^T.
+X = U\Sigma V^T.
 $$
 
 ```{python}
+#| echo: false
 #| fig-align: center
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -171,7 +452,7 @@ fig, ax = plt.subplots()
 # Draw matrix A
 rect_A = patches.Rectangle((0, 0), 2, 3, linewidth=1, edgecolor='black', facecolor='none')
 ax.add_patch(rect_A)
-ax.text(1, 1.5, r'$A$', fontsize=20, ha='center', va='center')
+ax.text(1, 1.5, r'$X$', fontsize=20, ha='center', va='center')
 ax.text(1, -0.5, r'$(m \times n)$', fontsize=12, ha='center', va='center')
 
 # Draw equal sign
@@ -204,833 +485,193 @@ ax.axis('off')
 plt.show()
 ```   
 
-## Dimensionality Reduction
+---
 
-By selecting the $k$ largest singular values we form the rank-$k$ matrix
+How can we relate this to what we learned in PCA?
+
+In PCA, we computed an eigen-decomposition of the covariance matrix, i.e., $S=V\Lambda V^{T}$.
+
+Consider the following computation using the SVD of $X$
 
 $$
-A^{(k)} =
-\begin{bmatrix}
-\vdots &  \vdots  \\
-\mathbf{u}_1 & \mathbf{u}_{k} \\
-\vdots& \vdots  \\
-\end{bmatrix}
-\begin{bmatrix}
-\sigma_{1} & &    \\
- & \ddots &    \\
-&  & \sigma_{k}  \\
-\end{bmatrix}
-\begin{bmatrix}
-\cdots & \mathbf{v}_1 & \cdots   \\
-\cdots & \mathbf{v}_k & \cdots   \\
-\end{bmatrix}.
+\begin{align*}
+X^{T}X
+= 
+(U\Sigma V^T)^{T}(U\Sigma V^T)
+=
+V\Sigma U^TU \Sigma V^{T}
+= 
+V\Sigma^{2}V^T
+\end{align*}
 $$
 
-:::: {.fragment}
-By forming $A^{(k)}$ we have transformed the data objects that live in an $n$ dimensional space to a $k$ dimensional space, where $k$ is (probably much) smaller than $n$.
-::::
-
-:::: {.fragment}
-This is an example of __dimensionality reduction.__
-::::
-
-:::: {.fragment}
-When we take our data to be the rows of $U\Sigma$ instead of the rows of $A$, we are __reducing the dimension__ of our data from $n$ dimensions to $k$ dimensions.
-::::
-
-:::: {.fragment}
-We will see today that the SVD is the __optimal__ transformation of the data into $k$ dimensions. It is optimal in the sense that it captures the maximum variance in the data.
-::::
-
-::: {.content-visible when-profile="web"}
-An excellent reference for the following section is at this [link](https://liorpachter.wordpress.com/2014/05/26/what-is-principal-component-analysis/).
-
-Some figures and discusion are taken from there.
-:::
-
-::: {.content-visible when-profile="slides"}
-## Dimensionality reduction continued
-:::
-
-In order to better understand how the SVD provides us with this optimal transformation, let's consider the following criterion for a $k$-dimensional transformation:
-
-:::: {.fragment}
-__Find the $k$-dimensional hyperplane that is "closest" to the points.__
-::::
-
-:::: {.fragment}
-More precisely:
-
-Given n points in $\mathbb{R}^n$, find the hyperplane (affine space) of dimension $k$ with the property that the squared distance of the points to their orthogonal projection onto the hyperplane is minimized.
-::::
+We see that eigenvalues $\lambda_i$ of the matrix $S$ are the squares $\sigma_{i}^{2}$ of the singular values $\Sigma$ (scaled by $\frac{1}{n-1}$).
 
 
-::: {.content-visible when-profile="slides"}
-## Dimensionality reduction continued
-:::
+---
 
-![](figs/pca_figure1.jpeg){fig-align="center" width="60%"}
+In practice, PCA is done by computing the SVD of your data matrix as opposed to forming the covariance matrix and computing the eigenvalues. This is for the following reasons
 
-[Source](https://liorpachter.wordpress.com/2014/05/26/what-is-principal-component-analysis/)
+:::: {.incremental}
+- **Numerical Stability**: SVD is a numerically stable method, which means it can handle datasets with high precision and avoid issues related to floating-point arithmetic errors.
+
+- **Efficiency**: SVD is computationally efficient, especially for large datasets. Many optimized algorithms and libraries (like those in NumPy and scikit-learn) leverage SVD for fast computations.
+
+- **Handling Non-Square Matrices**: SVD can be applied directly to non-square matrices, which is useful since the data matrix in PCA is often not square. This flexibility makes SVD a versatile tool for dimensionality reduction.
+
+- **Direct Computation of Principal Components**: SVD directly provides the principal components (right singular vectors) and the singular values, which are related to the explained variance. This makes the process straightforward and avoids the need to compute the covariance matrix explicitly.
 
 ::: {.content-visible when-profile="web"}
-This sounds like an appealing criterion.   
+- **Robustness to Data Scaling**: SVD is less sensitive to the scaling of data compared to other methods. This robustness ensures that the principal components are accurately computed regardless of the data's scale.
 
-But it also turns out to have a strong statistical guarantee.
+- **Memory Efficiency**: For large datasets, SVD can be more memory-efficient. Techniques like truncated SVD can be used to compute only the top principal components, reducing memory usage.
+
+- **Versatility**: SVD is a fundamental linear algebra technique used in various applications beyond PCA, such as signal processing, image compression, and solving linear systems. This versatility makes it a well-studied and widely implemented method.
 :::
-
-::: {.content-visible when-profile="slides"}
-## Dimensionality reduction continued
-
-__Find the $k$-dimensional hyperplane that is "closest" to the points.__
-:::
-
-:::: {.fragment}
-In fact, this criterion is a transformation that captures the maximum __variance__ in the data.
 ::::
 
-:::: {.fragment}
-That is, the resulting $k$-dimensional dataset is the one with maximum variance.
+## Pros and Cons
 
-::::
-
-:::: {.fragment}
-Let's see why this is the case.
-::::
-
-::: {.content-visible when-profile="slides"}
-## Centroid
-:::
-
-First, let's recall the idea of a dataset __centroid.__
-
-:::: {.fragment}
-Given a $m\times n$ data matrix $X$ with observations on the rows (as always) define
-
-$$\bar{\mathbf{x}}^T = \frac{1}{m}\mathbf{1}^TX.$$
-::::
-
-:::: {.fragment}
-The vector $\bar{\mathbf{x}}^T$ is the centroid vector (mean vector) where the $i$-th entry is the average over the $i$-th row.
-::::
-
-:::: {.fragment}
-It is the "center of mass" of the dataset.
-::::
-
-::: {.content-visible when-profile="slides"}
-## Sample variance
-:::
-
-Next, recall the sample variance of a dataset is:
-    
-$$ \operatorname{Var}(X) = \frac{1}{m}\sum_{j=1}^{m}\Vert \mathbf{x}_j^T - \bar{\mathbf{x}}^T\Vert^2 $$
-
-where $\mathbf{x}_j^T$ is row $j$ of $X$.
-
-:::: {.fragment}
-The sample variance of the set of points is the average squared distance from each point to the centroid. 
-::::
-
-:::: {.fragment}
-If we move the points (translate each point by some constant amount), the sample variance does not change.
-::::
-
-::: {.content-visible when-profile="slides"}
-## Sample variance continued
-:::
-
-So, let's move the points to be __centered__ on the __origin.__
-
-$$ \tilde{X} = X - \mathbf{1}\overline{\mathbf{x}}^T $$
-
-:::: {.fragment}
-The sample variance of the new points $\tilde{X}$ is the same as the old points $X$, but the centroid of the new point set is the origin.
-::::
-
-:::: {.fragment}
-Now that the mean of the points is the zero vector, we can reason geometrically.
-::::
-
-::: {.content-visible when-profile="slides"}
-## Centered data
-:::
-
-Here is a picture to show why the distance-minimizing subspace is variance-maximizing.
-
-In this figure,   
+Here are some advantages (left column) and disadvantages (right column) of PCA.
 
 :::: {.columns}
-::: {.column width="40%"}
-* the red point is one example point from $\tilde{X}$, 
-* the green point is the origin / centroid, and
-* the blue point is the $k$-dimensional projection of the red point.
+::: {.column width="50%"}
+**Advantages**
+
++ Allows for visualizations
++ Removes redundant variables
++ Prevents overfitting
++ Speeds up other ML algorithms
 :::
-::: {.column width="60%"}
-![](figs/pca_figure5.jpeg){fig-align="center" width="75%"}
-    
-[Source](https://liorpachter.wordpress.com/2014/05/26/what-is-principal-component-analysis/)
+::: {.column width="50%"}
+**Disadvantages**
+- reduces interpretability
+- can result in information loss
+- can be less effective than non-linear methods
 :::
 ::::
 
-::: {.content-visible when-profile="web"}
-The length of the black line is fixed -- it is the distance of the original point from the origin.
+# t-SNE
 
-So the squared length of the black line is this point's contribution to the sample variance.
+## What is t-SNE?
 
-Now, regardless of how we shift the green line, a right triangle is formed because the projection is orthogonal. 
+- t-SNE stands for **t-Distributed Stochastic Neighbor Embedding**.
+- It is a **non-linear dimensionality reduction technique**.
+- Primarily used for **visualizing high-dimensional data** in 2 or 3 dimensions.
+- Developed by Laurens van der Maaten and Geoffrey Hinton in 2008.
 
-So -- by virtue of the Pythagorean Theorem, the __blue line squared__ plus the __red line squared__ equals the __black line squared.__
 
-Which means that when we shift the subspace (green line) so as to __minimize the squared distances to all the example points__ $\tilde{X}$ (blue lines) we automatically __maximize the squared distance of all the resulting blue points to the origin__ (red lines).
+## How t-SNE Works
 
-And the squared distance of the blue point from the origin (red dashed line) is its contribution to the new $k$-dimensional sample variance.
+- t-SNE converts high-dimensional Euclidean distances into **conditional probabilities**.
+- It aims to preserve the **local structure** of the data.
+- Uses a **heavy-tailed Student-t distribution** in the low-dimensional space to prevent crowding.
 
-In other words, the __distance-minimizing__ projection is the __variance-maximizing__ projection!
-:::
 
-::: {.content-visible when-profile="slides"}
-## Centering data example
-:::
 
-For example, here is a dataset $X$ in $\mathbb{R}^2$.
+## Step 1: Compute Pairwise Similarities
 
-```{python}
-def centerAxes(ax):
-    ax.spines['left'].set_position('zero')
-    ax.spines['right'].set_color('none')
-    ax.spines['bottom'].set_position('zero')
-    ax.spines['top'].set_color('none')
-    ax.xaxis.set_ticks_position('bottom')
-    ax.yaxis.set_ticks_position('left')
-    bounds = np.array([ax.axes.get_xlim(), ax.axes.get_ylim()])
-    ax.plot(bounds[0][0], bounds[1][0], '')
-    ax.plot(bounds[0][1], bounds[1][1], '')
-```
+- Calculate pairwise similarities between points in the high-dimensional space.
+- Use a Gaussian distribution to convert distances into probabilities.
+- The similarity $p_{ij}$ between points $i$ and $j$ is given by:
+  $$
+  p_{ij} = \frac{\exp(-\|x_i - x_j\|^2 / 2\sigma_i^2)}{\sum_{k \neq i} \exp(-\|x_i - x_k\|^2 / 2\sigma_i^2)}.
+  $$
+ - The perplexity parameter controls the effective number of neighbors. 
 
-```{python}
-#| fig-align: center
-import numpy as np
-import matplotlib.pyplot as plt
-n_samples = 500
-C = np.array([[0.1, 0.6], [2., .6]])
-X = np.random.randn(n_samples, 2) @ C + np.array([-6, 3])
-ax = plt.figure(figsize = (6, 6)).add_subplot()
-plt.xlim([-12, 12])
-plt.ylim([-7, 7])
-centerAxes(ax)
-plt.axis('equal')
-plt.scatter(X[:, 0], X[:, 1], s=10, alpha=1)
-plt.show()
-```
 
-::: {.content-visible when-profile="slides"}
-## Centering data example continued
-:::
+## Step 2: Define Low-Dimensional Map
 
-By taking 
-$$
-\tilde{X} = X - \mathbf{1}\bar{\mathbf{x}}^T 
-$$
+- Initialize points randomly in the low-dimensional space.
+- Define a similar probability distribution using a Student-t distribution:
+  $$
+  q_{ij} = \frac{(1 + \|y_i - y_j\|^2)^{-1}}{\sum_{k \neq l} (1 + \|y_k - y_l\|^2)^{-1}}.
+  $$
+- The heavy tails of the Student-t distribution help to spread out the points.
 
-```{python}
-#| fig-align: center
-Xc = X - np.mean(X, axis=0)
-ax = plt.figure(figsize=(6, 5)).add_subplot()
-plt.xlim([-12, 12])
-plt.ylim([-7, 7])
-centerAxes(ax)
-plt.axis('equal')
-plt.scatter(X[:, 0], X[:, 1], s=10, alpha=0.8)
-plt.scatter(Xc[:, 0], Xc[:, 1], s=10, alpha=0.8, color='r')
-plt.show()
-```
 
-we translate each point so that the new mean is the origin.
+## Step 3: Minimize Kullback-Leibler Divergence
 
-::: {.content-visible when-profile="slides"}
-## Centering data example continued
-:::
+- Minimize the Kullback-Leibler (KL) divergence between the high-dimensional and low-dimensional distributions:
+  $$
+  KL(P \| Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}.
+  $$
+- Use gradient descent to iteratively adjust the positions of points in the low-dimensional space.
 
-The last step is to find the $k$-dimensional subspace that minimizes the distance between the data (red points) and their projection on the subspace.
+## Pros of t-SNE
 
-::: {.content-visible when-profile="web"}
-Remember that the $\ell_2$ norm of a vector difference is Euclidean distance.
+- **Excellent for visualizing complex datasets**: Reveals clusters and patterns that are not visible in high-dimensional space.
+- **Captures non-linear relationships**: Preserves local structure and relationships between points.
+- **Preserves local structure effectively**: Ensures that similar points in high-dimensional space remain close in the low-dimensional representation.
 
-:::
+## Cons of t-SNE
 
-:::: {.fragment}
-In other words, what rank $k$ matrix $X^{(k)} \in \mathbb{R}^{m\times k}$ is closest to $\tilde{X}$?
-::::
+- **Computationally intensive**: Requires significant computational resources, especially for large datasets.
+- **Results can vary depending on hyperparameters**: Parameters like perplexity and learning rate can significantly affect the outcome.
+- **Not suitable for all types of data analysis**: Primarily used for visualization, not for tasks like feature extraction or predictive modeling.
 
-:::: {.fragment}
-We seek
+## Case Study: Digits
 
-$$X^{(k)} =\mathop{\arg\min}\limits_{\{B~|~\operatorname{Rank} B = k\}} \Vert \tilde{X}-B\Vert_F.$$
-::::
-
-:::: {.fragment}
-We know how to find this matrix -- as we showed in the last lecture, we obtain it via the SVD!
-::::
-
-::: {.content-visible when-profile="slides"}
-## Centering data example continued
-:::
-
-So for this case, let's construct the best 1-D approximation of the mean-centered data.
-
-```{python}
-Xc = X - np.mean(X, axis=0)
-u, s, vt = np.linalg.svd(Xc, full_matrices=False)
-scopy = s.copy()
-scopy[1] = 0.
-reducedX = u @ np.diag(scopy) @ vt
-```
+Let's consider how t-SNE performs clustering the MNIST digits datset.
 
 ```{python}
 #| fig-align: center
-ax = plt.figure(figsize=(6, 5)).add_subplot()
-centerAxes(ax)
-plt.axis('equal')
-plt.scatter(Xc[:,0], Xc[:,1], color='r')
-plt.scatter(reducedX[:,0], reducedX[:,1])
-endpoints = np.array([[-10], [10]]) @ vt[[0], :]
-plt.plot(endpoints[:, 0], endpoints[:, 1], 'g-')
+from sklearn.manifold import TSNE
+from sklearn import datasets
+
+digits = datasets.load_digits()
+X = digits.data
+y = digits.target
+
+tsne = TSNE(n_components=2, random_state=42)
+X_tsne = tsne.fit_transform(X)
+
+plt.figure(figsize=(7, 7))
+scatter = plt.scatter(X_tsne[:, 0], X_tsne[:, 1], c=y, cmap='tab20', edgecolor='k', s=50)
+plt.title('Digits in t-SNE Space')
+plt.xlabel('tSNE Component 1')
+plt.ylabel('tSNE Component 2')
+
+# Create a legend with discrete labels
+legend_labels = np.unique(y)
+handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=plt.cm.tab20(i / 9), markersize=10) for i in legend_labels]
+plt.legend(handles, legend_labels, title="Digit Label", loc="best")
+
 plt.show()
+
 ```
 
-::: {.content-visible when-profile="slides"}
-## Principal component analysis (PCA)
-:::
+## t-SNE vs PCA: Dimensionality Reduction
 
-This method is called __Principal Component Analysis.__
+- **PCA**: Linear method, reduces dimensions by maximizing variance along principal components.
+- **t-SNE**: Non-linear method, focuses on preserving local structure and relationships between points.
 
-:::: {.fragment}
-In summary, PCA consists of:
 
-:::: {.incremental}
-1. Mean center the data, and
-2. Reduce the dimension of the mean-centered data via SVD.
-::::
-::::
+## t-SNE vs PCA: Visualization
 
-:::: {.fragment}
-This is equivalent to projecting the data onto the hyperplane that captures the maximum variance in the data.
-::::
+- **PCA**: Good for understanding global structure and variance in the data.
+- **t-SNE**: Superior for visualizing clusters, local relationships, and non-linear structures.
 
-:::: {.fragment}
-It winds up constructing the __best low dimensional linear approximation of the data.__
-::::
 
-::: {.content-visible when-profile="slides"}
-## PCA continued
-:::
+## t-SNE vs PCA: Computational Complexity
 
-What are "principal components"?
+- **PCA**: Faster and less computationally intensive, suitable for large datasets.
+- **t-SNE**: Slower, requires more computational resources, but provides more detailed visualizations.
 
-:::: {.fragment}
-These are nothing more than the columns of $U$ (or the rows of $V^T$).  Because they capture the direction of maximum variation, they are called "principal" components.
-::::
+# Recap
 
-## Uses of PCA/SVD
+Today we discussed two dimensionality reduction techniques: PCA and t-SNE.
 
-There are many uses of PCA (and SVD).
+We considered both on the MNIST digits dataset.
 
-We'll cover two use cases:
+In summary
 
-:::: {.incremental}
-1. Visualization
-2. Denoising
-::::
+- PCA is a faster, linear dimensionality reduction technique.
+- PCA captures the maximum amount of variance in each principal direction.
+- No parameter adjustments are needed for the SVD.
+- t-SNE is a powerful tool for reducing and visualizing high-dimensional data.
+- Choose t-SNE for detailed visualizations of local structures and clusters.
+- t-SNE is sensitive to changes in it's parameters.
+- Both methods have their own strengths and are chosen based on the specific needs of the analysis.
 
-:::: {.fragment}
-As already mentioned, SVD is also useful for data compression -- we won't discuss it in detail, but it is the principle behind audio and video compression (MP3s, HDTV, etc).
-
-SVD is also useful for anomaly detection, though we won't cover it here.
-::::
-
-## Visualization and Denoising -- Extended Example
-
-We will study both visualization and denoising in the context of text processing.
-
-:::: {.fragment}
-As we have seen, a common way to work with documents is using the bag-of-words model (perhaps considering n-grams), which results in a term-document matrix.
-::::
-
-:::: {.fragment}
-Entries in the matrix are generally TF-IDF scores.
-::::
-
-:::: {.fragment}
-Often, terms are correlated -- they appear together in combinations that suggest a certain "concept".
-::::
-
-:::: {.fragment}
-That is, term-document matrices often show low effective rank -- many columns can be approximated as combinations of other columns.
-::::
-
-:::: {.fragment}
-When PCA is used for dimensionality reduction of documents, it tends to to extract these "concept" vectors.
-::::
-
-:::: {.fragment}
-The application of PCA to term-document matrices is called __Latent Semantic Analysis (LSA).__
-::::
-
-::: {.content-visible when-profile="web"}
-Among other benefits, LSA can improve the performance of clustering of documents.
-
-This happens because the important concepts are captured in the most significant principal components.
-:::
-
-## Data: 20 Newsgroups
-
-```{python}
-#| code-fold: false
-from sklearn.datasets import fetch_20newsgroups
-
-categories = ['comp.os.ms-windows.misc', 'sci.space', 'rec.sport.baseball']
-news_data = fetch_20newsgroups(subset='train', categories=categories)
-
-print(news_data.target_names)
-print(news_data.target)
-```
-
-::: {.content-visible when-profile="web"}
-### Basic Clustering
-:::
-
-::: {.content-visible when-profile="slides"}
-## Basic Clustering
-:::
-
-To get started, let's compute tf-idf scores.
-
-Notice that we will let the tokenizer compute $n$-grams for $n=1$ and $n=2$.  
-
-An $n$-gram is a set of $n$ consecutive terms.
-
-We'll compute a document-term matrix `dtm`.
-
-```{python}
-#| code-fold: false
-from sklearn.feature_extraction.text import TfidfVectorizer
-
-vectorizer = TfidfVectorizer(stop_words='english', min_df=4, max_df=0.8)
-dtm = vectorizer.fit_transform(news_data.data)
-
-print("Type of dtm: ", type(dtm))
-print("Shape of dtm: ", dtm.shape)
-terms = vectorizer.get_feature_names_out()
-```
-
-::: {.content-visible when-profile="slides"}
-## Basic Clustering continued
-:::
-
-As a comparison case, let's first cluster the documents using the raw tf-idf scores.
-
-This is without any use of PCA, and so includes lots of noisy or meaningless terms.
-
-```{python}
-#| code-fold: false
-from sklearn.cluster import KMeans
-k = 3
-kmeans = KMeans(n_clusters=k, init='k-means++', max_iter=100, n_init=10, random_state = 0)
-kmeans.fit_predict(dtm)
-centroids = kmeans.cluster_centers_
-labels = kmeans.labels_
-error = kmeans.inertia_
-```
-
-::: {.content-visible when-profile="slides"}
-## Basic Clustering continued
-:::
-Let's evaluate the clusters.  We'll assume that the newgroup the article came from is the 'ground truth.'
-
-```{python}
-#| code-fold: false
-import sklearn.metrics as metrics
-ri = metrics.adjusted_rand_score(labels, news_data.target)
-ss = metrics.silhouette_score(dtm, kmeans.labels_, metric='euclidean')
-
-print('Rand Index is {}'.format(ri))
-print('Silhouette Score is {}'.format(ss))
-```
-
-::: {.content-visible when-profile="web"}
-### Improvement: Stemming
-:::
-
-::: {.content-visible when-profile="slides"}
-## Improvement: Stemming
-:::
-
-One source of noise that we can eliminate (before we use LSA) comes from word endings.
-
-:::: {.fragment}
-For example: a Google search on 'run' will return web pages on 'running.'
-::::
-
-:::: {.fragment}
-This is useful, because the difference between 'run' and 'running' in practice is not enough to matter.
-::::
-
-:::: {.fragment}
-The usual solution taken is to simply 'chop off' the part of the word that indicates a variation from the base word.
-::::
-
-::: {.content-visible when-profile="web"}
-(For those of you who studied Latin or Greek, this will sound familiar -- we are removing the 'inflection.')
-:::
-
-:::: {.fragment}
-The process is called 'stemming.'
-::::
-
-:::: {.fragment}
-A very good stemmer is the "Snowball" stemmer.
-::::
-
-::: {.content-visible when-profile="web"}
-You can read more at http://www.nltk.org and http://www.nltk.org/howto/stem.html.
-
-Installation Note: From a cell you need to call `nltk.download()` and select the appropriate packages from the interface that appears. In particular you need to download: `stopwords` from _corpora_ and `punkt` and `snowball_data` from _models._
-:::
-
-::: {.content-visible when-profile="slides"}
-## Stemming continued
-:::
-Let's stem the data using the Snowball stemmer:
-
-```{python}
-#| code-fold: false
-#| output: false
-import nltk
-nltk.download('punkt')
-nltk.download('punkt_tab')
-nltk.download('stopwords')
-nltk.download('snowball_data')
-nltk.download('wordnet')
-from nltk.stem.snowball import SnowballStemmer
-from nltk.tokenize import word_tokenize, sent_tokenize
-
-stemmed_data = [" ".join(SnowballStemmer("english", ignore_stopwords=True).stem(word)  
-         for sent in sent_tokenize(message)
-        for word in word_tokenize(sent))
-        for message in news_data.data]
-
-dtm = vectorizer.fit_transform(stemmed_data)
-terms = vectorizer.get_feature_names_out()
-```
-
-::: {.content-visible when-profile="slides"}
-## Clustering with stemming
-:::
-And now let's see how well we can cluster on the stemmed data.
-
-```{python}
-#| code-fold: false
-from sklearn.cluster import KMeans
-import sklearn.metrics as metrics
-
-k = 3
-kmeans = KMeans(n_clusters=k, init='k-means++', max_iter=100, n_init=10,random_state=0)
-kmeans.fit_predict(dtm)
-centroids = kmeans.cluster_centers_
-labels = kmeans.labels_
-error = kmeans.inertia_
-
-ri = metrics.adjusted_rand_score(labels, news_data.target)
-ss = metrics.silhouette_score(dtm, kmeans.labels_, metric='euclidean')
-print('Rand Index is {}'.format(ri))
-print('Silhouette Score is {}'.format(ss))
-```
-
-So the Rand Index went from 0.86 to 0.90 as a result of stemming.
-
-## Demonstrating PCA
-
-::: {.content-visible when-profile="web"}
-OK.  Now, let's apply PCA.
-:::
-
-Our data matrix `dtm` is in sparse form.
-
-:::: {.fragment}
-First, we mean center the data. Note that when `dtm` is mean centered it is no longer sparse.
-::::
-
-:::: {.fragment}
-Then we use PCA to reduce the dimension of the mean-centered data.
-::::
-
-:::: {.fragment}
-```{python}
-dtm_dense = dtm.todense()
-centered_dtm = dtm_dense - np.mean(dtm_dense, axis=0)
-u, s, vt = np.linalg.svd(centered_dtm)
-```
-::::
-
-:::: {.fragment}
-Note that if you have sparse data, you may want to use `scipy.sparse.linalg.svds()` and for large data it may be advantageous to use `sklearn.decomposition.TruncatedSVD()`.
-::::
-
-:::: {.fragment}
-The principal components (rows of $V^T$) encode the extracted concepts.
-::::
-
-::: {.content-visible when-profile="slides"}
-## Demonstrating PCA continued
-:::
-
-Each LSA __concept__ is a linear combination of words.
-
-```{python}
-import pandas as pd
-pd.DataFrame(vt, columns=vectorizer.get_feature_names_out())
-```
-
-```{python}
-names = np.array(vectorizer.get_feature_names_out())
-for cl in range(3):
-    print(f'\nPrincipal Component {cl}:')
-    idx = np.array(np.argsort(vt[cl]))[0][-10:]
-    for i in idx[::-1]:
-        print(f'{names[i]:12s} {vt[cl, i]:0.3f}')
-```
-
-The rows of $U$ correspond to documents, which are linear combinations of __concepts__.
-
-## Denoising
-
-In order to improve our clustering accuracy, we will __exclude__ the less significant concepts from the documents' feature vectors.
-
-That is, we will choose the leftmost $k$ columns of $U$ and the topmost $k$ rows of $V^T$.  
-
-The reduced set of columns of $U$ are our new document encodings, and it is those that we will cluster.
-
-::: {.content-visible when-profile="slides"}
-## Denoising continued
-:::
-```{python}
-plt.xlim([0, 50])
-plt.xlabel('Number of Principal Components (Rank $k$)')
-plt.ylabel('Singular Values')
-plt.plot(range(1, len(s)+1), s)
-plt.show()
-```
-
-::: {.content-visible when-profile="slides"}
-## Denoising continued
-:::
-```{python}
-ri = []
-ss = []
-max = len(u)
-for k in range(1, 50):
-    vectorsk = np.asarray(u[:, :k] @ np.diag(s[:k]))
-    kmeans = KMeans(n_clusters=3, init='k-means++', max_iter=100, n_init=10, random_state=0)
-    kmeans.fit_predict(vectorsk)
-    labelsk = kmeans.labels_
-    ri.append(metrics.adjusted_rand_score(labelsk, news_data.target))
-    ss.append(metrics.silhouette_score(vectorsk, kmeans.labels_, metric='euclidean'))
-
-plt.plot(range(1, 50), ri)
-plt.ylabel('Rand Score', size=20)
-plt.xlabel('No of Prin Comps', size=20)
-plt.show()
-```
-
-::: {.content-visible when-profile="slides"}
-## Denoising continued
-:::
-```{python}
-plt.plot(range(1, 50), ss)
-plt.ylabel('Silhouette Score', size=20)
-plt.xlabel('No of Prin Comps', size=20)
-plt.show()
-```
-
-Note that we can get good accuracy and coherent clusters with just __two__ principal components.
-
-## Visualization
-
-That's a good thing, because it means that we can also __visualize__ the data well with the help of PCA.
-
-Recall that the challenge of visualization is that the data lives in a high dimensional space.  
-
-We can only look at 2 (or maybe 3) dimensions at a time, so it's not clear __which__ dimensions to look at.
-
-The idea behind using PCA for visualization is that since low-numbered principal components capture most of the __variance__ in the data, these are the "directions" from which it is most useful to inspect the data.
-
-We saw that the first two principal components were particularly large -- let's start by using them for visualization.
-
-::: {.content-visible when-profile="slides"}
-## Visualization continued
-:::
-```{python}
-#| fig-align: center
-import seaborn as sns
-Xk = u @ np.diag(s)
-with sns.axes_style("white"):
-    fig, ax = plt.subplots(1, 1,figsize=(5, 3))
-    cmap = sns.hls_palette(n_colors=3, h=0.35, l=0.4, s=0.9)
-    for i, label in enumerate(set(news_data.target)):
-        point_indices = np.where(news_data.target == label)[0]
-        point_indices = point_indices.tolist()
-        plt.scatter(np.ravel(Xk[point_indices, 0]), np.ravel(Xk[point_indices, 1]), s=20, alpha=0.5, color=cmap[i], marker='D', label=news_data.target_names[i])
-        plt.legend(loc='best')
-sns.despine()
-plt.title('Ground Truth Labels', size=20)
-plt.show()
-```
-
-Points in this plot have been labelled with their "true" (aka "ground truth") cluster labels.
-
-Notice how clearly the clusters separate and how coherently they present themselves. This is an excellent visualization that is provided by PCA.
-
-Since this visualization is so clear, we can use it to examine the results of our various clustering methods and get some insight into how they differ.
-
-```{python}
-#| fig-align: center
-k = 3
-kmeans = KMeans(n_clusters=k, init='k-means++', max_iter=100, n_init=10, random_state=0)
-kmeans.fit_predict(dtm)
-centroids = kmeans.cluster_centers_
-labels = kmeans.labels_
-error = kmeans.inertia_
-
-with sns.axes_style("white"):
-    fig, ax = plt.subplots(1, 1, figsize=(5, 3))
-    cmap = sns.hls_palette(n_colors=3, h=0.35, l=0.4, s=0.9)
-    for i in range(k):
-        point_indices = np.where(labels == i)[0]
-        point_indices = point_indices.tolist()
-        plt.scatter(np.ravel(Xk[point_indices, 0]), np.ravel(Xk[point_indices, 1]), s=20, alpha=0.5, color=cmap[i], marker='D', label=news_data.target_names[i])
-sns.despine()
-plt.title('Clusters On Full Dataset, Dimension = {}\nRand Score = {:0.3f}'.format(dtm.shape[1], metrics.adjusted_rand_score(labels,news_data.target)), size=20)
-plt.show()
-```
-
-```{python}
-#| fig-align: center
-k = 3
-kmeans = KMeans(n_clusters=k, init='k-means++', max_iter=100, n_init=10,random_state=0)
-kmeans.fit_predict(np.asarray(Xk[:, :2]))
-centroids = kmeans.cluster_centers_
-Xklabels = kmeans.labels_
-error = kmeans.inertia_
-
-with sns.axes_style("white"):
-    fig, ax = plt.subplots(1, 1, figsize=(5, 3))
-    cmap = sns.hls_palette(n_colors=3, h=0.35, l=0.4, s=0.9)
-    for i, label in enumerate(set(news_data.target)):
-        point_indices = np.where(Xklabels == label)[0]
-        point_indices = point_indices.tolist()
-        plt.scatter(np.ravel(Xk[point_indices, 0]), np.ravel(Xk[point_indices, 1]), s=20, alpha=0.5, color=cmap[i], marker='D')
-sns.despine()
-plt.title('Clusters On PCA-reduced Dataset, Dimension = 2\nRand Score = {:0.3f}'.format(metrics.adjusted_rand_score(Xklabels, news_data.target)), size=20)
-plt.show()
-```
-
-```{python}
-#| fig-align: center
-plt.figure(figsize=(5, 3))
-plt.subplot(121)
-cmap = sns.hls_palette(n_colors=3, h=0.35, l=0.4, s=0.9)
-for i in range(k):
-        point_indices = np.where(labels == i)[0]
-        point_indices = point_indices.tolist()
-        plt.scatter(np.ravel(Xk[point_indices, 0]), np.ravel(Xk[point_indices, 1]), s=20, alpha=0.5, color=cmap[i], marker='D')
-sns.despine()
-plt.title('Dimension = {}\nRand Score = {:0.3f}'.format(dtm.shape[1], metrics.adjusted_rand_score(labels, news_data.target)), size=14)
-plt.subplot(122)
-cmap = sns.hls_palette(n_colors=3, h=0.35, l=0.4, s=0.9)
-for i in range(k):
-        point_indices = np.where(Xklabels == i)[0]
-        point_indices = point_indices.tolist()
-        plt.scatter(np.ravel(Xk[point_indices, 0]), np.ravel(Xk[point_indices, 1]), s=20, alpha=0.5, color=cmap[i], marker='D')
-sns.despine()
-plt.title('Dimension = 2\n Rand Score = {:0.3f}'.format(metrics.adjusted_rand_score(Xklabels, news_data.target)), size=14)
-plt.subplots_adjust(hspace=1.2)
-plt.show()
-```
-::: {.content-visible when-profile="slides"}
-## Visualization continued
-:::
-What happens if we misjudge the number of clusters?  Let's form 6 clusters.
-
-```{python}
-#| fig-align: center
-k = 6
-kmeans = KMeans(n_clusters=k, init='k-means++', max_iter=100, n_init=10, random_state=0)
-kmeans.fit_predict(dtm)
-centroids = kmeans.cluster_centers_
-labels = kmeans.labels_
-error = kmeans.inertia_
-
-with sns.axes_style("white"):
-    fig, ax = plt.subplots(1, 1, figsize=(5, 3))
-    cmap = sns.hls_palette(n_colors=k, h=0.35, l=0.4, s=0.9)
-    for i in range(k):
-        point_indices = np.where(labels == i)[0]
-        point_indices = point_indices.tolist()
-        plt.scatter(np.ravel(Xk[point_indices, 0]), np.ravel(Xk[point_indices, 1]), s=20, alpha=0.5, color=cmap[i], marker='D')
-    sns.despine()
-plt.title('Clusters On Full Dataset, Dimension = {}'.format(dtm.shape[1]),size=20)
-    
-plt.title(f'K means with six clusters on full dataset; Rand Score {metrics.adjusted_rand_score(labels,news_data.target):0.2f}')
-plt.show()
-```
-
-```{python}
-#| fig-align: center
-k = 6
-npc = 5
-kmeans = KMeans(n_clusters=k, init='k-means++', max_iter=100, n_init=10,random_state=0)
-kmeans.fit_predict(np.asarray(Xk[:, :npc]))
-centroids = kmeans.cluster_centers_
-labels = kmeans.labels_
-error = kmeans.inertia_
-
-with sns.axes_style("white"):
-    fig, ax = plt.subplots(1, 1, figsize=(5, 3))
-    cmap = sns.hls_palette(n_colors=k, h=0.35, l=0.4, s=0.9)
-    for i in range(k):
-        point_indices = np.where(labels == i)[0]
-        point_indices = point_indices.tolist()
-        plt.scatter(np.ravel(Xk[point_indices, 0]), np.ravel(Xk[point_indices, 1]), s=20, alpha=0.5, color=cmap[i], marker='D')
-    sns.despine()
-
-plt.title(f'K means with six clusters on {npc} principal components; Rand Score {metrics.adjusted_rand_score(labels,news_data.target):0.2f}')
-plt.show()
-```
-
-::: {.content-visible when-profile="slides"}
-## Visualization continued
-:::
-What about the other principal components?   Are they useful for visualization?
-
-A common approach is to look at all pairs of (low-numbered) principal components, to look for additional structure in the data.
-
-```{python}
-#| fig-align: center
-k = 5
-Xk = u[:, :k] @ np.diag(s[:k])
-X_df = pd.DataFrame(Xk)
-g = sns.PairGrid(X_df)
-def pltColor(x, y, color):
-    cmap = sns.hls_palette(n_colors=3, h=0.35, l=0.4, s=0.9)
-    for i in range(3):
-        point_indices = np.where(news_data.target == i)[0]
-        point_indices = point_indices.tolist()
-        plt.scatter(x[point_indices], y[point_indices], color=cmap[i], s=3)
-sns.despine()
-g.map(pltColor)
-plt.show()
-```
-
-## t-SNE
-
+---
