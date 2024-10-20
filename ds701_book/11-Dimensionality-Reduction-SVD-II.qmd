@@ -565,8 +565,10 @@ Here are some advantages (left column) and disadvantages (right column) of PCA.
 
 - t-SNE converts high-dimensional Euclidean distances into **conditional probabilities**.
 - It aims to preserve the **local structure** of the data.
-- Uses a **heavy-tailed Student-t distribution** in the low-dimensional space to prevent crowding.
+- Uses a **heavy-tailed Student-t distribution** in the low-dimensional space to prevent crowding. This is where the $t$ in $t$-SNE comes from.
 
+
+We will describe how this process works.
 
 
 ## Step 1: Compute Pairwise Similarities
@@ -575,9 +577,54 @@ Here are some advantages (left column) and disadvantages (right column) of PCA.
 - Use a Gaussian distribution to convert distances into probabilities.
 - The similarity $p_{ij}$ between points $i$ and $j$ is given by:
   $$
-  p_{ij} = \frac{\exp(-\|x_i - x_j\|^2 / 2\sigma_i^2)}{\sum_{k \neq i} \exp(-\|x_i - x_k\|^2 / 2\sigma_i^2)}.
+  p_{j\vert i} = \frac{\exp(-\|x_i - x_j\|^2 / 2\sigma_i^2)}{\sum_{k \neq i} \exp(-\|x_i - x_k\|^2 / 2\sigma_i^2)}.
   $$
- - The perplexity parameter controls the effective number of neighbors. 
+ - The $p_{j\vert i}$ value represents the conditional probability that point $x_i$ would choose $x_j$ as its neighbor. 
+ - Note that $p_{i\vert i} = 0$.
+ - The t-SNE method uses the quantities $p_{ij} = \frac{p_{j\vert i} + p_{i\vert j}}{2d}$ where $d$ is the dimension of the point. This is because the probabilities $p_{j\vert i}$ and $p_{i\vert j}$ are different.
+
+## Visualizing the Pairwise Similarities
+
+The Gaussian distribution is centered at point $x_i$ and the points $x_j$ that are further away have less probability of being chosen as neighbor.
+
+```{python}
+#| fig-align: center
+mean = 0
+std_dev = 1
+x = np.linspace(-5, 5, 1000)
+y = (1/(std_dev * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((x - mean) / std_dev)**2)
+
+# Points on the x-axis
+points_x = [0, 1, 4, 4.5]
+points_y = [0, 0, 0, 0]
+colors = ['#009E73', '#009E73', '#CC79A7', '#CC79A7']
+
+# Create the plot
+plt.plot(x, y, label='Gaussian Distribution')
+plt.scatter(points_x, points_y, color=colors, zorder=5)
+
+# Add labels and title
+plt.xlabel('X-axis')
+plt.ylabel('Probability Density')
+plt.title('Gaussian Distribution with Individual Points')
+plt.legend()
+
+# Show the plot
+plt.show()
+```
+
+## Choosing $\sigma$
+
+How do we determine the variance for the Gaussian?
+
+- The variance is determined by a hyperparameter called the **perplexity**.
+- As a result the perplexity controls the effective number of neighbors. 
+- A high perplexity means more neighbors for each point. A low perplexity means less neighbors are considered for each point.
+- The perplexity is defined as $\operatorname{Perp}(P_i) = 2^{H(P_i)}$, where $H(P_i)$ is the entropy of $P_i$. $P_i$ is the probability distribution induced by $\sigma_i$.
+- The entropy $H(P_i) = -\sum_j p_{j\vert i} \log_2{(p_{j\vert i})}$.
+- The value for $\sigma_i$ is computed to produce a distribution $P_i$ which equals the chosen value of the perplexity. 
+
+The perplexity commonly ranges  between 5 and 50.
 
 
 ## Step 2: Define Low-Dimensional Map
@@ -587,7 +634,39 @@ Here are some advantages (left column) and disadvantages (right column) of PCA.
   $$
   q_{ij} = \frac{(1 + \|y_i - y_j\|^2)^{-1}}{\sum_{k \neq l} (1 + \|y_k - y_l\|^2)^{-1}}.
   $$
-- The heavy tails of the Student-t distribution help to spread out the points.
+- The heavy tails of the Student-t distribution help to spread out the points and prevent crowding of the points in the lower dimensional space.
+
+---
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import t
+
+# Generate data for Gaussian distribution
+mean = 0
+std_dev = 1
+x = np.linspace(-5, 5, 1000)
+gaussian_y = (1/(std_dev * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((x - mean) / std_dev)**2)
+
+# Generate data for Student's t-distribution with 10 degrees of freedom
+df = 1
+t_y = t.pdf(x, df)
+
+# Create the plot
+plt.plot(x, gaussian_y, label='Gaussian Distribution')
+plt.plot(x, t_y, label="Student's t-Distribution", linestyle='dashed')
+
+# Add labels and title
+plt.xlabel('X-axis')
+plt.ylabel('Probability Density')
+plt.title('Gaussian Distribution and Student\'s t-Distribution')
+plt.legend()
+
+# Show the plot
+plt.show()
+
+```
 
 
 ## Step 3: Minimize Kullback-Leibler Divergence
@@ -596,7 +675,10 @@ Here are some advantages (left column) and disadvantages (right column) of PCA.
   $$
   KL(P \| Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}.
   $$
-- Use gradient descent to iteratively adjust the positions of points in the low-dimensional space.
+- THe KL divergence measures how different the distribution $P$ is from the distribution $Q$. In other words, how different are each of the higher dimensional $P_i$ point distributions from the lower dimensional $Q_i$ distributions.
+- By minimizing this function, we ensure that the lower dimensional point clusters are similar to the higher dimensional clusters.
+- To minimize the KL divergence we use gradient descent to iteratively adjust the positions of points in the low-dimensional space.
+
 
 ## Pros of t-SNE
 
