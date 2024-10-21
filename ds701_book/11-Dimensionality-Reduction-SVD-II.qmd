@@ -26,7 +26,7 @@ We have seen some of these challenges already, in particular:
 - the curse of dimensionality, where data points become sparse in higher dimensions and distance metrics have less meaning,
 - overfitting, where high-dimensional data can lead models becoming overly complex and fitting to noise in the data as opposed to the actual signal,
 - computational complexity, high-dimensional data requires more computing power and memory,
-- visualization, where high-dimensional data makes understanding and interpreting the data difficult our data.
+- visualization, where high-dimensional data makes understanding and interpreting the data difficult.
 ::::
 --- 
 
@@ -51,11 +51,13 @@ t-SNE is an alternative nonlinear method for dimensionality reduction.
 
 ## Dimensionality Reduction 
 
-Input: $\mathbf{x}_1,\ldots, \mathbf{x}_m$ with  $\mathbf{x}_i \in \mathbb{R}^n \: \: \forall \: i \in \{1, \ldots, n\}.$
+Input: $\mathbf{x}_1,\ldots, \mathbf{x}_m$ with  $\mathbf{x}_i \in \mathbb{R}^n \: \: \forall \: i \in \{1, \ldots, n\}.$ 
 
 Output: $\mathbf{y}_1,\dots, \mathbf{y}_m$  with  $\mathbf{y}_i \in \mathbb{R}^d \: \: \forall \: i \in \{1, \dots, n\}$. 
 
 The goal is to compute the new data points $\mathbf{y}_i$ such that <font color="red"> $d << n$ </font> while still preserving the most information contained in the data points $\mathbf{x}_i$.
+
+Be aware that row i of the data matrix $X_0$ is the $n$ dimensional vector $\mathbf{x}_i$. This keeps our matrix in the structure $m$ data rows and $n$ features (columns). The same is true for $Y$ (i.e., there are $m$ rows with $d$ features).
 
 $$
 X_0 = 
@@ -80,20 +82,22 @@ We consider a dataset from @novembre2008genes. The authors collected DNA data ca
 
 SNPs describe the changes in DNA from a common base pair (A,T,C,G). A value of 0 means no changes to the base pair, a value of 1 means 1 change to the base pair, and a value of 2 means both base pairs change.
 
-The data for each individual consisted of approximately 500k SNPs.
+The data for each individual consisted of approximately 500k SNPs. This means the data matrix we are working with is 3000 x 500k.
 
 ---
 
-The authors performed PCA and plotted 1387 of the individuals in the reduced dimensions.
+The authors performed PCA and plotted 1387 of the individuals in the reduced dimensions. 
 
 ![Image Credit @novembre2008genes](figs/PCA_genes_Europe.png)
+
+For comparison, a color coded map of western Europe is added and the same color coding was applied to the data samples by country of origin.
 
 ---
 
 Key observations:
 
 :::: {.incremental}
-- the first principal components of the data almost reproduce the map of Europe
+- the first principal components of the data almost reproduce the map of Europe, i.e., they appear to correspond to latitude and longitude.
 - SNPs are similar geographically
 - DNA of an individual reveals their birthplace within a few hundred kilometers
 ::::
@@ -103,6 +107,12 @@ Would a similar study in the USA be effective?
 ::::
 
 ## PCA Steps
+
+The following is an outline of the procedure for performing PCA and determining the principal components. 
+
+After this outline, we will present how to actually compute the principal components.
+
+---
 
 Input: $X_0\in\mathbb{R}^{m\times n}$
 
@@ -125,7 +135,7 @@ Output: $Y\in\mathbb{R}^{m\times d}$ with $d << n$.
 
 ---
 
-2. Find the direction of the largest variance. This is the first principal component (PC1).
+2. Find the direction of the largest variance. This is the first principal component (PC1). 
 
 3. From the $d-1$ directions orthogonal to PC1, find the one with the largest variance. This is the second principal component (PC2).
 
@@ -160,8 +170,7 @@ $$
 S = \frac{1}{m-1}X^{T}X
 $$
 
-Example:
-Example:     
+Example:   
 $$
 X = \begin{bmatrix}
 5 & 0 & -5\\
@@ -188,7 +197,7 @@ $$
 
 Observe that the matrix $S$ is symmetric, i.e., $S = S^{T}.$
 
-Every real symmetric matrix $S$ has the factorization $V\Lambda V^{T}$, where $\Lambda$ is a diagonal matrix that contains the eigenvalues of S and teh columns of $V$ are orthogonal eigenvectors of $S$.
+Every real symmetric matrix $S$ has the factorization $V\Lambda V^{T}$, where $\Lambda$ is a diagonal matrix that contains the eigenvalues of S and the columns of $V$ are orthogonal eigenvectors of $S$.
 
 You can refresh your memory about this in the [Linear Algebra Refresher](04-Linear-Algebra-Refresher.qmd).
 
@@ -220,15 +229,58 @@ with $S\mathbf{v}_i = \lambda_i \mathbf{v}_i$ and $\mathbf{v}_i \perp \mathbf{v}
 
 ## Essentials of PCA
 
-- The columns of $V$ are the principal directions (or components).
+- The columns of $V$ are the principal directions (or components). 
 - The principal components are the projection of the data into principal directions: $XV$.
 - The total variance $T$ in the data is the sum of all eigenvalues: $T = \lambda_1 + \lambda_2 + \dots + \lambda_n.$
 - The first eigenvector $\mathbf{v}_1$ points in the most significant direction of the data. This direction explains the largest fraction $\lambda_1/T$ of the total variance.
 - The second eigenvector $\mathbf{v}_2$ accounts for a smaller fraction $\lambda_2/T$.
 
-## Case Study: Weight and Height
+---
 
-Let's consider some randomly generated data consisting of 2 features, height and weight.
+Recalling the outline of our PCA steps, we see that steps 2-4 are accomplished by computing the eigen-decomposition of the covariance matrix $S = \frac{1}{m-1}X^T X = V\Lambda V^{T}$.
+
+Step 5 is accomplished by computing $XV$.
+
+---
+
+Recall our example
+$$X 
+= \begin{bmatrix}
+  5 & 0 & -5\\
+-5 & 0 & 5 \end{bmatrix}, 
+\quad
+S = 
+\begin{bmatrix}
+50 & 0 & -50\\
+0 & 0 & 0\\
+-50 & 0 & 50 
+\end{bmatrix}
+$$
+
+Eigenvalues of $S$: $\lambda_1 = 100, \: \lambda_2 = \lambda_3 =0$
+
+Eigenvectors of $S$:
+$$
+\mathbf{v}_1 = 
+\begin{bmatrix}
+0.7071 \\ 0 \\  -0.7071
+\end{bmatrix}, \:
+\mathbf{v}_2 = \begin{bmatrix}
+0.7071 \\ 0 \\  0.7071
+\end{bmatrix}, \:
+\mathbf{v}_3 = \begin{bmatrix}
+0 \\ 1 \\ 0
+\end{bmatrix}$$
+
+What is the value of the total variance in the data?
+
+:::: {.fragment}
+Total variance: $T = 100$
+::::
+
+## Case Study: Random Data
+
+Let's consider some randomly generated data consisting of 2 features. We
 
 ```{python}
 #| fig-align: center
@@ -237,56 +289,55 @@ import matplotlib.pyplot as plt
 
 rng = np.random.default_rng(seed=42)
 
-height = rng.normal(loc=173, scale=6.35, size = 100)
-weight = rng.normal(loc=90, scale=10, size = 100)
+import numpy as np
 
-X0 = np.stack((height, weight), axis=-1)
+# Set the seed for reproducibility
+seed = 42
+rng = np.random.default_rng(seed)
 
-X = X0-X0.mean(axis=0)
+n_samples = 500
+C = np.array([[0.1, 0.6], [2., .6]])
+X0 = rng.standard_normal((n_samples, 2)) @ C + np.array([-6, 3])
+X = X0 - X0.mean(axis=0)
 
 plt.scatter(X[:, 0], X[:, 1])
-plt.title("Height vs. Weight mean centered")
-plt.xlabel("Height in cm")
-plt.ylabel("Weight in kg")
+plt.axis('equal')
 plt.show()
 ```
 
 ---
 
-Let's do PCA and plot the principle components over our dataset.
+Let's do PCA and plot the principle components over our dataset. As expected, the principal components are orthogonal and point in the directions of the maximum variance.
 
 ```{python}
 #| fig-align: center
+
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
 
-pca = PCA(n_components=2)
-principal_components = pca.fit_transform(X)
+origin = [0, 0]
 
-plt.scatter(X[:, 0], X[:, 1], label='Original Data')
-origin = np.array([0, 0])
-for i, component in enumerate(pca.components_):
-    plt.arrow(origin[0], origin[1], 5*component[0], 20*component[1], 
-              color=['#D55E00', '#009E73'][i], width=0.2, head_width=0.35, label=f'PC{i+1}')
-plt.legend()
-plt.title("Height vs. Weight mean centered")
-plt.xlabel("Height in cm")
-plt.ylabel("Weight in kg")
-plt.show()
-```
+# Compute the covariance matrix
+cov_matrix = np.cov(X, rowvar=False)
 
----
+# Calculate the eigenvalues and eigenvectors
+eigenvalues, eigenvectors = np.linalg.eigh(cov_matrix)
 
-We can also plot the data in our transformed space.
+# Sort the eigenvalues and eigenvectors in descending order
+sorted_indices = np.argsort(eigenvalues)[::-1]
+eigenvalues = eigenvalues[sorted_indices]
+eigenvectors = eigenvectors[:, sorted_indices]
 
+# Plot the original dataset
+plt.scatter(X[:, 0], X[:, 1], alpha=0.2)
 
-```{python}
-#| fig-align: center
-plt.scatter(principal_components[:, 0], principal_components[:, 1], color="#CC79A7")
-plt.title("Transformed Height and Weight Data")
-plt.xlabel("PC1")
-plt.ylabel("PC2")
+# Plot the principal components
+for i in range(len(eigenvalues)):
+    plt.quiver(origin[0], origin[1], -eigenvectors[0, i], -eigenvectors[1, i],
+               angles='xy', scale_units='xy', scale=1, color=['r', 'g'][i])
+
+plt.title('Principal Components on Original Dataset')
+plt.axis('equal')
 plt.show()
 ```
 
@@ -310,7 +361,7 @@ plt.show()
 
 ---
 
-We first vectorize each digit and perform PCA on the 64-D representation of the digits.
+We first stack the columns of each digit on top of each other (this operation is called vectorizing) and perform PCA on the 64-D representation of the digits.
 
 We can plot the explained variance ratio and the total explained variance ratio.
 
@@ -327,7 +378,8 @@ X_pca = pca.fit_transform(X)
 # Create subplots
 fig, axs = plt.subplots(2, 1, figsize=(6, 5))
 
-# Scree plot (explained variance ratio)
+# Scree plot (graph of eigenvalues corresponding to PC number)
+# This shows the explained variance ratio
 axs[0].plot(np.arange(1, len(pca.explained_variance_ratio_) + 1), pca.explained_variance_ratio_, marker='o', linestyle='--')
 axs[0].set_title('Scree Plot')
 axs[0].set_xlabel('Principal Component')
