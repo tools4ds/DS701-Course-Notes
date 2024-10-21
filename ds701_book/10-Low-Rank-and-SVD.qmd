@@ -25,12 +25,12 @@ We will see how the SVD is used for
 
 ## Singular Vectors and Values
 
-For $A\in\mathbb{R}^{m\times n}$ with $m>n$ and rank $r$,
+For $A\in\mathbb{R}^{m\times n}$ with $m>n$ and rank $k$,
 there exists a set of orthogonal vectors $\{\mathbf{v}_1, \mathbf{v}_2, \dots, \mathbf{v}_n\}$ 
 and a set of orthogonal vectors $\{\mathbf{u}_1, \mathbf{u}_2, \dots, \mathbf{u}_m\}$ such that
 
 $$
-A\mathbf{v}_1 = \sigma_1 \mathbf{u}_1 \cdots A\mathbf{v}_r = \sigma_r \mathbf{u}_r \quad\quad A\mathbf{v}_{r+1} = 0 \cdots A\mathbf{v}_n = 0
+A\mathbf{v}_1 = \sigma_1 \mathbf{u}_1 \cdots A\mathbf{v}_k = \sigma_k \mathbf{u}_k \quad\quad A\mathbf{v}_{k+1} = 0 \cdots A\mathbf{v}_n = 0.
 $$
 
 :::: {.fragment}
@@ -53,7 +53,7 @@ A
 \begin{matrix}
 \sigma_1 & \cdots & 0 \\
 \vdots & \ddots & \vdots \\
-0 & \cdots & \sigma_r
+0 & \cdots & \sigma_k
 \end{matrix}
 &
 \mathbf{0}
@@ -62,6 +62,7 @@ A
 \mathbf{0} & \mathbf{0}
 \end{array}
 \right]
+.
 $$
 
 We call the $\mathbf{v}_i$ the __right singular vectors__ and the $\mathbf{u}_i$ the __left singular vectors__.
@@ -85,7 +86,7 @@ A
 \begin{matrix}
 \sigma_1 & \cdots & 0 \\
 \vdots & \ddots & \vdots \\
-0 & \cdots & \sigma_r
+0 & \cdots & \sigma_k
 \end{matrix}
 &
 \mathbf{0}
@@ -98,7 +99,7 @@ A
 \vert & \vert &   & \vert \\
 \mathbf{v}_1   & \mathbf{v}_2  & \dots  & \mathbf{v}_n  \\
 \vert & \vert &  & \vert
-\end{bmatrix}^T
+\end{bmatrix}^T.
 $$
 
 ::::
@@ -108,7 +109,7 @@ $$
 We can write this as
 
 $$
-A = U\Sigma V^{T},
+A = U\Sigma V^{T}.
 $$
 ::::
 
@@ -124,7 +125,7 @@ where
 
 :::: {.incremental}
 - $U$ has dimension $m\times n$. The columns of $U$ are orthogonal. The columns of $U$ are the __left singular vectors__.
-- $\Sigma$ has dimension $n\times n$. The only non-zero values are on the main diagonal and they are nonnegative real numbers  $\sigma_1\geq \sigma_2 \geq \ldots \geq \sigma_r$ and $\sigma_{r+1} = \ldots = \sigma_n = 0$. These are called the __singular values__ of $A$.
+- $\Sigma$ has dimension $n\times n$. The only non-zero values are on the main diagonal and they are nonnegative real numbers  $\sigma_1\geq \sigma_2 \geq \ldots \geq \sigma_k$ and $\sigma_{k+1} = \ldots = \sigma_n = 0$. These are called the __singular values__ of $A$.
 - $V$ has dimension $n \times n$. The columns of $V$ are orthogonal. The columns of $V$ are the __right singular vectors__.
 ::::
 

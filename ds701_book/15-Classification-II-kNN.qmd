@@ -1594,7 +1594,7 @@ plt.ylabel('Accuracy')
 plt.legend(loc = 'best')
 plt.xticks(kvals)
 best_k = kvals[np.argmax(accy1)]
-plt.title(f'Test Accuracy with $\pm 1\sigma$ Error Bars')
+plt.title(f'Test Accuracy with $\\pm 1\\sigma$ Error Bars')
 plt.show()
 ```
 
