@@ -425,7 +425,7 @@ We observe the following in our plot of the digits in the first two principal co
 
 - There is a decent clustering of some of our digits, in particular 0, 2, 3, 4, and 6.
 - The numbers 0 and 6 seem to be relatively close to each other in this space.
-- There is not a very clear separation of the number 5 from some of the other points..
+- There is not a very clear separation of the number 5 from some of the other points.
 
 
 ## To scale or not to scale
@@ -566,14 +566,14 @@ V\Sigma^{2}V^T
 \end{align*}
 $$
 
-We see that eigenvalues $\lambda_i$ of the matrix $S$ are the squares $\sigma_{i}^{2}$ of the singular values $\Sigma$ (scaled by $\frac{1}{n-1}$).
+We see that eigenvalues $\lambda_i$ of the matrix $S$ are the squares $\sigma_{i}^{2}$ of the singular values $\Sigma$ (scaled by $\frac{1}{m-1}$).
 
 
 ---
 
 In practice, PCA is done by computing the SVD of your data matrix as opposed to forming the covariance matrix and computing the eigenvalues. 
 
-You can then obtain the principal components from the right singular vectors $V$. The eigenvalues are obtained from squaring the entries of $\Sigma$ and scaling them by $\frac{1}{n-1}$
+You can then obtain the principal components from the right singular vectors $V$. The projected data into the lower dimensional space is $XV$. The eigenvalues of $S$ are obtained from squaring the entries of $\Sigma$ and scaling them by $\frac{1}{m-1}$
 
 The reason to compute PCA this way is
 
