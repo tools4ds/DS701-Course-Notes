@@ -287,7 +287,7 @@ plt.text(-9, 3, r'$y = \beta_0 + \beta_1x$', size=20);
 
 The first kind of model we'll study is a linear equation, $y = \beta_0 + \beta_1 x.$
 
-Experimental data often produce points $(x_1, y_1), \dots, (x_n,y_n)$ that seem
+Experimental data often produce points $(x_1, y_1), \dots, (x_n, y_n)$ that seem
 to lie close to a line.   
 
 We want to determine the parameters $\beta_0, \beta_1$ that define a line that is
@@ -503,7 +503,7 @@ $y$-values in $X\mathbf{\beta}$ equal the observed $y$-values in $\mathbf{y}$,
 ---
 
 Now, since the data doesn't fall exactly on a line, we have decided to seek the
-$\beta$ that minimizes the sum of squared residuals, ie,
+$\beta$ that minimizes the sum of squared residuals, i.e.,
 
 $$
 \sum_i (\beta_0 + \beta_1 x_i - y_i)^2
@@ -966,7 +966,7 @@ Now to measure the quality of fit of a model, we break TSS down into two compone
 For any given $\mathbf{x}_i$, the prediction made by the model is 
 $\hat{y_i} = \mathbf{x}_i^T\beta$.
 
-Therefore,
+We can break the total sum of squares into two parts:
 
 * the residual $\epsilon$ is $y_i - \hat{y_i}$, and 
 * the part that the model "explains" is $\hat{y_i} - \overline{y_i}.$
@@ -985,7 +985,7 @@ $$
 \text{ESS} = \sum_{i=1}^n \left(\hat{y_i}-\overline{y}\right)^2,
 $$
 
-Then it turns out that the total sum of squares is exactly equal to the sum of
+One can show that the total sum of squares is exactly equal to the sum of
 squares of the residuals plus the sum of squares of the explained part.
 
 In other words:
@@ -1002,12 +1002,26 @@ of $\mathbf{y}$.
 So the measure of fit $R^2$ is defined as:
 
 $$
-\begin{eqnarray}
-R^2 & = & \frac{\text{ESS}}{\text{TSS}} = 1-\frac{\text{RSS}}{\text{TSS}}
-\end{eqnarray}
+R^2 = \frac{\text{ESS}}{\text{TSS}} 
+= 1-\frac{\text{RSS}}{\text{TSS}}
+= 1 - \frac{\sum_{i=1}^n \left(y_i-\hat{y_i}\right)^2}{\sum_{i=1}^n \left(y_i-\overline{y}\right)^2}
 $$
 
 As a result, $0\leq R^2\leq 1$.
+
+:::: {.fragment}
+This is more specifically called $R^2$ __centered__.
+::::
+
+
+:::: {.fragment}
+There is also an __uncentered__ version of $R^2$ defined as:
+
+$$
+R^2 (\text{uncentered}) = 1 - \frac{\sum_{i=1}^n \left(y_i-\hat{y_i}\right)^2}{\sum_{i=1}^n y_i^2}
+$$
+
+::::
 
 ::: {.content-visible when-profile="slides"}
 ## $R^2$, cont.
@@ -1055,6 +1069,11 @@ And then use the `statsmodels` package to fit the model.
 ```{python}
 #| code-fold: false
 import statsmodels.api as sm
+
+# Add a constant (intercept) to the design matrix
+#X_with_intercept = sm.add_constant(X)
+#model = sm.OLS(y, X_with_intercept)
+
 model = sm.OLS(y, X)
 results = model.fit()
 ```
@@ -1070,6 +1089,13 @@ print(results.summary())
 The $R^2$ value is very good.   We can see that the linear model does a very good
 job of predicting the observations $y_i$.
 
+::: {.callout-note}
+The summary uses the __uncentered__ version of $R^2$ because, as the footnote says,
+the model does not include a constant to account fo an intercept term. You can try
+uncommenting the line `X_with_intercept = sm.add_constant(X)` and see that the
+summary then uses the centered version of $R^2$.
+:::
+
 ## Aside: Summary Statistics
 
 Here is what all the statistics in the summary table mean:
@@ -1081,10 +1107,10 @@ Here is what all the statistics in the summary table mean:
 * Formula:
   $R^2 (\text{uncentered}) = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum y_i^2}$
 
-where is the actual value, and is the predicted value from the regression.
+where $y_i$ is the actual value, and $\hat{y}_i$ is the predicted value from the regression.
 
 * Interpretation: Higher values (closer to 1) indicate a better fit, but this
-  version of can sometimes be misleading because it doesn’t account for the mean.
+  version of $R^2$ can sometimes be misleading because it doesn’t account for the mean.
 
 2. **Adjusted R-squared (Uncentered):**
 
@@ -1093,9 +1119,10 @@ where is the actual value, and is the predicted value from the regression.
 * Formula:
     $R^2 (\text{adj, uncentered}) = 1 - \left( \frac{(1 - R^2 (\text{uncentered}))(n - 1)}{n - p} \right)$
 
-where is the number of observations, and is the number of predictors in the model.
+where $n$ is the number of observations, and $p$ is the number of predictors in the model.
 
-* Interpretation: It is a more conservative measure of fit than the regular , particularly useful when comparing models with different numbers of predictors.
+* Interpretation: It is a more conservative measure of fit than the regular $R^2$,
+  particularly useful when comparing models with different numbers of predictors.
 
 3. **F-statistic:**
 
@@ -1105,7 +1132,7 @@ where is the number of observations, and is the number of predictors in the mode
 * Formula:
     $F = \frac{R^2 (\text{uncentered}) / (p - 1)}{(1 - R^2 (\text{uncentered})) / (n - p)}$
 
-where is the number of predictors, and is the number of observations.
+where $p$ is the number of predictors, and $n$ is the number of observations.
 
 * Interpretation: A high F-statistic suggests that the model is statistically significant.
 
@@ -1124,7 +1151,7 @@ where is the number of predictors, and is the number of observations.
 * Formula:
     $\mathcal{L} = -\frac{n}{2} \log(2\pi \sigma^2) - \frac{1}{2\sigma^2} \sum (y_i - \hat{y}_i)^2$
 
-where is the variance of the residuals
+where $\sigma^2$ is the variance of the residuals.
 
 * Interpretation: A higher log-likelihood indicates a better fit of the model.
 
@@ -1136,7 +1163,7 @@ where is the variance of the residuals
 * Formula:
     $\text{AIC} = 2p - 2 \log(\mathcal{L})$
 
-where is the number of parameters, and is the log-likelihood.
+where $p$ is the number of parameters, and $\mathcal{L}$ is the log-likelihood.
 
 * Interpretation: Lower AIC values suggest a better model fit, but it penalizes for overfitting.
 
@@ -1148,10 +1175,43 @@ where is the number of parameters, and is the log-likelihood.
 * Formula:
     $\text{BIC} = p \log(n) - 2 \log(\mathcal{L})$
 
-where is the number of parameters, is the number of observations, and is the log-likelihood.
+where $p$ is the number of parameters, $n$ is the number of observations, and
+$\mathcal{L}$ is the log-likelihood.
 
 * Interpretation: A lower BIC indicates a better model, with stronger penalties for
   models with more parameters.
+
+8. **Coefficient Table:**
+
+* The first two columns are the independent variables and their coefficients. It
+  is the $m$ in $y = mx + b$. One unit of change in the variable will affect the
+  variable’s coefficient’s worth of change in the dependent variable. If the
+  coefficient is negative, they have an inverse relationship. As one rises, the
+  other falls.
+
+* The `std error` is an estimate of the standard deviation of the coefficient, a
+  measurement of the amount of variation in the coefficient throughout its data
+  points. 
+  
+* The `t` is related and is a measurement of the precision with which the coefficient
+  was measured. A low std error compared to a high coefficient produces a
+  high t statistic, which signifies a high significance for your coefficient.
+
+* `P>|t|` is one of the most important statistics in the summary. It uses the
+  `t` statistic to produce the `P` value, a measurement of how likely your
+   coefficient is measured through our model by chance. For example, a `P` value
+   of 0.378 is saying there is a 37.8% chance the variable has no affect on the
+   dependent variable and the results are produced by chance. Proper model analysis
+   will compare the `P` value to a previously established alpha value, or a
+   threshold with which we can apply significance to our coefficient. A common
+   alpha is 0.05, which few of our variables pass in this instance.
+
+* `[0.025 and 0.975]` are both measurements of values of our coefficients within
+  95% of our data, or within two standard deviations. Outside of these values can
+  generally be considered outliers.
+
+The coefficient description came from this [blog post](https://medium.com/swlh/interpreting-linear-regression-through-statsmodels-summary-4796d359035a)
+which also describes the other statistics in the summary table.
 
 ---
 
