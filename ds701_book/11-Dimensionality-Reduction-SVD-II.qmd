@@ -309,7 +309,7 @@ The first principal component accounts for all the variance in the dataset.
 ## PCA Summary
 
 - The columns of $V$ are the principal directions (or components). 
-- The principal components are the projection of the data into principal directions: $XV$.
+- The reduced dimension data is the projection of the data in the direction of the principal directions, i.e.,  $Y=XV'$.
 - The total variance $T$ in the data is the sum of all eigenvalues: $T = \lambda_1 + \lambda_2 + \dots + \lambda_n.$
 - The first eigenvector $\mathbf{v}_1$ points in the most significant direction of the data. This direction explains the largest fraction $\lambda_1/T$ of the total variance.
 - The second eigenvector $\mathbf{v}_2$ accounts for a smaller fraction $\lambda_2/T$.
@@ -319,7 +319,7 @@ The first principal component accounts for all the variance in the dataset.
 
 ## Case Study: Random Data
 
-Let's consider some randomly generated data consisting of 2 features. We
+Let's consider some randomly generated data consisting of 2 features.
 
 ```{python}
 #| fig-align: center
@@ -565,7 +565,7 @@ fig, ax = plt.subplots()
 # Draw matrix A
 rect_A = patches.Rectangle((0, 0), 2, 3, linewidth=1, edgecolor='black', facecolor='none')
 ax.add_patch(rect_A)
-ax.text(1, 1.5, r'$A$', fontsize=20, ha='center', va='center')
+ax.text(1, 1.5, r'$X$', fontsize=20, ha='center', va='center')
 ax.text(1, -0.5, r'$(m \times n)$', fontsize=12, ha='center', va='center')
 
 # Draw equal sign
@@ -633,12 +633,9 @@ Reasons to compute PCA this way are
 
 - **Efficiency**: SVD is computationally efficient, especially for large datasets. Many optimized algorithms and libraries (like those in NumPy and scikit-learn) leverage SVD for fast computations.
 
-- **Handling Non-Square Matrices**: SVD can be applied directly to non-square matrices, which is useful since the data matrix in PCA is often not square. This flexibility makes SVD a versatile tool for dimensionality reduction.
-
 - **Direct Computation of Principal Components**: SVD directly provides the principal components (right singular vectors) and the singular values, which are related to the explained variance. This makes the process straightforward and avoids the need to compute the covariance matrix explicitly.
 
 ::: {.content-visible when-profile="web"}
-- **Robustness to Data Scaling**: SVD is less sensitive to the scaling of data compared to other methods. This robustness ensures that the principal components are accurately computed regardless of the data's scale.
 
 - **Memory Efficiency**: For large datasets, SVD can be more memory-efficient. Techniques like truncated SVD can be used to compute only the top principal components, reducing memory usage.
 
@@ -661,6 +658,7 @@ Here are some advantages (left column) and disadvantages (right column) of PCA.
 :::
 ::: {.column width="50%"}
 **Disadvantages**
+
 - reduces interpretability
 - can result in information loss
 - can be less effective than non-linear methods
@@ -674,7 +672,7 @@ Here are some advantages (left column) and disadvantages (right column) of PCA.
 - t-SNE stands for **t-Distributed Stochastic Neighbor Embedding**.
 - It is a **non-linear dimensionality reduction technique**.
 - Primarily used for **visualizing high-dimensional data** in 2 or 3 dimensions.
-- Developed by Laurens van der Maaten and Geoffrey Hinton in 2008.
+- Developed by Laurens van der Maaten and Geoffrey Hinton in 2008, see @van2008visualizing.
 
 
 ## How t-SNE Works
@@ -691,13 +689,13 @@ We will describe how this process works.
 
 - Calculate pairwise similarities between points in the high-dimensional space.
 - Use a Gaussian distribution to convert distances into probabilities.
-- The similarity $p_{ij}$ between points $i$ and $j$ is given by:
+- The similarity $p_{j\vert i}$ between points $i$ and $j$ is given by:
   $$
   p_{j\vert i} = \frac{\exp(-\|x_i - x_j\|^2 / 2\sigma_i^2)}{\sum_{k \neq i} \exp(-\|x_i - x_k\|^2 / 2\sigma_i^2)}.
   $$
  - The $p_{j\vert i}$ value represents the conditional probability that point $x_i$ would choose $x_j$ as its neighbor. 
  - Note that $p_{i\vert i} = 0$.
- - The t-SNE method uses the quantities $p_{ij} = \frac{p_{j\vert i} + p_{i\vert j}}{2d}$ where $d$ is the dimension of the point. This is because the probabilities $p_{j\vert i}$ and $p_{i\vert j}$ are different.
+ - The t-SNE method uses $p_{ij} = \frac{p_{j\vert i} + p_{i\vert j}}{2d}$ where $d$ is the dimension of the point. This is because the probabilities $p_{j\vert i}$ and $p_{i\vert j}$ are different. Using this value of $p_{ij}$ is called symmetric t-SNE.
 
 ## Visualizing the Pairwise Similarities
 
@@ -791,7 +789,7 @@ plt.show()
   $$
   KL(P \| Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}.
   $$
-- THe KL divergence measures how different the distribution $P$ is from the distribution $Q$. In other words, how different are each of the higher dimensional $P_i$ point distributions from the lower dimensional $Q_i$ distributions.
+- THe KL divergence measures how different distribution $P$ is from distribution $Q$. In other words, how different are each of the higher dimensional $P_i$ point distributions from the lower dimensional $Q_i$ distributions.
 - By minimizing this function, we ensure that the lower dimensional point clusters are similar to the higher dimensional clusters.
 - To minimize the KL divergence we use gradient descent to iteratively adjust the positions of points in the low-dimensional space.
 
