@@ -3,6 +3,8 @@ title: Linear Regression
 jupyter: python3
 ---
 
+# Introduction
+
 ## Introduction
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/17-Regression-I-Linear.ipynb)
@@ -37,34 +39,148 @@ def centerAxes(ax):
 ```
 
 
-![](figs/Sir_Francis_Galton_by_Charles_Wellington_Furse.jpg){width=50%}
+:::: {.columns}
+::: {.column width="40%"}
 
-[Sir Francis Galton by Charles Wellington Furse](https://commons.wikimedia.org/wiki/File:Sir_Francis_Galton_by_Charles_Wellington_Furse.jpg#/media/File:Sir_Francis_Galton_by_Charles_Wellington_Furse.jpg), 
+![](figs/Sir_Francis_Galton_by_Charles_Wellington_Furse.jpg){width=70%}
+
+[Sir Francis Galton by Charles Wellington Furse](https://commons.wikimedia.org/wiki/File:Sir_Francis_Galton_by_Charles_Wellington_Furse.jpg#/media/File:Sir_Francis_Galton_by_Charles_Wellington_Furse.jpg)
+
+<!--
 [National Portrait Gallery](https://en.wikipedia.org/wiki/National_Portrait_Gallery,_London)
 [NPG 3916](http://www.npg.org.uk/collections/search/portrait.php?search=ap&amp;npgno=3916&amp;eDate=&amp;lDate=)
+-->
+
+:::
+::: {.column width="60%"}
+
+![](figs/galton-title.png){width=70%}
+
+In 1886 Francis Galton published his observations about the height of children
+compared to their parents.
+
+:::
+::::
+
+## Regression to the Mean
+
+:::: {.columns}
+::: {.column width="%"}
 
 
-![](figs/galton-title.png){width=55%}
+![](figs/galton-regression.png){width=100%}
 
-In 1886 Francis Galton published his observations about how random factors affect outliers.
 
-This notion has come to be called "regression to the mean" because unusually large
-or small phenomena, after the influence of random events, become closer to their
-mean values (less extreme).
+:::
+::: {.column width="%"}
 
-![](figs/galton-regression.png){width=55%}
+
+Defined mid-parent as the average of the heights of the parents.
+
+:::: {.fragment}
+When parents are taller or shorter than average, their children are more likely
+to be closer to the average height than their parents. 
+::::
+
+:::: {.fragment}
+So called **"regression to the mean."**
 
 Galton fit a straight line to this effect, and the fitting of lines or curves to
 data has come to be called regression as well.
+::::
+
+:::
+::::
+
+## Praise versus Punishment
+
+:::: {.columns}
+::: {.column width="30%"}
+
+
+::: {layout-ncol="1"}
+
+![](figs/L17-Israeli-Airforce-Pirate.png){width="100px"}
+
+<!-- From https://airpowerasia.com/2020/08/30/israels-giora-hawkeye-epstein-ace-of-aces-of-supersonic-fighter-jets-17-aerial-victories/ -->
+
+![Daniel Kahneman](figs/L17-Daniel-Kahneman--NYT.png){height="200px"}
+
+:::
+
+
+:::
+::: {.column width="70%"}
+
+:::: {.fragment}
+In the 60s, psychologist Daniel Kahneman studied the effect of praise versus
+punishment on performance of Israeli Air Force trainees. He was led to believe
+that praise was more effective than punishment.
+::::
+
+:::: {.fragment}
+Air force trainers disagreed and said that when they praised pilots that did well,
+they usually did worse the next time, and when they punished pilots that did poorly,
+they usually did better the next time.
+::::
+
+:::: {.fragment}
+What Khaneman later realised was that this phenomenon could be explained by
+the idea of regression to the mean.
+
+If a pilot does worse than average on a task, they are more likely to do better
+the next time, and if they do better than average, they are more likely to do
+worse the next time.
+::::
+
+:::
+::::
+
+
+## Firing Coaches
+
+![NFL Coaches](figs/L17-nfl-coaching-candidates_0jpg.jpg){width="300px"}
+
+[cite](https://faculty.mccombs.utexas.edu/carlos.carvalho/teaching/regression_to_the_mean.pdf)
+
+Is it a good strategy to fire a coach after a bad season?
+
+> bad season -> fire and replace coach -> better season next year
+
+:::: {.fragment}
+When this could be interpreted as:
+
+> bad season (outlier) -> regression to the mean -> better season next year
+::::
+
+## This applies to many situations
+
+> "I had so many colds last year, and then I started herbal remedies, and I have much
+> fewer colds this year."
+
+> "My investments were doing quite bad last year, so switched investment managers, and
+> now it is doing much better."
+
+
+:::: {.fragment}
+<br>
+When in fact, they could be (at least partially) explained by: 
+
+::: {.text-center}
+**Regression to the mean**
+:::
+
+::::
 
 ## Model Types
 
 The most common form of machine learning is __regression__, which means
 constructing an equation that describes the relationships among variables.
 
-It is a form of supervised learning: whereas __classification__ deals with
-predicting categorical features (labels or classes), __regression__ deals with
-predicting continuous features (real values).
+It is a form of supervised learning: 
+
+* whereas __classification__ deals with predicting categorical features (labels or classes), 
+* __regression__ deals with predicting continuous features (real values).
 
 ## Fit to Linear Models
 
@@ -114,11 +230,15 @@ ylog = log[0] + log[1] * np.log(xlog) + std * np.random.randn(100)
 ax.plot(xlog, ylog, 'ro', markersize=4);
 ```
 
+---
+
 Clearly, none of these datasets agrees perfectly with the proposed model.   
 
 So the question arises:
 
 How do we find the __best__ linear function (or quadratic function, or logarithmic function) given the data?
+
+# Framework
 
 ## Framework
 
@@ -129,6 +249,10 @@ Certain terminology is used:
 * Some values are referred to as "independent," and
 * Some values are referred to as "dependent."
 
+::: {.content-visible when-profile="slides"}
+## Framework cont.
+:::
+
 The basic regression task is:
 
 * given a set of independent variables 
@@ -136,7 +260,11 @@ The basic regression task is:
 * estimate the parameters of a model (such as a line, parabola, etc) that describes
   how the dependent variables are related to the independent variables.
 
-The independent variables are collected into a matrix $X,$ which is called the
+::: {.content-visible when-profile="slides"}
+## Framework cont.
+:::
+
+The **independent variables** are collected into a matrix $X,$ sometimes called the
 __design matrix.__
 
 The dependent variables are collected into an __observation__ vector $\mathbf{y}.$
@@ -165,20 +293,22 @@ to lie close to a line.
 We want to determine the parameters $\beta_0, \beta_1$ that define a line that is
 as "close" to the points as possible.
 
+::: {.content-visible when-profile="slides"}
+## Least-Squares Lines cont.
+:::
+
 Suppose we have a line $y = \beta_0 + \beta_1 x$.   
 
 For each data point $(x_j, y_j),$ there is a point $(x_j, \beta_0 + \beta_1 x_j)$
 that is the point on the line with the same $x$-coordinate.
 
 ```{python}
-# todo: update this plot
-
 import numpy as np
 import matplotlib.pyplot as plt
 
 # Generate some data points
 x = np.array([1, 2, 3, 4, 5])
-y = np.array([2, 2.5, 3.5, 3.8, 5.5])
+y = np.array([3.7, 2.0, 2.1, 0.1, 1.5])
 
 # Linear regression parameters (intercept and slope)
 beta_0 = 4  # intercept
@@ -189,9 +319,11 @@ y_line = beta_0 + beta_1 * x
 
 # Create the plot
 fig, ax = plt.subplots()
+fig.set_size_inches(7, 5)
 
 # Plot the data points
 ax.scatter(x, y, color='blue', label='Data points', zorder=5)
+ax.scatter(x, y_line, color='red', label='Predicted values', zorder=5)
 
 # Plot the regression line
 ax.plot(x, y_line, color='cyan', label='Regression line (y = β0 + β1x)', zorder=4)
@@ -200,10 +332,13 @@ ax.plot(x, y_line, color='cyan', label='Regression line (y = β0 + β1x)', zorde
 for i in range(len(x)):
     ax.vlines(x[i], y_line[i], y[i], color='blue', linestyles='dashed', label='Residual' if i == 0 else "", zorder=2)
 
+y_offset = [0.2, -0.2, 0.2, -0.2, 0.2]
+y_line_offset = [-0.3, 0.3, -0.3, 0.3, -0.2]
+
 # Annotate points
 for i in range(len(x)):
-    ax.text(x[i], y[i] + 0.2, f'({x[i]}, {y[i]})', fontsize=9, ha='center')
-    ax.text(x[i], y_line[i] - 0.3, f'({x[i]}, {y_line[i]:.1f})', fontsize=9, ha='center')
+    ax.text(x[i], y[i] + y_offset[i], f'({x[i]}, {y[i]})', fontsize=9, ha='center')
+    ax.text(x[i], y_line[i] + y_line_offset[i], f'({x[i]}, {y_line[i]:.1f})', fontsize=9, ha='center')
 
 # Remove the box around the plot and show only x and y axis with no tics and numbers
 ax.spines['top'].set_color('none')
@@ -223,27 +358,104 @@ ax.legend()
 plt.show()
 ```
 
-![](figs/Lay-fig-6-6-1.jpg){width=55%}
+::: {.content-visible when-profile="slides"}
+## Least-Squares Lines cont.
+:::
 
-Image from Lay, _Linear Algebra and its Applications,_ 4th edition
+:::: {.columns}
+::: {.column width="50%"}
+
+```{python}
+#| echo: false
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate some data points
+x = np.array([1, 2, 3, 4, 5])
+y = np.array([3.7, 2.0, 2.1, 0.1, 1.5])
+
+# Linear regression parameters (intercept and slope)
+beta_0 = 4  # intercept
+beta_1 = -0.8  # slope
+
+# Regression line (y = beta_0 + beta_1 * x)
+y_line = beta_0 + beta_1 * x
+
+# Create the plot
+fig, ax = plt.subplots()
+fig.set_size_inches(4, 3)
+
+# Plot the data points
+ax.scatter(x, y, color='blue', label='Data points', zorder=5)
+ax.scatter(x, y_line, color='red', label='Predicted values', zorder=5)
+
+# Plot the regression line
+ax.plot(x, y_line, color='cyan', label='Regression line (y = β0 + β1x)', zorder=4)
+
+# Add residuals (vertical lines from points to regression line)
+for i in range(len(x)):
+    ax.vlines(x[i], y_line[i], y[i], color='blue', linestyles='dashed', label='Residual' if i == 0 else "", zorder=2)
+
+y_offset = [0.2, -0.2, 0.2, -0.2, 0.2]
+y_line_offset = [-0.3, 0.3, -0.3, 0.3, -0.2]
+
+# Annotate points
+for i in range(len(x)):
+    ax.text(x[i], y[i] + y_offset[i], f'({x[i]}, {y[i]})', fontsize=9, ha='center')
+    ax.text(x[i], y_line[i] + y_line_offset[i], f'({x[i]}, {y_line[i]:.1f})', fontsize=9, ha='center')
+
+# Remove the box around the plot and show only x and y axis with no tics and numbers
+ax.spines['top'].set_color('none')
+ax.spines['right'].set_color('none')
+#ax.spines['left'].set_position('zero')
+#ax.spines['bottom'].set_position('zero')
+ax.xaxis.set_ticks([])
+ax.yaxis.set_ticks([])
+
+# Title
+#ax.set_title('Linear Regression with Residuals')
+
+# Add legend
+#ax.legend()
+
+# Show the plot
+plt.show()
+```
+
+
+:::
+::: {.column width="50%"}
+
 
 We call 
 
 * $y_j$ the __observed__ value of $y$ and 
 * $\beta_0 + \beta_1 x_j$ the __predicted__ $y$-value.   
 
+:::
+::::
+
+:::: {.fragment}
 The difference between an observed $y$-value and a predicted $y$-value is called
 a __residual__.
+::::
 
+:::: {.fragment}
 There are several ways of measure how "close" the line is to the data. 
+::::
 
+:::: {.fragment}
 The usual choice is to sum the squares of the residuals.  
+::::
 
+:::: {.fragment}
 The __least-squares line__ is the line $y = \beta_0 + \beta_1x$ that minimizes
 the sum of squares of the residuals. 
 
 The coefficients $\beta_0, \beta_1$ of the line are called
 __regression coefficients.__
+::::
 
 ## A least-squares problem
 
@@ -279,12 +491,16 @@ X=
 \;\;\mathbf{y}=\begin{bmatrix}y_1\\y_2\\\vdots\\y_n\end{bmatrix}
 $$
 
+---
+
 Of course, if the data points don't actually lie exactly on a line, 
 
 ... then there are no parameters $\beta_0, \beta_1$ for which the predicted
 $y$-values in $X\mathbf{\beta}$ equal the observed $y$-values in $\mathbf{y}$, 
 
 ... and $X\mathbf{\beta}=\mathbf{y}$ has no solution.
+
+---
 
 Now, since the data doesn't fall exactly on a line, we have decided to seek the
 $\beta$ that minimizes the sum of squared residuals, ie,
@@ -301,6 +517,8 @@ __The sum of squares of the residuals__ is __exactly__ the
 __square of the distance between the vectors $X\mathbf{\beta}$ and $\mathbf{y}.$__
 :::
 
+---
+
 Computing the least-squares solution of $X\beta = \mathbf{y}$ is equivalent to
 finding the $\mathbf{\beta}$ that determines the least-squares line.
 
@@ -315,6 +533,8 @@ ax.plot(xlin, line[0] + line[1] * xlin, 'b-')
 plt.text(-9, 3, r'$y = \beta_0 + \beta_1x$', size=20);
 ```
 
+---
+
 Now, to obtain the least-squares line, find the least-squares solution to
 $X\mathbf{\beta} = \mathbf{y}.$
 
@@ -325,6 +545,10 @@ $$
 X^TX\mathbf{\beta} = X^T\mathbf{y}
 $$
 
+because $X\mathbf{\beta} - \mathbf{y}$ is normal (e.g. orthogonal) to the column
+space of $X.$    
+
+:::: {.fragment}
 We also know that the normal equations __always__ have at least one solution.
 
 And if $X^TX$ is invertible, there is a unique solution that is given by:
@@ -332,6 +556,11 @@ And if $X^TX$ is invertible, there is a unique solution that is given by:
 $$
 \hat{\mathbf{\beta}} = (X^TX)^{-1} X^T\mathbf{y}
 $$
+
+::::
+
+
+# The General Linear Model
 
 ## The General Linear Model
 
@@ -344,16 +573,20 @@ $$
 y = X\mathbf{\beta} + {\mathbf\epsilon}
 $$
 
+where $\mathbf{\epsilon}$ is the __residual vector.__
+
 Any equation of this form is referred to as a __linear model.__ 
 
 In this formulation, the goal is to find the $\beta$ so as to minimize the
-length of $\epsilon$, ie, $\Vert\epsilon\Vert.$
+__norm__ of $\epsilon$, i.e., $\Vert\epsilon\Vert.$
 
+:::: {.fragment}
 In some cases, one would like to fit data points with something other than a
 straight line.  
 
 In cases like this, the matrix equation is still $X\mathbf{\beta} = \mathbf{y}$,
 but the specific form of $X$ changes from one problem to the next.
+::::
 
 ## Least-Squares Fitting of Other Models
 
@@ -361,21 +594,29 @@ In model fitting, the parameters of the model are what is unknown.
 
 A central question for us is whether the model is _linear_ in its parameters.
 
-For example, the model 
+For example, is this model linear in its parameters?
 
 $$
 y = \beta_0 e^{-\beta_1 x}
 $$
 
-is __not__ linear in its parameters.  
+:::: {.fragment}
+It __is not__ linear in its parameters.  
+::::
 
-The model 
+:::: {.fragment}
+Is this model linear in its parameters?
 
 $$
 y = \beta_0 e^{-2 x}
 $$
+::::
 
-is __not__ linear in its parameters.
+:::: {.fragment}
+It __is__ linear in its parameters.
+::::
+
+---
 
 For a model that is linear in its parameters, an observation is a linear
 combination of (arbitrary) known functions.
@@ -394,14 +635,20 @@ parameters.
 Suppose data points $(x_1, y_1), \dots, (x_n, y_n)$ appear to lie along some
 sort of parabola instead of a straight line.  
 
+:::: {.columns}
+::: {.column width="50%"}
+
 ```{python}
-ax = plt.figure(figsize = (7, 7)).add_subplot()
+ax = plt.figure(figsize = (5, 5)).add_subplot()
 centerAxes(ax)
 quad = np.array([1, 3, 0.5])
 xquad = -10.0 + 20.0 * np.random.random(100)
-yquad = quad[0] + (quad[1] * xquad) + (quad[2] * xquad * xquad) + np.random.randn(100)
+yquad = quad[0] + (quad[1] * xquad) + (quad[2] * xquad * xquad) + 2*np.random.randn(100)
 ax.plot(xquad, yquad, 'ro', markersize = 4);
 ```
+
+:::
+::: {.column width="50%"}
 
 As a result, we wish to approximate the data by an equation of the form
 
@@ -411,7 +658,12 @@ $$
 
 Let's describe the linear model that produces a "least squares fit" of the data by the equation.
 
-__Solution.__  The ideal relationship is $y = \beta_0 + \beta_1x + \beta_2x^2.$
+:::
+::::
+
+## Solution
+  
+The ideal relationship is $y = \beta_0 + \beta_1x + \beta_2x^2.$
 
 Suppose the actual values of the parameters are $\beta_0, \beta_1, \beta_2.$  
 Then the coordinates of the first data point satisfy the equation
@@ -433,6 +685,11 @@ y_2 &= \beta_0 + \beta_1x_2 + \beta_2x_2^2 + \epsilon_2 \\
 y_n &= \beta_0 + \beta_1x_n + \beta_2x_n^2 + \epsilon_n
 \end{align*}
 $$
+
+---
+
+:::: {.columns}
+::: {.column width="50%"}
 
 Clearly, this system can be written as $\mathbf{y} = X\mathbf{\beta} + \mathbf{\epsilon}.$
 
@@ -462,21 +719,22 @@ beta_2
  \end{bmatrix}
  $$
 
+Let's solve for $\beta.$
+
 ```{python}
-#
-# Input data are in the vectors xquad and yquad
-#
-# estimate the parameters of the linear model
-#
+#| code-fold: false
 m = np.shape(xquad)[0]
 X = np.array([np.ones(m), xquad, xquad**2]).T
 beta = np.linalg.inv(X.T @ X) @ X.T @ yquad
 ```
 
+
+:::
+::: {.column width="50%"}
+
+And plot the results.
+
 ```{python}
-#
-# plot the results
-#
 ax = ut.plotSetup(-10, 10, -10, 20)
 ut.centerAxes(ax)
 xplot = np.linspace(-10, 10, 50)
@@ -485,16 +743,22 @@ ax.plot(xplot, yestplot, 'b-', lw=2)
 ax.plot(xquad, yquad, 'ro', markersize=4);
 ```
 
+:::
+::::
+
+
+---
+
+Now let's try a different model.
+
 ```{python}
-#
-# Input data are in the vectors xlog and ylog
-#
-# estimate the parameters of the linear model
-#
+#| code-fold: false
 m = np.shape(xlog)[0]
 X = np.array([np.ones(m), np.log(xlog)]).T
 beta = np.linalg.inv(X.T @ X) @ X.T @ ylog
 ```
+
+And plot the results.
 
 ```{python}
 # 
@@ -510,7 +774,10 @@ ax.plot(xlog,ylog,'ro',markersize=4);
 
 ## Multiple Regression
 
-Suppose an experiment involves two independent variables -- say, $u$ and $v$, -- and one dependent variable, $y$.  A simple equation for predicting $y$ from $u$ and $v$ has the form
+Suppose an experiment involves two independent variables -- say, $u$ and $v$, --
+and one dependent variable, $y$.  
+
+A simple equation for predicting $y$ from $u$ and $v$ has the form
 
 $$
 y = \beta_0 + \beta_1 u + \beta_2 v
@@ -518,6 +785,10 @@ $$
 
 Since there is more than one independent variable, this is called
 __multiple regression.__
+
+::: {.content-visible when-profile="slides"}
+## Multiple Regression, cont.
+:::
 
 A more general prediction equation might have the form
 
@@ -534,6 +805,8 @@ y = \beta_0f_0(u,v) + \beta_1f_1(u,v) + \cdots + \beta_kf_k(u,v)
 $$
 
 with $f_0,\dots,f_k$ any sort of known functions and $\beta_0,...,\beta_k$ unknown weights.
+
+## Example
 
 Let's take an example.   Here are a set of points in $\mathbb{R}^3$:
 
@@ -557,21 +830,29 @@ ax.plot(coords[0], coords[1], 'ro', zs=coords[2], markersize = 6);
 
 ## Example
 
-In geography, local models of terrain are constructed from data 
-$(u_1, v_1, y_1), \dots, (u_n, v_n, y_n)$ where $u_j, v_j$, and $y_j$ are
-latitude, longitude, and altitude, respectively.
+In geography, local models of terrain are constructed from data
 
+$$
+(u_1, v_1, y_1), \dots, (u_n, v_n, y_n)
+$$
+
+where $u_j, v_j$, and $y_j$ are latitude, longitude, and altitude, respectively.
+
+:::: {.fragment}
 Let's describe the linear models that gives a least-squares fit to such data.  
 The solution is called the least-squares _plane._
+::::
 
-__Solution.__  We expect the data to satisfy these equations:
+## Solution
+
+We expect the data to satisfy these equations:
 
 $$
 \begin{align*}
-y_1 &= \beta_0 + \beta_1 u_1 + \beta_2 v_1 + \epsilon_1 \\
-y_2 &= \beta_0 + \beta_1 u_2 + \beta_2 v_2 + \epsilon_2 \\
+y_1 &= \beta_0 + \beta_1 u_1 + \beta_2 v_1 + \beta_3 y_1 + \epsilon_1 \\
+y_2 &= \beta_0 + \beta_1 u_2 + \beta_2 v_2 + \beta_3 y_2 + \epsilon_2 \\
 \vdots \\
-y_n &= \beta_0 + \beta_1 u_n + \beta_2 v_n + \epsilon_n
+y_n &= \beta_0 + \beta_1 u_n + \beta_2 v_n + \beta_3 y_n + \epsilon_n
 \end{align*}
 $$
 
@@ -585,16 +866,17 @@ y_1\\
 y_n
 \end{bmatrix},\;\;
 X = 
-\begin{bmatrix}1&u_1&v_1\\
-1&u_2&v_2\\
-\vdots&\vdots&\vdots\\
-1&u_n&v_n
+\begin{bmatrix}1&u_1&v_1&y_1\\
+1&u_2&v_2&y_2\\
+\vdots&\vdots&\vdots&\vdots\\
+1&u_n&v_n&y_n
 \end{bmatrix},\;\;
 \mathbf{\beta}=
 \begin{bmatrix}
 \beta_0\\
 \beta_1\\
-\beta_2
+\beta_2\\
+\beta_3
 \end{bmatrix},\;\;
 \epsilon = 
 \begin{bmatrix}
@@ -604,6 +886,11 @@ X =
 \epsilon_n
 \end{bmatrix}
 $$
+
+---
+
+:::: {.columns}
+::: {.column width="50%"}
 
 ```{python}
 ax = ut.plotSetup3d(-7, 7, -7, 7, -10, 10, figsize = (7, 7))
@@ -616,17 +903,28 @@ npts = 50
 ax.plot(coords[0], coords[1], 'ro', zs = coords[2], markersize=6);
 ```
 
+:::
+::: {.column width="50%"}
+
 This example shows that the linear model for multiple regression has the same
 form as the model for the simple regression in the earlier examples.
 
-We can see that there the general principle is the same across all the different
+We can see that the general principle is the same across all the different
 kinds of linear models.
 
+:::: {.fragment}
 Once $X$ is defined properly, the normal equations for $\mathbf{\beta}$ have the
 same matrix form, no matter how many variables are involved.
 
-Thus, for any linear model where $X^TX$ is invertible, the least squares estimate
-$\hat{\mathbf{\beta}}$ is given by $(X^TX)^{-1}X^T\mathbf{y}$.
+Thus, for any linear model where $X^TX$ is invertible, the least squares estimate is
+
+$$
+\hat{\mathbf{\beta}} = (X^TX)^{-1}X^T\mathbf{y}.
+$$
+::::
+
+:::
+::::
 
 ## Measuring the fit of a regression model: $R^2$
 
@@ -635,6 +933,7 @@ $\hat{\beta}$.
 
 But how do we know whether the data is in fact well described by the model?
 
+:::: {.fragment}
 The most common measure of fit is $R^2$.
 
 $R^2$ measures the __fraction of the variance__ of $\mathbf{y}$ that can be
@@ -647,6 +946,11 @@ $$
 $$
 
 where $\overline{y}=\frac{1}{n}\sum_{i=1}^ny_i$.
+::::
+
+::: {.content-visible when-profile="slides"}
+## Measuring the fit, cont.
+:::
 
 For any given $n$, we can equally work with just 
 $$
@@ -654,6 +958,8 @@ $$
 $$
 
 which is called the __Total Sum of Squares__ (TSS).
+
+## Total Sum of Squares
 
 Now to measure the quality of fit of a model, we break TSS down into two components. 
 
@@ -664,6 +970,8 @@ Therefore,
 
 * the residual $\epsilon$ is $y_i - \hat{y_i}$, and 
 * the part that the model "explains" is $\hat{y_i} - \overline{y_i}.$
+
+## RSS and ESS
 
 Se we define Residual Sum of Squares (RSS) as:
 
@@ -686,6 +994,8 @@ $$
 \text{TSS} = \text{RSS} + \text{ESS}
 $$
 
+## $R^2$, cont.
+
 Now, a good fit is one in which the model explains a large part of the variance
 of $\mathbf{y}$.  
 
@@ -699,6 +1009,10 @@ $$
 
 As a result, $0\leq R^2\leq 1$.
 
+::: {.content-visible when-profile="slides"}
+## $R^2$, cont.
+:::
+
 The closer the value of $R^2$ is to $1$ the better the fit of the regression:
 
 * small values of RSS imply that the residuals are small and therefore we have a better fit.
@@ -707,40 +1021,147 @@ $R^2$ is called the __coefficient of determination.__
 
 It tells us "how well does the model predict the data?"
 
-__WARNING -- WARNING -- WARNING__
+## Warning
 
 Do __not__ confuse $R^2$ with Pearson's $r$, which is the
 __correlation coefficient.__
 
 (To make matters worse, sometimes people talk about $r^2$... very confusing!)
 
+:::: {.fragment}
 The correlation coefficient tells us whether two variables are __correlated__.   
 
 However, just because two variables are correlated does not mean that one is a
 good __predictor__ of the other!
 
 To compare ground truth with predictions, we always use $R^2$.
+::::
+
+# OLS in Practice
 
 ## OLS in Practice
 
-First, we'll look at a test case on synthetic data.
+First, we'll look at a test case on synthetic data. We'll use Scikit-Learn's
+`make_regression` function.
 
 ```{python}
+#| code-fold: false
 from sklearn import datasets
 X, y = datasets.make_regression(n_samples=100, n_features=20, n_informative=5, bias=0.1, noise=30, random_state=1)
 ```
 
+And then use the `statsmodels` package to fit the model.
+
 ```{python}
+#| code-fold: false
+import statsmodels.api as sm
 model = sm.OLS(y, X)
 results = model.fit()
+```
+
+---
+
+And print the summary of the results.
+
+```{python}
 print(results.summary())
 ```
 
 The $R^2$ value is very good.   We can see that the linear model does a very good
 job of predicting the observations $y_i$.
 
-However, some of the independent variables may not contribute to the accuracy of
+## Aside: Summary Statistics
+
+Here is what all the statistics in the summary table mean:
+
+1. **R-squared (Uncentered):**
+
+* Definition: Measures the proportion of the variation in the dependent variable
+  that is explained by the model, without subtracting the mean of the dependent variable.
+* Formula:
+  $R^2 (\text{uncentered}) = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum y_i^2}$
+
+where is the actual value, and is the predicted value from the regression.
+
+* Interpretation: Higher values (closer to 1) indicate a better fit, but this
+  version of can sometimes be misleading because it doesn’t account for the mean.
+
+2. **Adjusted R-squared (Uncentered):**
+
+* Definition: Adjusts the uncentered $R^2$ to account for the number of predictors
+  in the model, preventing overfitting by penalizing for adding more variables.
+* Formula:
+    $R^2 (\text{adj, uncentered}) = 1 - \left( \frac{(1 - R^2 (\text{uncentered}))(n - 1)}{n - p} \right)$
+
+where is the number of observations, and is the number of predictors in the model.
+
+* Interpretation: It is a more conservative measure of fit than the regular , particularly useful when comparing models with different numbers of predictors.
+
+3. **F-statistic:**
+
+* Definition: The F-statistic tests whether the overall regression model is
+  significant, i.e., whether at least one of the predictors explains a significant
+  amount of the variance in the dependent variable.
+* Formula:
+    $F = \frac{R^2 (\text{uncentered}) / (p - 1)}{(1 - R^2 (\text{uncentered})) / (n - p)}$
+
+where is the number of predictors, and is the number of observations.
+
+* Interpretation: A high F-statistic suggests that the model is statistically significant.
+
+4. **Prob (F-statistic):**
+
+* Definition: This is the p-value associated with the F-statistic. It indicates the
+  probability that the observed F-statistic would occur if the null hypothesis
+  (that none of the predictors are significant) were true.
+* Interpretation: A small p-value (typically less than 0.05) suggests that the
+  model is statistically significant, meaning that at least one predictor is important.
+
+5. **Log-Likelihood:**
+
+* Definition: The log-likelihood measures the likelihood that the model could
+  have produced the observed data. It is a measure of the fit of the model to the data.
+* Formula:
+    $\mathcal{L} = -\frac{n}{2} \log(2\pi \sigma^2) - \frac{1}{2\sigma^2} \sum (y_i - \hat{y}_i)^2$
+
+where is the variance of the residuals
+
+* Interpretation: A higher log-likelihood indicates a better fit of the model.
+
+6. **Akaike Information Criterion (AIC):**
+
+* Definition: AIC is a measure of the relative quality of a statistical model for a
+  given set of data. It penalizes the likelihood function for adding too many
+  parameters.
+* Formula:
+    $\text{AIC} = 2p - 2 \log(\mathcal{L})$
+
+where is the number of parameters, and is the log-likelihood.
+
+* Interpretation: Lower AIC values suggest a better model fit, but it penalizes for overfitting.
+
+7. **Bayesian Information Criterion (BIC):**
+
+* Definition: Similar to AIC, BIC penalizes models with more parameters, but more
+  strongly than AIC. It is used to select among models.
+
+* Formula:
+    $\text{BIC} = p \log(n) - 2 \log(\mathcal{L})$
+
+where is the number of parameters, is the number of observations, and is the log-likelihood.
+
+* Interpretation: A lower BIC indicates a better model, with stronger penalties for
+  models with more parameters.
+
+---
+
+Back to the example.
+
+Some of the independent variables may not contribute to the accuracy of
 the prediction. 
+
+:::: {.columns}
+::: {.column width="%"}
 
 ```{python}
 ax = ut.plotSetup3d(-2, 2, -2, 2, -200, 200)
@@ -748,6 +1169,8 @@ ax = ut.plotSetup3d(-2, 2, -2, 2, -200, 200)
 # try columns of X with large coefficients, or not
 ax.plot(X[:, 1], X[:, 2], 'ro', zs=y, markersize = 4)
 ```
+:::
+::: {.column width="%"}
 
 Note that each parameter of an independent variable has an associated confidence
 interval. 
@@ -755,13 +1178,26 @@ interval.
 If a coefficient is not distinguishable from zero, then we cannot assume that
 there is any relationship between the independent variable and the observations.
 
+:::
+::::
+
+---
+
 In other words, if the confidence interval for the parameter includes zero, the
 associated independent variable may not have any predictive value.
+
+:::: {.columns}
+::: {.column width="%"}
 
 ```{python}
 print('Confidence Intervals: {}'.format(results.conf_int()))
 print('Parameters: {}'.format(results.params))
 ```
+
+:::
+::: {.column width="%"}
+
+Find the independent variables that are not significant.
 
 ```{python}
 CIs = results.conf_int()
@@ -769,10 +1205,17 @@ notSignificant = (CIs[:,0] < 0) & (CIs[:,1] > 0)
 notSignificant
 ```
 
+Let's look at the shape of significant variables.
+
 ```{python}
 Xsignif = X[:,~notSignificant]
 Xsignif.shape
 ```
+
+:::
+::::
+
+---
 
 By eliminating independent variables that are not significant, we help avoid
 overfitting.
@@ -787,7 +1230,8 @@ print(results.summary())
 
 Let's see how powerful multiple regression can be on a real-world example.
 
-A typical application of linear models is predicting house prices.   
+A typical application of linear models is predicting house prices.
+
 Linear models have been used for this problem for decades, and when a municipality
 does a value assessment on your house, they typically use a linear model.
 
@@ -813,6 +1257,10 @@ $$
 
 and it will have one row for each house in the data set, with $y$ the sale price
 of the house.
+
+::: {.content-visible when-profile="slides"}
+## Ames Housing Data
+:::
 
 We will use data from housing sales in Ames, Iowa from 2006 to 2009:
 
@@ -854,12 +1302,19 @@ the formula for R2 with/without an intercept is different.
 [link](https://stats.stackexchange.com/questions/26176/removal-of-statistically-significant-intercept-term-increases-r2-in-linear-mo/26205#26205)
 :::
 
+::: {.content-visible when-profile="slides"}
+## Ames Housing Data, cont.
+:::
+
+Let's split the data into training and test sets.
 
 ```{python}
 from sklearn import utils, model_selection
 X_train, X_test, y_train, y_test = model_selection.train_test_split(
     X_intercept, y, test_size = 0.5, random_state = 0)
 ```
+
+Fit the model to the training data.
 
 ```{python}
 model = sm.OLS(y_train, X_train)
@@ -878,6 +1333,8 @@ We see that we have:
 * $\beta_5$: Marginal value of one additional half bath: \$15,600
 * $\beta_6$: Marginal value of one square foot of Garage Area: \$99
 * $\beta_7$: Marginal value of one square foot of Basement Area: \$62
+
+---
 
 Is our model doing a good job?  
 
