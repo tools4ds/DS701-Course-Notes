@@ -367,6 +367,15 @@ plt.show()
 ```
 
 
+---
+
+We observe the following in our plot of the digits in the first two principal components:
+
+- There is a decent clustering of some of our digits, in particular 0, 2, 3, 4, and 6.
+- The numbers 0 and 6 seem to be relatively close to each other in this space.
+- There is not a very clear separation of the number 5 from some of the other points..
+
+
 ## To scale or not to scale
 
 Consider a situation where we have age (years) and height (feet) data for 4 people.
@@ -510,7 +519,11 @@ We see that eigenvalues $\lambda_i$ of the matrix $S$ are the squares $\sigma_{i
 
 ---
 
-In practice, PCA is done by computing the SVD of your data matrix as opposed to forming the covariance matrix and computing the eigenvalues. This is for the following reasons
+In practice, PCA is done by computing the SVD of your data matrix as opposed to forming the covariance matrix and computing the eigenvalues. 
+
+You can then obtain the principal components from the right singular vectors $V$. The eigenvalues are obtained from squaring the entries of $\Sigma$ and scaling them by $\frac{1}{n-1}$
+
+The reason to compute PCA this way is
 
 :::: {.incremental}
 - **Numerical Stability**: SVD is a numerically stable method, which means it can handle datasets with high precision and avoid issues related to floating-point arithmetic errors.
