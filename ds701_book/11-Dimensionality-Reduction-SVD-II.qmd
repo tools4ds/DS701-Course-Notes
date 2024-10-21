@@ -106,42 +106,40 @@ Key observations:
 Would a similar study in the USA be effective?
 ::::
 
-## PCA Steps
+## PCA Overview
 
-The following is an outline of the procedure for performing PCA and determining the principal components. 
+The following describes the process to perform PCA and obtain your reduced data set. The goal is given
 
-After this outline, we will present how to actually compute the principal components.
-
----
-
-Input: $X_0\in\mathbb{R}^{m\times n}$
+Input: $X_0\in\mathbb{R}^{m\times n}$, produce
 
 Output: $Y\in\mathbb{R}^{m\times d}$ with $d << n$.
 
-1. Center the data (subtract the mean across rows): $X_0 \rightarrow X$.
+The first step is to center the data (subtract the mean across rows): $X_0 \rightarrow X$.
 
-    Example:
-    $$
-    X_0 = 
-    \begin{bmatrix}
-    90 & 60 & 60\\
-    80 & 60 & 70 \end{bmatrix}
-    $$
+Example:
+$$
+X_0 = 
+\begin{bmatrix}
+90 & 60 & 60\\
+80 & 60 & 70 \end{bmatrix}
+$$
 
-    The mean across rows is:
-    $$
-    \boldsymbol{\mu} = \begin{bmatrix} 85 & 60 & 65 \end{bmatrix}
-    $$
+The mean across rows is:
+$$
+\boldsymbol{\mu} = \begin{bmatrix} 85 & 60 & 65 \end{bmatrix}
+$$
+
+The mean-centered dataset is
+
+$$
+X = \begin{bmatrix}
+5 & 0 & -5\\
+-5 & 0 & 5 \end{bmatrix} 
+$$ 
+
+The next step is to determine the directions of the data that correspond to the largest variances. These are the principal components.
 
 ---
-
-2. Find the direction of the largest variance. This is the first principal component (PC1). 
-
-3. From the $d-1$ directions orthogonal to PC1, find the one with the largest variance. This is the second principal component (PC2).
-
-4. Repeat step 3 until you have accounted for all $d$ directions.
-
-5. Project the data into the direction of the PCs.
 
 ## Least Squares Interpretation
 
@@ -160,6 +158,10 @@ The sum of **residuals** (squared distances from the points to the line) is a **
 
 :::: {.fragment}
 What is the statistical entity that measures the variability in the data?
+::::
+
+:::: {.fragment}
+Answer: the covariance matrix.
 ::::
 
 ## Covariance Matrix
@@ -193,17 +195,19 @@ S =
 -50 & 0 & 50 \end{bmatrix}
 $$
 
+The matrix $S$ is symmetric, i.e., $S = S^{T}.$ 
+
 ## Spectral Decomposition
 
-Observe that the matrix $S$ is symmetric, i.e., $S = S^{T}.$
+We use the fact that $S$ is symmetric to apply the Spectral Decomposition, which states:
 
-Every real symmetric matrix $S$ has the factorization $V\Lambda V^{T}$, where $\Lambda$ is a diagonal matrix that contains the eigenvalues of S and the columns of $V$ are orthogonal eigenvectors of $S$.
+> Every real symmetric matrix $S$ has the factorization $V\Lambda V^{T}$, where $\Lambda$ is a diagonal matrix that contains the eigenvalues of S and the columns of $V$ are orthogonal eigenvectors of $S$.
 
 You can refresh your memory about this in the [Linear Algebra Refresher](04-Linear-Algebra-Refresher.qmd).
 
 ---
 
-The covariance matrix $S \in \mathbb{R}^{n\times n}$ can be written as $S = V\Lambda V^T$ where
+The covariance matrix $S \in \mathbb{R}^{n\times n}$ has the spectral decomposition $S = V\Lambda V^T$ where
 
 $$
 \Lambda = 
@@ -222,30 +226,49 @@ V = \begin{bmatrix}
 \mathbf{v}_1   & \mathbf{v}_2  & \dots & \mathbf{v}_{n-1}   & \mathbf{v}_n  \\
 \bigg| & \bigg| & & \bigg| & \bigg|
 \end{bmatrix}
- $$ 
+$$ 
  
 with $S\mathbf{v}_i = \lambda_i \mathbf{v}_i$ and $\mathbf{v}_i \perp \mathbf{v}_j$ for $i\neq j$.
 
-
-## Essentials of PCA
-
-- The columns of $V$ are the principal directions (or components). 
-- The principal components are the projection of the data into principal directions: $XV$.
-- The total variance $T$ in the data is the sum of all eigenvalues: $T = \lambda_1 + \lambda_2 + \dots + \lambda_n.$
-- The first eigenvector $\mathbf{v}_1$ points in the most significant direction of the data. This direction explains the largest fraction $\lambda_1/T$ of the total variance.
-- The second eigenvector $\mathbf{v}_2$ accounts for a smaller fraction $\lambda_2/T$.
-- The **explained variance** of component $i$ is the value $\lambda_i/T$. As $i\rightarrow n$ the explained variance gets smaller and approaches $\lambda_n/T$.
-- The **cumulative (total) explained variance** is the sum of the explained variances. The total explained variance for all eigenvalues is 1.
-
 ---
 
-Recalling the outline of our PCA steps, we see that steps 2-4 are accomplished by computing the eigen-decomposition of the covariance matrix $S = \frac{1}{m-1}X^T X = V\Lambda V^{T}$.
+The previous decomposition was for all $n$ dimensions. To obtain our reduced data, we take the first $d$ columns of $V$, i.e.,
 
-Step 5 is accomplished by computing $XV$.
+$$
+V' = \begin{bmatrix} 
+\bigg| & \bigg| &  & \bigg|   \\
+\mathbf{v}_1   & \mathbf{v}_2  & \dots & \mathbf{v}_{d}  \\
+\bigg| & \bigg| & & \bigg| 
+\end{bmatrix},
+$$ 
+and the $d\times d$ upper block of matrix $\Lambda$
+$$
+\Lambda' = 
+\begin{bmatrix}
+\lambda_1  &  & \\
+  & \lambda_2  &   \\
+&               & \ddots                \\
+&               &   &   & \lambda_d
+\end{bmatrix}.
+$$
 
----
+----
 
-Recall our example
+The direction $\mathbf{v}_i$ is the $i$-th principal component and the corresponding $\lambda_i$ accounts for the $i$-th largest variance in the dataset.
+
+In other words, $\mathbf{v}_1$ is the first principal component and is the direction that accounts for the most variance in the dataset. 
+
+The vector $\mathbf{v}_d$ is the $d$-th principal component and is the direction that accounts for the $d$-th most variance in the dataset. 
+
+The reduced data matrix is obtained by computing
+
+$$
+Y = XV'.
+$$
+
+----
+
+Returning to our example
 $$X 
 = \begin{bmatrix}
   5 & 0 & -5\\
@@ -274,11 +297,25 @@ $$
 0 \\ 1 \\ 0
 \end{bmatrix}$$
 
+
 What is the value of the total variance in the data?
 
 :::: {.fragment}
-Total variance: $T = 100$
+Total variance: $T = 100$.
+
+The first principal component accounts for all the variance in the dataset.
 ::::
+
+## PCA Summary
+
+- The columns of $V$ are the principal directions (or components). 
+- The principal components are the projection of the data into principal directions: $XV$.
+- The total variance $T$ in the data is the sum of all eigenvalues: $T = \lambda_1 + \lambda_2 + \dots + \lambda_n.$
+- The first eigenvector $\mathbf{v}_1$ points in the most significant direction of the data. This direction explains the largest fraction $\lambda_1/T$ of the total variance.
+- The second eigenvector $\mathbf{v}_2$ accounts for a smaller fraction $\lambda_2/T$.
+- The **explained variance** of component $i$ is the value $\lambda_i/T$. As $i\rightarrow n$ the explained variance gets smaller and approaches $\lambda_n/T$.
+- The **cumulative (total) explained variance** is the sum of the explained variances. The total explained variance for all eigenvalues is 1.
+
 
 ## Case Study: Random Data
 
@@ -449,6 +486,8 @@ Consider a situation where we have age (years) and height (feet) data for 4 peop
 :::
 ::::
 
+Notice that the dominant direction of the variance is aligned horizontally.
+
 ---
 
 What if the height is in cm?
@@ -467,6 +506,8 @@ What if the height is in cm?
 ![](figs/Scaling_cm.png)
 :::
 ::::
+
+Notice that the dominant direction of the variance is aligned vertically.
 
 ---
 
@@ -487,6 +528,8 @@ Let's standardize our data.
 :::
 ::::
 
+When we normalize our data, we observe an equal distribution of the variance.
+
 --- 
 
 What quantity is represented by $\frac{Cov(X, Y)}{\sigma_X\sigma_Y}$, where $X$ and $Y$ represent the random variables associated to sampling a person with that Age and Height?
@@ -494,6 +537,13 @@ What quantity is represented by $\frac{Cov(X, Y)}{\sigma_X\sigma_Y}$, where $X$ 
 :::: {.fragment}
 This is the correlation matrix. When you standardize your data you are no longer working with the covariance matrix but the correlation matrix.
 ::::
+
+:::: {.fragment}
+PCA on a standardized dataset and working with the correlation matrix is the best practice when your data has very different scales. 
+
+PCA identifies the directions with the maximum variance and large scale data can disproportionately influence the results of your PCA.
+::::
+
 
 ## Relationship to the SVD
 
@@ -570,14 +620,13 @@ $$
 
 We see that eigenvalues $\lambda_i$ of the matrix $S$ are the squares $\sigma_{i}^{2}$ of the singular values $\Sigma$ (scaled by $\frac{1}{m-1}$).
 
-
 ---
 
 In practice, PCA is done by computing the SVD of your data matrix as opposed to forming the covariance matrix and computing the eigenvalues. 
 
-You can then obtain the principal components from the right singular vectors $V$. The projected data into the lower dimensional space is $XV$. The eigenvalues of $S$ are obtained from squaring the entries of $\Sigma$ and scaling them by $\frac{1}{m-1}$
+The principal components are the right singular vectors $V$. The projected data is computed as $XV$. The eigenvalues of $S$ are obtained from squaring the entries of $\Sigma$ and scaling them by $\frac{1}{m-1}$.
 
-The reason to compute PCA this way is
+Reasons to compute PCA this way are
 
 :::: {.incremental}
 - **Numerical Stability**: SVD is a numerically stable method, which means it can handle datasets with high precision and avoid issues related to floating-point arithmetic errors.
