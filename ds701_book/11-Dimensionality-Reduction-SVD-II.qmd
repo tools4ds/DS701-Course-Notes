@@ -24,7 +24,7 @@ We have seen some of these challenges already, in particular:
 
 :::: {.incremental}
 - the curse of dimensionality, where data points become sparse in higher dimensions and distance metrics have less meaning,
-- overfitting, where high-dimensional data can lead models becoming overly complex and fitting to noise in the data as opposed to the actual signal,
+- overfitting, where high-dimensional data can lead to overly complex models that fit to noise in the data as opposed to the actual signal,
 - computational complexity, high-dimensional data requires more computing power and memory,
 - visualization, where high-dimensional data makes understanding and interpreting the data difficult.
 ::::
@@ -295,8 +295,8 @@ $$
 \end{bmatrix}, \:
 \mathbf{v}_3 = \begin{bmatrix}
 0 \\ 1 \\ 0
-\end{bmatrix}$$
-
+\end{bmatrix}
+$$
 
 What is the value of the total variance in the data?
 
@@ -689,13 +689,13 @@ We will describe how this process works.
 
 - Calculate pairwise similarities between points in the high-dimensional space.
 - Use a Gaussian distribution to convert distances into probabilities.
-- The similarity $p_{j\vert i}$ between points $i$ and $j$ is given by:
+- The probability $p_{j\vert i}$ between points $i$ and $j$ is given by:
   $$
   p_{j\vert i} = \frac{\exp(-\|x_i - x_j\|^2 / 2\sigma_i^2)}{\sum_{k \neq i} \exp(-\|x_i - x_k\|^2 / 2\sigma_i^2)}.
   $$
  - The $p_{j\vert i}$ value represents the conditional probability that point $x_i$ would choose $x_j$ as its neighbor. 
- - Note that $p_{i\vert i} = 0$.
- - The t-SNE method uses $p_{ij} = \frac{p_{j\vert i} + p_{i\vert j}}{2d}$ where $d$ is the dimension of the point. This is because the probabilities $p_{j\vert i}$ and $p_{i\vert j}$ are different. Using this value of $p_{ij}$ is called symmetric t-SNE.
+ - Note that we set $p_{i\vert i} = 0$ -- we don't consider a point to be its own neighbor.
+ - The t-SNE defines the joint probability $p_{ij} = \frac{p_{j\vert i} + p_{i\vert j}}{2d}$ where $d$ is the dimension of the point. This is because the probabilities $p_{j\vert i}$ and $p_{i\vert j}$ are different. Using this value of $p_{ij}$ is called symmetric t-SNE.
 
 ## Visualizing the Pairwise Similarities
 
@@ -789,7 +789,7 @@ plt.show()
   $$
   KL(P \| Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}.
   $$
-- THe KL divergence measures how different distribution $P$ is from distribution $Q$. In other words, how different are each of the higher dimensional $P_i$ point distributions from the lower dimensional $Q_i$ distributions.
+- The KL divergence measures how different distribution $P$ is from distribution $Q$. In other words, how different are each of the higher dimensional $P_i$ point distributions from the lower dimensional $Q_i$ distributions.
 - By minimizing this function, we ensure that the lower dimensional point clusters are similar to the higher dimensional clusters.
 - To minimize the KL divergence we use gradient descent to iteratively adjust the positions of points in the low-dimensional space.
 
@@ -869,5 +869,14 @@ In summary
 - Choose t-SNE for detailed visualizations of local structures and clusters.
 - t-SNE is sensitive to changes in it's parameters.
 - Both methods have their own strengths and are chosen based on the specific needs of the analysis.
+
+
+::: {.content-visible when-profile="slides"}
+
+## Course Feedback
+
+![](figs/qrcode_course_feedback.png){width="50%" fig-align="center" }
+
+:::
 
 ---
