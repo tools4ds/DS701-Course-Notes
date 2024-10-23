@@ -774,7 +774,7 @@ X = np.array([np.ones(m), np.log(xlog)]).T
 Q, R = np.linalg.qr(X)
 
 # Solve for beta
-beta = np.linalg.solve(R, Q.T @ yquad)
+beta = np.linalg.solve(R, Q.T @ ylog)
 ```
 
 And plot the results.
