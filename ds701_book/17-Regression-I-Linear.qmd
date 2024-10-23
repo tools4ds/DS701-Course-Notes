@@ -141,7 +141,7 @@ worse the next time.
 
 ![NFL Coaches](figs/L17-nfl-coaching-candidates_0jpg.jpg){width="300px"}
 
-[cite](https://faculty.mccombs.utexas.edu/carlos.carvalho/teaching/regression_to_the_mean.pdf)
+[Reference](https://faculty.mccombs.utexas.edu/carlos.carvalho/teaching/regression_to_the_mean.pdf)
 
 Is it a good strategy to fire a coach after a bad season?
 
@@ -194,7 +194,8 @@ centerAxes(ax)
 line = np.array([1, 0.5])
 xlin = -10.0 + 20.0 * np.random.random(100)
 ylin = line[0] + (line[1] * xlin) + np.random.randn(100)
-ax.plot(xlin, ylin, 'ro', markersize = 4);
+ax.plot(xlin, ylin, 'ro', markersize = 4)
+plt.show()
 ```
 
 ## Fit to Quadratic Models
@@ -210,7 +211,8 @@ quad = np.array([1, 3, 0.5])
 std = 8.0
 xquad = -10.0 + 20.0 * np.random.random(100)
 yquad = quad[0] + (quad[1] * xquad) + (quad[2] * xquad * xquad) + std * np.random.randn(100)
-ax.plot(xquad, yquad, 'ro', markersize = 4);
+ax.plot(xquad, yquad, 'ro', markersize = 4)
+plt.show()
 ```
 
 
@@ -227,7 +229,8 @@ log = np.array([1, 4])
 std = 1.5
 xlog = 10.0 * np.random.random(100)
 ylog = log[0] + log[1] * np.log(xlog) + std * np.random.randn(100)
-ax.plot(xlog, ylog, 'ro', markersize=4);
+ax.plot(xlog, ylog, 'ro', markersize=4)
+plt.show()
 ```
 
 ---
@@ -280,7 +283,8 @@ xlin = -10.0 + 20.0 * np.random.random(100)
 ylin = line[0] + (line[1] * xlin) + np.random.randn(100)
 ax.plot(xlin, ylin, 'ro', markersize = 4)
 ax.plot(xlin, line[0] + line[1] * xlin, 'b-')
-plt.text(-9, 3, r'$y = \beta_0 + \beta_1x$', size=20);
+plt.text(-9, 3, r'$y = \beta_0 + \beta_1x$', size=20)
+plt.show()
 ```
 
 ## Least-Squares Lines
@@ -442,7 +446,7 @@ a __residual__.
 ::::
 
 :::: {.fragment}
-There are several ways of measure how "close" the line is to the data. 
+There are several ways to measure how "close" the line is to the data. 
 ::::
 
 :::: {.fragment}
@@ -463,18 +467,20 @@ If the data points were on the line, the parameters $\beta_0$ and $\beta_1$ woul
 
 $$
 \begin{align*}
-\beta_0 + \beta_1 x_1 &= y_1 \\
-\beta_0 + \beta_1 x_2 &= y_2 \\
-\beta_0 + \beta_1 x_3 &= y_3 \\
+\beta_0 + \beta_1 x_1 &= y_1, \\
+\beta_0 + \beta_1 x_2 &= y_2, \\
+\beta_0 + \beta_1 x_3 &= y_3, \\
 &\vdots \\
-\beta_0 + \beta_1 x_n &= y_n
+\beta_0 + \beta_1 x_n &= y_n.
 \end{align*}
 $$
+
+--- 
 
 We can write this system as 
 
 $$
-X\mathbf{\beta} = \mathbf{y}
+X\mathbf{\beta} = \mathbf{y},
 $$
 
 where 
@@ -488,7 +494,7 @@ X=
 1 & x_n
 \end{bmatrix},
 \;\;\mathbf{\beta} = \begin{bmatrix}\beta_0\\\beta_1\end{bmatrix},
-\;\;\mathbf{y}=\begin{bmatrix}y_1\\y_2\\\vdots\\y_n\end{bmatrix}
+\;\;\mathbf{y}=\begin{bmatrix}y_1\\y_2\\\vdots\\y_n\end{bmatrix}.
 $$
 
 ---
@@ -507,7 +513,7 @@ $\beta$ that minimizes the sum of squared residuals, i.e.,
 
 $$
 \sum_i (\beta_0 + \beta_1 x_i - y_i)^2
-=\Vert X\beta -\mathbf{y}\Vert^2
+=\Vert X\beta -\mathbf{y}\Vert^2.
 $$
 
 This is key: 
@@ -530,7 +536,8 @@ xlin = -10.0 + 20.0 * np.random.random(100)
 ylin = line[0] + (line[1] * xlin) + np.random.randn(100)
 ax.plot(xlin, ylin, 'ro', markersize = 4)
 ax.plot(xlin, line[0] + line[1] * xlin, 'b-')
-plt.text(-9, 3, r'$y = \beta_0 + \beta_1x$', size=20);
+plt.text(-9, 3, r'$y = \beta_0 + \beta_1x$', size=20)
+plt.show()
 ```
 
 ---
@@ -542,7 +549,7 @@ From linear algebra we know that the least squares solution of
 $X\mathbf{\beta} = \mathbf{y}$ is given by the solution of the __normal equations__:
 
 $$
-X^TX\mathbf{\beta} = X^T\mathbf{y}
+X^TX\mathbf{\beta} = X^T\mathbf{y},
 $$
 
 because $X\mathbf{\beta} - \mathbf{y}$ is normal (e.g. orthogonal) to the column
@@ -554,7 +561,7 @@ We also know that the normal equations __always__ have at least one solution.
 And if $X^TX$ is invertible, there is a unique solution that is given by:
     
 $$
-\hat{\mathbf{\beta}} = (X^TX)^{-1} X^T\mathbf{y}
+\hat{\mathbf{\beta}} = (X^TX)^{-1} X^T\mathbf{y}.
 $$
 
 ::::
@@ -570,7 +577,7 @@ all the residuals into a __residual vector.__
 Then an exact equation is
 
 $$
-y = X\mathbf{\beta} + {\mathbf\epsilon}
+y = X\mathbf{\beta} + {\mathbf\epsilon},
 $$
 
 where $\mathbf{\epsilon}$ is the __residual vector.__
@@ -627,7 +634,7 @@ $$
 y = \beta_0f_0(x) + \beta_1f_1(x) + \dots + \beta_nf_n(x)
 $$
 
-where $f_0, \dots, f_n$ are known functions and $\beta_0,\dots,\beta_k$ are
+where $f_0, \dots, f_n$ are known functions and $\beta_0,\dots,\beta_n$ are
 parameters.
 
 ## Example
@@ -644,7 +651,8 @@ centerAxes(ax)
 quad = np.array([1, 3, 0.5])
 xquad = -10.0 + 20.0 * np.random.random(100)
 yquad = quad[0] + (quad[1] * xquad) + (quad[2] * xquad * xquad) + 2*np.random.randn(100)
-ax.plot(xquad, yquad, 'ro', markersize = 4);
+ax.plot(xquad, yquad, 'ro', markersize = 4)
+plt.show()
 ```
 
 :::
@@ -669,7 +677,7 @@ Suppose the actual values of the parameters are $\beta_0, \beta_1, \beta_2.$
 Then the coordinates of the first data point satisfy the equation
 
 $$
-y_1 = \beta_0 + \beta_1x_1 + \beta_2x_1^2 + \epsilon_1
+y_1 = \beta_0 + \beta_1x_1 + \beta_2x_1^2 + \epsilon_1,
 $$
 
 where $\epsilon_1$ is the residual error between the observed value $y_1$ and
@@ -679,10 +687,10 @@ Each data point determines a similar equation:
 
 $$
 \begin{align*}
-y_1 &= \beta_0 + \beta_1x_1 + \beta_2x_1^2 + \epsilon_1 \\
-y_2 &= \beta_0 + \beta_1x_2 + \beta_2x_2^2 + \epsilon_2 \\
+y_1 &= \beta_0 + \beta_1x_1 + \beta_2x_1^2 + \epsilon_1, \\
+y_2 &= \beta_0 + \beta_1x_2 + \beta_2x_2^2 + \epsilon_2, \\
 &\vdots \\
-y_n &= \beta_0 + \beta_1x_n + \beta_2x_n^2 + \epsilon_n
+y_n &= \beta_0 + \beta_1x_n + \beta_2x_n^2 + \epsilon_n.
 \end{align*}
 $$
 
@@ -707,8 +715,8 @@ y_n
 \end{bmatrix} 
 \begin{bmatrix}
 \beta_0\\\
-beta_1\\\
-beta_2
+\beta_1\\\
+\beta_2
 \end{bmatrix}
  + 
  \begin{bmatrix}
@@ -725,7 +733,12 @@ Let's solve for $\beta.$
 #| code-fold: false
 m = np.shape(xquad)[0]
 X = np.array([np.ones(m), xquad, xquad**2]).T
-beta = np.linalg.inv(X.T @ X) @ X.T @ yquad
+
+# QR decomposition
+Q, R = np.linalg.qr(X)
+
+# Solve for beta
+beta = np.linalg.solve(R, Q.T @ yquad)
 ```
 
 
@@ -740,7 +753,8 @@ ut.centerAxes(ax)
 xplot = np.linspace(-10, 10, 50)
 yestplot = beta[0] + beta[1] * xplot + beta[2] * xplot**2
 ax.plot(xplot, yestplot, 'b-', lw=2)
-ax.plot(xquad, yquad, 'ro', markersize=4);
+ax.plot(xquad, yquad, 'ro', markersize=4)
+plt.show()
 ```
 
 :::
@@ -755,7 +769,12 @@ Now let's try a different model.
 #| code-fold: false
 m = np.shape(xlog)[0]
 X = np.array([np.ones(m), np.log(xlog)]).T
-beta = np.linalg.inv(X.T @ X) @ X.T @ ylog
+
+# QR decomposition
+Q, R = np.linalg.qr(X)
+
+# Solve for beta
+beta = np.linalg.solve(R, Q.T @ yquad)
 ```
 
 And plot the results.
@@ -769,7 +788,8 @@ ut.centerAxes(ax)
 xplot = np.logspace(np.log10(0.0001),1,100)
 yestplot = beta[0]+beta[1]*np.log(xplot)
 ax.plot(xplot,yestplot,'b-',lw=2)
-ax.plot(xlog,ylog,'ro',markersize=4);
+ax.plot(xlog,ylog,'ro',markersize=4)
+plt.show()
 ```
 
 ## Multiple Regression
@@ -780,7 +800,7 @@ and one dependent variable, $y$.
 A simple equation for predicting $y$ from $u$ and $v$ has the form
 
 $$
-y = \beta_0 + \beta_1 u + \beta_2 v
+y = \beta_0 + \beta_1 u + \beta_2 v.
 $$
 
 Since there is more than one independent variable, this is called
@@ -793,7 +813,7 @@ __multiple regression.__
 A more general prediction equation might have the form
 
 $$
-y = \beta_0 + \beta_1 u + \beta_2 v + \beta_3u^2 + \beta_4 uv + \beta_5 v^2
+y = \beta_0 + \beta_1 u + \beta_2 v + \beta_3u^2 + \beta_4 uv + \beta_5 v^2.
 $$
 
 A least squares fit to equations like this is called a __trend surface.__
@@ -801,14 +821,14 @@ A least squares fit to equations like this is called a __trend surface.__
 In general, a linear model will arise whenever $y$ is to be predicted by an equation of the form
 
 $$
-y = \beta_0f_0(u,v) + \beta_1f_1(u,v) + \cdots + \beta_kf_k(u,v)
+y = \beta_0f_0(u,v) + \beta_1f_1(u,v) + \cdots + \beta_nf_n(u,v),
 $$
 
-with $f_0,\dots,f_k$ any sort of known functions and $\beta_0,...,\beta_k$ unknown weights.
+with $f_0,\dots,f_n$ any sort of known functions and $\beta_0,...,\beta_n$ unknown weights.
 
 ## Example
 
-Let's take an example.   Here are a set of points in $\mathbb{R}^3$:
+Let's take an example. Here are a set of points in $\mathbb{R}^3$:
 
 ```{python}
 ax = ut.plotSetup3d(-7, 7, -7, 7, -10, 10, figsize = (7, 7))
@@ -825,7 +845,8 @@ A = np.array([u,v]).T
 P = A @ np.linalg.inv(A.T @ A) @ A.T
 coords = P @ np.array([xc, yc, np.zeros(npts)])
 coords[2] += np.random.randn(npts)
-ax.plot(coords[0], coords[1], 'ro', zs=coords[2], markersize = 6);
+ax.plot(coords[0], coords[1], 'ro', zs=coords[2], markersize = 6)
+plt.show()
 ```
 
 ## Example
@@ -833,7 +854,7 @@ ax.plot(coords[0], coords[1], 'ro', zs=coords[2], markersize = 6);
 In geography, local models of terrain are constructed from data
 
 $$
-(u_1, v_1, y_1), \dots, (u_n, v_n, y_n)
+(u_1, v_1, y_1), \dots, (u_n, v_n, y_n),
 $$
 
 where $u_j, v_j$, and $y_j$ are latitude, longitude, and altitude, respectively.
@@ -849,10 +870,10 @@ We expect the data to satisfy these equations:
 
 $$
 \begin{align*}
-y_1 &= \beta_0 + \beta_1 u_1 + \beta_2 v_1 + \beta_3 y_1 + \epsilon_1 \\
-y_2 &= \beta_0 + \beta_1 u_2 + \beta_2 v_2 + \beta_3 y_2 + \epsilon_2 \\
+y_1 &= \beta_0 + \beta_1 u_1 + \beta_2 v_1 + \beta_3 y_1 + \epsilon_1, \\
+y_2 &= \beta_0 + \beta_1 u_2 + \beta_2 v_2 + \beta_3 y_2 + \epsilon_2, \\
 \vdots \\
-y_n &= \beta_0 + \beta_1 u_n + \beta_2 v_n + \beta_3 y_n + \epsilon_n
+y_n &= \beta_0 + \beta_1 u_n + \beta_2 v_n + \beta_3 y_n + \epsilon_n.
 \end{align*}
 $$
 
@@ -884,7 +905,7 @@ X =
 \epsilon_2\\
 \vdots\\ 
 \epsilon_n
-\end{bmatrix}
+\end{bmatrix}.
 $$
 
 ---
@@ -900,7 +921,8 @@ u = [-4.0, 3.0, 1.0]
 # plotting the span of v
 ut.plotSpan3d(ax,u,v,'Green')
 npts = 50
-ax.plot(coords[0], coords[1], 'ro', zs = coords[2], markersize=6);
+ax.plot(coords[0], coords[1], 'ro', zs = coords[2], markersize=6)
+plt.show()
 ```
 
 :::
@@ -942,7 +964,7 @@ explained by the model $X\hat{\beta}$.
 The variance of $\mathbf{y}$ is 
 
 $$
-\text{Var}(\mathbf{y}) =\frac{1}{n} \sum_{i=1}^n \left(y_i-\overline{y}\right)^2
+\text{Var}(\mathbf{y}) =\frac{1}{n} \sum_{i=1}^n \left(y_i-\overline{y}\right)^2,
 $$
 
 where $\overline{y}=\frac{1}{n}\sum_{i=1}^ny_i$.
@@ -954,7 +976,7 @@ where $\overline{y}=\frac{1}{n}\sum_{i=1}^ny_i$.
 
 For any given $n$, we can equally work with just 
 $$
-\sum_{i=1}^n \left(y_i-\overline{y}\right)^2
+\sum_{i=1}^n \left(y_i-\overline{y}\right)^2,
 $$
 
 which is called the __Total Sum of Squares__ (TSS).
@@ -969,17 +991,17 @@ $\hat{y_i} = \mathbf{x}_i^T\beta$.
 We can break the total sum of squares into two parts:
 
 * the residual $\epsilon$ is $y_i - \hat{y_i}$, and 
-* the part that the model "explains" is $\hat{y_i} - \overline{y_i}.$
+* the part that the model "explains" is $\hat{y_i} - \overline{y}.$
 
 ## RSS and ESS
 
-Se we define Residual Sum of Squares (RSS) as:
+Se we define the Residual Sum of Squares (RSS) as:
 
 $$
 \text{RSS} = \sum_{i=1}^n \left(y_i-\hat{y_i}\right)^2,
 $$
 
-and Explained Sum of Squares (ESS) as:
+and the Explained Sum of Squares (ESS) as:
 
 $$
 \text{ESS} = \sum_{i=1}^n \left(\hat{y_i}-\overline{y}\right)^2,
@@ -991,7 +1013,7 @@ squares of the residuals plus the sum of squares of the explained part.
 In other words:
 
 $$
-\text{TSS} = \text{RSS} + \text{ESS}
+\text{TSS} = \text{RSS} + \text{ESS}.
 $$
 
 ## $R^2$, cont.
@@ -1004,7 +1026,7 @@ So the measure of fit $R^2$ is defined as:
 $$
 R^2 = \frac{\text{ESS}}{\text{TSS}} 
 = 1-\frac{\text{RSS}}{\text{TSS}}
-= 1 - \frac{\sum_{i=1}^n \left(y_i-\hat{y_i}\right)^2}{\sum_{i=1}^n \left(y_i-\overline{y}\right)^2}
+= 1 - \frac{\sum_{i=1}^n \left(y_i-\hat{y_i}\right)^2}{\sum_{i=1}^n \left(y_i-\overline{y}\right)^2}.
 $$
 
 As a result, $0\leq R^2\leq 1$.
@@ -1018,7 +1040,7 @@ This is more specifically called $R^2$ __centered__.
 There is also an __uncentered__ version of $R^2$ defined as:
 
 $$
-R^2 (\text{uncentered}) = 1 - \frac{\sum_{i=1}^n \left(y_i-\hat{y_i}\right)^2}{\sum_{i=1}^n y_i^2}
+R^2 (\text{uncentered}) = 1 - \frac{\sum_{i=1}^n \left(y_i-\hat{y_i}\right)^2}{\sum_{i=1}^n y_i^2}.
 $$
 
 ::::
@@ -1091,7 +1113,7 @@ job of predicting the observations $y_i$.
 
 ::: {.callout-note}
 The summary uses the __uncentered__ version of $R^2$ because, as the footnote says,
-the model does not include a constant to account fo an intercept term. You can try
+the model does not include a constant to account for an intercept term. You can try
 uncommenting the line `X_with_intercept = sm.add_constant(X)` and see that the
 summary then uses the centered version of $R^2$.
 :::
@@ -1299,6 +1321,8 @@ We can consider various measurable attributes of a house (its "features") as the
 independent variables, and the most recent sale price of the house as the
 dependent variable.
 
+---
+
 For our case study, we will use the features:
 
 * Lot Area (sq ft), 
@@ -1312,7 +1336,7 @@ For our case study, we will use the features:
 So our design matrix will have 8 columns (including the constant for the intercept):
 
 $$
-X\beta = \mathbf{y}
+X\beta = \mathbf{y},
 $$
 
 and it will have one row for each house in the data set, with $y$ the sale price
@@ -1330,6 +1354,8 @@ We will use data from housing sales in Ames, Iowa from 2006 to 2009:
 [CC BY-SA 2.5](https://creativecommons.org/licenses/by-sa/2.5)
 via Wikimedia Commons
 
+---
+
 ```{python}
 df = pd.read_csv('data/ames-housing-data/train.csv')
 ```
@@ -1337,6 +1363,8 @@ df = pd.read_csv('data/ames-housing-data/train.csv')
 ```{python}
 df[['LotArea', 'GrLivArea', 'Fireplaces', 'FullBath', 'HalfBath', 'GarageArea', 'TotalBsmtSF', 'SalePrice']].head()
 ```
+
+---
 
 Some things to note here:
 
@@ -1357,9 +1385,8 @@ y = df['SalePrice'].values
 
 ::: {.callout-note}
 Note that removing the intercept will cause the $R^2$ to go up, which is 
-counter-intuitive.  The reason is explained here -- but amounts to the fact that
+counter-intuitive.  The reason is explained [here(https://stats.stackexchange.com/questions/26176/removal-of-statistically-significant-intercept-term-increases-r2-in-linear-mo/26205#26205)] -- but amounts to the fact that
 the formula for R2 with/without an intercept is different.
-[link](https://stats.stackexchange.com/questions/26176/removal-of-statistically-significant-intercept-term-increases-r2-in-linear-mo/26205#26205)
 :::
 
 ::: {.content-visible when-profile="slides"}
@@ -1381,6 +1408,8 @@ model = sm.OLS(y_train, X_train)
 results = model.fit()
 print(results.summary())
 ```
+
+---
 
 We see that we have:
 
@@ -1431,7 +1460,8 @@ ax2.plot([0,500000],[0,500000],'r-')
 ax2.axis('equal')
 ax2.set_ylim([0,500000])
 ax2.set_xlim([0,500000])
-ax2.set_title(f'In Sample Prediction, $R^2$ is {r2_train:0.3f}');
+ax2.set_title(f'In Sample Prediction, $R^2$ is {r2_train:0.3f}')
+plt.show()
 ```
 
 We see that the model does a reasonable job for house values less than about 
