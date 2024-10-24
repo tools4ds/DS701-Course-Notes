@@ -760,7 +760,35 @@ plt.show()
 
 ---
 
+:::: {.columns}
+::: {.column width="50%"}
+
 Now let's try a different model.
+
+$$
+\begin{bmatrix}
+y_1\\
+y_2\\
+\vdots\\
+y_n
+\end{bmatrix} = 
+\begin{bmatrix}1&log(x_1)\\
+1&log(x_2)\\
+\vdots&\vdots\\
+1&log(x_n)
+\end{bmatrix} 
+\begin{bmatrix}
+\beta_0\\\
+\beta_1
+\end{bmatrix}
++ 
+\begin{bmatrix}
+\epsilon_1\\
+\epsilon_2\\
+\vdots\\
+\epsilon_n
+\end{bmatrix}
+ $$
 
 ```{python}
 #| code-fold: false
@@ -770,6 +798,9 @@ X = np.array([np.ones(m), np.log(xlog)]).T
 # Solve for beta
 beta = np.linalg.inv(X.T @ X) @ X.T @ ylog
 ```
+
+:::
+::: {.column width="50%"}
 
 And plot the results.
 
@@ -785,6 +816,9 @@ ax.plot(xplot,yestplot,'b-',lw=2)
 ax.plot(xlog,ylog,'ro',markersize=4)
 plt.show()
 ```
+
+:::
+::::
 
 ## Multiple Regression
 
@@ -1379,7 +1413,9 @@ y = df['SalePrice'].values
 
 ::: {.callout-note}
 Note that removing the intercept will cause the $R^2$ to go up, which is 
-counter-intuitive.  The reason is explained [here(https://stats.stackexchange.com/questions/26176/removal-of-statistically-significant-intercept-term-increases-r2-in-linear-mo/26205#26205)] -- but amounts to the fact that
+counter-intuitive.  The reason is explained 
+[here](https://stats.stackexchange.com/questions/26176/removal-of-statistically-significant-intercept-term-increases-r2-in-linear-mo/26205#26205)] 
+-- but amounts to the fact that
 the formula for R2 with/without an intercept is different.
 :::
 
