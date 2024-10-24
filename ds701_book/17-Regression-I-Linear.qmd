@@ -734,11 +734,8 @@ Let's solve for $\beta.$
 m = np.shape(xquad)[0]
 X = np.array([np.ones(m), xquad, xquad**2]).T
 
-# QR decomposition
-Q, R = np.linalg.qr(X)
-
 # Solve for beta
-beta = np.linalg.solve(R, Q.T @ yquad)
+beta = np.linalg.inv(X.T @ X) @ X.T @ yquad
 ```
 
 
@@ -770,11 +767,8 @@ Now let's try a different model.
 m = np.shape(xlog)[0]
 X = np.array([np.ones(m), np.log(xlog)]).T
 
-# QR decomposition
-Q, R = np.linalg.qr(X)
-
 # Solve for beta
-beta = np.linalg.solve(R, Q.T @ ylog)
+beta = np.linalg.inv(X.T @ X) @ X.T @ ylog
 ```
 
 And plot the results.
@@ -854,10 +848,10 @@ plt.show()
 In geography, local models of terrain are constructed from data
 
 $$
-(u_1, v_1, y_1), \dots, (u_n, v_n, y_n),
+(u_1, v_1, z_1), \dots, (u_n, v_n, z_n),
 $$
 
-where $u_j, v_j$, and $y_j$ are latitude, longitude, and altitude, respectively.
+where $u_j, v_j$, and $z_j$ are latitude, longitude, and altitude, respectively.
 
 :::: {.fragment}
 Let's describe the linear models that gives a least-squares fit to such data.  
@@ -870,10 +864,10 @@ We expect the data to satisfy these equations:
 
 $$
 \begin{align*}
-y_1 &= \beta_0 + \beta_1 u_1 + \beta_2 v_1 + \beta_3 y_1 + \epsilon_1, \\
-y_2 &= \beta_0 + \beta_1 u_2 + \beta_2 v_2 + \beta_3 y_2 + \epsilon_2, \\
+y_1 &= \beta_0 + \beta_1 u_1 + \beta_2 v_1 + \beta_3 z_1 + \epsilon_1, \\
+y_2 &= \beta_0 + \beta_1 u_2 + \beta_2 v_2 + \beta_3 z_2 + \epsilon_2, \\
 \vdots \\
-y_n &= \beta_0 + \beta_1 u_n + \beta_2 v_n + \beta_3 y_n + \epsilon_n.
+y_n &= \beta_0 + \beta_1 u_n + \beta_2 v_n + \beta_3 z_n + \epsilon_n.
 \end{align*}
 $$
 
@@ -887,10 +881,10 @@ y_1\\
 y_n
 \end{bmatrix},\;\;
 X = 
-\begin{bmatrix}1&u_1&v_1&y_1\\
-1&u_2&v_2&y_2\\
+\begin{bmatrix}1&u_1&v_1&z_1\\
+1&u_2&v_2&z_2\\
 \vdots&\vdots&\vdots&\vdots\\
-1&u_n&v_n&y_n
+1&u_n&v_n&z_n
 \end{bmatrix},\;\;
 \mathbf{\beta}=
 \begin{bmatrix}
