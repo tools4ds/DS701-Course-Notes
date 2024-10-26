@@ -1,9 +1,9 @@
 ---
 title: Neural Networks I -- Gradient Descent
 jupyter: python3
-format:
-    html
 ---
+
+## Introduction
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/23-NN-I-Gradient-Descent.ipynb)
 
@@ -26,26 +26,14 @@ import laUtilities as ut
 ```
 
 
-
-```{margin}
+::: {.callout-note}
 The content builds upon 
+
 * Andrej Karpathy's excellent [video](https://youtu.be/VMj-3S1tku0?si=9HKPIq36EnHektSm) on building _micrograd_ and 
 * _Understanding Deep Learning_ [book preprint](https://udlbook.github.io/udlbook/) by Simone Prince 
 * as well as many other sources cited below.
-```
+:::
 
-### Preview of _new_ Deep Learning for Data Science
-
-This is a preview of _Deep Learning for Data Science_ which is debuting Spring '24 as
-a Special Topics Course (__CDS DS 598 Special Topics in Machine Learning Section B1__) and will then
-become a regular course each Spring after that. It will count towards the MSDS
-credit.
-
-In Spring 24, this course satisfies:
-* BSDS Methodology track in Applied and Use-Inspired DS & AI
-* MSDS A3 Competency 
-* PhD in DS Competency in Predictive Analysis & ML
-* PhD in DS Subject core in Data Mining & Machine Learning
 
 ## The "Unreasonable" Effectiveness of Deep Neural Networks
 
