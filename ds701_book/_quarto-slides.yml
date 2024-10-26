@@ -28,7 +28,7 @@ project:
     - 20-Recommender-Systems.qmd
     - 21-Networks-I.qmd
     - 22-Networks-II-Centrality-Clustering.qmd
-    #- 23-NN-I-Gradient-Descent.qmd
+    - 23-NN-I-Gradient-Descent.qmd
     - 24-NN-II-Backprop.qmd
     - 25-NN-III-CNNs.qmd
     - "!23-NN-I-Gradient-Descent.qmd" # for now ignore this file since cell 10 is stuck
