@@ -224,15 +224,17 @@ However, all that is available are categorical observations, which we will code 
 
 That is, these could be pass/fail, admit/reject, Democrat/Republican, etc.
 
-Now, a linear function like $\alpha + \beta x$ cannot be used to predict
+Now, a linear function like $\beta_0 + \beta_1 x$ cannot be used to predict
 probability directly, because the linear function takes on all values (from
 -$\infty$ to +$\infty$), and probability only ranges over $(0, 1)$.
 
 ## Odds and Log-Odds
 
-However, there is a transformation of probability that works: it is called __log-odds__.
+However, there is a transformation of probability that works: it is called
+__log-odds__.
 
-For any probabilty $p$, the __odds__ is defined as $p/(1-p)$, which is the ratio of the probability of an event to the probability of the non-event.
+For any probabilty $p$, the __odds__ is defined as $p/(1-p)$, which is the ratio
+of the probability of an event to the probability of the non-event.
 
 Notice that odds vary from 0 to $\infty$, and odds < 1 indicates that $p < 1/2$.
 
@@ -262,17 +264,17 @@ ax.set_title('Logit Function: $\log (p/1-p)$', fontsize = 16);
 :::
 
 So, logistic regression does the following: it does a linear regression of
-$\alpha + \beta x$ against $\log p/(1-p)$.
+$\beta_0 + \beta_1 x$ against $\log p/(1-p)$.
 
 That is, it fits:
 
 $$
 \begin{aligned}
-\alpha + \beta x &= \log \frac{p(x)}{1-p(x)} \\
-e^{\alpha + \beta x} &= \frac{p(x)}{1-p(x)} \quad \text{(exponentiate both sides)} \\
-e^{\alpha + \beta x} (1-p(x)) &= p(x) \quad \text{(multiply both sides by $1-p(x)$)} \\
-e^{\alpha + \beta x}  &= p(x) + p(x)e^{\alpha + \beta x} \quad \text{(distribute $p(x)$)} \\
-\frac{e^{\alpha + \beta x}}{1 +e^{\alpha + \beta x}} &= p(x)
+\beta_0 + \beta_1 x &= \log \frac{p(x)}{1-p(x)} \\
+e^{\beta_0 + \beta_1 x} &= \frac{p(x)}{1-p(x)} \quad \text{(exponentiate both sides)} \\
+e^{\beta_0 + \beta_1 x} (1-p(x)) &= p(x) \quad \text{(multiply both sides by $1-p(x)$)} \\
+e^{\beta_0 + \beta_1 x}  &= p(x) + p(x)e^{\beta_0 + \beta_1 x} \quad \text{(distribute $p(x)$)} \\
+\frac{e^{\beta_0 + \beta_1 x}}{1 +e^{\beta_0 + \beta_1 x}} &= p(x)
 \end{aligned}
 $$
 
@@ -283,10 +285,10 @@ $$
 So, logistic regression fits a probability of the following form:
 
 $$
-p(x) = P(y=1\mid x) = \frac{e^{\alpha+\beta x}}{1+e^{\alpha+\beta x}}
+p(x) = P(y=1\mid x) = \frac{e^{\beta_0+\beta_1 x}}{1+e^{\beta_0+\beta_1 x}}
 $$
 
-This is a sigmoid function; when $\beta > 0$, $x\rightarrow \infty$, then
+This is a sigmoid function; when $\beta_1 > 0$, $x\rightarrow \infty$, then
 $p(x)\rightarrow 1$ and when $x\rightarrow -\infty$, then $p(x)\rightarrow 0$.
 
 ::: {.content-visible when-profile="slides"}
@@ -305,8 +307,8 @@ for i in range(len(alphas)):
     a = alphas[i]
     b = betas[i]
     y = np.exp(a+b*x)/(1+np.exp(a+b*x))
-#     plt.plot(x,y,label=r"$\frac{e^{%d + %3.1fx}}{1+e^{%d + %3.1fx}}\;\alpha=%d, \beta=%3.1f$" % (a,b,a,b,a,b))
-    ax.plot(x,y,label=r"$\alpha=%d,$    $\beta=%3.1f$" % (a,b))
+#     plt.plot(x,y,label=r"$\frac{e^{%d + %3.1fx}}{1+e^{%d + %3.1fx}}\;\beta_0=%d, \beta_1=%3.1f$" % (a,b,a,b,a,b))
+    ax.plot(x,y,label=r"$\beta_0=%d,$    $\beta_1=%3.1f$" % (a,b))
 ax.tick_params(labelsize=12)
 ax.set_xlabel('x', fontsize = 14)
 ax.set_ylabel('$p(x)$', fontsize = 14)
@@ -314,25 +316,25 @@ ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 16})
 ax.set_title('Logistic Functions', fontsize = 16);
 ```
 
-Parameter $\beta$ controls how fast $p(x)$ raises from $0$ to $1$
+Parameter $\beta_1$ controls how fast $p(x)$ raises from $0$ to $1$
 
-The value of -$\alpha$/$\beta$ shows the value of $x$ for which $p(x)=0.5$
+The value of -$\beta_0$/$\beta_1$ shows the value of $x$ for which $p(x)=0.5$
 
 ::: {.content-visible when-profile="slides"}
 ## Odds and Log-Odds
 :::
 
-Another interpretation of $\alpha$ is that it gives the __base rate__ -- the
+Another interpretation of $\beta_0$ is that it gives the __base rate__ -- the
 unconditional probability of a 1.   That is, if you knew nothing about a
-particular data item, then $p(x) = 1/(1+e^{-\alpha})$.
+particular data item, then $p(x) = 1/(1+e^{-\beta_0})$.
 
 The function $f(x) = \log (x/(1-x))$ is called the __logit__ function.
 
 So a compact way to describe logistic regression is that it finds regression
-coefficients $\alpha, \beta$ to fit:
+coefficients $\beta_0, \beta_1$ to fit:
 
 $$
-\text{logit}\left(p(x)\right)=\log\left(\frac{p(x)}{1-p(x)} \right) = \alpha + \beta x
+\text{logit}\left(p(x)\right)=\log\left(\frac{p(x)}{1-p(x)} \right) = \beta_0 + \beta_1 x
 $$
 
 Note also that the __inverse__ logit function is:
@@ -350,13 +352,13 @@ Somewhat confusingly, this is called the __logistic__ function.
 So, the best way to think of logistic regression is that we compute a linear function:
     
 $$
-\alpha + \beta x
+\beta_0 + \beta_1 x
 $$
     
 and then "map" that to a probability using the $\text{logit}^{-1}$ function:
 
 $$
-\frac{e^{\alpha+\beta x}}{1+e^{\alpha+\beta x}}
+\frac{e^{\beta_0+\beta_1 x}}{1+e^{\beta_0+\beta_1 x}}
 $$
 
 ## Logistic vs Linear Regression
@@ -366,7 +368,7 @@ Let's take a moment to compare linear and logistic regression.
 In __Linear regression__ we fit 
 
 $$
-y_i = \alpha +\beta x_i + \epsilon_i.
+y_i = \beta_0 +\beta_1 x_i + \epsilon_i.
 $$
 
 We do the fitting by minimizing the sum of squared error ($\Vert\epsilon\Vert$).
@@ -381,7 +383,7 @@ then minimizing the sum of squared error is exactly the same as finding the
 maximum likelihood of the data with respect to the probability of the errors.
 
 So, in the case of linear regression, it is a lucky fact that the __MLE__ of
-$\alpha$ and $\beta$ can be found by a __closed-form__ calculation.
+$\beta_0$ and $\beta_1$ can be found by a __closed-form__ calculation.
 
 ::: {.content-visible when-profile="slides"}
 ## Logistic vs Linear Regression
@@ -390,7 +392,7 @@ $\alpha$ and $\beta$ can be found by a __closed-form__ calculation.
 In __Logistic regression__ we fit 
 
 $$
-\text{logit}(p(x_i)) = \alpha + \beta x_i.
+\text{logit}(p(x_i)) = \beta_0 + \beta_1 x_i.
 $$
 
 
@@ -404,8 +406,8 @@ That is, we choose the parameter values that maximize the likelihood of the data
 
 $$
 \text{Pr}(y_i \mid x_i) = 
-\left\{\begin{array}{lr}\text{logit}^{-1}(\alpha + \beta x_i)& \text{if } y_i = 1\\
-1 - \text{logit}^{-1}(\alpha + \beta x_i)& \text{if } y_i = 0\end{array}\right.
+\left\{\begin{array}{lr}\text{logit}^{-1}(\beta_0 + \beta_1 x_i)& \text{if } y_i = 1\\
+1 - \text{logit}^{-1}(\beta_0 + \beta_1 x_i)& \text{if } y_i = 0\end{array}\right.
 $$
 
 ::: {.content-visible when-profile="slides"}
@@ -415,13 +417,13 @@ $$
 We can write this as a single expression:
 
 $$
-\text{Pr}(y_i \mid x_i) = \text{logit}^{-1}(\alpha + \beta x_i)^{y_i} (1-\text{logit}^{-1}(\alpha + \beta x_i))^{1-y_i} 
+\text{Pr}(y_i \mid x_i) = \text{logit}^{-1}(\beta_0 + \beta_1 x_i)^{y_i} (1-\text{logit}^{-1}(\beta_0 + \beta_1 x_i))^{1-y_i} 
 $$
 
-We then use this to compute the __likelihood__ of parameters $\alpha$, $\beta$:
+We then use this to compute the __likelihood__ of parameters $\beta_0$, $\beta_1$:
 
 $$
-L(\alpha, \beta \mid x_i, y_i) = \text{logit}^{-1}(\alpha + \beta x_i)^{y_i} (1-\text{logit}^{-1}(\alpha + \beta x_i))^{1-y_i}
+L(\beta_0, \beta_1 \mid x_i, y_i) = \text{logit}^{-1}(\beta_0 + \beta_1 x_i)^{y_i} (1-\text{logit}^{-1}(\beta_0 + \beta_1 x_i))^{1-y_i}
 $$
 
 which is a function that we can maximize via various kinds of gradient descent.
@@ -432,7 +434,7 @@ So, in summary, we have:
 
 **Input** pairs $(x_i,y_i)$
 
-**Output** parameters $\widehat{\alpha}$ and $\widehat{\beta}$ that maximize the
+**Output** parameters $\widehat{\beta_0}$ and $\widehat{\beta_1}$ that maximize the
 likelihood of the data given these parameters for the logistic regression model.
 
 **Method** Maximum likelihood estimation, obtained by gradient descent.
@@ -444,7 +446,7 @@ independent variable (feature).
 ## Logistic Regression in Practice
 :::
 
-If we want to include a constant (ie, $\alpha$) we need to add a column of 1s (just
+If we want to include a constant (i.e., $\beta_0$) we need to add a column of 1s (just
 like in linear regression).
 
 ```{python}
@@ -480,7 +482,7 @@ Note that by fitting a model to the data, we can make predictions for inputs tha
 were never seen in the data.  
 
 Furthermore, we can make a prediction of a probability for cases where we don't
-have enough data to estimate the probability directly -- e.g, for specific
+have enough data to estimate the probability directly -- e.g., for specific
 parameter values.
 
 Let's see how well the model fits the data.
