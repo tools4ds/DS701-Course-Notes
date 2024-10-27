@@ -119,8 +119,22 @@ Unfortunately, in practice we will run into trouble even if variables are *almos
 
 To illustrate the multcollinearity problem, we'll load a standard dataset.
 
-The Longley dataset contains various US macroeconomic variables from 1947–1962.
+The [Longley](https://www.statsmodels.org/stable/datasets/generated/longley.html) dataset contains various US macroeconomic variables from 1947–1962.
 
+We have the following features:
+
+- GNP - GNP (Gross National Product)
+- GNPDEFL - GNP deflator
+- UNEMP - Number of unemployed
+- ARMED - Size of armed forces
+- POP - Population
+- YEAR - Year (1947 - 1962)
+
+We want to predict:
+
+- TOTEMP - Total Employment
+
+--- 
 ```{python}
 from statsmodels.datasets.longley import load_pandas
 y = load_pandas().endog
@@ -129,7 +143,8 @@ X['const'] = 1.0
 X.index = X['YEAR']
 y.index = X['YEAR']
 X.drop('YEAR', axis = 1, inplace = True)
-X.head()
+print(X.head())
+print(y.head())
 ```
 
 ---
@@ -266,6 +281,10 @@ Here are two strategies we can employ to address multicollinearity:
 1. Ridge Regression
 2. Model Selection via LASSO
 
+::: {.aside}
+PCA also addresses multicollinearity by transforming the correlated features into uncorrelated features. However in this approach you lose the original features, which is less explainable.
+:::
+
 ## Ridge Regression
 
 The first thing to note is that when columns of $X$ are nearly dependent, the components of $\hat{\boldsymbol{\beta}}$ tend to be __large in magnitude__.
@@ -326,9 +345,12 @@ Via least-squares, we determine the coefficients $\beta_1$ and $\beta_2$.
 
 Now consider if the columns of $X$ are __nearly dependent__.
 
+:::: {.columns}
+::: {.column width="50%"}
+
 ```{python}
 #| fig-align: center
-ax = ut.plotSetup(size=(5, 3))
+ax = ut.plotSetup(size=(4, 2))
 ut.centerAxes(ax)
 u = np.array([2, 1])
 v = np.array([4, 1])
@@ -341,6 +363,35 @@ ut.plotPoint(ax, sum_uv[0], sum_uv[1])
 ax.plot(0, 0, '')
 plt.show()
 ```
+:::
+::: {.column width="50%"}
+
+```{python}
+#| fig-align: center
+ax = ut.plotSetup(size=(4, 2))
+ut.centerAxes(ax)
+u = np.array([2, 1])
+v = np.array([4, 1])
+alph = 2.675
+beta = -8.75
+ax.arrow(0, 0, u[0], u[1], head_width=0.2, head_length=0.2, length_includes_head = True)
+ax.arrow(0, 0, v[0], v[1], head_width=0.2, head_length=0.2, length_includes_head = True)
+ax.arrow(0, 0, alph * u[0], alph * u[1], head_width=0.2, 
+         head_length=0.2, length_includes_head = True)
+ax.arrow(alph * u[0], alph * u[1], sum_uv[0] - alph * u[0], sum_uv[1] - alph * u[1], 
+         head_width=0.2, 
+         head_length=0.2, length_includes_head = True, color = 'r')
+ax.text(sum_uv[0]-2, sum_uv[1]+0.25, r'$\beta_1{\bf u}$+$\beta_2{\bf v}$',size=12)
+ax.text(u[0]+0.25, u[1]-0.25, r'${\bf u}$', size=12)
+ax.text(alph * u[0]+0.25, alph * u[1]-0.25, r'$\beta_1{\bf u}$', size=12)
+ax.text(-2, 2.75, r'$\beta_2{\bf v}$', size=12)
+ax.text(v[0]+0.25, v[1]+0.25, r'${\bf v}$',size=12)
+ut.plotPoint(ax, sum_uv[0], sum_uv[1])
+ax.plot(0, 0, '')
+plt.show()
+```
+:::
+::::
 
 If you imagine the values of $\beta_1$ and $\beta_2$ necessary to create $\mathbf{y} = \beta_1{\bf u}$+$\beta_2{\bf v}$, you can see that $\beta_1$ and $\beta_2$ will be __very large__ in magnitude.
 
@@ -364,7 +415,7 @@ $$
 
 ---
 
-For any given $c$ this has a closed-form solution in which $\hat{\boldsymbol{\beta}} = (X^TX +cI)^{−1}X^T$ is a linear function of $X$ (just as in ordinary least squares).
+For any given $c$ this has a closed-form solution in which $\hat{\boldsymbol{\beta}} = (X^TX +cI)^{−1}X^T.$
 
 The solution to the Ridge regression problem always exists and is unique, even when the data contains multicollinearity.
 
@@ -388,6 +439,10 @@ Therefore, if we know that the variables are not measured in the same units, we 
 Note that by scaling $\mathbf{y}$ to have zero-mean, we do not need (or include) an intercept in the model.
 
 Another name for ridge regression is __Tikhanov regularization__. You may see this terminology used in textbooks on optimization.
+
+::: {.aside}
+Normalizing is needed for this specific method. This is in contrast to the previous lecture where we allowed the coefficients to correct for the scaling differences between different units of measure.
+:::
 
 ---
 
@@ -579,12 +634,23 @@ plt.show()
 
 We can use the statsmodel `smf` sub-module to directly type formulas and expressions in the functions of the models. This allows us to, among other things,
 
-- specify the name of the columns to be used to predict another column, 
+- specify the name of the columns to be used to predict another column
 - remove columns
+- infer the type of the variable (e.g., categorical, numerical)
+- apply functions to columns
+
+The `smf` submodule makes use of the [patsy(https://patsy.readthedocs.io/en/latest/)] package. patsy is a Python package for describing statistical models (especially linear models, or models that have a linear component) and building design matrices. It is closely inspired by and compatible with the formula mini-language used in R and S.
+
+In the following code cells we will see the syntax that is used to specify columns in the models and how to remove columns from our model
+
+---
+
+Here is an example where we specify the name of the columns to be used to predict another column.
 
 ```{python}
 X['TOTEMP'] = y
 ```
+
 
 ```{python}
 mod = smf.ols(formula='TOTEMP ~ GNPDEFL + GNP + UNEMP + ARMED + POP', data=X)
@@ -594,6 +660,24 @@ with warnings.catch_warnings():
     print(res.summary())
 ```
 
+---
+
+The formula
+
+`formula='TOTEMP ~ GNPDEFL + GNP + UNEMP + ARMED + POP'`
+
+is an R-style formula string that specifies the model.
+
+The variable `TOTEMP` is the dependent variable, which is Total Employment in the Longley dataset.
+
+The syntax `~` separates the dependent variable from the independent variables.
+
+The sytnax `GNPDEFL + GNP + UNEMP + ARMED + POP` are the independent variables, which are GNP Deflator, Gross National Product, Number of Unemployed, Size of the Armed Forces, and Population.
+
+---
+
+This is an example where we remove columns from the data and exclude the y-intercept.
+
 ```{python}
 mod = smf.ols(formula='TOTEMP ~ GNPDEFL + GNP + UNEMP - 1', data=X)
 res = mod.fit()
@@ -601,6 +685,17 @@ with warnings.catch_warnings():
     warnings.simplefilter('ignore')
     print(res.summary())
 ```
+
+---
+
+The formula is 
+
+`formula='TOTEMP ~ GNPDEFL + GNP + UNEMP - 1'`
+
+We still have the same dependent variable `TOTEMP`. The independent variables are
+`GNPDEFL + GNP + UNEMP`
+
+The syntax `-1` removes the intercept from the model. By default, an intercept is included in the model, but - 1 explicitly excludes it.
 
 ---
 
@@ -643,6 +738,8 @@ Spatial Analysis", Michael Friendly.  Statistical Science 2007, Vol. 22, No. 3, 
 
 --- 
 
+Here is the dataset.
+
 ```{python}
 # Lottery is per-capital wager on Royal Lottery
 df = sm.datasets.get_rdataset("Guerry", "HistData").data
@@ -650,32 +747,32 @@ df = df[['Lottery', 'Literacy', 'Wealth', 'Region']].dropna()
 df.head()
 ```
 
+---
+
+Here is a regression using the feature `Literacy`, `Wealth`, and `Region`.
+
 ```{python}
 mod = smf.ols(formula='Lottery ~ Literacy + Wealth + Region', data=df)
 res = mod.fit()
 print(res.summary())
 ```
 
-## Categorical variables
+---
 
-Patsy is the name of the interpreter that parses the formulas in the `smf` submodule. These formulas are R-styled formulas. It is based off this [package](https://patsy.readthedocs.io/en/latest/) used to describe statistical models in Python.
+In the previous cell, using the patsy syntax determined that elements of `Region` were text strings, so it treated `Region` as a categorical variable. 
 
-Looking at the summary printed above, notice that patsy determined that elements of `Region` were text strings, so it treated `Region` as a categorical variable. 
+Alternatively, we could manually enforce this with the syntax on the following slide. Recall that the `-` sign is used to remove columns/variables. Here we remove the intercept from a model by.
 
-Patsy‘s default is also to include an intercept, so we automatically dropped one of the Region categories.
-
-## Removing Variables
-
-The `-` sign can be used to remove columns/variables. For instance, we can remove the intercept from a model by:
+---
 
 ```{python}
 res = smf.ols(formula='Lottery ~ Literacy + Wealth + C(Region) -1 ', data=df).fit()
 print(res.summary())
 ```
 
-## Functions
+---
 
-We can also apply vectorized functions to the variables in our model:
+We can also apply vectorized functions to the variables in our model. The following cell shows how to do this. In this case we apply the natural log function to the `Literacy` column and use this single column to predict the `Lottery` values.
 
 ```{python}
 res = smf.ols(formula='Lottery ~ np.log(Literacy)', data=df).fit()
@@ -691,3 +788,5 @@ We discussed how the condition number of a matrix indicates whether we have issu
 We saw that large condition numbers indicate multicollinearity.
 
 To address this issue we considered both Ridge and LASSO regression.
+
+We also learned about the patsy syntax in the statsmodel package.
