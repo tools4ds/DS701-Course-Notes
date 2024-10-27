@@ -50,10 +50,6 @@ regression are:
 
 ## Example: Grad School Admission
 
-Let's consider this question:
-
-> What is the probability I will be admitted to Grad School?
-
 ::: {.callout-note}
 The following example was adapted from this 
 [URL](http://www.ats.ucla.edu/stat/r/dae/logit.htm) which seems to be no longer
@@ -62,9 +58,21 @@ available. There is an
 and an [archive of the dataset](https://web.archive.org/web/20161022051727/http://www.ats.ucla.edu/stat/data/binary.csv).
 :::
 
-A researcher is interested in how variables, such as _GRE_ (Graduate Record Exam
-scores), _GPA_ (grade point average) and prestige of the undergraduate institution
+Let's consider this question:
+
+> What is the probability I will be admitted to Grad School?
+
+Let's see how variables, such as
+
+* _GRE_ (Graduate Record Exam scores), 
+* _GPA_ (grade point average) and 
+* prestige of the undergraduate institution
+
 affect admission into graduate school. 
+
+::: {.content-visible when-profile="slides"}
+## Example continued
+:::
 
 The response variable, admit/don't admit, is a binary variable.
 
@@ -72,6 +80,10 @@ So there are three predictor variables: __gre,__ __gpa__ and __rank.__
 
 * We will treat the variables _gre_ and _gpa_ as continuous. 
 * The variable _rank_ takes on the values 1 through 4 with 1 being the highest prestige.
+
+::: {.content-visible when-profile="slides"}
+## Example continued
+:::
 
 Let's look at 10 lines of the data:
 
@@ -82,12 +94,20 @@ df = pd.read_csv('data/ats-admissions.csv')
 df.head(10)
 ```
 
+::: {.content-visible when-profile="slides"}
+## Example continued
+:::
+
 and some summary statistics:
 
 ```{python}
 #| code-fold: true
 df.describe()
 ```
+
+::: {.content-visible when-profile="slides"}
+## Example continued
+:::
 
 We can also plot histograms of the variables:
 
@@ -96,9 +116,18 @@ We can also plot histograms of the variables:
 df.hist(figsize = (10, 7));
 ```
 
+::: {.content-visible when-profile="slides"}
+## Example continued
+:::
+
 Let's look at how each independent variable affects admission probability by
 plotting the mean admission probability as a function of the independent variable.
+
 We add error bars to the means to indicate the standard error of the mean.
+
+::: {.content-visible when-profile="slides"}
+## Example continued
+:::
 
 First, __rank__:
 
@@ -117,6 +146,10 @@ ax.set_ylabel('P[admit]', fontsize=16)
 ax.set_xlabel('Rank', fontsize=16);
 ```
 
+::: {.content-visible when-profile="slides"}
+## Example continued
+:::
+
 Next, __GRE__:
 
 ```{python}
@@ -129,6 +162,10 @@ ax = means_gre.plot(marker='o', yerr=errors_gre, fontsize=12, capsize=5)
 ax.set_ylabel('P[admit]', fontsize=16)
 ax.set_xlabel('GRE', fontsize=16);
 ```
+
+::: {.content-visible when-profile="slides"}
+## Example continued
+:::
 
 Finally, __GPA__ (for this visualization, we aggregate GPA into 8 bins):
 
@@ -143,6 +180,10 @@ ax.set_xlabel('GPA', fontsize=16)
 ax.set_xticks(range(1, len(bin_centers) + 1))
 ax.set_xticklabels([f'{center:.2f}' for center in bin_centers], rotation=45);
 ```
+
+::: {.content-visible when-profile="slides"}
+## Example continued
+:::
 
 Finally, we plot admission value for each data point for each of the four ranks:
 
@@ -187,6 +228,8 @@ Now, a linear function like $\alpha + \beta x$ cannot be used to predict
 probability directly, because the linear function takes on all values (from
 -$\infty$ to +$\infty$), and probability only ranges over $(0, 1)$.
 
+## Odds and Log-Odds
+
 However, there is a transformation of probability that works: it is called __log-odds__.
 
 For any probabilty $p$, the __odds__ is defined as $p/(1-p)$, which is the ratio of the probability of an event to the probability of the non-event.
@@ -195,6 +238,10 @@ Notice that odds vary from 0 to $\infty$, and odds < 1 indicates that $p < 1/2$.
 
 Now, there is a good argument that to fit a linear function, instead of using
 odds, we should use log-odds. 
+
+::: {.content-visible when-profile="slides"}
+## Odds and Log-Odds
+:::
 
 That is simply $\log p/(1-p)$ which is also called the __logit__ function, which
 is an abbreviation for **log**istic un**it**.
@@ -209,6 +256,10 @@ ax.set_xlabel('Probability', fontsize = 14)
 ax.set_ylabel('Log-Odds', fontsize = 14)
 ax.set_title('Logit Function: $\log (p/1-p)$', fontsize = 16);
 ```
+
+::: {.content-visible when-profile="slides"}
+## Odds and Log-Odds
+:::
 
 So, logistic regression does the following: it does a linear regression of
 $\alpha + \beta x$ against $\log p/(1-p)$.
@@ -225,6 +276,10 @@ e^{\alpha + \beta x}  &= p(x) + p(x)e^{\alpha + \beta x} \quad \text{(distribute
 \end{aligned}
 $$
 
+::: {.content-visible when-profile="slides"}
+## Odds and Log-Odds
+:::
+
 So, logistic regression fits a probability of the following form:
 
 $$
@@ -233,6 +288,10 @@ $$
 
 This is a sigmoid function; when $\beta > 0$, $x\rightarrow \infty$, then
 $p(x)\rightarrow 1$ and when $x\rightarrow -\infty$, then $p(x)\rightarrow 0$.
+
+::: {.content-visible when-profile="slides"}
+## Odds and Log-Odds
+:::
 
 ```{python}
 #| code-fold: true
@@ -259,6 +318,10 @@ Parameter $\beta$ controls how fast $p(x)$ raises from $0$ to $1$
 
 The value of -$\alpha$/$\beta$ shows the value of $x$ for which $p(x)=0.5$
 
+::: {.content-visible when-profile="slides"}
+## Odds and Log-Odds
+:::
+
 Another interpretation of $\alpha$ is that it gives the __base rate__ -- the
 unconditional probability of a 1.   That is, if you knew nothing about a
 particular data item, then $p(x) = 1/(1+e^{-\alpha})$.
@@ -279,6 +342,10 @@ $$
 $$
 
 Somewhat confusingly, this is called the __logistic__ function.
+
+::: {.content-visible when-profile="slides"}
+## Odds and Log-Odds
+:::
 
 So, the best way to think of logistic regression is that we compute a linear function:
     
@@ -316,6 +383,10 @@ maximum likelihood of the data with respect to the probability of the errors.
 So, in the case of linear regression, it is a lucky fact that the __MLE__ of
 $\alpha$ and $\beta$ can be found by a __closed-form__ calculation.
 
+::: {.content-visible when-profile="slides"}
+## Logistic vs Linear Regression
+:::
+
 In __Logistic regression__ we fit 
 
 $$
@@ -336,6 +407,10 @@ $$
 \left\{\begin{array}{lr}\text{logit}^{-1}(\alpha + \beta x_i)& \text{if } y_i = 1\\
 1 - \text{logit}^{-1}(\alpha + \beta x_i)& \text{if } y_i = 0\end{array}\right.
 $$
+
+::: {.content-visible when-profile="slides"}
+## Logistic vs Linear Regression
+:::
 
 We can write this as a single expression:
 
@@ -365,6 +440,10 @@ likelihood of the data given these parameters for the logistic regression model.
 The standard package will give us a correlation coefficient (a $\beta_i$) for each
 independent variable (feature).
 
+::: {.content-visible when-profile="slides"}
+## Logistic Regression in Practice
+:::
+
 If we want to include a constant (ie, $\alpha$) we need to add a column of 1s (just
 like in linear regression).
 
@@ -382,6 +461,10 @@ logit = sm.Logit(df['admit'], df[train_cols])
 # fit the model
 result = logit.fit() 
 ```
+
+::: {.content-visible when-profile="slides"}
+## Logistic Regression in Practice
+:::
 
 ```{python}
 #| code-fold: true
@@ -402,6 +485,10 @@ parameter values.
 
 Let's see how well the model fits the data.
 
+::: {.content-visible when-profile="slides"}
+## Using the Model
+:::
+
 We have three independent variables, so in each case we'll use average values
 for the two that we aren't evaluating.
 
@@ -421,6 +508,10 @@ ax.set_ylabel('P[admit]', fontsize = 14)
 ax.set_title('Marginal Effect of GPA', fontsize = 16);
 ```
 
+::: {.content-visible when-profile="slides"}
+## Logistic Regression in Practice
+:::
+
 GRE Score:
 
 ```{python}
@@ -434,6 +525,10 @@ ax.set_xlabel('gre', fontsize = 14)
 ax.set_ylabel('P[admit]', fontsize = 14)
 ax.set_title('Marginal Effect of GRE', fontsize = 16);
 ```
+
+::: {.content-visible when-profile="slides"}
+## Logistic Regression in Practice
+:::
 
 Institution Rank:
 
@@ -452,8 +547,8 @@ ax.set_title('Marginal Effect of Rank', fontsize = 16);
 
 ## Logistic Regression in Perspective
 
-At the start of lecture I emphasized that logistic regression is concerned with
-estimating a __probability__ model from __discrete__ (0/1) data. 
+At the start of lecture we emphasized that logistic regression is concerned with
+estimating a __probability__ model for __discrete__ (0/1) data. 
 
 However, it may well be the case that we want to do something with the
 probability that amounts to __classification.__
@@ -462,6 +557,10 @@ For example, we may classify data items using a rule such as "Assign item $x_i$
 to Class 1 if $p(x_i) > 0.5$".
 
 For this reason, logistic regression could be considered a classification method.
+
+::: {.content-visible when-profile="slides"}
+## Logistic Regression in Perspective
+:::
 
 In fact, that is what we did with Naive Bayes -- we used it to estimate something
 like a probability, and then chose the class with the maximum value to create a
@@ -481,6 +580,10 @@ X_train, X_test, y_train, y_test = model_selection.train_test_split(
         test_size=0.4, random_state=1)
 ```
 
+::: {.content-visible when-profile="slides"}
+## Logistic Regression in Perspective
+:::
+
 Now, there are some standard metrics used when evaluating a binary classifier.
 
 Let's say our classifier is outputting "yes" when it thinks the student will be admitted.
@@ -491,6 +594,10 @@ There are four cases:
 * Classifier says "yes", and student __is not__ admitted:  __False Positive.__
 * Classifier says "no", and student __is__ admitted:  __False Negative.__
 * Classifier says "no", and student __is not__ admitted:  __True Negative.__
+
+::: {.content-visible when-profile="slides"}
+## Logistic Regression in Perspective
+:::
 
 __Precision__ is the fraction of "yes"es that are correct:
 
@@ -528,6 +635,10 @@ precision, recall = evaluate(y_train, X_train, y_test, X_test, 0.5)
 print(f'Precision: {precision:0.3f}, Recall: {recall:0.3f}')
 ```
 
+::: {.content-visible when-profile="slides"}
+## Logistic Regression in Perspective
+:::
+
 Now, let's get a sense of average accuracy:
 
 ```{python}
@@ -547,6 +658,10 @@ avgRec = np.mean([f[1] for f in PR])
 print(f'Average Precision: {avgPrec:0.3f}, Average Recall: {avgRec:0.3f}')
 ```
 
+::: {.content-visible when-profile="slides"}
+## Logistic Regression in Perspective
+:::
+
 Sometimes we would like a single value that describes the overall performance of
 the classifier.
 
@@ -555,6 +670,10 @@ For this, we take the harmonic mean of precision and recall, called __F1 Score__
 $$
 \mbox{F1 Score} = 2 \;\;\frac{\mbox{Precision} \cdot \mbox{Recall}}{\mbox{Precision} + \mbox{Recall}}
 $$
+
+::: {.content-visible when-profile="slides"}
+## Logistic Regression in Perspective
+:::
 
 Using this, we can evaluate other settings for the threshold.
 
