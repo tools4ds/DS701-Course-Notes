@@ -1,5 +1,5 @@
 ---
-title: Neural Networks I -- Gradient Descent
+title: NN I -- Gradient Descent
 jupyter: python3
 ---
 
@@ -40,6 +40,8 @@ Deep Neural Networks have been effective in many applications.
 
 ![](figs/NN-figs/IntroModels.svg){width="75%"}
 
+---
+
 ![](figs/NN-figs/IntroModels2a.svg){width="75%"}
 
 [Understanding Deep Learning, Simon J.D. Prince, MIT Press, 2023](http://udlbook.com)
@@ -66,7 +68,6 @@ Deep Neural Networks have been effective in many applications.
 * The same can be said for Neural Networks. The theory to make them work is well understood. The theory of why they work is still developing.
 * We'll balance theory and application
 
----
 [The Power and Limits of Deep Learning](https://learning.acm.org/techtalks/powerandlimitsdl), Yann LeCun, March 2019.
 
 Underlying all these techniques is the idea of applying optimization techniques
@@ -87,6 +88,10 @@ We have seen example after example of this problem.
 * In the support vector machine, our goal was to find a parameter vector $\theta$
   so that classification error was minimized.
 
+::: {.content-visible when-profile="slides"}
+## Loss Functions for Model Fitting
+:::
+
 And similarly we'll want to find good parameter settings in neural networks.
 
 It's time now to talk about how, in general, one can find "good settings" for the
@@ -100,6 +105,10 @@ function, to describe how well our method is doing.
 And second, we choose loss functions that are __differentiable__ with respect to
 the parameters.
 
+::: {.content-visible when-profile="slides"}
+## Loss Functions for Model Fitting
+:::
+
 These two requirements mean that we can think of the parameter tuning problem
 using surfaces like these:
 
@@ -107,6 +116,12 @@ using surfaces like these:
 
 Imagine that the $x$ and $y$ axes in these pictures represent parameter settings.
 That is, we have two parameters to set, corresponding to the values of $x$ and $y$.
+
+---
+
+::: {.content-visible when-profile="slides"}
+![](figs/L23-convex_cost_function.jpeg){width="25%"}
+:::
 
 For each $(x, y)$ setting, the $z$-axis shows the value of the loss function. 
 
@@ -120,6 +135,8 @@ If we find a local minimum of this function, it is a global minimum.
 
 The surface on the right corresponds to a __non-convex__ loss function.
 There are local minima that are not globally minimal.
+
+---
 
 Both kinds of loss functions arise in machine learning.
 
@@ -138,12 +155,18 @@ While non-convex loss functions arise in
 
 The intuition of gradient descent is the following.   
 
-Imagine you are lost in the mountains, and it is foggy out.  You want to find a
-valley.  But since it is foggy, you can only see the local area around you.
-
-![](figs/L23-fog-in-the-mountains.jpeg){width="75%"}
-
+:::: {.columns}
+::: {.column width="30%"}
+![](figs/L23-fog-in-the-mountains.jpeg){width="100%"}
 <!-- Image credit http://nederlandliving.com/?p=1931 -->
+:::
+::: {.column width="70%"}
+Imagine you are lost in the mountains, and it is foggy out.  
+
+You want to find a valley.  But since it is foggy, you can only see the local
+area around you.
+:::
+::::
 
 The natural thing to do is:
 
@@ -151,6 +174,8 @@ The natural thing to do is:
 2. Observe in which direction the ground is sloping downward most steeply.  
 3. Take a few steps in that direction.  
 4. Repeat the process ... until the ground seems to be level.
+
+---
 
 The key to this intuitive idea is formalizing the idea of "direction of steepest
 descent."
@@ -185,24 +210,30 @@ $$
 Which we can write in python as well.
 
 ```{python}
-#| code-fold: true
+#| code-fold: false
 def f(x):
   return 3*x**2 - 4*x + 5
 ```
 
+---
+
 And we can plot it.
 
+:::: {.columns}
+::: {.column width="40%"}
 ```{python}
 #| code-fold: true
 import numpy as np
+plt.figure(figsize=(6, 3))
 
 xs = np.arange(-5, 5, 0.25)
 ys = f(xs)
 plt.plot(xs, ys);
+plt.title('$f(x) = 3x^2 - 4x + 5$');
 ```
-
+:::
+::: {.column width="60%"}
 Let's assume for a minute that this is our loss function that we are minimizing.
-
 
 __Question__
 
@@ -212,9 +243,16 @@ __Answer__
 
 It is necessary but _not sufficient_ that the slope be zero.
 
+:::
+::::
+
 __Question__ 
 
 How do we calculate the slope?
+
+__Answer__
+
+---
 
 We take the derivative, denoted
 
@@ -228,9 +266,12 @@ $$
 f'(x) \hspace{10pt} \textrm{Lagrange's notation} 
 $$
 
+
 You may see both notations. The nice thing about Leibniz' notation is that it is
 easy to express _partial derivatives_ when we get to multivariate differentiation,
 which we'll get to shortly.
+
+---
 
 We can take the derivate of the $f(x)$
 
@@ -246,6 +287,8 @@ $$
 $$
 
 exists at $x$. And in fact, that limit approaches the value of the derivative in the limit.
+
+---
 
 ```{python}
 #| code-fold: true
@@ -300,6 +343,8 @@ widgets.interact(plot_with_tangents, x_value=widgets.FloatSlider(value=-2, min=-
 #widgets.interact(plot_with_tangents, h_value=widgets.FloatSlider(value=1, min=1, max=10, step=1));
 ```
 
+---
+
 We use the rules of derivatives. See for example the derivative
 [rules for basic functions](https://en.wikipedia.org/wiki/Derivative#Rules_for_basic_functions), 
 e.g.
@@ -344,6 +389,8 @@ df(x_zero)
 # And f at that value is
 f(x_zero)
 ```
+
+---
 
 Which we can add to the plot of $f(x)$ to see if it indeed is at the minimum.
 
@@ -453,6 +500,8 @@ The components of $\mathbf{w}\in\mathbb{R}^n$ are the parameters we want to opti
 
 Just a reminder that $\mathbf{w} \in \mathbb{R}^n$ denotes an $n$-dimensional vector.
 
+---
+
 For linear regression, the loss function could be squared loss:
     
 $$
@@ -487,6 +536,8 @@ derivative with respect to the vector $\mathbf{w}$.
 
 The _nabla_ symbol, $\nabla$, denotes the _vector differentiator operator_ called _del_.
 
+---
+
 It turns out that if we are going to take a small step of unit length, then the
 gradient is the direction that maximizes the change in the loss function.
 
@@ -496,6 +547,8 @@ gradient is the direction that maximizes the change in the loss function.
 
 As you can see from the above figure, in general the gradient varies depending on
 where you are in the parameter space.
+
+---
 
 So we write:
 
@@ -513,6 +566,8 @@ a step in the negative direction of the gradient.
 
 ... "negative direction" because the gradient specifies the direction of maximum
 increase -- and we want to decrease the loss function.
+
+---
 
 How big a step should we take? 
 
@@ -579,6 +634,8 @@ y = beta[0] + (beta[1] * xlin) + np.random.randn(n)
 ax.plot(xlin, y, 'ro', markersize = 10);
 ```
 
+---
+
 Let's fit a least-squares line to this data. 
 
 The loss function for this problem is the least-squares error:
@@ -588,6 +645,8 @@ $$
 $$
 
 Of course, we know how to solve this problem using the normal equations, but let's do it using gradient descent instead.
+
+---
 
 Here is the line we'd like to find:
 
@@ -599,6 +658,8 @@ ax.plot(xlin, y, 'ro', markersize = 10)
 ax.plot(xlin, beta[0] + beta[1] * xlin, 'b-')
 plt.text(-9, 3, r'$y = \beta_0 + \beta_1x$', size=20);
 ```
+
+---
 
 There are $n = 10$ data points, whose $x$ and $y$ values are stored in `xlin` and `y`.
 
@@ -626,6 +687,8 @@ fig.set_title(r'$\Vert \mathbf{y}-X\mathbf{\beta}\Vert^2$', '',
 # fig.save();
 ```
 
+---
+
 We won't take you through computing the gradient for this problem (you can find it in the online text).  
 
 We'll will just tell you that the gradient for a least squares problem is:
@@ -633,6 +696,8 @@ We'll will just tell you that the gradient for a least squares problem is:
 $$
 \nabla_\beta \mathcal{L}(\mathbf{\beta}) = X^T X \beta - X^T\mathbf{y} 
 $$
+
+::: {.content-visible when-profile="web"}
 
 ::: {.callout-note}
 For those interested in a little more insight into what these plots are showing,
@@ -676,9 +741,12 @@ $$
 Which of course, are the normal equations for this linear system.
 :::
 
+:::
+
 So here is our code for gradient descent:
 
 ```{python}
+#| code-fold: false
 def loss(X, y, beta):
     return np.linalg.norm(y - X @ beta) ** 2
 
@@ -701,6 +769,8 @@ def gradient_descent(X, y, beta_hat, eta, nsteps = 1000):
         
     return np.array(betas), np.array(losses)
 ```
+
+---
 
 We'll start at an arbitrary point, say, $(-8, -3.2)$.
 
@@ -732,6 +802,8 @@ plt.ylabel(r'$\beta_1$', size = 14)
 plt.title(r'Evolution of $\beta$', size = 16);
 ```
 
+---
+
 Notice that the improvement in loss decreases over time.  Initially the gradient
 is steep and loss improves fast, while later on the gradient is shallow and loss
 doesn't improve much per step.
@@ -743,6 +815,8 @@ In general we cannot "see" the entire loss function surface.
 
 Nonetheless, since we know what the loss surface looks like in this case, we can
 visualize the algorithm "moving" on that surface.
+
+---
 
 This visualization combines the last two plots into a single view.
 
@@ -779,6 +853,8 @@ animation.FuncAnimation(fig.fig, anim,
                        interval = 1,
                        repeat = False)
 ```
+
+---
 
 We can also see how evolution of the parameters translate to the line fitting to the data.
 
@@ -828,6 +904,9 @@ eta = 0.0065
 betas, losses = gradient_descent(X, y, beta_start, eta, nsteps = 100)
 ```
 
+:::: {.columns}
+::: {.column width="50%"}
+
 ```{python}
 #| code-fold: true
 plt.plot(np.log(losses), '.-')
@@ -835,6 +914,9 @@ plt.ylabel(r'$\log\mathcal{L}$', size = 14)
 plt.xlabel('Iteration', size = 14)
 plt.title('Improvement in Loss Per Iteration of GD', size = 16);
 ```
+
+:::
+::: {.column width="50%"}
 
 ```{python}
 #| code-fold: true
@@ -844,9 +926,17 @@ plt.ylabel(r'$\beta_1$', size = 14)
 plt.title(r'Evolution of $\beta$', size = 16);
 ```
 
+:::
+::::
+
+---
+
 This is a total disaster.  What is going on?  
 
 It is helpful to look at the progress of the algorithm using the loss surface:
+
+:::: {.columns}
+::: {.column width="50%"}
 
 ```{python}
 #| code-fold: true
@@ -867,6 +957,9 @@ fig.ax.plot(betas[:nplot, 0], betas[:nplot, 1], 'o-', zs = losses[:nplot], marke
 #
 ```
 
+:::
+::: {.column width="50%"}
+
 We can see what is going on more clearly here.  
 
 What is happening is that because the steps are __too large,__ each step
@@ -879,6 +972,9 @@ And so the process diverges.
 
 > For an interesting comparison, try setting $\eta = 0.0055$ and observe the
 > evolution of $\beta$.
+
+:::
+::::
 
 Hence it is important to decrease the step size when divergence appears.  
 
@@ -904,7 +1000,8 @@ Here's a visualization of the loss surface for the 56 layer neural network
 
 ![](figs/L23-complex-landscape.png){width="40%"}
 
-For a fun exploration, see https://losslandscape.com/explorer.
+For a fun exploration, see
+[https://losslandscape.com/explorer](https://losslandscape.com/explorer).
 
 ## Recap
 
@@ -932,25 +1029,18 @@ From [cs231n](https://cs231n.github.io/neural-networks-1/)
 * Once the collective firing rate of the impulses exceed a certain threshold,
   the neuron fires its own pulse through the axon to other neurons
 
-There are companies trying to mimic this impulse (i.e. spiking) based neuron in
-silicon -- so called _neuromorphic computing_.
-
-See for example 
-[Neuromorphic Computing](https://en.wikipedia.org/wiki/Neuromorphic_engineering)
-or [Spiking Neural Network](https://en.wikipedia.org/wiki/Spiking_neural_network)
-
-Some examples of companies and projects are Intel's 
-[Loihi](https://www.intel.com/content/www/us/en/research/neuromorphic-computing-loihi-2-technology-brief.html)
-and startups such as GrAI Matter Labs [VIP processor](https://www.graimatterlabs.ai/product).
-
 ## Artificial Neuron
 
 <!-- Image Credit "https://cs231n.github.io/neural-networks-1/"-->
 
+:::: {.columns}
+::: {.column width="%"}
 
 ![](figs/NN-figs/neuron_model.jpeg){width="75%"}
 
 From [cs231n](https://cs231n.github.io/neural-networks-1/)
+:::
+::: {.column width="50%"}
 
 The more common artifical neuron
 
@@ -959,6 +1049,9 @@ The more common artifical neuron
 * sums the weighted inputs
 * adds a bias
 * then finally usually applies a nonlinear activation function
+
+:::
+::::
 
 ## Multi-Layer Perceptron (MLP) or Fully Connected Network (FCN)
 
@@ -975,43 +1068,16 @@ with 4 neurons, followed by one layer that produces a single value output.
 
 E.g. a binary classifier.
 
-Activation function is typically some nonlinear function that compresses the input
-in some way. Historically, it's been the sigmoid and $\tanh()$ functions. See for
-example [Hyperbolic Functions](https://en.wikipedia.org/wiki/Hyperbolic_functions#Tanh).
-
-```{python}
-#| code-fold: true
-plt.plot(np.arange(-5,5,0.2), np.tanh(np.arange(-5,5,0.2)))
-plt.title('tanh(x)')
-plt.xlabel('x')
-plt.ylabel('f(x)')
-plt.grid()
-```
-
-A more common activation function these days and that is more efficient to implement is the _Rectified Linear Unit_ or _ReLU_.
-
-$$ 
-\textrm{ReLU}(x) = \mathrm{max}(0, x) 
-$$
-
-```{python}
-#| code-fold: true
-plt.plot(np.arange(-5,5,0.2), np.maximum(0,np.arange(-5,5,0.2)))
-plt.title('ReLU(x)')
-plt.xlabel('x')
-plt.ylabel('f(x)')
-plt.grid()
-```
-
-There are many other variations. See for example 
-[PyTorch Non-linear Activations](https://pytorch.org/docs/stable/nn.html#non-linear-activations-weighted-sum-nonlinearity)
-
 ## Next Lecture
 
-* We'll  build out a Value class
-* Visualize our compute graph
+* Introduce and visualize our compute graph
 * Implement Backpropagation
 * Build out our neural network
 * Train and evaluate it
-* Recreate and match it in PyTorch
 
+## Recap
+
+* We introduced gradient descent for linear regression
+* We defined an artificial neuron and a multi-layer perceptron
+* We visualized the loss surface for linear regression
+* We saw how divergence can occur if the step size is too large
