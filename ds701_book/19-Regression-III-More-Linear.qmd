@@ -3,12 +3,8 @@ title: Regularization
 jupyter: python3
 ---
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/19-Regression-III-More-Linear.ipynb)
-
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
+#| echo: false
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -16,14 +12,11 @@ import pandas as pd
 import seaborn as sns
 import matplotlib as mp
 import sklearn
-from IPython.display import Image, HTML
 import statsmodels.api as sm
 from sklearn import model_selection
 from sklearn import metrics
 
 import laUtilities as ut
-
-%matplotlib inline
 
 from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from statsmodels.regression.linear_model import OLS
@@ -33,28 +26,116 @@ import warnings
 
 np.random.seed(9876789)
 ```
+# Overfitting
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/19-Regression-III-More-Linear.ipynb)
+
+We have referenced the concept of overfitting previously in our [decision tree](14-Classification-I-Decision-Trees.qmd) and [dimensionality reduction](11-Dimensionality-Reduction-SVD-II.qmd) lectures.
+
+We know that a model that overfits does not generalize well. In other words, the model does not perform well on data it was not trained on.
+
+We observe overfitting when the training accuracy of the model is high, while the accuracy on the validation set (or held out test set) stagnates.
+
+In this lecture we will discuss **regularization**. A technique to help prevent overfitting. We will see how to apply regularization to regression problems. 
+
+However, regularization is a general technique to ensure models learn broad patterns and is applicable in neural networks.
 
 
+## What is regularization?
 
-Today, we'll look at some additional aspects of Linear Regression.
+We know regularization is a way to prevent overfitting, but how does this actually work?
 
-Our first topic is multicollinearity.
+The idea behind regularization is to penalize a model's loss function during training. The added penalty will discourage the model from becoming too complex (i.e., overfitting).
 
-## Multicollinearity
+In regression, our training process was to compute coefficients $\boldsymbol{\beta}$ by minimizing
+
+$$
+\min_{\boldsymbol{\beta}} \Vert X \boldsymbol{\beta} - \mathbf{y}\Vert_{2}^{2},
+$$
+
+ where $X\in\mathbb{R}^{m\times n}$ is the design matrix and $\mathbf{y}\in\mathbb{R}^{m}$ are the dependent variables.
+
+
+---
+
+Regularization adds a function $R(\boldsymbol{\beta})$ to the minimization problem. A regularized minimization problem is then: compute $\boldsymbol{\beta}$ such that
+
+$$
+\min_{\boldsymbol{\beta}} \Vert X \boldsymbol{\beta} - \mathbf{y}\Vert_{2}^{2} + cR(\boldsymbol{\beta}).
+$$
+
+The regularization coefficient $c$ is a hyperparameter that controls the importance of the regularization term $R(\boldsymbol{\beta})$.
+
+We will consider two common forms of $R(\boldsymbol{\beta})$:
+
+- $R(\boldsymbol{\beta}) = \Vert \boldsymbol{\beta}\Vert_{2}^{2}$, called **ridge regression**, and
+- $R(\boldsymbol{\beta}) = \Vert \boldsymbol{\beta}\Vert_1$, called **LASSO** regression.
+
+
+## Overview
+
+In this lecture we will cover:
+
+- situations where regression is needed to help
+- when to use the different types of regression
+- importance of the hyperparameter $c$ 
+
+
+# Multicollinearity
+
+>In statistics, multicollinearity (also collinearity) is a phenomenon in which two or more predictor variables in a multiple regression model are highly correlated, meaning that one can be linearly predicted from the others with a substantial degree of accuracy.
+
+We will see that multicollinearity can be problematic in our regression models.
+
+To address these issues, we will consider
+
+- What are the potential sources for multicollinearity?
+- What does multicollinearity tell us about our data?
+
+Understanding these questions will inform us how regularization can be used to mitigate the issue of multicollinearity.
+
+
+## Sources of Multicollinearity
+
+We will be working with our design matrix $X\in\mathbb{R}^{m\times n}$, where each row corresponds to an instance of data and the $n$ columns are the $n$ features of the data points.
+
+We will see that multicollinearity arises when the columns of $X$ are linearly dependent (or nearly linearly dependent).
+
+As a consequence, the matrix $X^{T}X$ is no longer invertible. However, as we saw in our [Linear Regression](17-Regression-I-Linear.qmd) lecture, the least squares solution still exists. It is just not unique.
+
+---
+
+What are the situations where this can happen?
+
+One clear case is when $m < n$, which means $X$ has more columns than rows. That is, there are  __more features than there are observations__ in the data.
+
+However, we can still observe multicollinearity when $m > n$. 
+
+This can happen when the columns of $X$ happen to be linearly dependent because of the nature of the data itself. In particular, this happens when one column is a linear function of the other columns. This means that one independent variable is a linear function of one or more of the others.
+
+Unfortunately, in practice we will run into trouble even if variables are *almost* linearly dependent. 
+
+---
 
 To illustrate the multcollinearity problem, we'll load a standard dataset.
 
-The Longley dataset contains various US macroeconomic variables from 1947–1962.
+The [Longley](https://www.statsmodels.org/stable/datasets/generated/longley.html) dataset contains various US macroeconomic variables from 1947–1962.
 
-```{note}
-A good reference for the following is 
-https://www.sjsu.edu/faculty/guangliang.chen/Math261a/Ch9slides-multicollinearity.pdf
-and
-https://www.stat.cmu.edu/~ryantibs/datamining/lectures/17-modr2.pdf
-```
+We have the following features:
 
+- GNP - GNP (Gross National Product)
+- GNPDEFL - GNP deflator
+- UNEMP - Number of unemployed
+- ARMED - Size of armed forces
+- POP - Population
+- YEAR - Year (1947 - 1962)
+
+We want to predict:
+
+- TOTEMP - Total Employment
+
+--- 
 ```{python}
-#| slideshow: {slide_type: fragment}
 from statsmodels.datasets.longley import load_pandas
 y = load_pandas().endog
 X = load_pandas().exog
@@ -62,11 +143,15 @@ X['const'] = 1.0
 X.index = X['YEAR']
 y.index = X['YEAR']
 X.drop('YEAR', axis = 1, inplace = True)
-X
+print(X.head())
+print(y.head())
 ```
 
+---
+
+An important warning is issued stating the condition number is large. What does this mean?
+
 ```{python}
-#| slideshow: {slide_type: fragment}
 ols_model = sm.OLS(y, X)
 ols_results = ols_model.fit()
 with warnings.catch_warnings():
@@ -74,136 +159,141 @@ with warnings.catch_warnings():
     print(ols_results.summary())
 ```
 
-What does this mean?
+## Condition Number
 
->In statistics, multicollinearity (also collinearity) is a phenomenon in which two or more predictor variables in a multiple regression model are highly correlated, meaning that one can be linearly predicted from the others with a substantial degree of accuracy.
+The notion of conditioning pertains to the perturbation behavior of a mathematical problem. A well-conditioned problem is one where small changes to the inputs produce small changes to the output. An ill-conditioned problem is one where small changes in the input can produce very large changes in the output. 
 
-(Wikipedia)
+The condition number of a matrix provides an indication of how accurately you can compute with it. 
 
-### Condition Number
+A large condition number tells us that our problem is ill conditioned, i.e., small changes to the input can produce very large changes in the output.
 
-The condition number being referred to is the condition number of the design matrix.
+A small condition number tells us that our problem is well-conditioned.
 
-That is the $X$ in $X\beta = y$. 
+---
 
-Remember that to solve a least-squares problem $X\beta = y$, we solve the normal equations
+The condition number is derived using matrix norms, which is beyond the scope of this course. However, we will use the following definition for the condition number of our matrix
 
-$$X^TX\beta = X^Ty.$$
+$$
+\kappa(X) = \frac{\sigma_{\text{max}}}{\sigma_{\text{min}}},
+$$
 
-These equations always have at least one solution.
+where $\sigma_{\text{max}}$, $\sigma_{\text{min}}$ are the maximum and minimum singular values, respectively, of the design matrix $X$.
 
-However, the "at least one" part is problematic!
+The SVD again provides us with important properties of a matrix.
 
-If there are multiple solutions, they are in a sense all equivalent in that they yield the same value of $\Vert X\beta - y\Vert$.
+---
 
-However, the actual values of $\beta$ can vary tremendously and so it is not clear how best to interpret the case when $X$ does not have full column rank.
+Another important fact is that
 
-When does this problem occur?   Look at the normal equations:
+$$
+\kappa(X^TX) = \frac{\sigma_{\text{max}}^2}{\sigma_{\text{min}}^2}.
+$$
 
-$$X^TX\beta = X^Ty.$$
+This means that if we have a poorly conditioned data matrix $X$, then $X^TX$ is even more poorly conditioned.
+
+This is why you should never work directly with $X^TX$ as it can be numerically unstable.
+
+## Normal Equations
+
+To solve the least-squares problem we solve the normal equations
+
+$$
+X^TX\boldsymbol{\beta} = X^Ty.
+$$
+
+These equations always have at least one solution. However, the *at least one* part is problematic.
+
+If there are multiple solutions, they are in a sense all equivalent in that they yield the same value of $\Vert X\boldsymbol{\beta} - y\Vert$.
+
+However, the actual values of $\boldsymbol{\beta}$ can vary tremendously and so it is not clear how best to interpret which solution is actually the best.
+
+When does this problem occur? 
+
+## Linear Dependence
 
 It occurs when $X^TX$ is __not invertible.__
 
-In that case, we cannot simply solve the normal equations by computing $\hat{\beta} = (X^TX)^{-1}X^Ty.$
+This happens when the columns of $X$ are linearly dependent -- that is, one column can be expressed as a linear combination of the other columns.
 
-When is $(X^TX)$ not invertible?
-
-This happens when the columns of $X$ are linearly dependent --
-
-That is, one column can be expressed as a linear combination of the other columns.
+In that case, it is not possible to solve the normal equations by computing $\hat{\boldsymbol{\beta}} \neq (X^TX)^{-1}X^Ty.$
 
 This is the simplest kind of __multicollinearity__.
 
-### Sources of Multicollinearity
+---
 
-One obvious case is if $X$ has more columns than rows.   That is, if data have __more features than there are observations__.
+What are the implications of a matrix not being invertible on the condition number?
 
-This case is easy to recognize. 
+If a matrix $Z = X^{T}X$ is not invertible, there is a zero singular value. This implies
 
-However, a more insidious case occurs when the columns of $X$ happen to be linearly dependent because of the nature of the data itself.
+$$
+\kappa(Z) = \infty.
+$$
 
-This happens when one column is a linear function of the other columns.   
+In other words, the problem of solving an equation with a non-invertible matrix is completely ill-conditioned. In fact, it's a problem that is impossible to solve.
 
-In other words, one independent variable is a linear function of one or more of the others.
+## Near Linear Dependence
 
-Unfortunately, in practice we will run into trouble even if variables are __almost__ linearly dependent. 
+Near linear dependence causes problems as well. This can happen, for example, due to  measurement errors. Or when two or more columns are __strongly correlated__.
 
-Near-dependence causes problems because measurements are not exact, and small errors are magnified when computing $(X^TX)^{-1}$. 
+In such a situation, we have some column of our design matrix that is __close to__ being a linear combination of the other columns.
 
-So, more simply, when two or more columns are __strongly correlated__, we will have problems with linear regression.
+When these situations occur we will have problems with linear regression.
 
-Consider an experiment with the following predictors:
-    
-$$ x_1 = \text{arm length} $$
+---
 
-$$ x_2 = \text{leg length} $$
+As a result of near linear dependence, the smallest singular value of the design matrix $X$ will be close to zero. This means that $\kappa(X)$ will be very large.
 
-$$ x_3 = \text{height} $$
+The condition number tells us that a small change in the input to our problem can result in large changes to the output. 
 
-$$ \dots $$
+This means that for a design matrix $X$ with near linearly dependent columns, the values we compute for $\boldsymbol{\beta}$ in our linear regression can vary significantly.
 
-Condition number is a measure of whether $X$ is __nearly__ lacking full column rank.
+This is why we see the addition of a regularization (penalty) term involving $\boldsymbol{\beta}$ in the least squares minimization problem. This process *regularizes* the solution $\boldsymbol{\beta}$.
 
-In other words, whether some column is __close to__ being a linear combination of the other columns.
 
-In this case, the actual values of $\beta$ can vary a lot due to noise in the measurements.
+## Longley Dataset
 
-One way to say that $X^TX$ is not invertible is to say that it has at least one zero eigenvalue.   
+Recall that the condition number of our data is around $10^8$. 
 
-Condition number relaxes this -- it asks if $X^TX$ has a __very small__ eigenvalue (compared to its largest eigenvalue).
+A large condition number is evidence of a problem.
 
-An easy way to assess this is using the SVD of $X$.
-
-(Thank you, "swiss army knife"!)
-
-The eigenvalues of $X^TX$ are the squares of the singular values of $X$.   
-
-So the condition number of $X$ is defined as:
-
-$$\kappa(X) = \frac{\sigma_{\mbox{max}}}{\sigma_{\mbox{min}}}$$
-
-where $\sigma_{\mbox{max}}$ and $\sigma_{\mbox{min}}$ are the largest and smallest singular values of $X$.
-
-A large condition number is evidence of a problem.   
+As a general rule of thumb:
 
 * If the condition number is less than 100, there is no serious problem
 with multicollinearity.
 * Condition numbers between 100 and 1000 imply moderate to strong multicollinearity.
 * Condition numbers bigger than 1000 indicate severe multicollinearity.
 
-Recall that the condition number of our data is around $10^8$. 
+---
 
-Let's look at pairwise scatterplots of the Longley data:
+Let's look at pairwise scatter plots of the Longley data.
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
-sns.pairplot(X[['GNPDEFL', 'GNP', 'UNEMP', 'ARMED', 'POP']]);
+sns.pairplot(X[['GNPDEFL', 'GNP', 'UNEMP', 'ARMED', 'POP']])
+plt.show()
 ```
 
-We can see __very__ strong linear relationships between, eg, __GNP Deflator__, __GNP__, and __Population.__
+We can see __very__ strong linear relationships between, e.g., __GNP Deflator__, __GNP__, and __Population.__
 
 ## Addressing Multicollinearity
 
-
-There are some things that can be done if it does happen.
-
-We will review two strategies:
+Here are two strategies we can employ to address multicollinearity:
 
 1. Ridge Regression
 2. Model Selection via LASSO
 
-### Ridge Regression
+::: {.aside}
+PCA also addresses multicollinearity by transforming the correlated features into uncorrelated features. However in this approach you lose the original features, which is less explainable.
+:::
 
-The first thing to note is that when columns of $X$ are nearly dependent, the components of $\hat{\beta}$ tend to be __large in magnitude__.
+## Ridge Regression
 
-Consider a regression in which we are predicting the point $\mathbf{y}$ as a linear function of two $X$ columns, which we'll denote $\mathbf{u}$ and $\mathbf{v}$.
+The first thing to note is that when columns of $X$ are nearly dependent, the components of $\hat{\boldsymbol{\beta}}$ tend to be __large in magnitude__.
 
+:::: {.columns}
+::: {.column width="50%"}
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
-ax = ut.plotSetup(size=(6,3))
+#| fig-align: center
+ax = ut.plotSetup(size=(4,2))
 ut.centerAxes(ax)
 u = np.array([1, 2])
 v = np.array([4, 1])
@@ -216,15 +306,15 @@ ax.text(sum_uv[0]-.5, sum_uv[1]+0.25, r'$\mathbf{y}$',size=12)
 ax.text(u[0]+0.25, u[1]-0.25, r'${\bf u}$', size=12)
 ax.text(v[0]+0.25, v[1]+0.25, r'${\bf v}$',size=12)
 ut.plotPoint(ax, sum_uv[0], sum_uv[1])
-ax.plot(0, 0, '');
+ax.plot(0, 0, '')
+plt.show()
 ```
-
-Via least-squares, we determine the coefficients $\beta_1$ and $\beta_2$:
-
+Consider a regression in which we are predicting the point $\mathbf{y}$ as a linear function of two $X$ columns, which we'll denote $\mathbf{u}$ and $\mathbf{v}$.
+:::
+::: {.column width="50%"}
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
-ax = ut.plotSetup(size=(6,3))
+#| fig-align: center
+ax = ut.plotSetup(size=(4, 2))
 ut.centerAxes(ax)
 u = np.array([1, 2])
 v = np.array([4, 1])
@@ -244,15 +334,23 @@ ax.text(alph * u[0]+0.25, alph * u[1]-0.25, r'$\beta_1{\bf u}$', size=12)
 ax.text(-2, 2.75, r'$\beta_2{\bf v}$', size=12)
 ax.text(v[0]+0.25, v[1]+0.25, r'${\bf v}$',size=12)
 ut.plotPoint(ax, sum_uv[0], sum_uv[1])
-ax.plot(0, 0, '');
+ax.plot(0, 0, '')
+plt.show()
 ```
+Via least-squares, we determine the coefficients $\beta_1$ and $\beta_2$.
+:::
+::::
 
-Now consider if the columns of $X$ are __nearly dependent__: ie, they are almost in the same direction:
+---
+
+Now consider if the columns of $X$ are __nearly dependent__.
+
+:::: {.columns}
+::: {.column width="50%"}
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
-ax = ut.plotSetup(size=(6,3))
+#| fig-align: center
+ax = ut.plotSetup(size=(4, 2))
 ut.centerAxes(ax)
 u = np.array([2, 1])
 v = np.array([4, 1])
@@ -262,65 +360,98 @@ ax.text(sum_uv[0]-.5, sum_uv[1]+0.25, r'$\mathbf{y}$',size=12)
 ax.text(u[0]+0.25, u[1]-0.25, r'${\bf u}$', size=12)
 ax.text(v[0]+0.25, v[1]+0.25, r'${\bf v}$',size=12)
 ut.plotPoint(ax, sum_uv[0], sum_uv[1])
-ax.plot(0, 0, '');
+ax.plot(0, 0, '')
+plt.show()
 ```
+:::
+::: {.column width="50%"}
+
+```{python}
+#| fig-align: center
+ax = ut.plotSetup(size=(4, 2))
+ut.centerAxes(ax)
+u = np.array([2, 1])
+v = np.array([4, 1])
+alph = 2.675
+beta = -8.75
+ax.arrow(0, 0, u[0], u[1], head_width=0.2, head_length=0.2, length_includes_head = True)
+ax.arrow(0, 0, v[0], v[1], head_width=0.2, head_length=0.2, length_includes_head = True)
+ax.arrow(0, 0, alph * u[0], alph * u[1], head_width=0.2, 
+         head_length=0.2, length_includes_head = True)
+ax.arrow(alph * u[0], alph * u[1], sum_uv[0] - alph * u[0], sum_uv[1] - alph * u[1], 
+         head_width=0.2, 
+         head_length=0.2, length_includes_head = True, color = 'r')
+ax.text(sum_uv[0]-2, sum_uv[1]+0.25, r'$\beta_1{\bf u}$+$\beta_2{\bf v}$',size=12)
+ax.text(u[0]+0.25, u[1]-0.25, r'${\bf u}$', size=12)
+ax.text(alph * u[0]+0.25, alph * u[1]-0.25, r'$\beta_1{\bf u}$', size=12)
+ax.text(-2, 2.75, r'$\beta_2{\bf v}$', size=12)
+ax.text(v[0]+0.25, v[1]+0.25, r'${\bf v}$',size=12)
+ut.plotPoint(ax, sum_uv[0], sum_uv[1])
+ax.plot(0, 0, '')
+plt.show()
+```
+:::
+::::
 
 If you imagine the values of $\beta_1$ and $\beta_2$ necessary to create $\mathbf{y} = \beta_1{\bf u}$+$\beta_2{\bf v}$, you can see that $\beta_1$ and $\beta_2$ will be __very large__ in magnitude.
 
 This geometric argument illustrates why the regression coefficients will be very large under multicollinearity.
 
-Put another way, the value of $\Vert\beta\Vert$ will be very large.
+As a result, the value of $\Vert\boldsymbol{\beta}\Vert_2$ will be very large.
 
-### Ridge Regression
+## Ridge Regression
 
-Ridge regression adjusts least squares regression by shrinking the estimated coefficients towards zero.
+Ridge regression adjusts the least squares regression by shrinking the estimated coefficients towards zero.
 
-The purpose is to fix the magnitude inflation of $\Vert\beta\Vert$.
+The purpose is to fix the magnitude inflation of $\Vert\boldsymbol{\beta}\Vert_2$.
 
-To do this, Ridge regression assumes that the model has no intercept term --
-
-both the response and the predictors have been centered so that $\beta_0 = 0$.
+To do this, Ridge regression assumes that the model has no intercept term -- both the response and the predictors have been centered so that $\beta_0 = 0$.
 
 Ridge regression then consists of adding a penalty term to the regression:
 
-$$ \hat{\beta} = \arg \min_\beta \Vert X\beta - y \Vert^2 + \lambda \Vert\beta\Vert^2.$$
+$$ 
+\hat{\boldsymbol{\beta}} = \arg \min_\boldsymbol{\beta} \Vert X\boldsymbol{\beta} - y \Vert_2^2 + c\Vert\boldsymbol{\beta}\Vert_2^2.
+$$
 
-For any given $\lambda$ this has a closed-form solution in which $\hat{\beta}$ is a linear function of $X$ (just as in ordinary least squares).
+---
+
+For any given $c$ this has a closed-form solution in which $\hat{\boldsymbol{\beta}} = (X^TX +cI)^{−1}X^T.$
 
 The solution to the Ridge regression problem always exists and is unique, even when the data contains multicollinearity.
 
+Here, $c \geq 0$ is a tradeoff parameter and controls the strength of the penalty term:
 
-Here, $\lambda \geq 0$ is a tradeoff parameter (amount of shrinkage).
+* When $c = 0$, we get the least squares estimator: $\hat{\boldsymbol{\beta}} = (X^TX)^{−1}X^T\mathbf{y}$
+* When $c \rightarrow \infty$, we get $\hat{\boldsymbol{\beta}} \rightarrow 0.$
+* Increasing the value of $c$ forces the norm of $\hat{\boldsymbol{\beta}}$ to decrease, yielding smaller coefficient estimates in magnitude.
 
-It controls the strength of the penalty term:
-* When $\lambda = 0$, we get the least squares estimator: $\hat{\beta} = (X^TX)^{−1}X^T\mathbf{y}$
-* When $\lambda = \infty$, we get $\hat{\beta} = 0.$
-* Increasing the value of $\lambda$ forces the norm of $\hat{\beta}$ to decrease, yielding smaller coefficient estimates (in magnitude).
-
-For a finite, positive value of $\lambda$, we are balancing two tasks: fitting
+For a finite, positive value of $c$, we are balancing two tasks: fitting
 a linear model and shrinking the coefficients.
 
-So once again, we have a __hyperparameter__ that controls model complexity:
-* hence, we typically set $\lambda$ by holding out data, ie, __cross-validation.__
+The coefficient $c$ is a __hyperparameter__ that controls the model complexity. We typically set $c$ by holding out data, i.e., __cross-validation.__
 
-Note that the penalty term $\Vert\beta\Vert^2$ would be unfair to the different predictors, if they are not on the same scale. 
+## Scaling
+
+Note that the penalty term $\Vert\boldsymbol{\beta}\Vert_2^2$ would be unfair to the different predictors if they are not on the same scale. 
 
 Therefore, if we know that the variables are not measured in the same units, we typically first perform unit normal scaling on the columns of $X$ and on $\mathbf{y}$ (to standardize the predictors), and then perform ridge regression.
 
-Note that by scaling $\mathbf{y}$ to zero-mean, we do not need (or include) an intercept in the model.
+Note that by scaling $\mathbf{y}$ to have zero-mean, we do not need (or include) an intercept in the model.
 
-The general strategy of including extra criteria to improve the behavior of a model is called "regularization."
+Another name for ridge regression is __Tikhanov regularization__. You may see this terminology used in textbooks on optimization.
 
-Accordingly, Ridge regression is also known as __Tikhanov regularization__.
+::: {.aside}
+Normalizing is needed for this specific method. This is in contrast to the previous lecture where we allowed the coefficients to correct for the scaling differences between different units of measure.
+:::
+
+---
 
 Here is the performance of Ridge regression on the Longley data.
 
-We are training on half of the data, and using the other half for testing.
+We are training on half of the data and using the other half for testing.
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
+#| fig-align: center
 from sklearn.metrics import r2_score
 nreps = 1000
 
@@ -349,8 +480,7 @@ results = np.array(vals)
 ```
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
+#| fig-align: center
 ax = plt.figure(figsize = (6, 4)).add_subplot()
 ax.errorbar(np.log10(results[1:][:, 0]), results[1:][:, 1], 
             results[1:][:, 2],
@@ -365,73 +495,71 @@ ax.hlines(results[0,1]-results[0,2], np.log10(results[1, 0]),
 ax.tick_params(labelsize=12)
 ax.set_ylabel('$R^2$', fontsize = 14)
 plt.legend(loc = 'best')
-ax.set_xlabel('$\log_{10}(\lambda)$', fontsize = 14)
-ax.set_title('Ridge Regression Accuracy on Longley Data', fontsize = 16);
+ax.set_xlabel('$\\log_{10}(c)$', fontsize = 14)
+ax.set_title('Ridge Regression Accuracy on Longley Data', fontsize = 16)
+plt.show()
 ```
+
+--- 
 
 To sum up the idea behind Ridge regression: 
 
-1. There may be many $\beta$ values that are (approximately) consistent with the equations.   
-2. However over-fit $\beta$ values tend to have large magnitudes 
-3. We apply shrinkage to avoid those solutions
-4. We do so by tuning $\lambda$ via cross-validation
+1. There may be many $\boldsymbol{\beta}$ values that are consistent with the equations.   
+1. Over-fit $\boldsymbol{\beta}$ values tend to have large magnitudes.
+1. We add the regularization term $c \Vert \boldsymbol{\beta}\Vert_2^2$ to the least squares to avoid those solutions.
+1. We tune $c$ to an appropriate value via cross-validation.
 
-### Model Selection
+## Model Selection
 
 Of course, one might attack the problem of multicollinearity as follows:
     
-1. Multicollinearity occurs because there are near-dependences among variables (features)
-2. The extra variables do not contribute anything "meaningful" to the quality of the model
-3. Hence, why not simply remove variables from the model that are causing dependences?
+- Multicollinearity occurs when variables (features) are close to linearly dependent.
+- These variables do not contribute anything *meaningful* to the quality of the model
+- As a result why not simply remove variables from the model that are nearly linearly dependent?
 
-If we remove variables from our regression, we are creating a new model.
+We create a new model when we remove these variables from our regression.
 
-Hence this strategy is called "model selection."
+This strategy is called **model selection**.
+
+---
 
 One of the advantages of model selection is __interpretability__: by eliminating variables, we get a clearer picture of the relationship between truly useful features and dependent variables.
 
-However, there is a big challenge inherent in model selection:
-    
-in general, the possibilities to consider are exponential in the number of features.
+However, there is a big challenge inherent in model selection. In general, the possibilities to consider are exponential in the number of features.
 
-That is, if we have $n$ features to consider, then there are $2^n-1$ possible models that incorporate one or more of those features.
-
-This space is usually too big to search directly.
+That is, if we have $n$ features to consider, then there are $2^n-1$ possible models that incorporate one or more of those features. This space is usually too big to search directly.
 
 Can we use Ridge regression for this problem?
 
-Ridge regression does not set any coefficients exactly to zero unless $\lambda = \infty$ (in which case they’re all zero). 
+:::: {.fragment}
+Ridge regression does not set any coefficients exactly to zero unless $c\rightarrow \infty$, in which case they’re all zero. 
 
-Hence, Ridge regression cannot perform variable selection, and even though it performs well in terms of prediction accuracy, it does not offer a clear interpretation
+This means Ridge regression cannot perform variable selection. Even though it performs well in terms of prediction accuracy, it does not offer a clear interpretation.
+::::
 
-### The LASSO
+
+## The LASSO
 
 LASSO differs from Ridge regression __only in terms of the norm__ used by the penalty term.
 
-__Ridge regression:__
-
-$$ \hat{\beta} = \arg \min_\beta \Vert X\beta - y \Vert^2 + \lambda \Vert\beta\Vert_2^2.$$
-
-__LASSO:__
-
-$$ \hat{\beta} = \arg \min_\beta \Vert X\beta - y \Vert^2 + \lambda \Vert\beta\Vert_1.$$
+$$ 
+\hat{\beta} = \arg \min_\beta \Vert X\beta - y \Vert_2^2 + c \Vert\beta\Vert_1.
+$$
 
 However, this small change in the norm makes a __big difference__ in practice.
 
-The nature of the $\ell_1$ penalty will cause some coefficients to be shrunken to zero exactly!
+The nature of the $\ell_1$ penalty will cause some coefficients to be shrunken to zero exactly.
 
-This means that LASSO can perform model selection: it can tell us which variables to keep and which to set aside.
+This means that LASSO can perform model selection by telling us which variables to keep and which to set aside.
 
-As $\lambda$ increases, more coefficients are set to zero (fewer variables are selected).
+As $c$ increases, more coefficients are set to zero, i.e., fewer variables are selected.
 
-In terms of prediction error, LASSO performs comparably to Ridge regression, 
+In terms of prediction error, LASSO performs comparably to Ridge regression but it has a __big advantage with respect to interpretation.__
 
-... but it has a __big advantage with respect to interpretation.__
+---
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
+#| fig-align: center
 from sklearn.metrics import r2_score
 nreps = 200
 
@@ -465,8 +593,7 @@ mean_params = np.array(mean_params)
 ```
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
+#| fig-align: center
 ax = plt.figure(figsize = (6, 4)).add_subplot()
 ax.errorbar(np.log10(results[1:][:, 0]), results[1:][:, 1], 
             results[1:][:, 2],
@@ -482,44 +609,50 @@ ax.tick_params(labelsize=12)
 ax.set_ylabel('$R^2$', fontsize = 14)
 #ax.set_xlim([-4, -1])
 plt.legend(loc = 'best')
-ax.set_xlabel('$\log_{10}(\lambda)$', fontsize = 14)
-ax.set_title('LASSO Accuracy on Longley Data', fontsize = 16);
+ax.set_xlabel('$\\log_{10}(c)$', fontsize = 14)
+ax.set_title('LASSO Accuracy on Longley Data', fontsize = 16)
+plt.show()
 ```
 
+---
+
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
-df = pd.DataFrame(mean_params, columns = ['$\log_{10}(\lambda)$', 'GNPDEFL', 'GNP', 'UNEMP', 'ARMED', 'POP', 'const'])
+df = pd.DataFrame(mean_params, columns = ['$\log_{10}(c)$', 'GNPDEFL', 'GNP', 'UNEMP', 'ARMED', 'POP', 'const'])
 param_df = df[['GNPDEFL', 'GNP', 'UNEMP', 'ARMED', 'POP', 'const']].iloc[1:].copy()
-param_df.index = np.log10(df.iloc[1:]['$\log_{10}(\lambda)$'])
+param_df.index = np.log10(df.iloc[1:]['$\log_{10}(c)$'])
 ```
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: fragment}
-#| tags: [hide-input]
+#| fig-align: center
 param_df.plot()
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 16})
-plt.title('LASSO Coefficients vs $\lambda$');
+plt.title('LASSO Coefficients vs $c$')
+plt.show()
 ```
 
-We can use another version of the module that can directly type formulas and expressions in the functions of the models.
+--- 
 
+We can use the statsmodel `smf` sub-module to directly type formulas and expressions in the functions of the models. This allows us to, among other things,
 
-We can specify the name of the columns to be used to predict another column, remove columns, etc.
+- specify the name of the columns to be used to predict another column
+- remove columns
+- infer the type of the variable (e.g., categorical, numerical)
+- apply functions to columns
+
+The `smf` submodule makes use of the [patsy(https://patsy.readthedocs.io/en/latest/)] package. patsy is a Python package for describing statistical models (especially linear models, or models that have a linear component) and building design matrices. It is closely inspired by and compatible with the formula mini-language used in R and S.
+
+In the following code cells we will see the syntax that is used to specify columns in the models and how to remove columns from our model
+
+---
+
+Here is an example where we specify the name of the columns to be used to predict another column.
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [hide-cell]
 X['TOTEMP'] = y
 ```
 
+
 ```{python}
-#| hide_input: false
-#| slideshow: {slide_type: skip}
-#| tags: [hide-cell]
 mod = smf.ols(formula='TOTEMP ~ GNPDEFL + GNP + UNEMP + ARMED + POP', data=X)
 res = mod.fit()   
 with warnings.catch_warnings():
@@ -527,16 +660,52 @@ with warnings.catch_warnings():
     print(res.summary())
 ```
 
+---
+
+The formula
+
+`formula='TOTEMP ~ GNPDEFL + GNP + UNEMP + ARMED + POP'`
+
+is an R-style formula string that specifies the model.
+
+The variable `TOTEMP` is the dependent variable, which is Total Employment in the Longley dataset.
+
+The syntax `~` separates the dependent variable from the independent variables.
+
+The sytnax `GNPDEFL + GNP + UNEMP + ARMED + POP` are the independent variables, which are GNP Deflator, Gross National Product, Number of Unemployed, Size of the Armed Forces, and Population.
+
+---
+
+This is an example where we remove columns from the data and exclude the y-intercept.
+
 ```{python}
-#| hide_input: false
-#| slideshow: {slide_type: skip}
-#| tags: [hide-cell]
 mod = smf.ols(formula='TOTEMP ~ GNPDEFL + GNP + UNEMP - 1', data=X)
 res = mod.fit()
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
     print(res.summary())
 ```
+
+---
+
+The formula is 
+
+`formula='TOTEMP ~ GNPDEFL + GNP + UNEMP - 1'`
+
+We still have the same dependent variable `TOTEMP`. The independent variables are
+`GNPDEFL + GNP + UNEMP`
+
+The syntax `-1` removes the intercept from the model. By default, an intercept is included in the model, but - 1 explicitly excludes it.
+
+---
+
+## The LASSO and Longley Data
+
+Here are some of the important observations from using LASSO regression on the Longley dataset:
+
+- We removed the near linearly dependent features from our model.
+- We improved the condition number of the data by 4 orders of magnitude.
+- There is only one variable whose condfidence interval contains 0.
 
 ## Flexible Modeling
 
@@ -550,7 +719,7 @@ Guerry assembled data on crimes, suicides, literacy and other “moral
 statistics,” and used tables and maps to analyze a variety of social issues
 in perhaps the first comprehensive study relating such variables.
 
-Wikipedia
+---
 
 >Guerry’s results were startling for two reasons.
 First he showed that rates of crime and suicide remained
@@ -567,47 +736,57 @@ physical world.
 Source: "A.-M. Guerry’s Moral Statistics of France: Challenges for Multivariable
 Spatial Analysis", Michael Friendly.  Statistical Science 2007, Vol. 22, No. 3, 368–399.
 
+--- 
+
+Here is the dataset.
+
 ```{python}
-#| slideshow: {slide_type: fragment}
 # Lottery is per-capital wager on Royal Lottery
 df = sm.datasets.get_rdataset("Guerry", "HistData").data
 df = df[['Lottery', 'Literacy', 'Wealth', 'Region']].dropna()
 df.head()
 ```
 
+---
+
+Here is a regression using the feature `Literacy`, `Wealth`, and `Region`.
+
 ```{python}
-#| slideshow: {slide_type: fragment}
 mod = smf.ols(formula='Lottery ~ Literacy + Wealth + Region', data=df)
 res = mod.fit()
 print(res.summary())
 ```
 
-__Categorical variables__
+---
 
-Patsy is the name of the interpreter that parses the formulas.
+In the previous cell, using the patsy syntax determined that elements of `Region` were text strings, so it treated `Region` as a categorical variable. 
 
-Looking at the summary printed above, notice that patsy determined that elements of Region were text strings, so it treated Region as a categorical variable. 
+Alternatively, we could manually enforce this with the syntax on the following slide. Recall that the `-` sign is used to remove columns/variables. Here we remove the intercept from a model by.
 
-Patsy‘s default is also to include an intercept, so we automatically dropped one of the Region categories.
-
-__Removing variables__
-
-The “-” sign can be used to remove columns/variables. For instance, we can remove the intercept from a model by:
+---
 
 ```{python}
-#| slideshow: {slide_type: '-'}
 res = smf.ols(formula='Lottery ~ Literacy + Wealth + C(Region) -1 ', data=df).fit()
 print(res.summary())
 ```
 
-__Functions__
+---
 
-We can also apply vectorized functions to the variables in our model:
+We can also apply vectorized functions to the variables in our model. The following cell shows how to do this. In this case we apply the natural log function to the `Literacy` column and use this single column to predict the `Lottery` values.
 
 ```{python}
-#| scrolled: false
-#| slideshow: {slide_type: '-'}
 res = smf.ols(formula='Lottery ~ np.log(Literacy)', data=df).fit()
 print(res.summary())
 ```
 
+## Recap
+
+We discussed how to perform regularization in linear regression to avoid issues of overfitting due to multicollinearity.
+
+We discussed how the condition number of a matrix indicates whether we have issues with multicollinearity. 
+
+We saw that large condition numbers indicate multicollinearity.
+
+To address this issue we considered both Ridge and LASSO regression.
+
+We also learned about the patsy syntax in the statsmodel package.
