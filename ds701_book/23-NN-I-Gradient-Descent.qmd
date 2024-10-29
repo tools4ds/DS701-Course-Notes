@@ -20,8 +20,6 @@ import networkx as nx
 from IPython.display import Image, HTML
 
 import laUtilities as ut
-
-%matplotlib inline
 ```
 
 
@@ -213,6 +211,7 @@ Here is a plot of $f(x)$.
 
 
 ```{python}
+#| fig-align: center
 #| code-fold: true
 import numpy as np
 plt.figure(figsize=(4, 2))
@@ -305,6 +304,7 @@ The minimum of $f(x)$ occurs at the point $x$ where $f'(x) = 0$. This is determi
 Plotting the point $(2/3, f(2/3))$ confirms that $x=2/3$ is a minimum point.
 
 ```{python}
+#| fig-align: center
 #| code-fold: true
 xs = np.arange(-5, 5, 0.25)
 ys = f(xs)
@@ -327,6 +327,7 @@ plt.show()
 We can explore the tangent at different x-values.
 
 ```{python}
+#| fig-align: center
 #| code-fold: true
 import matplotlib.pyplot as plt
 import numpy as np
@@ -720,21 +721,25 @@ This visualization combines the last two plots into a single view.
 
 ```{python}
 #| code-fold: true
-%matplotlib inline
+#| fig-align: center
 # set up view
+from IPython.display import HTML
+import matplotlib
 import matplotlib.animation as animation
-mp.rcParams['animation.html'] = 'jshtml'
+matplotlib.rcParams['animation.html'] = 'jshtml'
+matplotlib.rcParams['animation.embed_limit'] = 30000000
+matplotlib.rcParams['animation.html'] = 'html5'
 
 anim_frames = np.array(list(range(10)) + [2 * x for x in range(5, 25)] + [5 * x for x in range(10, 100)])
 
 fig = ut.three_d_figure((23, 1), 'z = 3 x1^2 + 7 x2 ^2',
                         -12, 12, -4, 4, -1, 2000, 
-                        figsize = (7, 7))
+                        figsize = (5, 5))
 plt.close()
 fig.ax.view_init(azim = 60, elev = 22)
 qf = np.array(X.T @ X)
 fig.plotGeneralQF(X.T @ X, -2 * (y.T @ X), y.T @ y, alpha = 0.5)
-fig.ax.set_zlabel('$\mathcal{L}$')
+fig.ax.set_zlabel(r'$\mathcal{L}$')
 fig.ax.set_xlabel(r'$\beta_0$')
 fig.ax.set_ylabel(r'$\beta_1$')
 fig.set_title(r'$\Vert \mathbf{y}-X\mathbf{\beta}\Vert^2$', '', 
@@ -745,11 +750,13 @@ def anim(frame):
     # fig.canvas.draw()
 #
 # create the animation 
-animation.FuncAnimation(fig.fig, anim,
+ani = animation.FuncAnimation(fig.fig, anim,
                        frames = anim_frames,
                        fargs = None,
-                       interval = 1,
+                       interval = 100,
                        repeat = False)
+
+HTML(ani.to_html5_video())                     
 ```
 
 ---
@@ -758,7 +765,8 @@ We can also see how evolution of the parameters translate to the line fitting to
 
 ```{python}
 #| code-fold: true
-fig, ax = plt.subplots(figsize = (7, 7))
+#| fig-align: center
+fig, ax = plt.subplots(figsize = (5, 5))
 plt.close()
 centerAxes(ax)
 ax.plot(xlin, y, 'ro', markersize = 10)
@@ -773,11 +781,14 @@ def animate(frame):
     fig.canvas.draw()
 #
 # create the animation 
-animation.FuncAnimation(fig, animate,
+ani = animation.FuncAnimation(fig, animate,
                        frames = anim_frames,
                        fargs=None,
                        interval=100,
                        repeat=False)
+
+
+HTML(ani.to_html5_video())   
 ```
 
 ## Challenges in Gradient Descent
@@ -838,8 +849,8 @@ It is helpful to look at the progress of the algorithm using the loss surface:
 ::: {.column width="50%"}
 
 ```{python}
+#| fig-align: center
 #| code-fold: true
-%matplotlib inline
 fig = ut.three_d_figure((23, 1), '',
                         -12, 2, -4, 4, -1, 2000, 
                         figsize = (7, 7))
