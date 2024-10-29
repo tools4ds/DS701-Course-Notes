@@ -203,7 +203,7 @@ $$
 
 These equations always have at least one solution. However, the *at least one* part is problematic.
 
-If there are multiple solutions, they are in a sense all equivalent in that they yield the same value of $\Vert X\boldsymbol{\beta} - y\Vert$.
+If there are multiple solutions, they are in a sense all equivalent in that they yield the same value of $\Vert X\boldsymbol{\beta} - y\Vert_2$.
 
 However, the actual values of $\boldsymbol{\beta}$ can vary tremendously and so it is not clear how best to interpret which solution is actually the best.
 
@@ -415,7 +415,7 @@ $$
 
 ---
 
-For any given $c$ this has a closed-form solution in which $\hat{\boldsymbol{\beta}} = (X^TX +cI)^{−1}X^T.$
+For any given $c$ this has a closed-form solution in which $\hat{\boldsymbol{\beta}} = (X^TX +cI)^{−1}X^T\mathbf{y}.$
 
 The solution to the Ridge regression problem always exists and is unique, even when the data contains multicollinearity.
 
@@ -639,7 +639,7 @@ We can use the statsmodel `smf` sub-module to directly type formulas and express
 - infer the type of the variable (e.g., categorical, numerical)
 - apply functions to columns
 
-The `smf` submodule makes use of the [patsy(https://patsy.readthedocs.io/en/latest/)] package. patsy is a Python package for describing statistical models (especially linear models, or models that have a linear component) and building design matrices. It is closely inspired by and compatible with the formula mini-language used in R and S.
+The `smf` submodule makes use of the [patsy](https://patsy.readthedocs.io/en/latest/) package. patsy is a Python package for describing statistical models (especially linear models, or models that have a linear component) and building design matrices. It is closely inspired by and compatible with the formula mini-language used in R and S.
 
 In the following code cells we will see the syntax that is used to specify columns in the models and how to remove columns from our model
 
