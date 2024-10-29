@@ -34,6 +34,8 @@ So far we have seen linear regression:
 
 Now we will look at the following situation.
 
+---
+
 Imagine that you are observing a binary variable -- value 0 or 1.
 
 That is, these could be pass/fail, admit/reject, Democrat/Republican, etc.
@@ -62,10 +64,10 @@ Let's consider this question:
 
 > What is the probability I will be admitted to Grad School?
 
-Let's see how variables, such as
+Let's see how variables, such as,
 
 * _GRE_ (Graduate Record Exam scores), 
-* _GPA_ (grade point average) and 
+* _GPA_ (grade point average), and 
 * prestige of the undergraduate institution
 
 affect admission into graduate school. 
@@ -226,7 +228,7 @@ That is, these could be pass/fail, admit/reject, Democrat/Republican, etc.
 
 Now, a linear function like $\beta_0 + \beta_1 x$ cannot be used to predict
 probability directly, because the linear function takes on all values (from
--$\infty$ to +$\infty$), and probability only ranges over $(0, 1)$.
+-$\infty$ to +$\infty$), and probability only ranges over $[0, 1]$.
 
 ## Odds and Log-Odds
 
@@ -285,7 +287,7 @@ $$
 So, logistic regression fits a probability of the following form:
 
 $$
-p(x) = P(y=1\mid x) = \frac{e^{\beta_0+\beta_1 x}}{1+e^{\beta_0+\beta_1 x}}
+p(x) = P(y=1\mid x) = \frac{e^{\beta_0+\beta_1 x}}{1+e^{\beta_0+\beta_1 x}}.
 $$
 
 This is a sigmoid function; when $\beta_1 > 0$, $x\rightarrow \infty$, then
@@ -334,13 +336,13 @@ So a compact way to describe logistic regression is that it finds regression
 coefficients $\beta_0, \beta_1$ to fit:
 
 $$
-\text{logit}\left(p(x)\right)=\log\left(\frac{p(x)}{1-p(x)} \right) = \beta_0 + \beta_1 x
+\text{logit}\left(p(x)\right)=\log\left(\frac{p(x)}{1-p(x)} \right) = \beta_0 + \beta_1 x.
 $$
 
 Note also that the __inverse__ logit function is:
 
 $$
-\text{logit}^{-1}(x) = \frac{e^x}{1 + e^x}
+\text{logit}^{-1}(x) = \frac{e^x}{1 + e^x}.
 $$
 
 Somewhat confusingly, this is called the __logistic__ function.
@@ -352,13 +354,13 @@ Somewhat confusingly, this is called the __logistic__ function.
 So, the best way to think of logistic regression is that we compute a linear function:
     
 $$
-\beta_0 + \beta_1 x
+\beta_0 + \beta_1 x,
 $$
     
-and then "map" that to a probability using the $\text{logit}^{-1}$ function:
+and then *map* that to a probability using the inverse $\text{logit}$ function:
 
 $$
-\frac{e^{\beta_0+\beta_1 x}}{1+e^{\beta_0+\beta_1 x}}
+\frac{e^{\beta_0+\beta_1 x}}{1+e^{\beta_0+\beta_1 x}}.
 $$
 
 ## Logistic vs Linear Regression
@@ -371,15 +373,11 @@ $$
 y_i = \beta_0 +\beta_1 x_i + \epsilon_i.
 $$
 
-We do the fitting by minimizing the sum of squared error ($\Vert\epsilon\Vert$).
-This can be done in closed form.  
-
-(Recall that the closed form is found by geometric arguments, or by calculus).
+We do the fitting by minimizing the sum of squared errors $\Vert\epsilon\Vert$.
+This can be done in closed form using either geometric arguments or by calculus.
 
 Now, if $\epsilon_i$ comes from a normal distribution with mean zero and some
-fixed variance, 
-
-then minimizing the sum of squared error is exactly the same as finding the
+fixed variance, then minimizing the sum of squared errors is exactly the same as finding the
 maximum likelihood of the data with respect to the probability of the errors.
 
 So, in the case of linear regression, it is a lucky fact that the __MLE__ of
@@ -396,7 +394,7 @@ $$
 $$
 
 
-with $\text{Pr}(y_i=1\mid x_i)=p(x_i).$
+with $\text{P}(y_i=1\mid x_i)=p(x_i).$
 
 How should we choose parameters?   
 
@@ -405,7 +403,7 @@ Here too, we use Maximum Likelihood Estimation of the parameters.
 That is, we choose the parameter values that maximize the likelihood of the data given the model.
 
 $$
-\text{Pr}(y_i \mid x_i) = 
+\text{P}(y_i \mid x_i) = 
 \left\{\begin{array}{lr}\text{logit}^{-1}(\beta_0 + \beta_1 x_i)& \text{if } y_i = 1\\
 1 - \text{logit}^{-1}(\beta_0 + \beta_1 x_i)& \text{if } y_i = 0\end{array}\right.
 $$
@@ -417,16 +415,16 @@ $$
 We can write this as a single expression:
 
 $$
-\text{Pr}(y_i \mid x_i) = \text{logit}^{-1}(\beta_0 + \beta_1 x_i)^{y_i} (1-\text{logit}^{-1}(\beta_0 + \beta_1 x_i))^{1-y_i} 
+\text{P}(y_i \mid x_i) = \text{logit}^{-1}(\beta_0 + \beta_1 x_i)^{y_i} (1-\text{logit}^{-1}(\beta_0 + \beta_1 x_i))^{1-y_i}.
 $$
 
 We then use this to compute the __likelihood__ of parameters $\beta_0$, $\beta_1$:
 
 $$
-L(\beta_0, \beta_1 \mid x_i, y_i) = \text{logit}^{-1}(\beta_0 + \beta_1 x_i)^{y_i} (1-\text{logit}^{-1}(\beta_0 + \beta_1 x_i))^{1-y_i}
+L(\beta_0, \beta_1 \mid x_i, y_i) = \text{logit}^{-1}(\beta_0 + \beta_1 x_i)^{y_i} (1-\text{logit}^{-1}(\beta_0 + \beta_1 x_i))^{1-y_i},
 $$
 
-which is a function that we can maximize via various kinds of gradient descent.
+which is a function that we can maximize, for example, with gradient descent.
 
 ## Logistic Regression In Practice
 
@@ -439,7 +437,7 @@ likelihood of the data given these parameters for the logistic regression model.
 
 **Method** Maximum likelihood estimation, obtained by gradient descent.
 
-The standard package will give us a correlation coefficient (a $\beta_i$) for each
+The standard package will give us a correlation coefficient $\beta_i$ for each
 independent variable (feature).
 
 ::: {.content-visible when-profile="slides"}
@@ -601,16 +599,16 @@ There are four cases:
 ## Logistic Regression in Perspective
 :::
 
-__Precision__ is the fraction of "yes"es that are correct:
+__Precision__ is the fraction of "yes" classifications that are correct:
 
 $$
-\mbox{Precision} = \frac{\mbox{True Positives}}{\mbox{True Positives + False Positives}}
+\mbox{Precision} = \frac{\mbox{True Positives}}{\mbox{True Positives + False Positives}}.
 $$
     
 __Recall__ is the fraction of admits that we say "yes" to:
 
 $$
-\mbox{Recall} = \frac{\mbox{True Positives}}{\mbox{True Positives + False Negatives}}
+\mbox{Recall} = \frac{\mbox{True Positives}}{\mbox{True Positives + False Negatives}}.
 $$
 
 ```{python}
@@ -670,7 +668,7 @@ the classifier.
 For this, we take the harmonic mean of precision and recall, called __F1 Score__:
 
 $$
-\mbox{F1 Score} = 2 \;\;\frac{\mbox{Precision} \cdot \mbox{Recall}}{\mbox{Precision} + \mbox{Recall}}
+\mbox{F1 Score} = 2 \;\;\frac{\mbox{Precision} \cdot \mbox{Recall}}{\mbox{Precision} + \mbox{Recall}}.
 $$
 
 ::: {.content-visible when-profile="slides"}
