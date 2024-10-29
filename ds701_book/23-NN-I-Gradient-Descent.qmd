@@ -490,7 +490,7 @@ The stopping criteria of the algorithm is:
 ## Example: Linear Regression
 
 ```{python}
-#| code-fold: true
+#| echo: false
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -503,13 +503,13 @@ from IPython.display import Image, HTML
 
 import laUtilities as ut
 
-%matplotlib inline
 ```
 
 Assume we have the following plotted data.
 
 ```{python}
 #| code-fold: true
+#| #| fig-align: center
 def centerAxes(ax):
     ax.spines['left'].set_position('zero')
     ax.spines['right'].set_color('none')
@@ -550,6 +550,7 @@ Here is the line we'd like to find.
 
 ```{python}
 #| code-fold: true
+#| #| fig-align: center
 ax = plt.figure(figsize = (7, 7)).add_subplot()
 centerAxes(ax)
 ax.plot(xlin, y, 'ro', markersize = 10)
@@ -578,7 +579,7 @@ fig = ut.three_d_figure((23, 1), '',
 qf = np.array(X.T @ X)
 fig.ax.view_init(azim = 60, elev = 22)
 fig.plotGeneralQF(X.T @ X, -2 * (y.T @ X), y.T @ y, alpha = 0.5)
-fig.ax.set_zlabel('$\mathcal{L}$')
+fig.ax.set_zlabel(r'$\mathcal{L}$')
 fig.ax.set_xlabel(r'$\beta_0$')
 fig.ax.set_ylabel(r'$\beta_1$')
 fig.set_title(r'$\Vert \mathbf{y}-X\mathbf{\beta}\Vert^2$', '', 
@@ -817,6 +818,8 @@ betas, losses = gradient_descent(X, y, beta_start, eta, nsteps = 100)
 
 ```{python}
 #| code-fold: true
+#| fig-align: center
+plt.figure(figsize=(4, 4))
 plt.plot(np.log(losses), '.-')
 plt.ylabel(r'$\log\mathcal{L}$', size = 14)
 plt.xlabel('Iteration', size = 14)
@@ -829,6 +832,8 @@ plt.show()
 
 ```{python}
 #| code-fold: true
+#| #| fig-align: center
+plt.figure(figsize=(4, 4))
 plt.plot(betas[:, 0], betas[:, 1], '.-')
 plt.xlabel(r'$\beta_0$', size = 14)
 plt.ylabel(r'$\beta_1$', size = 14)
@@ -853,11 +858,11 @@ It is helpful to look at the progress of the algorithm using the loss surface:
 #| code-fold: true
 fig = ut.three_d_figure((23, 1), '',
                         -12, 2, -4, 4, -1, 2000, 
-                        figsize = (7, 7))
+                        figsize = (4, 4))
 qf = np.array(X.T @ X)
 fig.ax.view_init(azim = 142, elev = 58)
 fig.plotGeneralQF(X.T @ X, -2 * (y.T @ X), y.T @ y, alpha = 0.5)
-fig.ax.set_zlabel('$\mathcal{L}$')
+fig.ax.set_zlabel(r'$\mathcal{L}$')
 fig.ax.set_xlabel(r'$\beta_0$')
 fig.ax.set_ylabel(r'$\beta_1$')
 fig.set_title(r'$\Vert \mathbf{y}-X\mathbf{\beta}\Vert^2$', '', 

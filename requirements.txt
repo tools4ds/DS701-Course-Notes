@@ -38,6 +38,7 @@ gdown
 
 # 23-NN-I-Gradient-Descent
 networkx
+ffmpeg
 
 #24-NN-II-Backprop
 graphviz
