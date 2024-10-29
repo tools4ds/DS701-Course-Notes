@@ -437,7 +437,7 @@ likelihood of the data given these parameters for the logistic regression model.
 
 **Method** Maximum likelihood estimation, obtained by gradient descent.
 
-The standard package will give us a correlation coefficient $\beta_i$ for each
+The standard package will give us a coefficient $\beta_i$ for each
 independent variable (feature).
 
 ::: {.content-visible when-profile="slides"}
@@ -477,7 +477,7 @@ confidence intervals contain zero).
 ## Using the Model
 
 Note that by fitting a model to the data, we can make predictions for inputs that
-were never seen in the data.  
+were not in the training data.  
 
 Furthermore, we can make a prediction of a probability for cases where we don't
 have enough data to estimate the probability directly -- e.g., for specific
