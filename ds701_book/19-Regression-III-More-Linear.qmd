@@ -143,7 +143,9 @@ X['const'] = 1.0
 X.index = X['YEAR']
 y.index = X['YEAR']
 X.drop('YEAR', axis = 1, inplace = True)
+print("X.head()")
 print(X.head())
+print("\n\ny.head()")
 print(y.head())
 ```
 
@@ -337,7 +339,8 @@ ut.plotPoint(ax, sum_uv[0], sum_uv[1])
 ax.plot(0, 0, '')
 plt.show()
 ```
-Via least-squares, we determine the coefficients $\beta_1$ and $\beta_2$.
+
+We determine the coefficients $\beta_1$ and $\beta_2$.
 :::
 ::::
 
