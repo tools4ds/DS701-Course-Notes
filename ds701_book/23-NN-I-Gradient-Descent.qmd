@@ -1,5 +1,5 @@
 ---
-title: Neural Networks I -- Gradient Descent
+title: NN I -- Gradient Descent
 jupyter: python3
 ---
 
@@ -20,8 +20,6 @@ import networkx as nx
 from IPython.display import Image, HTML
 
 import laUtilities as ut
-
-%matplotlib inline
 ```
 
 
@@ -30,7 +28,7 @@ The content builds upon
 
 * Andrej Karpathy's excellent [video](https://youtu.be/VMj-3S1tku0?si=9HKPIq36EnHektSm) on building _micrograd_ and 
 * _Understanding Deep Learning_ [book preprint](https://udlbook.github.io/udlbook/) by Simone Prince 
-* as well as many other sources cited below.
+* Additional sources are cited below
 :::
 
 
@@ -39,6 +37,8 @@ The content builds upon
 Deep Neural Networks have been effective in many applications.
 
 ![](figs/NN-figs/IntroModels.svg){width="75%"}
+
+---
 
 ![](figs/NN-figs/IntroModels2a.svg){width="75%"}
 
@@ -62,64 +62,69 @@ Deep Neural Networks have been effective in many applications.
 | Computer (1941-1945) | Computer Science (1950-1960) |
 | Teletype (1906) | Information Theory (1948) |
 
-* But then when theory is developed it can more quickly improve invention
-* The same can be said for Neural Networks. The theory to make them work is well understood. The theory of why they work is still developing.
-* We'll balance theory and application
+* However, a better developed theory can lead to significant improvements in the invention.
+* For Neural Networks, the theory to make them work is well understood. The theory of *why* they work is still developing.
+* We'll balance theory and application.
 
----
 [The Power and Limits of Deep Learning](https://learning.acm.org/techtalks/powerandlimitsdl), Yann LeCun, March 2019.
 
-Underlying all these techniques is the idea of applying optimization techniques
-to minimize some kind of "loss" function.
+Underlying Neural Networks is the minimization of a *loss* function.
 
 ## Loss Functions for Model Fitting
 
-Most of the machine learning we have studied this semester is based on the idea
-that we have a model that is _parameterized_, and our goal is to find good
-settings for the parameters.
+Many of the machine learning models we studied this semester are based on training a _parameterized_ model. Such a model is trained by finding the parameters which minimized the error defined through a *loss function.*
 
-We have seen example after example of this problem.
+Here are examples we considered so far this semester:
 
-* In $k$-means, our goal was to find $k$ cluster centroids, so that the $k$-means
-  objective was minimized.
-* In linear regression, our goal was to find a parameter vector $\beta$ so that
-  sum of squared error $\Vert \mathbf{y} - \hat{\mathbf{y}}\Vert_2$ was minimized.
-* In the support vector machine, our goal was to find a parameter vector $\theta$
-  so that classification error was minimized.
+* In $k$-means clustering, we computed $k$ cluster centroids, so that the WCSS (within sum of squares) was minimized.
+* In linear regression, we found the parameter vector $\beta$ so that minimized the sum of squares $\Vert \mathbf{y} - \hat{\mathbf{y}}\Vert_2^2.$
+* In the support vector machine, we computed a parameter vector $\theta$ to minimize the classification error.
 
-And similarly we'll want to find good parameter settings in neural networks.
+::: {.content-visible when-profile="slides"}
+## Loss Functions for Model Fitting
+:::
 
-It's time now to talk about how, in general, one can find "good settings" for the
+Similarly we'll want to find good parameter settings in neural networks.
+
+We introduce a generic approach to find *good values* for the
 parameters in problems like these.
 
 What allows us to unify our approach to many such problems is the following:
 
-First, we start by defining an error function, generally called a __loss__
-function, to describe how well our method is doing.
-
-And second, we choose loss functions that are __differentiable__ with respect to
+1. We start by defining an error function, called a __loss__
+function, to calculate a measure of how our method is performing.
+2. We define loss functions that are __differentiable__ with respect to
 the parameters.
 
-These two requirements mean that we can think of the parameter tuning problem
-using surfaces like these:
+::: {.content-visible when-profile="slides"}
+## Loss Functions for Model Fitting
+:::
 
-![](figs/L23-convex_cost_function.jpeg){width="75%"}
+Thinking visually, we will see that the loss function defines a corresponding loss surface.
 
-Imagine that the $x$ and $y$ axes in these pictures represent parameter settings.
-That is, we have two parameters to set, corresponding to the values of $x$ and $y$.
+![](figs/L23-convex_cost_function.jpeg){fig-align=center,width="75%"}
 
-For each $(x, y)$ setting, the $z$-axis shows the value of the loss function. 
+In this picture the $x-$ and $y-$axes represent ranges of the parameters and the loss functions are plotted as surfaces.
 
-What we want to do is find the minimum of a surface, corresponding to the
-parameter settings that minimize loss.
+---
+
+::: {.content-visible when-profile="slides"}
+![](figs/L23-convex_cost_function.jpeg){fig-align=center,width="25%"}
+:::
+
+For each parameter pair $(x, y)$, the $z$-axis shows the value of the loss function. 
+
+The lowest point on the surface corresponds to optimal parameters.
 
 Notice the difference between the two kinds of surfaces.    
 
 The surface on the left corresponds to a __strictly convex__ loss function.   
-If we find a local minimum of this function, it is a global minimum.
+A local minimum of a convex function is a global minimum.
 
 The surface on the right corresponds to a __non-convex__ loss function.
 There are local minima that are not globally minimal.
+
+---
 
 Both kinds of loss functions arise in machine learning.
 
@@ -132,35 +137,45 @@ While non-convex loss functions arise in
 
 * $k$-means
 * Gaussian Mixture Modeling
-* and of course neural networks
+* Neural Networks
 
 ## Gradient Descent Intuitively
 
 The intuition of gradient descent is the following.   
 
-Imagine you are lost in the mountains, and it is foggy out.  You want to find a
-valley.  But since it is foggy, you can only see the local area around you.
+:::: {.columns}
+::: {.column width="30%"}
+![](figs/L23-fog-in-the-mountains.jpeg){width="100%"}
+:::
+::: {.column width="70%"}
+Imagine you are lost in the mountains and it is foggy out.  
 
-![](figs/L23-fog-in-the-mountains.jpeg){width="75%"}
+You want to find a valley, but since it is foggy, you can only see the local
+area around you.
 
-<!-- Image credit http://nederlandliving.com/?p=1931 -->
+What would you do?
+:::
+::::
 
-The natural thing to do is:
+:::: {.fragment}
+The natural thing is:
 
+:::: {.incremental}
 1. Look around you 360 degrees.  
 2. Observe in which direction the ground is sloping downward most steeply.  
 3. Take a few steps in that direction.  
 4. Repeat the process ... until the ground seems to be level.
+::::
+::::
 
-The key to this intuitive idea is formalizing the idea of "direction of steepest
-descent."
 
-This is where the differentiability of the loss function comes into play.
+---
 
-As long as the loss function is _locally_ differentiable, we can define the 
-direction of steepest descent (really, ascent).
+The key to this idea is formalizing the "direction of steepest descent."
 
-That direction is called the __gradient.__
+We do this by using the differentiability of the loss function. This means that the **gradient**, which represents the rate of spatial change, of the loss function is defined.
+
+The (negative) of the gradient represents the direction of steepest descent.
 
 ## Derivatives on Single Variable Functions
 
@@ -173,203 +188,146 @@ import ipywidgets as widgets
 %matplotlib inline
 ```
 
-We'll build up to concept of gradient by starting with derivatives on single
+We'll build our understanding of the gradient by considering derivatives of single
 variable functions.
 
-Let's start with a simple quadratic function.
+Let's start with a quadratic function
 
 $$
-f(x) = 3x^2 - 4x +5
+f(x) = 3x^2 - 4x +5.
 $$
 
-Which we can write in python as well.
+The function $f(x)$ defined in Python.
 
 ```{python}
-#| code-fold: true
+#| code-fold: false
 def f(x):
   return 3*x**2 - 4*x + 5
 ```
 
-And we can plot it.
+---
+
+Here is a plot of $f(x)$.
+
 
 ```{python}
+#| fig-align: center
 #| code-fold: true
 import numpy as np
+plt.figure(figsize=(4, 2))
 
 xs = np.arange(-5, 5, 0.25)
 ys = f(xs)
-plt.plot(xs, ys);
+plt.plot(xs, ys)
+plt.title('$f(x) = 3x^2 - 4x + 5$')
+plt.show()
 ```
 
-Let's assume for a minute that this is our loss function that we are minimizing.
+--- 
 
+Assume that $f(x)$ is the loss function we want to minimize.
 
+:::: {.fragment}
 __Question__
 
 What do we know about where the minimum is in terms of the slope of the curve?
+::::
 
+:::: {.fragment}
 __Answer__
 
-It is necessary but _not sufficient_ that the slope be zero.
+The slope must *necessarily* be zero.
+::::
 
-__Question__ 
+:::: {.fragment}
+__Question__
 
 How do we calculate the slope?
+::::
 
-We take the derivative, denoted
+:::: {.fragment}
+__Answer__
+
+Calculate the derivative.
+::::
+
+
+---
+
+The derivative of a function $f(x)$ is denoted
 
 $$
-\frac{d f(x)}{dx} \hspace{10pt} \textrm{Leibniz' notation} 
+\frac{d f(x)}{dx} \hspace{10pt} \textrm{Leibniz' notation},
 $$
 
 or
 
 $$
-f'(x) \hspace{10pt} \textrm{Lagrange's notation} 
+f'(x) \hspace{10pt} \textrm{Lagrange's notation}.
 $$
+
 
 You may see both notations. The nice thing about Leibniz' notation is that it is
-easy to express _partial derivatives_ when we get to multivariate differentiation,
-which we'll get to shortly.
-
-We can take the derivate of the $f(x)$
+easy to express _partial derivatives_. A _partial derivative_ of a function $f(x_1, x_2)$ of $2$ variables is, the derivative with respect to one of its variables. For example
 
 $$
-f(x) = 3x^2 - 4x +5
+\frac{\partial f(x_1, x_2)}{\partial x_1} = \lim_{h\rightarrow 0} \frac{f(x_1 +h, x_2) - f(x_1, x_2)}{h}.
 $$
 
-By definition of the [derivative](https://en.wikipedia.org/wiki/Derivative), the
-function $f(x)$ is differentiable at $x$ if
+---
+
+A function $f(x)$ is [differentiable](https://en.wikipedia.org/wiki/Derivative) at $x$ if
 
 $$
-\lim_{h\to 0} \frac{f(a+h)-f(a)}{h} 
+ \lim_{h\to 0} \frac{f(x+h)-f(x)}{h} 
 $$
 
-exists at $x$. And in fact, that limit approaches the value of the derivative in the limit.
+exists at $x$. The function $f'(x)$ is the value in the limit.
 
-```{python}
-#| code-fold: true
-import matplotlib.pyplot as plt
-import numpy as np
-import ipywidgets as widgets
-from IPython.display import display
 
-# Define the function f(x)
-def f(x):
-    return 3 * x ** 2 - 4 * x + 5
+The derivative of our example is
 
-# Define the derivative f'(x)
-def df(x):
-    return 6 * x - 4
+$$
+f'(x) = 6x-4.
+$$
 
-# Function to plot f(x) and its tangent line at x = x_value
-def plot_with_tangents(x_value, h_value):
-    # Generate x values for the function
-    x = np.linspace(-5, 5, 400)
-    y = f(x)
-
-    #h_value = 10**(-e_value)
-    
-    # Compute the slope and function value at x = x_value
-    slope_at_x_value = df(x_value)
-    limit_at_x_value = (f(x_value + h_value) - f(x_value)) / h_value
-    f_at_x_value = f(x_value)
-    f_at_x_plus_h_value = f(x_value + h_value)
-    
-    # Generate x and y values for the tangent line near x = x_value
-    x_tangent = np.linspace(x_value - 2, x_value + 2, 400)
-    y_tangent = f_at_x_value + slope_at_x_value * (x_tangent - x_value)
-    y_limit_tangent = f_at_x_value + limit_at_x_value * (x_tangent - x_value)
-    
-    # Create the plot
-    plt.figure(figsize=(10, 6))
-    plt.plot(x, y, label='f(x) = 3x^2 - 4x + 5')
-    plt.plot(x_tangent, y_tangent, linestyle='--', label=f'Asymptotic slope of {df(x_value):.2f} at x = {x_value:.2f}')
-    plt.plot(x_tangent, y_limit_tangent, linestyle='-.', label=f'Asymptotic limit of {limit_at_x_value:.2f} at x = {x_value:.2f}, h = {h_value:.3f}')
-    plt.scatter([x_value], [f_at_x_value], color='red')  # point of tangency
-    plt.scatter([x_value+h_value], [f_at_x_plus_h_value], color='red')  # point of tangency
-    plt.title('Plot of the function f(x) = 3x^2 - 4x + 5')
-    plt.xlabel('x')
-    plt.ylabel('f(x)')
-    plt.grid(True)
-    plt.legend()
-    plt.show()
-
-# Create an interactive widget
-widgets.interact(plot_with_tangents, x_value=widgets.FloatSlider(value=-2, min=-5, max=5, step=0.1), h_value=widgets.FloatSlider(value=1, min=.001, max=2, step=.001));
-#widgets.interact(plot_with_tangents, h_value=widgets.FloatSlider(value=1, min=1, max=10, step=1));
-```
-
-We use the rules of derivatives. See for example the derivative
-[rules for basic functions](https://en.wikipedia.org/wiki/Derivative#Rules_for_basic_functions), 
-e.g.
-
+You can compute this using the [derivative rule](https://en.wikipedia.org/wiki/Derivative#Rules_for_basic_functions) 
 $$
 \frac{d}{dx} x^a = ax^{a-1}, 
-  \quad \textrm{e.g.} \quad \frac{d}{dx} 3x^2 = 6x 
-  \quad \textrm{,} \quad \frac{d}{dx} 6x = 6
-  \quad \textrm{,} \quad \frac{d}{dx} 6 = 0 
 $$
+for polynomial functions.
 
-so
+The minimum of $f(x)$ occurs at the point $x$ where $f'(x) = 0$. This is determined by solving $6x-4=0$, which gives a value of $x=2/3$.
 
-$$
-\frac{d f(x)}{dx} = 6x - 4 
-$$
+---
+
+Plotting the point $(2/3, f(2/3))$ confirms that $x=2/3$ is a minimum point.
 
 ```{python}
-#| code-fold: true
-# define the derivate of f as df
-def df(x):
-    return 6*x - 4
-```
-
-We can solve for where $\frac{d}{dx} f(x) = 0$
-
-$$
-6x - 4 = 0 
-$$
-
-```{python}
-#| code-fold: true
-# Evaluate df and f for x where df = 0 
-x_zero = 2/3
-
-# Evaluate df
-df(x_zero)
-```
-
-```{python}
-#| code-fold: true
-# And f at that value is
-f(x_zero)
-```
-
-Which we can add to the plot of $f(x)$ to see if it indeed is at the minimum.
-
-```{python}
+#| fig-align: center
 #| code-fold: true
 xs = np.arange(-5, 5, 0.25)
 ys = f(xs)
 plt.plot(xs, ys)
 
 # Add a circle point at (2, 5)
-plt.plot([x_zero], [f(x_zero)], 'o')
+plt.plot([2/3], [f(2/3)], 'o')
 
 # Show the plot
 plt.show()
 ```
 
-Now as Wikipedia [states](https://en.wikipedia.org/wiki/Derivative),
 
-> The derivative of a function of a single variable at a chosen input value, when
-it exists, is the slope of the tangent line to the graph of the function at that point.
+---
+
+> Assume $f(x)$ is differentiable. The derivative $f'(x)$ is the slope of the tangent line at the point $(x, f(x)$.
 
 ## Slope of a Function
 
 We can explore the tangent at different x-values.
 
 ```{python}
+#| fig-align: center
 #| code-fold: true
 import matplotlib.pyplot as plt
 import numpy as np
@@ -410,85 +368,85 @@ def plot_with_tangent(x_value):
     plt.legend()
     plt.show()
 
+plot_with_tangent(2)
+
 # Create an interactive widget
-widgets.interact(plot_with_tangent, x_value=widgets.FloatSlider(value=-2, min=-5, max=5, step=0.1));
+# widgets.interact(plot_with_tangent, x_value=widgets.FloatSlider(value=-2, min=-5, max=5, step=0.1));
 ```
 
-## Slope Shows Influence of $x$ on $f$
+## Slope Shows the Influence of $x$ on $f$
 
 __Important Note:__
 
-* if the slope is negative, then by increasing $x$, we will decrease $f(x)$.
-* And if the slope is positive, then decreasing $x$ will decrease $f(x)$.
+* If the slope is negative, when $x$ increases, $f(x)$ decreases.
+* If the slope is positive, when $x$ decreases, $f(x)$ decreases.
 
 ## Interpretation of Slope
 
-Let's illustrate with this function $f(x)$ a useful way to interpret the slope.
+From the graph above, consider $x=-2$. The value of the slope  $f'(2)=-16$. If we change the value of $x$ by a small amount $h$, the impact on the ouptut is _amplified_ by $-16$.
 
-In the graph above, with $x=-2$, we see the slope, call it $m$, is -16. What that
-means is that when we change the value of $x$, the impact on the ouptut will
-roughly be _amplified_ by $m$, or -16 when $x=2$.
+The slope (derivative) of a function $f(x)$ at
+the point $(x, f(x))$ indicates how sensitive the output is to changes in the input.
 
-Put another way, the slope (equivalently the derivative) of a function $f(x)$ at
-an input $x$ indicates how sensitive the output is to changes in the input.
+> This is key to understanding how we adjust the weights of our model
+> in order to minimize the loss function.
 
-> This will be key to understanding how we have to tweak the weights of our model
-> to minimize our loss function.
+## The Gradient
+
+In 2 or higher dimensions, the concept of derivative generalizes to the gradient. The gradient of a multivariate function $f(\mathbf{x})$, where $\mathbf{x}= (x_1,\ldots, x_n)\in\mathbb{R}^{n}$ is the vector
+
+$$
+\nabla f(\mathbf{x}) = 
+\begin{bmatrix}
+\frac{\partial f}{\partial x_1}\\
+\frac{\partial f}{\partial x_2}\\
+\vdots \\
+\frac{\partial f}{\partial w_2}
+\end{bmatrix}
+$$
+
+It is a vector containing all the partial derivatives of the function $f(\mathbf{x})$.
 
 ## Gradient Descent on a Linear Regression Model
 
-Now, in 2 or higher dimensions we can there many directions that will descend,
-but we want to pick the direction of steepest descent. We'll formalize that idea.
-
-As long as the loss function is _locally_ differentiable, we can define the
-direction of steepest descent.
-
-That direction is given by the _negative_ of the __gradient.__
-
-The gradient is a generalization of the slope of a line.
-
-Let's say we have a loss function $\mathcal{L}(\mathbf{w})$.   
-
-The components of $\mathbf{w}\in\mathbb{R}^n$ are the parameters we want to optimize.
-
-Just a reminder that $\mathbf{w} \in \mathbb{R}^n$ denotes an $n$-dimensional vector.
-
-For linear regression, the loss function could be squared loss:
-    
-$$
-\mathcal{L}(\mathbf{w}) = \Vert\mathbf{y} - \hat{\mathbf{y}}\Vert^2 
-$$
-
-where $\hat{\mathbf{y}}$ is our estimate, ie, $\hat{\mathbf{y}} = X\mathbf{w}$ so that 
-
-$$
-\mathcal{L}(\mathbf{w}) = \Vert\mathbf{y} - X\mathbf{w}\Vert^2 
-$$
-
-To find the gradient, we take the partial derivative of our loss function with respect to each parameter:
-
-$$
-\frac{\partial \mathcal{L}}{\partial w_i} 
-$$
-
-and collect all the partial derivatives into a vector of the same shape as $\mathbf{w}$:
-
-$$
-\nabla_\mathbf{w}\mathcal{L} = \begin{bmatrix}
-    \frac{\partial \mathcal{L}}{\partial w_1}\\
-    \frac{\partial \mathcal{L}}{\partial w_2}\\
-    \vdots \\
-    \frac{\partial \mathcal{L}}{\partial w_n}
-   \end{bmatrix}
-$$
-
-When you see the notation  $\nabla_\mathbf{w}\mathcal{L},$ think of it as the
-derivative with respect to the vector $\mathbf{w}$.
-
-The _nabla_ symbol, $\nabla$, denotes the _vector differentiator operator_ called _del_.
+For multivariate functions, the gradient points in multiple directions. Similar to the 1-D case, we want to make take a step in a direction that moves us closer to the minimum value. 
 
 It turns out that if we are going to take a small step of unit length, then the
 gradient is the direction that maximizes the change in the loss function.
+
+To descend, we compute the _negative_ of the __gradient.__ This is the idea of gradient descent for minimization.
+
+To formalize gradient descent, consider a vector $\mathbf{w}\in\mathbb{R}^n$. This vector $\mathbf{w}$ contains the $n$ parameters of our model that  we want to optimize.
+
+We introduce a differentiable loss function $\mathcal{L}(\mathbf{w})$ that we wish to minimize.   
+
+---
+
+In linear regression, the loss function is:
+    
+$$
+\mathcal{L}(\mathbf{w}) = \Vert\mathbf{y} - \hat{\mathbf{y}}\Vert_2^2,
+$$
+
+where $\hat{\mathbf{y}}=X\mathbf{w}$ is our predicted value. By substitution the loss function becomes
+
+$$
+\mathcal{L}(\mathbf{w}) = \Vert\mathbf{y} - X\mathbf{w}\Vert_2^2.
+$$
+
+The gradient is the vector
+
+$$
+\nabla_\mathbf{w}\mathcal{L}(\mathbf{w}) = 
+\begin{bmatrix}
+\frac{\partial \mathcal{L}(\mathbf{w})}{\partial w_1}\\
+\frac{\partial \mathcal{L}(\mathbf{w})}{\partial w_2}\\
+\vdots \\
+\frac{\partial \mathcal{L}(\mathbf{w})}{\partial w_n}
+\end{bmatrix}.
+$$
+
+---
 
 <!-- Image credit https://www.analyticsvidhya.com/blog/2020/10/how-does-the-gradient-descent-algorithm-work-in-machine-learning/ -->
 
@@ -497,16 +455,7 @@ gradient is the direction that maximizes the change in the loss function.
 As you can see from the above figure, in general the gradient varies depending on
 where you are in the parameter space.
 
-So we write:
-
-$$
-\nabla_\mathbf{w}\mathcal{L}(\mathbf{w}) = \begin{bmatrix}
-    \frac{\partial \mathcal{L}}{\partial w_1}(\mathbf{w})\\
-    \frac{\partial \mathcal{L}}{\partial w_2}(\mathbf{w})\\
-    \vdots \\
-    \frac{\partial \mathcal{L}}{\partial w_n}(\mathbf{w})
-   \end{bmatrix}
-$$
+---
 
 Each time we seek to improve our parameter estimates $\mathbf{w}$, we will take
 a step in the negative direction of the gradient.
@@ -514,26 +463,29 @@ a step in the negative direction of the gradient.
 ... "negative direction" because the gradient specifies the direction of maximum
 increase -- and we want to decrease the loss function.
 
+---
+
 How big a step should we take? 
 
-For step size, will use a scalar value, here denoted by the greek letter "eta",
-$\eta$, which we call the __learning rate.__
+For step size, will use a scalar value $\eta$, called the  __learning rate.__
 
-The learning rate is a hyperparameter that needs to be tuned for a given problem,
-or even can be modified adaptively as the algorithm progresses as we will see later.
+The learning rate is a hyperparameter that needs to be tuned for a given problem. It can also be modified adaptively as the algorithm progresses.
 
-Now we can write the __gradient descent__ algorithm formally:
+The __gradient descent__ algorithm is:
 
 1. Start with an initial parameter estimate $\mathbf{w}^0$.
 2. Update: $\mathbf{w}^{n+1} = \mathbf{w}^n - \eta \nabla_\mathbf{w}\mathcal{L}(\mathbf{w}^n)$
 3. If not converged, go to step 2.
 
-How do we know if we are "converged"?  
+---
 
-Typically we stop
+How do we know if the gradient descent *converged*?  
 
-* after a certain number of iterations, or
-* the loss has not improved by a fixed amount -- _early stopping_
+The stopping criteria of the algorithm is:
+
+* the change in the loss is below a fixed threshold -- _early stopping_, or
+* after a maximum number of iterations.
+
 
 ## Example: Linear Regression
 
@@ -554,7 +506,7 @@ import laUtilities as ut
 %matplotlib inline
 ```
 
-Let's say we have this dataset.
+Assume we have the following plotted data.
 
 ```{python}
 #| code-fold: true
@@ -576,20 +528,25 @@ centerAxes(ax)
 np.random.seed(1)
 xlin = -10.0 + 20.0 * np.random.random(n)
 y = beta[0] + (beta[1] * xlin) + np.random.randn(n)
-ax.plot(xlin, y, 'ro', markersize = 10);
+ax.plot(xlin, y, 'ro', markersize = 10)
+plt.show()
 ```
+
+---
 
 Let's fit a least-squares line to this data. 
 
 The loss function for this problem is the least-squares error:
 
 $$
-\mathcal{L}(\mathbf{\beta}) = \Vert\mathbf{y} - X\mathbf{\beta}\Vert^2
+\mathcal{L}(\mathbf{\beta}) = \Vert\mathbf{y} - X\mathbf{\beta}\Vert_2^2.
 $$
 
-Of course, we know how to solve this problem using the normal equations, but let's do it using gradient descent instead.
+Rather than solve this problem using the normal equations, let's solve it with gradient descent.
 
-Here is the line we'd like to find:
+---
+
+Here is the line we'd like to find.
 
 ```{python}
 #| code-fold: true
@@ -597,8 +554,11 @@ ax = plt.figure(figsize = (7, 7)).add_subplot()
 centerAxes(ax)
 ax.plot(xlin, y, 'ro', markersize = 10)
 ax.plot(xlin, beta[0] + beta[1] * xlin, 'b-')
-plt.text(-9, 3, r'$y = \beta_0 + \beta_1x$', size=20);
+plt.text(-9, 3, r'$y = \beta_0 + \beta_1x$', size=20)
+plt.show()
 ```
+
+---
 
 There are $n = 10$ data points, whose $x$ and $y$ values are stored in `xlin` and `y`.
 
@@ -608,7 +568,7 @@ First, let's create our $X$ (design) matrix, and include a column of ones to mod
 X = np.column_stack([np.ones((n, 1)), xlin])
 ```
 
-Now, let's visualize the loss function $\mathcal{L}(\mathbf{\beta}) = \Vert \mathbf{y}-X\mathbf{\beta}\Vert^2.$
+Now, let's visualize the loss function $\mathcal{L}(\mathbf{\beta}) = \Vert \mathbf{y}-X\mathbf{\beta}\Vert_2^2.$
 
 ```{python}
 #| code-fold: true
@@ -626,13 +586,15 @@ fig.set_title(r'$\Vert \mathbf{y}-X\mathbf{\beta}\Vert^2$', '',
 # fig.save();
 ```
 
-We won't take you through computing the gradient for this problem (you can find it in the online text).  
+---
 
-We'll will just tell you that the gradient for a least squares problem is:
+The gradient for a least squares problem is
     
 $$
-\nabla_\beta \mathcal{L}(\mathbf{\beta}) = X^T X \beta - X^T\mathbf{y} 
+\nabla_\beta \mathcal{L}(\mathbf{\beta}) = X^T X \beta - X^T\mathbf{y}.
 $$
+
+::: {.content-visible when-profile="web"}
 
 ::: {.callout-note}
 For those interested in a little more insight into what these plots are showing,
@@ -676,9 +638,12 @@ $$
 Which of course, are the normal equations for this linear system.
 :::
 
+:::
+
 So here is our code for gradient descent:
 
 ```{python}
+#| code-fold: false
 def loss(X, y, beta):
     return np.linalg.norm(y - X @ beta) ** 2
 
@@ -702,9 +667,9 @@ def gradient_descent(X, y, beta_hat, eta, nsteps = 1000):
     return np.array(betas), np.array(losses)
 ```
 
-We'll start at an arbitrary point, say, $(-8, -3.2)$.
+---
 
-That is, $\beta_0 = -8$, and $\beta_1 = -3.2$.
+We'll start at the point $(-8, -3.2)$, i.e.,$\beta_0 = -8$, and $\beta_1 = -3.2$.
 
 ```{python}
 beta_start = np.array([-8, -3.2])
@@ -719,8 +684,11 @@ What happens to our loss function per GD iteration?
 plt.plot(np.log(losses), '.-')
 plt.ylabel(r'$\log\mathcal{L}$', size = 14)
 plt.xlabel('Iteration', size = 14)
-plt.title('Improvement in Loss Per Iteration of GD', size = 16);
+plt.title('Improvement in Loss Per Iteration of GD', size = 16)
+plt.show()
 ```
+
+---
 
 And how do the parameter values $\beta$ evolve?
 
@@ -729,40 +697,49 @@ And how do the parameter values $\beta$ evolve?
 plt.plot(betas[:, 0], betas[:, 1], '.-')
 plt.xlabel(r'$\beta_0$', size = 14)
 plt.ylabel(r'$\beta_1$', size = 14)
-plt.title(r'Evolution of $\beta$', size = 16);
+plt.title(r'Evolution of $\beta$', size = 16)
+plt.show()
 ```
 
-Notice that the improvement in loss decreases over time.  Initially the gradient
+---
+
+Notice that the improvement in loss decreases over time. Initially the gradient
 is steep and loss improves fast, while later on the gradient is shallow and loss
 doesn't improve much per step.
 
-Now remember that in reality we are like the person who is trying to find their
-way down the mountain, in the fog.
+Remember, in reality we are the person trying to find their
+way down the mountain in the fog.
 
-In general we cannot "see" the entire loss function surface.
+In general, we cannot "see" the entire loss function surface.
 
 Nonetheless, since we know what the loss surface looks like in this case, we can
 visualize the algorithm "moving" on that surface.
+
+---
 
 This visualization combines the last two plots into a single view.
 
 ```{python}
 #| code-fold: true
-%matplotlib inline
+#| fig-align: center
 # set up view
+from IPython.display import HTML
+import matplotlib
 import matplotlib.animation as animation
-mp.rcParams['animation.html'] = 'jshtml'
+matplotlib.rcParams['animation.html'] = 'jshtml'
+matplotlib.rcParams['animation.embed_limit'] = 30000000
+matplotlib.rcParams['animation.html'] = 'html5'
 
 anim_frames = np.array(list(range(10)) + [2 * x for x in range(5, 25)] + [5 * x for x in range(10, 100)])
 
 fig = ut.three_d_figure((23, 1), 'z = 3 x1^2 + 7 x2 ^2',
                         -12, 12, -4, 4, -1, 2000, 
-                        figsize = (7, 7))
+                        figsize = (5, 5))
 plt.close()
 fig.ax.view_init(azim = 60, elev = 22)
 qf = np.array(X.T @ X)
 fig.plotGeneralQF(X.T @ X, -2 * (y.T @ X), y.T @ y, alpha = 0.5)
-fig.ax.set_zlabel('$\mathcal{L}$')
+fig.ax.set_zlabel(r'$\mathcal{L}$')
 fig.ax.set_xlabel(r'$\beta_0$')
 fig.ax.set_ylabel(r'$\beta_1$')
 fig.set_title(r'$\Vert \mathbf{y}-X\mathbf{\beta}\Vert^2$', '', 
@@ -773,18 +750,23 @@ def anim(frame):
     # fig.canvas.draw()
 #
 # create the animation 
-animation.FuncAnimation(fig.fig, anim,
+ani = animation.FuncAnimation(fig.fig, anim,
                        frames = anim_frames,
                        fargs = None,
-                       interval = 1,
+                       interval = 100,
                        repeat = False)
+
+HTML(ani.to_html5_video())                     
 ```
+
+---
 
 We can also see how evolution of the parameters translate to the line fitting to the data.
 
 ```{python}
 #| code-fold: true
-fig, ax = plt.subplots(figsize = (7, 7))
+#| fig-align: center
+fig, ax = plt.subplots(figsize = (5, 5))
 plt.close()
 centerAxes(ax)
 ax.plot(xlin, y, 'ro', markersize = 10)
@@ -799,28 +781,30 @@ def animate(frame):
     fig.canvas.draw()
 #
 # create the animation 
-animation.FuncAnimation(fig, animate,
+ani = animation.FuncAnimation(fig, animate,
                        frames = anim_frames,
                        fargs=None,
                        interval=100,
                        repeat=False)
+
+
+HTML(ani.to_html5_video())   
 ```
 
 ## Challenges in Gradient Descent
 
-Gradient Descent is a very general algorithm, one that can be applied to a huge
-array of problem types.
+Gradient Descent can be applied to many optimization problems.
 
-However, there are a variety of issues that arise in using gradient descent in
-practice.
+However, here are some issues to consider in practice
+
+- setting the learning rate
+- navigating complex loss surfaces
 
 ## Learning Rate
 
-Setting the learning rate can be a challenge.
+Setting the learning rate can be a challenge. The previous learning rate was $\eta = 0.002$.   
 
-Previously we had set the learning rate $\eta = 0.002$.   
-
-Let set it a little higher and see what happens:  $\eta = 0.0065.$
+Observe what happens when we set it to $\eta = 0.0065$.
 
 ```{python}
 beta_start = np.array([-8, -2])
@@ -828,29 +812,45 @@ eta = 0.0065
 betas, losses = gradient_descent(X, y, beta_start, eta, nsteps = 100)
 ```
 
+:::: {.columns}
+::: {.column width="50%"}
+
 ```{python}
 #| code-fold: true
 plt.plot(np.log(losses), '.-')
 plt.ylabel(r'$\log\mathcal{L}$', size = 14)
 plt.xlabel('Iteration', size = 14)
-plt.title('Improvement in Loss Per Iteration of GD', size = 16);
+plt.title('Improvement in Loss Per Iteration of GD', size = 16)
+plt.show()
 ```
+
+:::
+::: {.column width="50%"}
 
 ```{python}
 #| code-fold: true
 plt.plot(betas[:, 0], betas[:, 1], '.-')
 plt.xlabel(r'$\beta_0$', size = 14)
 plt.ylabel(r'$\beta_1$', size = 14)
-plt.title(r'Evolution of $\beta$', size = 16);
+plt.title(r'Evolution of $\beta$', size = 16)
+plt.show()
 ```
 
-This is a total disaster.  What is going on?  
+:::
+::::
+
+---
+
+This is a total disaster. What is going on?  
 
 It is helpful to look at the progress of the algorithm using the loss surface:
 
+:::: {.columns}
+::: {.column width="50%"}
+
 ```{python}
+#| fig-align: center
 #| code-fold: true
-%matplotlib inline
 fig = ut.three_d_figure((23, 1), '',
                         -12, 2, -4, 4, -1, 2000, 
                         figsize = (7, 7))
@@ -867,27 +867,34 @@ fig.ax.plot(betas[:nplot, 0], betas[:nplot, 1], 'o-', zs = losses[:nplot], marke
 #
 ```
 
-We can see what is going on more clearly here.  
+:::
+::: {.column width="50%"}
 
-What is happening is that because the steps are __too large,__ each step
-overshoots the local minimum.  
+We can now see what is happening clearly.  
 
-The next step then lands on a portion of the surface that steeper ... and in the
+The steps we take are __too large__  and each step overshoots the local minimum.  
+
+The next step then lands on a portion of the surface that is steeper and in the
 opposite direction.
 
-And so the process diverges.
+As a result the process diverges.
 
 > For an interesting comparison, try setting $\eta = 0.0055$ and observe the
 > evolution of $\beta$.
 
-Hence it is important to decrease the step size when divergence appears.  
+:::
+::::
+
+---
+
+It is important to decrease the step size when divergence appears.  
 
 Unfortunately, on a complicated loss surface, a given step size may diverge in
 one location or starting point, but not in another.
 
 ## Complex Loss Surfaces
 
-The loss surface for linear regression is the best possible kind:  it is strictly
+The loss surface for linear regression is the best possible kind. It is strictly
 convex, so it has a single global minimum.
 
 For neural networks, the loss surface is more complex. 
@@ -904,7 +911,8 @@ Here's a visualization of the loss surface for the 56 layer neural network
 
 ![](figs/L23-complex-landscape.png){width="40%"}
 
-For a fun exploration, see https://losslandscape.com/explorer.
+For a fun exploration, see
+[https://losslandscape.com/explorer](https://losslandscape.com/explorer).
 
 ## Recap
 
@@ -918,8 +926,7 @@ scalable algorithm, called _Back Propagation_, that solves this problem.
 
 ## Neuron and Neural Networks
 
-Now let's switch gears a bit to define an _artificial neuron_. For better or worse
-it is named after and loosely modeled on a biological neuron.
+Let's switch gears and discuss how to construct neural networks. An _artificial neuron_is loosely modeled on a biological neuron.
 
 <!-- Image Credit "https://cs231n.github.io/neural-networks-1/"-->
 
@@ -930,35 +937,31 @@ From [cs231n](https://cs231n.github.io/neural-networks-1/)
 
 * The dendrites carry impulses from other neurons of different distances.
 * Once the collective firing rate of the impulses exceed a certain threshold,
-  the neuron fires its own pulse through the axon to other neurons
-
-There are companies trying to mimic this impulse (i.e. spiking) based neuron in
-silicon -- so called _neuromorphic computing_.
-
-See for example 
-[Neuromorphic Computing](https://en.wikipedia.org/wiki/Neuromorphic_engineering)
-or [Spiking Neural Network](https://en.wikipedia.org/wiki/Spiking_neural_network)
-
-Some examples of companies and projects are Intel's 
-[Loihi](https://www.intel.com/content/www/us/en/research/neuromorphic-computing-loihi-2-technology-brief.html)
-and startups such as GrAI Matter Labs [VIP processor](https://www.graimatterlabs.ai/product).
+  the neuron fires its own pulse through the axon to other neurons.
 
 ## Artificial Neuron
 
 <!-- Image Credit "https://cs231n.github.io/neural-networks-1/"-->
 
+:::: {.columns}
+::: {.column width="%"}
 
 ![](figs/NN-figs/neuron_model.jpeg){width="75%"}
 
 From [cs231n](https://cs231n.github.io/neural-networks-1/)
+:::
+::: {.column width="50%"}
 
 The more common artifical neuron
 
 * collects one or more inputs, 
-* each multiplied by a unique weight
-* sums the weighted inputs
-* adds a bias
-* then finally usually applies a nonlinear activation function
+* each multiplied by a unique weight,
+* sums the weighted inputs,
+* adds a bias,
+* then applies a nonlinear activation function.
+
+:::
+::::
 
 ## Multi-Layer Perceptron (MLP) or Fully Connected Network (FCN)
 
@@ -966,52 +969,26 @@ The more common artifical neuron
 
 From [cs231n](https://cs231n.github.io/convolutional-networks/)
 
-Multiple artificial neurons can be acting on the same inputs, in what we call
-a _layer_, and we can have more than one _layer_ until we produce one or more
+Multiple artificial neurons can act on the same inputs,. This defines
+a _layer_. We can have more than one _layer_ until we produce one or more
 outputs.
 
 The example above shows a network with _3 inputs_, two layers of neurons, each
 with 4 neurons, followed by one layer that produces a single value output.
 
-E.g. a binary classifier.
-
-Activation function is typically some nonlinear function that compresses the input
-in some way. Historically, it's been the sigmoid and $\tanh()$ functions. See for
-example [Hyperbolic Functions](https://en.wikipedia.org/wiki/Hyperbolic_functions#Tanh).
-
-```{python}
-#| code-fold: true
-plt.plot(np.arange(-5,5,0.2), np.tanh(np.arange(-5,5,0.2)))
-plt.title('tanh(x)')
-plt.xlabel('x')
-plt.ylabel('f(x)')
-plt.grid()
-```
-
-A more common activation function these days and that is more efficient to implement is the _Rectified Linear Unit_ or _ReLU_.
-
-$$ 
-\textrm{ReLU}(x) = \mathrm{max}(0, x) 
-$$
-
-```{python}
-#| code-fold: true
-plt.plot(np.arange(-5,5,0.2), np.maximum(0,np.arange(-5,5,0.2)))
-plt.title('ReLU(x)')
-plt.xlabel('x')
-plt.ylabel('f(x)')
-plt.grid()
-```
-
-There are many other variations. See for example 
-[PyTorch Non-linear Activations](https://pytorch.org/docs/stable/nn.html#non-linear-activations-weighted-sum-nonlinearity)
+This architecture can be used as a binary classifier.
 
 ## Next Lecture
 
-* We'll  build out a Value class
-* Visualize our compute graph
+* Introduce and visualize our compute graph
 * Implement Backpropagation
 * Build out our neural network
 * Train and evaluate it
-* Recreate and match it in PyTorch
+
+## Recap
+
+* We introduced gradient descent for linear regression
+* We visualized the loss surface for linear regression
+* We saw how divergence can occur if the step size is too large
+* We defined an artificial neuron and a multi-layer perceptron
 
