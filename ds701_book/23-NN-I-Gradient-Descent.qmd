@@ -214,7 +214,7 @@ Here is a plot of $f(x)$.
 #| fig-align: center
 #| code-fold: true
 import numpy as np
-plt.figure(figsize=(4, 2))
+plt.figure(figsize=(6, 6))
 
 xs = np.arange(-5, 5, 0.25)
 ys = f(xs)
@@ -324,7 +324,7 @@ plt.show()
 
 ## Slope of a Function
 
-We can explore the tangent at different x-values.
+Here is an example of a tangent line at $x=-2$.
 
 ```{python}
 #| fig-align: center
@@ -357,7 +357,7 @@ def plot_with_tangent(x_value):
     y_tangent = f_at_x_value + slope_at_x_value * (x_tangent - x_value)
 
     # Create the plot
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(7, 4))
     plt.plot(x, y, label='$f(x) = 3x^2 - 4x + 5$')
     plt.plot(x_tangent, y_tangent, linestyle='--', label=f'Asymptotic slope of {df(x_value):.2f} at x = {x_value:.2f}')
     plt.scatter([x_value], [f_at_x_value], color='red')  # point of tangency
@@ -368,7 +368,7 @@ def plot_with_tangent(x_value):
     plt.legend()
     plt.show()
 
-plot_with_tangent(2)
+plot_with_tangent(-2)
 
 # Create an interactive widget
 # widgets.interact(plot_with_tangent, x_value=widgets.FloatSlider(value=-2, min=-5, max=5, step=0.1));
@@ -401,15 +401,15 @@ $$
 \frac{\partial f}{\partial x_1}\\
 \frac{\partial f}{\partial x_2}\\
 \vdots \\
-\frac{\partial f}{\partial w_2}
+\frac{\partial f}{\partial x_n}
 \end{bmatrix}
 $$
 
-It is a vector containing all the partial derivatives of the function $f(\mathbf{x})$.
+It is a vector of dimension $n$ containing all the partial derivatives of the function $f(\mathbf{x})$.
 
 ## Gradient Descent on a Linear Regression Model
 
-For multivariate functions, the gradient points in multiple directions. Similar to the 1-D case, we want to make take a step in a direction that moves us closer to the minimum value. 
+For multivariate functions, there are multiple directions to move. Similar to the 1-D case, we want to make take a step in a direction that moves us closer to the minimum value. 
 
 It turns out that if we are going to take a small step of unit length, then the
 gradient is the direction that maximizes the change in the loss function.
