@@ -76,8 +76,8 @@ Many of the machine learning models we studied this semester are based on traini
 
 Here are examples we considered so far this semester:
 
-* In $k$-means clustering, we computed $k$ cluster centroids, so that the WCSS (within sum of squares) was minimized.
-* In linear regression, we found the parameter vector $\beta$ so that minimized the sum of squares $\Vert \mathbf{y} - \hat{\mathbf{y}}\Vert_2^2.$
+* In $k$-means clustering, we computed $k$ cluster centroids, so that the WCSS (within cluster sum of squares) was minimized.
+* In linear regression, we found the parameter vector $\beta$ that minimized the sum of squares $\Vert \mathbf{y} - \mathbf{X}\beta\Vert_2^2.$
 * In the support vector machine, we computed a parameter vector $\theta$ to minimize the classification error.
 
 ::: {.content-visible when-profile="slides"}
@@ -95,6 +95,7 @@ What allows us to unify our approach to many such problems is the following:
 function, to calculate a measure of how our method is performing.
 2. We define loss functions that are __differentiable__ with respect to
 the parameters.
+3. We use a __gradient descent__ algorithm to find the parameters that minimize the loss function.
 
 ::: {.content-visible when-profile="slides"}
 ## Loss Functions for Model Fitting
@@ -161,7 +162,7 @@ What would you do?
 The natural thing is:
 
 :::: {.incremental}
-1. Look around you 360 degrees.  
+1. Look around 360 degrees.  
 2. Observe in which direction the ground is sloping downward most steeply.  
 3. Take a few steps in that direction.  
 4. Repeat the process ... until the ground seems to be level.
@@ -320,7 +321,7 @@ plt.show()
 
 ---
 
-> Assume $f(x)$ is differentiable. The derivative $f'(x)$ is the slope of the tangent line at the point $(x, f(x)$.
+> Assume $f(x)$ is differentiable. The derivative $f'(x)$ is the slope of the tangent line at the point $(x, f(x))$.
 
 ## Slope of a Function
 
