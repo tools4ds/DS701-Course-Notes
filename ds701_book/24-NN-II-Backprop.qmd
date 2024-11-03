@@ -64,7 +64,7 @@ Without a nonlinear activation function, a neural network is just a linear model
 The **sigmoid function** is
 
 $$
-\mathrm{sigmoid}(x) = \frac{1}{1 + e^{-x}}
+\mathrm{sigmoid}(x) = \frac{1}{1 + e^{-x}}.
 $$
 
 ```{python}
@@ -91,7 +91,7 @@ The hyperbolic tangent, $\tanh$, is basically the sigmoid function shifted and s
 The **tanh** function is
 
 $$
-\tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}
+\tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}.
 $$
 
 ```{python}
@@ -127,7 +127,7 @@ __Question__
 What does 
 
 $$
-\mathrm{sigmoid}(\sum_i w_i x_i + b) \hspace{10pt} \textrm{where} \hspace{10pt} \mathrm{sigmoid}(x) = \frac{1}{1 + e^{-x}}
+\mathrm{sigmoid}\left(\sum_i w_i x_i + b\right) \hspace{10pt} \textrm{where} \hspace{10pt} \mathrm{sigmoid}(x) = \frac{1}{1 + e^{-x}}
 $$
 
 remind you of?
@@ -155,9 +155,10 @@ Multiple artificial neurons can be acting on the same inputs, in what we call
 a _layer_, and we can have more than one _layer_ until we produce one or more
 outputs.
 
-The example above shows a network with _3 inputs_, three hidden layers of 4, 2 and 3 neurons, respectively, followed by one layer that produces two continuous value outputs.
+The example above shows a network with _3 inputs_, three hidden layers of 4, 2 and 3 neurons, respectively, followed by one layer that produces two continuous value outputs. This is regression model that is predicting two continuous valued
+outputs.
 
-E.g. a regression problem.
+E.g., a regression problem.
 
 ## FCN Matrix Equations
 
@@ -172,6 +173,8 @@ $$
 \mathbf{\hat{y}} &= \mathbf{\beta}_K + \mathbf{\Omega}_K \mathbf{h}_K \\
 \end{aligned}
 $$
+
+where $\mathbf{a}[\cdot]$ is the element-wise activation function.
 
 And we can write the square loss function in vector notation as
 
@@ -188,6 +191,12 @@ In other words, we want to compute
 $$
 \frac{\partial L}{\partial \mathbf{\beta}_k}, \frac{\partial L}{\partial \mathbf{\Omega}_k}, \frac{\partial L}{\partial \mathbf{\beta}_{k-1}}, \frac{\partial L}{\partial \mathbf{\Omega}_{k-1}}, \ldots, \frac{\partial L}{\partial \mathbf{\beta}_0}, \frac{\partial L}{\partial \mathbf{\Omega}_0}
 $$
+
+In the notation above, $\mathbf{\beta}_k$ and $\mathbf{\Omega}_k$ are the bias
+vectors and weight matrices of the $k$-th layer. Just as with partial derivatives
+with respect to scalars, there are well-defined rules for how to compute the
+partial derivatives of vector and matrix expressions and, in fact, PyTorch and
+TensorFlow implement these calculations.
 
 So that we can update the parameters with the negative of the partial derivatives.
 
@@ -958,6 +967,7 @@ print(L.data)
 ## A Single Neuron
 
 Let's now programmatically define a single neuron with
+
 * two inputs
 * two weights (1 for each input)
 * a bias
@@ -1007,7 +1017,7 @@ o.grad = 1.0
 
 <!-- Credit: _Understanding Deep Learning_, Figure 7.6 -->
 ReLU is technically not differentiable at 0, but practically we implement the
-derivative as 0 when $ \le 0$ and 1 when $ 1 > 0 $
+derivative as 0 when $\le 0$ and 1 when $1 > 0$
 
 ![](figs/NN-figs/Train2ReLUDeriv.svg){width="50%"}
 
@@ -1220,6 +1230,7 @@ There are still some useful operations that `Value` doesn't support, so to be mo
 complete we have the final version of the `Value` class below.
 
 We added:
+
 * `__radd__` for when the `Value` object is the right operand of an add
 * `__rmul__` for when the `Value` object is the right operand of a product 
 * `__pow__` to support the ** operator
@@ -1458,6 +1469,8 @@ class MLP(Module):
     def __repr__(self):
         return f"MLP of [{', '.join(str(layer) for layer in self.layers)}]"
 ```
+
+Feel free to uncomment lines of code in the following cell to see the docstrings for each class.
 
 ```{python}
 #| code-fold: false
