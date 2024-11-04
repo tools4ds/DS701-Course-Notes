@@ -44,6 +44,10 @@ of the input data.
 * Work through the dataset by _randomly sampling without replacement_. This is the _stochastic_ part.
 * One pass through the data is called an _epoch_.
 
+::: {.content-visible when-profile="slides"}
+## Batches and Stochastic Gradient Descent
+:::
+
 For squared error loss with $N$ input samples, the loss for (full-batch) gradient descent was
 
 $$
@@ -56,6 +60,10 @@ For every time $t$, let's denote the batch as $\mathcal{B}_t$
 $$
 L_t = \sum_{i \in \mathcal{B}_t} \ell_i = \sum_{i \in \mathcal{B}_t} \left( y - \hat{y}  \right)^2
 $$
+
+::: {.content-visible when-profile="slides"}
+## Batches
+:::
 
 Let's look at an example.
 
@@ -94,6 +102,12 @@ Say we have a training data set of 12 points and we want to use a _batch size_ o
 
 Divide the 12 points into batches of 3 by randomlly selecting points without replacement.
 
+::: {.content-visible when-profile="slides"}
+## Batches
+:::
+
+We can resample again to create a different set of batches.
+
 ```{python}
 # Shuffle the points and split them into 3 groups of 4
 indices = np.random.permutation(12)
@@ -110,71 +124,59 @@ plt.legend()
 plt.show()
 ```
 
-We can resample again to create a different set of batches.
-
-Optionally, you can shuffle after every epoch.
-
-```{python}
-colors = ['red', 'lightgray', 'lightgray', 'lightgray']
-labels = ['batch 1', 'batch 2', 'batch 3', 'batch 4']
-
-# Plot each group of points with a different color and label
-for i in range(4):
-    plt.scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
-
-# Display the legend
-plt.legend()
-
-plt.show()
-```
+::: {.content-visible when-profile="slides"}
+## Batches
+:::
 
 Then for every training iteration, you calculate the forward pass and backward pass loss with only the data from the batch.
 
-Above, we use data from the 1st batch.
-
 ```{python}
+#| echo: false
+colors = ['red', 'lightgray', 'lightgray', 'lightgray']
+labels = ['batch 1', 'batch 2', 'batch 3', 'batch 4']
+
+fig, axs = plt.subplots(2, 2, figsize=(8, 8))
+
+# Plot each group of points with a different color and label
+for i in range(4):
+    axs[0, 0].scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
+
+axs[0, 0].legend()
+axs[0, 0].set_title("Batch 1")
+
 colors = ['lightgray', 'green', 'lightgray', 'lightgray']
 labels = ['batch 1', 'batch 2', 'batch 3', 'batch 4']
 
 # Plot each group of points with a different color and label
 for i in range(4):
-    plt.scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
+    axs[0, 1].scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
 
-# Display the legend
-plt.legend()
+axs[0, 1].legend()
+axs[0, 1].set_title("Batch 2")
 
-plt.show()
-```
-
-```{python}
 colors = ['lightgray', 'lightgray', 'blue', 'lightgray']
 labels = ['batch 1', 'batch 2', 'batch 3', 'batch 4']
 
 # Plot each group of points with a different color and label
 for i in range(4):
-    plt.scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
+    axs[1, 0].scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
 
-# Display the legend
-plt.legend()
+axs[1, 0].legend()
+axs[1, 0].set_title("Batch 3")
 
-plt.show()
-```
-
-```{python}
 colors = ['lightgray', 'lightgray', 'lightgray', 'purple']
 labels = ['batch 1', 'batch 2', 'batch 3', 'batch 4']
 
 # Plot each group of points with a different color and label
 for i in range(4):
-    plt.scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
+    axs[1, 1].scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
 
-# Display the legend
-plt.legend()
-
-plt.show()
+axs[1, 1].legend()
+axs[1, 1].set_title("Batch 4")
 ```
 
-## Advantages of Stochastic Gradient Descent
+
+## Advantages of SGD
 
 There are two main advantages to _Stochastic Gradient Descent_.
 
@@ -184,6 +186,10 @@ There are two main advantages to _Stochastic Gradient Descent_.
 
 2. Improves training convergence by adding _noise_ to the weight updates.
     * Can avoid getting stuck in a local minima.
+
+::: {.content-visible when-profile="slides"}
+## Advantages of SGD
+:::
 
 An example
 
@@ -200,13 +206,11 @@ For stochastic gradient descent, starting point 1 still ends up at the global
 minimum, but now starting point 2 also avoids the local minimum and ends up at
 the global minimum.
 
-## Load an Image Dataset in Batches in PyTorch
+# Load an Image Dataset in Batches in PyTorch
 
 ```{python}
+#| echo: false
 %matplotlib inline
-```
-
-```{python}
 import torch
 import torchvision
 import torchvision.transforms as transforms
@@ -217,6 +221,7 @@ import torchvision.transforms as transforms
 Load MNIST handwritten digit dataset with 60K training samples and 10K test samples.
 
 ```{python}
+#| code-fold: false
 # Define a transform to scale the pixel values from [0, 255] to [-1, 1]
 transform = transforms.Compose([transforms.ToTensor(),
                                 transforms.Normalize((0.5,), (0.5,))])
@@ -260,6 +265,10 @@ print("The dataset classes are:")
 print(trainset.classes)
 ```
 
+::: {.content-visible when-profile="slides"}
+## 1. Load and Scale MNIST
+:::
+
 We can see the data loader, `trainloader` in action in the code below to
 get a batch and visualize it.
 
@@ -282,6 +291,10 @@ images, labels = next(dataiter)
 # show images
 imshow(torchvision.utils.make_grid(images))
 ```
+
+::: {.content-visible when-profile="slides"}
+## 1. Load and Scale MNIST
+:::
 
 We can display the training labels for the image as well.
 
@@ -312,12 +325,20 @@ display(HTML(html))
 * Multi-class classification problem ( >2 possible classes)
 * Convolutional network with classification output
 
+::: {.content-visible when-profile="slides"}
+## Convolutional Network Applications
+:::
+
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
 ![](figs/NN-figs/L25-obj-det.png){width="75%" fig-align="center"}
 
 * Localize and classify objects in an image
 * Convolutional network with classification _and_ regression output
+
+::: {.content-visible when-profile="slides"}
+## Convolutional Network Applications
+:::
 
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
@@ -339,15 +360,16 @@ Problems with fully-connected networks
 * Should be stable under transformations
     * Don’t want to re-learn appearance at different parts of image
 
-<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
-
 ## Classification Invariant to Shift
+
+<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
 ![](figs/NN-figs/L25-shift-img-class.png){width="75%" fig-align="center"}
 
-<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
 ## Image Segmentation Invariant to Shift
+
+<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
 ![](figs/NN-figs/L25-shift-seg.png){width="75%" fig-align="center"}
 
@@ -363,7 +385,7 @@ the input data.
 
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
-![](figs/NN-figs/L25-conv04.png){width="40%" fig-align="center"}
+<!-- ![](figs/NN-figs/L25-conv04.png){width="40%" fig-align="center"} -->
 
 Example with 3 weights and input of length 6.
 
