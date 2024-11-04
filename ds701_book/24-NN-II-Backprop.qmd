@@ -153,7 +153,7 @@ plt.ylabel('f(x)')
 plt.grid()
 ```
 
-There are many other variations. See for example [PyTorch Non-linear Activations](https://pytorch.org/docs/stable/nn.html#non-linear-activations-weighted-sum-nonlinearity)
+There are many other variations. See for example [PyTorch Non-linear Activations](https://pytorch.org/docs/stable/nn.html#non-linear-activations-weighted-sum-nonlinearity).
 
 ## Relating Back to an Earlier Lecture
 
@@ -185,15 +185,15 @@ doing binary classification to output the probabilities.
 
 ![FCN from UDL.](figs/NN-figs/L24-fcn-dag.png){width="75%" fig-align="center"}
 
-* **Layer**: Multiple artificial neurons can be acting on the same inputs.
-* **Network**: More than one __layer__ cascaded to produce one or more outputs.
+* **Layer**: Multiple artificial neurons acting on the same inputs.
+* **Network**: Multiple cascading __layers__ produce one or more outputs.
 
 ::: {.content-visible when-profile="slides"}
 ## Fully Connected Network (FCN)
 ![FCN from UDL.](figs/NN-figs/L24-fcn-dag.png){width="75%" fig-align="center"}
 :::
 
-In above: a network with
+The above network has
 
 * _3 inputs_, 
 * three hidden layers of 4, 2 and 3 neurons, respectively, followed by 
@@ -208,10 +208,10 @@ We can express the matrix equations for a $K$ layer network as
 
 $$
 \begin{aligned}
-\mathbf{h}_1 &= \mathbf{a}[\boldsymbol{\beta}_0 + \boldsymbol{\Omega}_0 \mathbf{x}] \\
-\mathbf{h}_2 &= \mathbf{a}[\boldsymbol{\beta}_1 + \boldsymbol{\Omega}_1 \mathbf{h}_1] \\
+\mathbf{h}_1 &= \mathbf{a}(\boldsymbol{\beta}_0 + \boldsymbol{\Omega}_0 \mathbf{x}) \\
+\mathbf{h}_2 &= \mathbf{a}(\boldsymbol{\beta}_1 + \boldsymbol{\Omega}_1 \mathbf{h}_1) \\
 \vdots \\
-\mathbf{h}_K &= \mathbf{a}[\boldsymbol{\beta}_{K-1} + \boldsymbol{\Omega}_{K-1} \mathbf{h}_{K-1}] \\
+\mathbf{h}_K &= \mathbf{a}(\boldsymbol{\beta}_{K-1} + \boldsymbol{\Omega}_{K-1} \mathbf{h}_{K-1}) \\
 \mathbf{\hat{y}} &= \boldsymbol{\beta}_K + \boldsymbol{\Omega}_K \mathbf{h}_K \\
 \end{aligned}
 $$
@@ -222,48 +222,48 @@ where $\mathbf{a}[\cdot]$ is the element-wise activation function.
 ## FCN Matrix Equations
 :::
 
-And we can write the square loss function in vector notation as
+The square loss function is
 
 $$
-L = \sum_{i=1}^N \ell_i = \sum_{i=1}^N \|\mathbf{y}_i - \mathbf{\hat{y}}_i\|_2^2
+L = \sum_{i=1}^N \ell_i = \sum_{i=1}^N \|\mathbf{y}_i - \mathbf{\hat{y}}_i\|_2^2.
 $$
 
-which is calculated for each training example $i$ and then accumulated.
+The total loss is the sum of the losses for the $i$ training examples.
 
-So what we want to do is:
+What we want to do is find weights in the NN that minimize the above loss function. We do this by
 
-* find the partial derivatives of $L$ with respect to each parameter in the network
-* update the parameters with the negative of its partial derivatives
+* finding the partial derivatives of $L$ with respect to each parameter in the network
+* updating the parameters with the negative of its partial derivatives
 
 ::: {.content-visible when-profile="slides"}
 ## FCN Matrix Equations
 :::
 
-In other words, we want to compute
+In other words, we compute
 
 $$
-\frac{\partial L}{\partial \boldsymbol{\beta}_k}, \frac{\partial L}{\partial \boldsymbol{\Omega}_k}, \frac{\partial L}{\partial \boldsymbol{\beta}_{k-1}}, \frac{\partial L}{\partial \boldsymbol{\Omega}_{k-1}}, \ldots, \frac{\partial L}{\partial \boldsymbol{\beta}_0}, \frac{\partial L}{\partial \boldsymbol{\Omega}_0}
+\frac{\partial L}{\partial \boldsymbol{\beta}_k}, \frac{\partial L}{\partial \boldsymbol{\Omega}_k}, \frac{\partial L}{\partial \boldsymbol{\beta}_{k-1}}, \frac{\partial L}{\partial \boldsymbol{\Omega}_{k-1}}, \ldots, \frac{\partial L}{\partial \boldsymbol{\beta}_0}, \frac{\partial L}{\partial \boldsymbol{\Omega}_0}.
 $$
 
 In the notation above, $\mathbf{\beta}_k$ and $\mathbf{\Omega}_k$ are the bias
 vectors and weight matrices of the $k$-th layer. 
 
 Just as with partial derivatives with respect to scalars, there are well-defined
-rules for how to compute the partial derivatives of vector and matrix expressions
-and, in fact, PyTorch and TensorFlow implement these calculations.
+rules for how to compute the partial derivatives of vector and matrix expressions.
+PyTorch and TensorFlow implement these calculations.
 
 ::: {.content-visible when-profile="slides"}
 ## FCN Matrix Equations
 :::
 
-And then update the parameters with the negative of the partial derivatives.
+The update rules for the parameters are given by
 
 $$
-\boldsymbol{\beta}_k \leftarrow \boldsymbol{\beta}_k - \frac{\partial L}{\partial \boldsymbol{\beta}_k}
+\boldsymbol{\beta}_k \leftarrow \boldsymbol{\beta}_k - \frac{\partial L}{\partial \boldsymbol{\beta}_k},
 $$
 
 $$
-\boldsymbol{\Omega}_k \leftarrow \boldsymbol{\Omega}_k - \frac{\partial L}{\partial \boldsymbol{\Omega}_k}
+\boldsymbol{\Omega}_k \leftarrow \boldsymbol{\Omega}_k - \frac{\partial L}{\partial \boldsymbol{\Omega}_k}.
 $$
 
 # Computation Graph
@@ -271,9 +271,9 @@ $$
 ## Computation Graph
 
 The way we are going to differentiate more complex functions is to first build a
-"computation graph" to apply our operations on.
+"computation graph."
 
-We'll see that we can "backpropagate" through the graph to calculate the gradients
+We'll see that we can "propagate backwards" through the graph to calculate the gradients
 of the loss function with respect to the parameters.
 
 It's a scalable approach employed by TensorFlow and PyTorch, and in fact we'll
@@ -283,10 +283,10 @@ follow PyTorch interface definition.
 
 To do that we will 
 
-* build a data wrapper as a `class` called `Value` and 
+* build a data wrapper as a `class` called `Value`, 
 * gradually build in on all the functionality we need to define a Multi-Layer Neural Network
-(a.k.a. Multi-Layer Perceptron) 
-* and train it.
+(a.k.a. Multi-Layer Perceptron),
+* and train the full network.
 
 This is similar to how PyTorch defines its `Tensor` class.
 
@@ -319,12 +319,12 @@ a
 If you are not familiar with [python classes](https://docs.python.org/3/tutorial/classes.html), there are a few things to note here.
 
 1. The property `self` is just a pointer to the object itself.
-2. The `__init__` method is called when you initialize a class object
-3. The `__repr__` method is how you represent the class object
+2. The `__init__` method is called when you initialize a class object.
+3. The `__repr__` method is how you represent the class object.
 
 ## Implementing Addition
 
-So the Value object doesn't do much yet except for taking a value and printing it. We'd also like to do things like addition and other operations with them, but...
+The `Value` object doesn't do much yet except for taking a value and printing it. We'd also like to do things like addition and other operations with them, but...
 
 ```{python}
 #| code-fold: false
@@ -344,7 +344,7 @@ else:
 :::
 
 When python tries to add two objects `a` and `b`, internally it will call
-`a.__add__(b)`. So we have to add the `__add__()` method.
+`a.__add__(b)`. We have to add the `__add__()` method.
 
 ```{python}
 #| code-fold: false
@@ -392,7 +392,7 @@ a.__add__(b)
 
 ## Implementing More Operations
 
-Similarly we can support for multiplication and a ReLU function.
+Similarly we can add define a multiplication operation and a ReLU function.
 
 ```{python}
 #| code-fold: false
@@ -427,7 +427,7 @@ class Value:
 ## Implementing More Operations
 :::
 
-And now we can use the additional operations.
+Now we can use the additional operations.
 
 ```{python}
 #| code-fold: false
@@ -444,7 +444,7 @@ d
 d.relu()
 ```
 
-By the way, internally, python will call `__mul__` on `a`, then `__add__` on the temporary product object.
+Internally, python will call `__mul__` on `a`, then `__add__` on the temporary product object.
 
 ```{python}
 #| code-fold: false
@@ -490,7 +490,7 @@ class Value:
 ## Child Nodes
 :::
 
-Let's instanstiate a few `Value` objects and do some operations with them.
+Let's instantiate a few `Value` objects and perform some operations with them.
 
 ```{python}
 #| code-fold: false
@@ -555,7 +555,7 @@ class Value:
 ## Child Operations
 :::
 
-Let's instanstiate a few `Value` objects and do some operations with them.
+Let's again instantiate a few `Value` objects and do some operations with them.
 ```{python}
 #| code-fold: false
 a = Value(4.0, label='a')
@@ -651,7 +651,7 @@ print("Edges: ", edges)
 ## The Compute Graph
 :::
 
-Lets add one more operation, or stage in the compute graph.
+Lets add one more operation, or stage, in the compute graph.
 
 ```{python}
 #| code-fold: false
@@ -673,15 +673,15 @@ draw_dot(L)
 So far we've:
 
 * built a `Value` class and associated data structures,
-* captured a computational graph and
+* captured a computational graph, and
 * calculated the output based on the inputs and operations. 
 
-We'll call this the __forward pass__.
+We'll call this the __forward pass__ (or forward propagation).
 
-But now, we're interested in calculating the gradients with respect to some of
-the parameters with respect to $L$. 
+We now need to calculate the gradient of the loss function $L$ with respect to
+the parameters of the model. 
 
-So next we'll update our `Value` class to capture the partial derivative at each
+Next we'll update our `Value` class to capture the partial derivative at each
 node relative to `L`.
 
 # Calculating Gradients
@@ -729,7 +729,7 @@ class Value:
 ## Calculating Gradients
 :::
 
-And update `draw_dot()` to show `grad` in the node info.
+We update `draw_dot()` to show `grad` in the node info.
 
 ```{python}
 #| code-fold: true
@@ -770,7 +770,7 @@ def draw_dot(root):
   return dot        
 ```
 
-And reinitialize and redraw...
+We also reinitialize and redraw the computational graph.
 
 ```{python}
 #| code-fold: true
@@ -787,7 +787,7 @@ L = e*f; L.label = 'L'
 draw_dot(L)
 ```
 
-We have have placeholders for the gradients, but they are currently all zero.
+We have placeholders for the gradients, but they are currently all zero.
 
 ## Manual Gradient Calculation
 
@@ -795,13 +795,13 @@ Before we start implementing backpropagation, it is helpful to manually calculat
 
 For the node $L$, we trivially calculate $\frac{dL}{dL} = 1$. 
 
-We can easily prove this from the limit ratio perspective, 
+We can easily see this from the limit ratio perspective, 
 
 $$
 \frac{\partial L}{\partial L} = \lim_{h \rightarrow 0} \frac{ (L+h) - L }{h} = \frac{h}{h} = 1
 $$
 
-So let's set the gradient of the last node `L` to 1.
+Let's set the gradient of the last node `L` to 1.
 
 ```{python}
 #| code-fold: false
@@ -815,7 +815,7 @@ L.grad = 1.0
 If we go backwards a step in the graph, we see that $L=e*f$, so we calculate
 
 $$
-\frac{\partial{L}}{\partial{e}} = \frac{\partial}{\partial{e}} (e\times f) = f
+\frac{\partial{L}}{\partial{e}} = \frac{\partial}{\partial{e}} (e\times f) = f,
 $$
 
 and
@@ -837,7 +837,7 @@ For **products**, the partial derivative w.r.t. to one operand is simply the _ot
 :::
 
 ::: {.callout-important}
-We needed the node values, e.g. `e.data` and `f.data`, in order to update the
+We needed the node values, e.g., `e.data` and `f.data`, in order to update the
 gradients. Remember, we calculate all the node values in the **forward pass**.
 :::
 
@@ -845,7 +845,7 @@ gradients. Remember, we calculate all the node values in the **forward pass**.
 ## Manual Gradient Calculation
 :::
 
-And we can redraw the graph above again.
+We again redraw the above computational graph .
 
 ```{python}
 #| code-fold: false
@@ -856,7 +856,7 @@ draw_dot(L)
 ## Manual Gradient Calculation
 :::
 
-How do the parameters $e$ and $f$ influence $L$? Here's a function to wiggle them
+How do the parameters $e$ and $f$ influence $L$? Here's a function to vary (or wiggle) them
 and see the effect on $L$.
 
 ```{python}
@@ -897,7 +897,7 @@ What does $L$ change by if we change $f$ by 1?
 
 How much would $L$ change if we changed $e$ by 1?
 
-Commentline 12 and uncomment line 10 to check your answer.
+Comment line 12 and uncomment line 10 to check your answer.
 
 ## Propagating Back
 
@@ -908,10 +908,10 @@ draw_dot(L)
 Now we want to calculate
 
 $$
-\frac{\partial{L}}{\partial{c}}
+\frac{\partial{L}}{\partial{c}},
 $$
 
-or put another way, we want to know how much $L$ wiggles if we wiggle $c$, or how $c$ influences $L$.
+i.e., we want to know how much $L$ varies if we vary $c$, or how $c$ influences $L$.
 
 ::: {.content-visible when-profile="slides"}
 ## Propagating Back
@@ -925,7 +925,7 @@ draw_dot(L)
 Looking at the graph again we see that $c$ influences $e$ and $e$ influences $L$, so we should be able see the ripple effect of $c$ on $L$.
 
 $$
-c \rightarrow e \rightarrow L 
+c \rightarrow e \rightarrow L.
 $$
 
 ::: {.content-visible when-profile="slides"}
@@ -937,14 +937,14 @@ draw_dot(L)
 
 :::
 
-So $e = c + d$, and so we calculate
+We have that $e = c + d$, and so we calculate
 
 $$ 
-\frac{\partial{e}}{\partial{c}} = \frac{\partial{}}{\partial{c}} (d + c) = 1
+\frac{\partial{e}}{\partial{c}} = \frac{\partial{}}{\partial{c}} (d + c) = 1.
 $$
 
 ::: {.callout-tip}
-For **additions**, the partial derivative w.r.t. to one operand is 1.
+For **addition**, the partial derivative w.r.t. to one operand is 1.
 :::
 
 ## Question
@@ -953,7 +953,7 @@ $$
 c \rightarrow e \rightarrow L 
 $$
 
-So now we know $\partial{L}/\partial{e}$ and we also know $\partial{e}/\partial{c}$,
+Now we know $\partial{L}/\partial{e}$ and we also know $\partial{e}/\partial{c}$,
 
 How do we get $\partial{L}/\partial{c}$?
 
@@ -976,10 +976,10 @@ and
 $$
 \left.\frac{\partial L}{\partial c}\right|_{c} 
 = \left.\frac{\partial L}{\partial e}\right|_{e(c)}\cdot \left.
-  \frac{\partial e}{\partial c}\right|_{c} ,
+  \frac{\partial e}{\partial c}\right|_{c}.
 $$
 
-for indicating at which points the derivatives have to be evaluated.
+The above notation indicates at which points the derivatives have to be evaluated.
 
 > We evaluate the derivatives at the specific values of the variables that we
 > calculated in the forward pass.
@@ -988,9 +988,11 @@ for indicating at which points the derivatives have to be evaluated.
 ## The Chain Rule
 :::
 
-Now since we've established that
+Since we've established that
 
-$$ \frac{\partial{e}}{\partial{c}} = 1$$
+$$
+\frac{\partial{e}}{\partial{c}} = 1
+$$,
 
 then
 
@@ -998,7 +1000,7 @@ $$
 \frac{dL}{dc} = \frac{dL}{de} \cdot \frac{\partial{e}}{\partial{c}} = \frac{dL}{de} \cdot 1.
 $$
 
-So in the case of an operand in an addition operation, we just copy the gradient of the parent node.
+In the case of an operand in an addition operation, we just copy the gradient of the parent node.
 
 Or put another way:
 
@@ -1080,7 +1082,7 @@ $\frac{\partial{L}}{\partial{d}}$
 and we know that
 
 $$
-\frac{\partial{d}}{\partial{b}} = \frac{\partial{}}{\partial{b}}(a\cdot b) = a
+\frac{\partial{d}}{\partial{b}} = \frac{\partial{}}{\partial{b}}(a\cdot b) = a,
 $$
 
 so again from the chain rule
@@ -1105,7 +1107,7 @@ If we expanded all the partial derivatives, we would get
 
 $$
 \frac{\partial{L}}{\partial{b}} 
-  = \left(\frac{\partial{L}}{\partial{e}} \cdot \frac{\partial{e}}{\partial{d}}\right) \cdot \frac{\partial{d}}{\partial{b}}
+  = \left(\frac{\partial{L}}{\partial{e}} \cdot \frac{\partial{e}}{\partial{d}}\right) \cdot \frac{\partial{d}}{\partial{b}}.
 $$
 
 
@@ -1123,13 +1125,13 @@ a.grad = b.data * d.grad
 draw_dot(L)
 ```
 
-We've traversed all the way back to the inputs and calculated all the partial derivatives!!
+We've traversed all the way back to the inputs and calculated all the partial derivatives.
 
 ::: {.content-visible when-profile="slides"}
 ## Propagating Back Again
 :::
 
-And now we can see the effects of wigling `b` and `a`.
+Now we can see the effects of varying `b` and `a`.
 
 ```{python}
 #| code-fold: false
@@ -1171,7 +1173,7 @@ As you saw, we recursively went backwards through the computation graph and
 applied the local gradients to the gradients calculated so far to get the partial
 gradients. 
 
-> Put another way, we propagated this calculation backwards through the graph.
+> We propagated this calculation backwards through the graph.
 
 Of course, in practice, we will only need the gradients on the parameters, not
 the inputs, so we won't bother calculating them on inputs.
@@ -1180,7 +1182,7 @@ the inputs, so we won't bother calculating them on inputs.
 PyTorch let's you control this by setting the `requires_grad` flag on Tensors.
 :::
 
-_That is the essence of Back Propagation._
+_This is the essence of Back Propagation._
 
 # Model Optimization
 
@@ -1200,7 +1202,7 @@ derived from children and leaf nodes.
 
 The leaf nodes are $a, b, c$ and $f$.
 
-> Again, in practice we would only update the parameter leaf nodes, not the input
+> In practice only update the parameter leaf nodes, not the input
 > leaf node, but we'll ignore that distinction temporarily for this example.
 
 ::: {.content-visible when-profile="slides"}
@@ -1216,10 +1218,10 @@ print(L.data)
 ```
 
 As we showed before, we want to nudge each of those leaf nodes by the negative
-of the gradient, multiplied by a step size, $\eta$.
+of the gradient, multiplied by a step size, $\eta$, i.e.,
 
 $$
-w_{n+1} = w_n - \eta * \frac{\partial{L}}{\partial{w_n}}
+w_{n+1} = w_n - \eta * \frac{\partial{L}}{\partial{w_n}},
 $$
 
 where $n$ is the step number.
@@ -1242,11 +1244,11 @@ L = e*f
 print(L.data)
 ```
 
-And indeed, the value of L has decreased.
+Observe that the value of L has indeed decreased.
 
 ## A Single Neuron
 
-Let's now programmatically define a single neuron with
+Let's programmatically define a single neuron with
 
 * two inputs
 * two weights (1 for each input)
@@ -1297,7 +1299,7 @@ differentiate the ReLU.
 Like before, for the output node, o:
 
 $$
-\frac{\partial o}{\partial o} = 1
+\frac{\partial o}{\partial o} = 1.
 $$
 
 ```{python}
@@ -1322,7 +1324,7 @@ n.grad = (o.data > 0) * o.grad  # = 0 when o.data <= 0; = o.grad when o.data > 0
 
 ## Coding Backpropagation
 
-Now we'll update our `Value` class once more to support the backward pass.
+We'll update our `Value` class once more to support the backward pass.
 
 There's a
 
@@ -1443,15 +1445,14 @@ draw_dot(o)
 ## Coding Backpropagation
 :::
 
-
-Now, all we have to do is call the `backward()` method of the last node...
+All we have to do is call the `backward()` method of the last node...
 
 ```{python}
 #| code-fold: false
 o.backward()
 ```
 
-And voila! We have all the gradients!
+and voila! We have all the gradients.
 
 ```{python}
 #| code-fold: false
@@ -1477,7 +1478,7 @@ Always remember to zero the gradient after each iteration where you update the p
 
 ## Accumulating the Gradients -- Special Cases
 
-There are also special cases to handle like where a `Value` object is on both
+There are also special cases to handle such as when a `Value` object is on both
 sides of the operand like
 
 ```{python}
@@ -1508,34 +1509,34 @@ We can verify that the gradients are correct analytically.
 
 To find the partial derivative $\frac{\partial f}{\partial a}$, we first need to define $f$ in terms of $a$ and $b$.
 
-Given:
+Given
 $$
 \begin{aligned}
-d &= a \times b \\
-e &= a + b      \\
+d &= a \times b, \\
+e &= a + b,      \\
 f &= d \times e
 \end{aligned}
 $$
 
-Then $f$ can be expanded as:
+then $f$ can be expanded as
 $$
 \begin{aligned}
-f &= (a \times b) \times (a + b) \\
-f &= a^2 \times b + a \times b^2
+f &= (a \times b) \times (a + b), \\
+  &= a^2 \times b + a \times b^2.
 \end{aligned}
 $$
 
-Next, we find the partial derivative of $f$ with respect to $a$:
+Next, we find the partial derivative of $f$ with respect to $a$
 $$
-\frac{\partial f}{\partial a} = 2a \times b + b^2
+\frac{\partial f}{\partial a} = 2a \times b + b^2.
 $$
 
-Finally, we plug in the given values $a = -2.0$ and $b = 3.0$:
+Finally, we plug in the given values $a = -2.0$ and $b = 3.0$
 $$
 \begin{aligned}
-\frac{\partial f}{\partial a} &= 2(-2.0) \times 3.0 + 3.0^2 \\
-\frac{\partial f}{\partial a} &= -12.0 + 9.0                 \\
-\frac{\partial f}{\partial a} &= -3.0
+\frac{\partial f}{\partial a} &= 2(-2.0) \times 3.0 + 3.0^2, \\
+\frac{\partial f}{\partial a} &= -12.0 + 9.0 ,                \\
+\frac{\partial f}{\partial a} &= -3.0.
 \end{aligned}
 $$
 
@@ -1887,9 +1888,7 @@ draw_dot(m(x))
 
 ## Training Loop
 
-So after manually iterating, we put it all together in a training loop. 
-
-Let's define inputs, targets and initialize the MLP.
+In order to run the training loop, let's define inputs, targets, and initialize the MLP.
 
 ```{python}
 #| code-fold: false
@@ -2021,7 +2020,7 @@ criterion = nn.MSELoss(reduction='sum')
 optimizer = SGD(model.parameters(), lr=0.01)
 ```
 
-Create the tiny dataset.
+Recreate the tiny dataset.
 
 ```{python}
 #| code-fold: false
@@ -2108,15 +2107,15 @@ list(zip(ys, [y.item() for y in predictions]))
 
 ## Summary
 
-So today we...
+We have now covered the following topics:
 
-* got a glimpse of the wide applications of neural networks
-* revisited loss functions
+* an overview of the wide applications of neural networks
+* loss functions
 * developed the notion of gradient descent first by intuition, then in the univariate case, then the multivariate case
 * defined artificial neurons
 * implemented a computation graph and visualization
 * implemented the chain rule as backpropagation on the computation graph
-* defined Neuron, Layer and MLP modules which completes are homegrown Neural Network Framework
-* then trained a small MLP on a tiny dataset
-* finally implemented the same in PyTorch
+* defined Neuron, Layer and MLP modules which completes a homegrown Neural Network Framework
+* trained a small MLP on a tiny dataset
+* implemented the same neural network architecture in PyTorch
 
