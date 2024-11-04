@@ -216,7 +216,7 @@ $$
 \end{aligned}
 $$
 
-where $\mathbf{a}[\cdot]$ is the element-wise activation function.
+where $\mathbf{a}(\cdot)$ is the element-wise activation function.
 
 ::: {.content-visible when-profile="slides"}
 ## FCN Matrix Equations
