@@ -245,7 +245,7 @@ $$
 \frac{\partial L}{\partial \boldsymbol{\beta}_k}, \frac{\partial L}{\partial \boldsymbol{\Omega}_k}, \frac{\partial L}{\partial \boldsymbol{\beta}_{k-1}}, \frac{\partial L}{\partial \boldsymbol{\Omega}_{k-1}}, \ldots, \frac{\partial L}{\partial \boldsymbol{\beta}_0}, \frac{\partial L}{\partial \boldsymbol{\Omega}_0}.
 $$
 
-In the notation above, $\mathbf{\beta}_k$ and $\mathbf{\Omega}_k$ are the bias
+In the notation above, $\boldsymbol{\beta}_k$ and $\mathbf{\Omega}_k$ are the bias
 vectors and weight matrices of the $k$-th layer. 
 
 Just as with partial derivatives with respect to scalars, there are well-defined
@@ -798,7 +798,7 @@ For the node $L$, we trivially calculate $\frac{dL}{dL} = 1$.
 We can easily see this from the limit ratio perspective, 
 
 $$
-\frac{\partial L}{\partial L} = \lim_{h \rightarrow 0} \frac{ (L+h) - L }{h} = \frac{h}{h} = 1
+\frac{dL}{dL} = \lim_{h \rightarrow 0} \frac{ (L+h) - L }{h} = \frac{h}{h} = 1
 $$
 
 Let's set the gradient of the last node `L` to 1.
@@ -991,13 +991,13 @@ The above notation indicates at which points the derivatives have to be evaluate
 Since we've established that
 
 $$
-\frac{\partial{e}}{\partial{c}} = 1
-$$,
+\frac{\partial{e}}{\partial{c}} = 1,
+$$
 
 then
 
 $$
-\frac{dL}{dc} = \frac{dL}{de} \cdot \frac{\partial{e}}{\partial{c}} = \frac{dL}{de} \cdot 1.
+\frac{\partial L}{\partial c} = \frac{\partial L}{\partial e} \cdot \frac{\partial{e}}{\partial{c}} = \frac{\partial L}{\partial e} \cdot 1.
 $$
 
 In the case of an operand in an addition operation, we just copy the gradient of the parent node.
