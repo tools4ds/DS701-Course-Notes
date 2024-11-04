@@ -228,7 +228,7 @@ $$
 L = \sum_{i=1}^N \ell_i = \sum_{i=1}^N \|\mathbf{y}_i - \mathbf{\hat{y}}_i\|_2^2.
 $$
 
-The total loss is the sum of the losses for the $i$ training examples.
+The total loss is the sum of the losses over the $i$ training examples.
 
 What we want to do is find weights in the NN that minimize the above loss function. We do this by
 
