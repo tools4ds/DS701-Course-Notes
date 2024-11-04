@@ -259,12 +259,14 @@ PyTorch and TensorFlow implement these calculations.
 The update rules for the parameters are given by
 
 $$
-\boldsymbol{\beta}_k \leftarrow \boldsymbol{\beta}_k - \frac{\partial L}{\partial \boldsymbol{\beta}_k},
+\boldsymbol{\beta}_k \leftarrow \boldsymbol{\beta}_k - \eta\frac{\partial L}{\partial \boldsymbol{\beta}_k},
 $$
 
 $$
-\boldsymbol{\Omega}_k \leftarrow \boldsymbol{\Omega}_k - \frac{\partial L}{\partial \boldsymbol{\Omega}_k}.
+\boldsymbol{\Omega}_k \leftarrow \boldsymbol{\Omega}_k - \eta\frac{\partial L}{\partial \boldsymbol{\Omega}_k},
 $$
+
+where $\eta$ is the learning rate.
 
 # Computation Graph
 
@@ -1259,7 +1261,7 @@ Recall the neuron figure above.
 
 ```{python}
 #| code-fold: false
-# inputs x0, x1
+# inputs x1, x2
 x1 = Value(2.0, label='x1')
 x2 = Value(0.0, label='x2')
 
@@ -1409,7 +1411,7 @@ This constitutes the _forward pass_.
 
 ```{python}
 #| code-fold: false
-# inputs x0, x1
+# inputs x1, x2
 x1 = Value(2.0, label='x1')
 x2 = Value(0.0, label='x2')
 
