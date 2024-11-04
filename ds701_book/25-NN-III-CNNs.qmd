@@ -68,6 +68,7 @@ $$
 Let's look at an example.
 
 ```{python}
+#| echo: false
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -109,6 +110,7 @@ Divide the 12 points into batches of 3 by randomlly selecting points without rep
 We can resample again to create a different set of batches.
 
 ```{python}
+#| echo: false
 # Shuffle the points and split them into 3 groups of 4
 indices = np.random.permutation(12)
 colors = ['red', 'green', 'blue', 'purple']
@@ -241,22 +243,23 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
                                          shuffle=True)
 ```
 
-`torchvision.dataset.MNIST` is a convenience class which inherits from
-`torch.utils.data.Dataset` (see [doc](https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset))
-that wraps a particular dataset and overwrites a `__getitem__()` method which retrieves a data sample given an 
-index or a key.
+* `torchvision.dataset.MNIST` is a convenience class which inherits from
+  `torch.utils.data.Dataset` (see [doc](https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset))
+   that wraps a particular dataset and overwrites a `__getitem__()` method which
+   retrieves a data sample given an 
+   index or a key.
 
-If we give the argument `train=True`, it returns the training set, while the 
-argument `train=False` returns the test set.
+* If we give the argument `train=True`, it returns the training set, while the 
+  argument `train=False` returns the test set.
 
-`torch.utils.data.DataLoader()` takes a dataset as in the previous line and
-returns a python _iterable_ which lets you loop through the data.
+* `torch.utils.data.DataLoader()` takes a dataset as in the previous line and
+  returns a python _iterable_ which lets you loop through the data.
 
-We give `DataLoader` the _batch size_, and it will return a batch of data samples
-on each iteration.
+* We give `DataLoader` the _batch size_, and it will return a batch of data samples
+  on each iteration.
 
-By passing `shuffle=True`, we are telling the data loader to shuffle the batches
-after every epoch.
+* By passing `shuffle=True`, we are telling the data loader to shuffle the batches
+  after every epoch.
 
 ```{python}
 print(f"No. of training images: {len(trainset)}")
@@ -270,9 +273,12 @@ print(trainset.classes)
 :::
 
 We can see the data loader, `trainloader` in action in the code below to
-get a batch and visualize it.
+get a batch and visualize it along with the labels.
 
 Everytime we rerun the cell we will get a different batch.
+
+:::: {.columns}
+::: {.column width="40%"}
 
 ```{python}
 import matplotlib.pyplot as plt
@@ -292,11 +298,8 @@ images, labels = next(dataiter)
 imshow(torchvision.utils.make_grid(images))
 ```
 
-::: {.content-visible when-profile="slides"}
-## 1. Load and Scale MNIST
 :::
-
-We can display the training labels for the image as well.
+::: {.column width="60%"}
 
 ```{python}
 from IPython.display import display, HTML
@@ -310,9 +313,23 @@ df = pd.DataFrame(labels_grid)
 # Generate HTML representation of DataFrame with border
 html = df.to_html(border=1)
 
+# Add CSS to shrink the size of the table
+html = f"""
+<style>
+    table {{
+        font-size: 14px;
+    }}
+</style>
+{html}
+"""
+
 # Display the DataFrame
 display(HTML(html))
 ```
+
+:::
+::::
+
 
 # Convolutional Neural Networks
 
@@ -371,53 +388,58 @@ Problems with fully-connected networks
 
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
-![](figs/NN-figs/L25-shift-seg.png){width="75%" fig-align="center"}
+![](figs/NN-figs/L25-shift-seg.png){.r-stretch width="65%" fig-align="center"}
 
 Solution: Convolutional Neural Networks
 
 * Parameters only look at local data regions
 * Shares parameters across image or signal
 
-## Example with 1-D Input Data
+## 1-D Convolution
+
+<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
+
+![](figs/NN-figs/L25-conv06.png){width="65%" fig-align="center"}
 
 In _convolutional neural networks_, we define a set of weights that we move across
 the input data.
 
-<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
-
-<!-- ![](figs/NN-figs/L25-conv04.png){width="40%" fig-align="center"} -->
-
 Example with 3 weights and input of length 6.
-
 For figure (a), we calculate 
 
 $$
 z_2 = \omega_1 x_1 + \omega_2 x_2 + \omega_3 x_3
 $$
 
-<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
+::: {.content-visible when-profile="slides"}
+## 1-D Convolution
+![](figs/NN-figs/L25-conv06.png){width="65%" fig-align="center"}
+:::
 
-![](figs/NN-figs/L25-conv05.png){width="75%" fig-align="center"}
-
-To calculate $z_2$, we shift the weights over 1 place (figure (b)) and then
+To calculate $z_3$, we shift the weights over 1 place (figure (b)) and then
 weight and sum the inputs. We can generalize the equation slightly.
 
 $$
 z_i = \omega_1 x_{i - 1} + \omega_2 x_i + \omega_3 x_{i+1}
 $$
 
+::: {.content-visible when-profile="slides"}
+## 1-D Convolution -- Edge Cases
+![](figs/NN-figs/L25-conv06.png){width="65%" fig-align="center"}
+:::
+
 But what do we do about $z_1$?
-
-<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
-
-![](figs/NN-figs/L25-conv06.png){width="75%" fig-align="center"}
 
 We can calculate $z_1$ by _padding_ our input data. In figure (c), we
 simply add $0$, which means we can now calculate $z_1$.
 
+::: {.content-visible when-profile="slides"}
+## 1-D Convolution -- Edge Cases
+:::
+
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
-![](figs/NN-figs/L25-conv07.png){width="75%" fig-align="center"}
+![](figs/NN-figs/L25-conv07.png){width="85%" fig-align="center"}
 
 Alternatively, we can just reduce the size of the output, by only calculating where
 we have _valid_ input data, as in figure (d).
@@ -425,34 +447,51 @@ we have _valid_ input data, as in figure (d).
 For 1-D data, this reduces the output size by 1 at the beginning and end of the
 data, so by 2 overall for length-3 filter.
 
+::: {.content-visible when-profile="slides"}
+## 1-D Convolution -- Parameters
+:::
+
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
 ![](figs/NN-figs/L25-conv-fig10-3.png){width="75%" fig-align="center"}
 
 There are a few design choices one can make with convolution layers, such as:
 
-1. _filter length_, e.g. size 3 in figures (a) and (b)
-2. _stride_, which is how much you shift to calculate the next output. Common values are
+1. __filter length__, e.g. size 3 in figures (a) and (b) and 5 in (c)
+
+::: {.content-visible when-profile="slides"}
+## 1-D Convolution -- Parameters
+![](figs/NN-figs/L25-conv-fig10-3.png){width="75%" fig-align="center"}
+:::
+
+2. __stride__, which is how much you shift to calculate the next output. Common values are
     1. _stride 1_ as we saw in the previous examples and in figures (c) and (d)
     2. _stride 2_, where you shift by 2 instead of 1, an effectively halve the size of the output as in figures (a) and (b)
-3. _dilation_, where you expand the filter as in figure (d)
+
+::: {.content-visible when-profile="slides"}
+## 1-D Convolution -- Parameters
+![](figs/NN-figs/L25-conv-fig10-3.png){width="75%" fig-align="center"}
+:::
+
+3. __dilation__, where you expand the filter as in figure (d)
 
 ## 2D Convolution
 
 For images and video frames we use a two-dimensional convolution
 (called `conv2d` in PyTorch) which is an extension of the 1-D
 convolution as shown in the following illustration.
+From [cs231n](https://cs231n.github.io/convolutional-networks/).
+
+Let's look at a 2D convolution layer: $7 \times 7 \times 3 \rightarrow 3 \times 3 \times 2$
 
 <!-- Image Credit "https://cs231n.github.io/convolutional-networks/"-->
 
+<iframe src="figs/NN-figs/conv-demo/index.html" width="100%" height="800px"></iframe>
 
-![](figs/NN-figs/L25-conv-2d.png){width="75%" fig-align="center"}
+<!-- ![](figs/NN-figs/L25-conv-2d.png){width="75%" fig-align="center"} -->
 
-[cs231n](https://cs231n.github.io/convolutional-networks/)
 
-To see this figure animated, clone the class repo and click on the file `./conv-demo/index.html`.
-
-## Define a Convolutional Neural Network in PyTorch
+## Define a CNN in PyTorch
 
 We will do the following steps in order:
 
@@ -463,7 +502,14 @@ We will do the following steps in order:
 4. Train the network on the training data
 5. Test the network on the test data
 
+::: {.content-visible when-profile="slides"}
+## Define a CNN in PyTorch
+:::
+
+Define and instantiate a CNN for MNIST.
+
 ```{python}
+#| code-fold: false
 # network for MNIST
 import torch
 from torch import nn
@@ -492,12 +538,18 @@ class Net(nn.Module):
 net = Net()
 ```
 
-Where
+Where the `Conv2d` layer is defined as:
 
 ```python
 CLASS torch.nn.Conv2d(in_channels, out_channels, kernel_size, 
                       stride=1, padding_mode='valid', ...)
 ```
+
+::: {.content-visible when-profile="slides"}
+## Define a CNN in PyTorch
+:::
+
+We can see the layers and shapes of the data as it passes through the network.
 
 
 | Layer   | Kernel Size | Stride | Input Shape | Input Channels | Output Channels | Output Shape |
@@ -510,6 +562,12 @@ CLASS torch.nn.Conv2d(in_channels, out_channels, kernel_size,
 | FC Linear |           |        |  128x1      |    1           |    1            |  10x1        |
 | Soft Max |            |        |  10x1      |    1           |    1            |  10x1        |
 
+::: {.content-visible when-profile="slides"}
+## Define a CNN in PyTorch
+:::
+
+Here's a common way to visualize a CNN architecture.
+
 <!-- Image Credit "https://alexlenail.me/NN-SVG/AlexNet.html"-->
 
 ![](figs/NN-figs/L25-mnist-cnn2.svg){width="75%" fig-align="center"}
@@ -517,9 +575,11 @@ CLASS torch.nn.Conv2d(in_channels, out_channels, kernel_size,
 [NN-SVG](https://alexlenail.me/NN-SVG/AlexNet.html)
 
 ## 3. Define a Loss function and optimizer
+
 We'll use a Classification Cross-Entropy loss and SGD with momentum.
 
 ```{python}
+#| code-fold: false
 import torch.optim as optim
 
 criterion = nn.CrossEntropyLoss()
@@ -568,6 +628,7 @@ See _Understanding Deep Learning_, Section 6.3 to learn more.
 ## 4. Train the network
 
 ```{python}
+#| code-fold: false
 print(f"[Epoch #, Iteration #] loss")
 
 # loop over the dataset multiple times
@@ -597,7 +658,14 @@ for epoch in range(1):
 print('Finished Training')
 ```
 
+::: {.content-visible when-profile="slides"}
+## 4. Train the network
+:::
+
 Display some of the images from the test set with the ground truth labels.
+
+:::: {.columns}
+::: {.column width="40%"}
 
 ```{python}
 dataiter = iter(testloader)
@@ -605,8 +673,11 @@ images, labels = next(dataiter)
 
 # print images
 imshow(torchvision.utils.make_grid(images))
-#print('GroundTruth: ', ' '.join(f'{testset.classes[labels[j]]:5s}' for j in range(4)))
 ```
+
+:::
+::: {.column width="60%"}
+
 
 ```{python}
 from IPython.display import display, HTML
@@ -617,16 +688,35 @@ labels_grid = np.array(labels_grid).reshape(8, 8)
 
 df = pd.DataFrame(labels_grid)
 
-# Generate HTML representation of DataFrame with border
+# Generate HTML representation of DataFrame with border and smaller font size
 html = df.to_html(border=1)
+
+# Add CSS to shrink the size of the table
+html = f"""
+<style>
+    table {{
+        font-size: 14px;
+    }}
+</style>
+{html}
+"""
 
 # Display the DataFrame
 display(HTML(html))
 ```
 
+:::
+::::
+
+
+::: {.content-visible when-profile="slides"}
+## 4. Train the network
+:::
+
 Let's run inference (forward pass) on the model to get numeric outputs.
 
 ```{python}
+#| code-fold: false
 outputs = net(images)
 ```
 
@@ -634,11 +724,26 @@ Get the index of the element with highest value and print the label
 associated with that index.
 
 ```{python}
+#| code-fold: false
 _, predicted = torch.max(outputs, 1)
-
-#print('Predicted: ', ' '.join(f'{testset.classes[predicted[j]]:5s}'
-#                              for j in range(4)))
 ```
+
+::: {.content-visible when-profile="slides"}
+## 4. Train the network
+:::
+
+We can display the predicted labels for the images.
+
+:::: {.columns}
+::: {.column width="40%"}
+
+```{python}
+# print images
+imshow(torchvision.utils.make_grid(images))
+```
+
+:::
+::: {.column width="60%"}
 
 ```{python}
 # Assuming batch_size is 64 and images are displayed in an 8x8 grid
@@ -650,13 +755,32 @@ df = pd.DataFrame(labels_grid)
 # Generate HTML representation of DataFrame with border
 html = df.to_html(border=1)
 
+# Add CSS to shrink the size of the table
+html = f"""
+<style>
+    table {{
+        font-size: 14px;
+    }}
+</style>
+{html}
+"""
+
 # Display the DataFrame
 display(HTML(html))
 ```
 
+:::
+::::
+
+
+::: {.content-visible when-profile="slides"}
+## 4. Train the network
+:::
+
 Evaluate over the entire test set.
 
 ```{python}
+#| code-fold: false
 correct = 0
 total = 0
 # since we're not training, we don't need to calculate the gradients for our outputs
@@ -672,6 +796,10 @@ with torch.no_grad():
 
 print(f'Accuracy of the network on the 10000 test images: {100 * correct // total} %')
 ```
+
+::: {.content-visible when-profile="slides"}
+## 4. Train the network
+:::
 
 Evaluate the performance per class.
 
@@ -703,5 +831,16 @@ for classname, correct_count in correct_pred.items():
 
 Look at common CNN network architectures. 
 
-For example in _Understanding Deep Learning_ section 10.5.
+For example see [_Understanding Deep Learning_](https://udlbook.github.io/udlbook/)
+section 10.5 or 
+[PyTorch models and pre-trained weights](https://pytorch.org/vision/stable/models.html).
+
+## Recap
+
+We covered the following topics:
+
+* Convolutional Neural Networks
+* 1-D and 2-D convolutions
+* Common CNN architectures
+* Training a CNN in PyTorch
 
