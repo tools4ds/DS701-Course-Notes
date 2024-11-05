@@ -32,6 +32,10 @@ project:
     - 24-NN-II-Backprop.qmd
     - 25-NN-III-CNNs.qmd
 
+resources:
+  - figs/NN-figs/conv-demo/index.html
+  - figs/NN-figs/conv-demo/utils.js
+  - figs/NN-figs/conv-demo/external/d3.min.js
 
 format:
   revealjs:
@@ -44,6 +48,11 @@ format:
     html-math-method: mathjax
     echo: true
     code-fold: true
+    # eventually I think we want to use this option but I don't want
+    # to enable it so late in the semester since it will effect all
+    # the earlier slides. See
+    # https://quarto.org/docs/presentations/revealjs/advanced.html#stretch
+    auto-stretch: false
 
 execute: 
   freeze: auto # see https://quarto.org/docs/projects/code-execution.html#freeze

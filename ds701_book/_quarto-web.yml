@@ -35,6 +35,10 @@ project:
     - 21-Networks-I.qmd
     - 22-Networks-II-Centrality-Clustering.qmd
 
+resources:
+  - figs/NN-figs/conv-demo/index.html
+  - figs/NN-figs/conv-demo/utils.js
+  - figs/NN-figs/conv-demo/external/d3.min.js
 
 website:
   title: "Tools for data science"

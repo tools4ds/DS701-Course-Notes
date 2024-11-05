@@ -4,64 +4,71 @@ jupyter: python3
 ---
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [remove-cell]
+#| echo: false
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mp
 import pandas as pd
 from IPython.display import Image, HTML
-
-%matplotlib inline
 ```
-
 
 
 ## Recap
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/25-NN-III-CNNs.ipynb)
 
-So far we covered
-* Gradients, gradient descent and back propagation
+We have covered the following topics
+
+* Gradients, gradient descent, and back propagation
 * Fully connected neural networks (Multi-Layer Perceptron)
 * Training of MLPs using back propagation
 
-Today, we'll cover
+Now we cover
+
 * _Stochastic_ gradient descent (SGD)
 * Convolutional Neural Networks (CNNs)
 * Training a CNN with SGD
 
+# Stochastic Gradient Descent
+
 ## Batches and Stochastic Gradient Descent
 
 
-* Compute the gradient (e.g. forward pass and backward pass) with only a _random subset_
+* Compute the gradient (e.g., forward pass and backward pass) with only a _random subset_
 of the input data.
 
-> We call the subset a _batch_.
+> This subset is called a _batch_.
 
 * Work through the dataset by _randomly sampling without replacement_. This is the _stochastic_ part.
+* One forward and backward pass through all the batches of data is called an _epoch_.
 
-* One pass through the data is called an _epoch_.
+::: {.content-visible when-profile="slides"}
+## Batches and Stochastic Gradient Descent
+:::
 
-For squared error loss with $N$ input samples, the loss for (full-batch) gradient descent was
-
-$$
-L = \sum_{i=0}^{N-1} \ell_i = \sum_{i=0}^{N-1} \left( y - \hat{y}  \right)^2
-$$
-
-For _Stochastic Gradient Descent_, we calculate the loss only on a _batch_ at as time.
-For every time $t$, let's denote the batch as $\mathcal{B}_t$
+The squared error loss for (full-batch) gradient descent for $N$ input samples is
 
 $$
-L_t = \sum_{i \in \mathcal{B}_t} \ell_i = \sum_{i \in \mathcal{B}_t} \left( y - \hat{y}  \right)^2
+L = \sum_{i=1}^{N} \ell_i = \sum_{i=1}^{N} \left( y_i - \hat{y}_i  \right)^2.
 $$
 
-Let's look at an example.
+In _Stochastic Gradient Descent_, the loss is calculated for a single _batch_ of data, i.e.,
+
+$$
+L_t = \sum_{i \in \mathcal{B}_t} \ell_i = \sum_{i \in \mathcal{B}_t} \left( y_i - \hat{y}_i  \right)^2,
+$$
+
+where $\mathcal{B}_t$ is the $t$-th batch.
+
+::: {.content-visible when-profile="slides"}
+## Batches
+:::
+
+Here is an example.
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
+#| echo: false
+#| fig-align: center
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -80,7 +87,7 @@ y += np.random.normal(0, 1.0, 12)
 # Shuffle the points and split them into 3 groups of 4
 indices = np.random.permutation(12)
 colors = ['red', 'green', 'blue', 'purple']
-labels = ['batch 1', 'batch 2', 'batch 3', 'batch 4']
+labels = ['Batch 1', 'Batch 2', 'Batch 3', 'Batch 4']
 
 # Plot each group of points with a different color and label
 for i in range(4):
@@ -92,18 +99,23 @@ plt.legend()
 plt.show()
 ```
 
-Say we have a training data set of 12 points and we want to use a _batch size_ of 3.
+Given a training data set of 12 points and we want to use a _batch size_ of 3.
 
-Divide the 12 points into batches of 3 by randomlly selecting points without replacement.
+The 12 points are divided into batches of 3 by randomly selecting points without replacement.
+
+::: {.content-visible when-profile="slides"}
+## Batches
+:::
+
+The points can be resampled again to create a different set of batches.
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: subslide}
-#| tags: [hide-input]
+#| echo: false
+#| fig-align: center
 # Shuffle the points and split them into 3 groups of 4
 indices = np.random.permutation(12)
 colors = ['red', 'green', 'blue', 'purple']
-labels = ['batch 1', 'batch 2', 'batch 3', 'batch 4']
+labels = ['Batch 1', 'Batch 2', 'Batch 3', 'Batch 4']
 
 # Plot each group of points with a different color and label
 for i in range(4):
@@ -115,131 +127,136 @@ plt.legend()
 plt.show()
 ```
 
-We can resample again to create a different set of batches.
+::: {.content-visible when-profile="slides"}
+## Batches
+:::
 
-Optionally, you can shuffle after every epoch.
+For every training iteration, you calculate the loss after a forward and backward pass with the data from a single batch.
 
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: subslide}
-#| tags: [hide-input]
+#| echo: false
+#| fig-align: center
 colors = ['red', 'lightgray', 'lightgray', 'lightgray']
-labels = ['batch 1', 'batch 2', 'batch 3', 'batch 4']
+labels = ['Batch 1', 'Batch 2', 'Batch 3', 'Batch 4']
+
+fig, axs = plt.subplots(2, 2, figsize=(8, 8))
 
 # Plot each group of points with a different color and label
 for i in range(4):
-    plt.scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
+    axs[0, 0].scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
 
-# Display the legend
-plt.legend()
+axs[0, 0].legend()
+axs[0, 0].set_title("Batch 1")
 
-plt.show()
-```
-
-Then for every training iteration, you calculate the forward pass and backward pass loss with only the data from the batch.
-
-Above, we use data from the 1st batch.
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: subslide}
-#| tags: [hide-input]
 colors = ['lightgray', 'green', 'lightgray', 'lightgray']
-labels = ['batch 1', 'batch 2', 'batch 3', 'batch 4']
+labels = ['Batch 1', 'Batch 2', 'Batch 3', 'Batch 4']
 
 # Plot each group of points with a different color and label
 for i in range(4):
-    plt.scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
+    axs[0, 1].scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
 
-# Display the legend
-plt.legend()
+axs[0, 1].legend()
+axs[0, 1].set_title("Batch 2")
 
-plt.show()
-```
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: subslide}
-#| tags: [hide-input]
 colors = ['lightgray', 'lightgray', 'blue', 'lightgray']
-labels = ['batch 1', 'batch 2', 'batch 3', 'batch 4']
+labels = ['Batch 1', 'Batch 2', 'Batch 3', 'Batch 4']
 
 # Plot each group of points with a different color and label
 for i in range(4):
-    plt.scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
+    axs[1, 0].scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
 
-# Display the legend
-plt.legend()
+axs[1, 0].legend()
+axs[1, 0].set_title("Batch 3")
 
-plt.show()
-```
-
-```{python}
-#| hide_input: true
-#| slideshow: {slide_type: subslide}
-#| tags: [hide-input]
 colors = ['lightgray', 'lightgray', 'lightgray', 'purple']
-labels = ['batch 1', 'batch 2', 'batch 3', 'batch 4']
+labels = ['Batch 1', 'Batch 2', 'Batch 3', 'Batch 4']
 
 # Plot each group of points with a different color and label
 for i in range(4):
-    plt.scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
+    axs[1, 1].scatter(x[indices[i*3:(i+1)*3]], y[indices[i*3:(i+1)*3]], color=colors[i], label=labels[i])
 
-# Display the legend
-plt.legend()
-
+axs[1, 1].legend()
+axs[1, 1].set_title("Batch 4")
 plt.show()
 ```
 
-### Advantages of Stochastic Gradient Descent
+## Vocabulary Summary
+
+We have introduced the following terms:
+
+- **batch** - a subset of the full training data
+- **batch size** - the number of data points in the batch
+- **iteration** - a forward and backward pass with a single batch of data
+- **epoch** - a forward and backward pass over all the batches of data.
+
+With 12 instances of data split into 4 batches, the batch size is 3, and it takes 4 iterations for a single epoch.
+
+
+## Advantages of SGD
 
 There are two main advantages to _Stochastic Gradient Descent_.
 
-1. You don't read and compute on every input data sample for every training iteration, 
-    * Speeds up iteration while still making optimization progress
-    * This works better with limited GPU memory and CPU cache. Not slowing down by thrashing limited memory.
+1. Avoid reading and computing on every input data sample for every training iteration.
+    * Speeds up the iterations while still making optimization progress.
+    * Works better with limited GPU memory and CPU cache. Avoid slow downs by thrashing limited memory.
 
-2. Improves training convergence by adding _noise_ to the weight updates.
-    * Can avoid getting stuck in a local minima.
+2. Improve training convergence by adding _noise_ to the weight updates.
+    * Possibly avoid getting stuck in a local minima.
 
-An example
+::: {.content-visible when-profile="slides"}
+## Advantages of SGD
+:::
+
+Consider the following example.
 
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
-<center>    
-    
-<img src="figs/NN-figs/L25-GD-vs-SGD.png" width="50%"> 
-    
-</center> 
 
+![](figs/NN-figs/L25-GD-vs-SGD.png){width="75%" fig-align="center"}
 
-This a contour plot showing a loss surface for a model with only 2 parameters.
+This contour plot shows a loss surface for a model with only 2 parameters.
 
-For full-batch gradient descent, starting points 1 and 3 still end up at the
-global minimum, but starting point 2 get stuck in a local minimum.
+With full-batch gradient descent, starting points 1 and 3 converge to the
+global minimum, but starting point 2 gets stuck in a local minimum.
 
-For stochastic gradient descent, starting point 1 still ends up at the global 
-minimum, but now starting point 2 also avoids the local minimum and ends up at
+With SGD, starting point 1 converges to the global minimum. 
+However, starting point 2 now avoids the local minimum and converges to
 the global minimum.
 
-## Load an Image Dataset in Batches in PyTorch
+# Load an Image Dataset in Batches in PyTorch
 
 ```{python}
-#| slideshow: {slide_type: skip}
-%matplotlib inline
-```
-
-```{python}
-#| slideshow: {slide_type: skip}
+#| echo: false
 import torch
 import torchvision
 import torchvision.transforms as transforms
 ```
 
-### 1. Load and Scale MNIST
+## DataSet and DataLoader
+
+![](figs/DataSetDataLoader.png)
+
+---
+
+- **`Dataset` Object**:
+  - Abstract class representing a dataset.
+  - Custom datasets are created by subclassing `Dataset` and implementing `__len__` and `__getitem__`.
+
+  - **`DataLoader` Object**:
+  - Provides an iterable over a dataset.
+  - Handles batching, shuffling, and loading data in parallel.
+
+  - **Key Features**:
+    - **Batching**: Efficiently groups data samples into batches.
+    - **Shuffling**: Randomizes the order of data samples.
+    - **Parallel Loading**: Uses multiple workers to load data in parallel, improving performance.
+
+
+## 1. Load and Scale MNIST
 
 Load MNIST handwritten digit dataset with 60K training samples and 10K test samples.
 
 ```{python}
+#| code-fold: false
 # Define a transform to scale the pixel values from [0, 255] to [-1, 1]
 transform = transforms.Compose([transforms.ToTensor(),
                                 transforms.Normalize((0.5,), (0.5,))])
@@ -259,35 +276,42 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
                                          shuffle=True)
 ```
 
-`torchvision.dataset.MNIST` is a convenience class which inherits from
-`torch.utils.data.Dataset` (see [doc](https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset))
-that wraps a particular dataset and overwrites a `__getitem__()` method which retrieves a data sample given an 
-index or a key.
+* `torchvision.dataset.MNIST` is a convenience class which inherits from
+  `torch.utils.data.Dataset` (see [doc](https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset))
+   that wraps a particular dataset and overwrites a `__getitem__()` method which
+   retrieves a data sample given an 
+   index or a key.
 
-If we give the argument `train=True`, it returns the training set, while the 
-argument `train=False` returns the test set.
+* If we give the argument `train=True`, it returns the training set, while the 
+  argument `train=False` returns the test set.
 
-`torch.utils.data.DataLoader()` takes a dataset as in the previous line and
-returns a python _iterable_ which lets you loop through the data.
+* `torch.utils.data.DataLoader()` takes a dataset as in the previous line and
+  returns a python _iterable_ which lets you loop through the data.
 
-We give `DataLoader` the _batch size_, and it will return a batch of data samples
-on each iteration.
+* We give `DataLoader` the _batch size_, and it will return a batch of data samples
+  on each iteration.
 
-By passing `shuffle=True`, we are telling the data loader to shuffle the batches
-after every epoch.
+* By passing `shuffle=True`, we are telling the data loader to shuffle the batches
+  after every epoch.
 
 ```{python}
-#| slideshow: {slide_type: subslide}
 print(f"No. of training images: {len(trainset)}")
 print(f"No. of test images: {len(testset)}")
 print("The dataset classes are:")
 print(trainset.classes)
 ```
 
+::: {.content-visible when-profile="slides"}
+## 1. Load and Scale MNIST
+:::
+
 We can see the data loader, `trainloader` in action in the code below to
-get a batch and visualize it.
+get a batch and visualize it along with the labels.
 
 Everytime we rerun the cell we will get a different batch.
+
+:::: {.columns}
+::: {.column width="40%"}
 
 ```{python}
 import matplotlib.pyplot as plt
@@ -307,11 +331,10 @@ images, labels = next(dataiter)
 imshow(torchvision.utils.make_grid(images))
 ```
 
-We can display the training labels for the image as well.
+:::
+::: {.column width="60%"}
 
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
 from IPython.display import display, HTML
 
 # Assuming batch_size is 64 and images are displayed in an 8x8 grid
@@ -323,185 +346,232 @@ df = pd.DataFrame(labels_grid)
 # Generate HTML representation of DataFrame with border
 html = df.to_html(border=1)
 
+# Add CSS to shrink the size of the table
+html = f"""
+<style>
+    table {{
+        font-size: 14px;
+    }}
+</style>
+{html}
+"""
+
 # Display the DataFrame
 display(HTML(html))
 ```
 
-## Convolutional Network Applications
+:::
+::::
 
-<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
-<center>    
-    
-<img src="figs/NN-figs/L25-img-class.svg">
-    
-</center> 
 
-* Multi-class classification problem ( >2 possible classes)
-* Convolutional network with classification output
+# Convolutional Neural Networks
 
-<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
-<center>    
-    
-<img src="figs/NN-figs/L25-obj-det.png">
-    
-</center> 
-
-* Localize and classify objects in an image
-* Convolutional network with classification _and_ regression output
-
-<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
-<center>    
-    
-<img src="figs/NN-figs/L25-img-seg.png">
-    
-</center> 
-
-* Classify each pixel in an image to 2 or more classes
-* Convolutional encoder-decoder network with a classification values for each pixel.
-
-## Convolutional Neural Networks
-
-Problems with fully-connected networks
+## Problems with Fully-Connected Networks
 
 * Size
     * 224x224 RGB image = 150,528 dimensions
     * Hidden layers generally larger than inputs
-    * One hidden layer = 150,520x150,528 weights -- 22 billion
+    * One hidden layer = $150,520x150,528\approx 22$ billion weights  22 billion weigth
 * Nearby pixels statistically related
     * But fully connected network doesn't exploit spatial correlation
 * Should be stable under transformations
     * Don’t want to re-learn appearance at different parts of image
 
+## Convolutional Neural Network (CNN)
+
+- **Definition**:
+  - A type of deep learning model designed for processing structured grid data, such as images.
+  - Utilizes convolutional layers to automatically and adaptively learn spatial hierarchies of features.
+
+--- 
+
+- **Key Components**:
+  - **Convolutional Layers**: Apply filters to input data to create feature maps.
+  - **Pooling Layers**: Reduce the dimensionality of feature maps while retaining important information.
+  - **Fully Connected Layers**: Perform classification based on the features extracted by convolutional and pooling layers.
+
+---
+
+- **Advantages**:
+  - **Parameter Sharing**: Reduces the number of parameters, making the network more efficient.
+  - **Translation Invariance**: Recognizes patterns regardless of their position in the input.
+
+## Convolutional Network Applications
+
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
-#### Classification Invariant to Shift
+![](figs/NN-figs/L25-img-class.svg){width="75%" fig-align="center"}
 
-<center>    
-    
-<img src="figs/NN-figs/L25-shift-img-class.png">
-    
-</center> 
+* Multi-class classification problem ( >2 possible classes)
+* Convolutional network with classification output
+
+::: {.content-visible when-profile="slides"}
+## Convolutional Network Applications
+:::
 
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
-#### Image Segmentation Invariant to Shift
+![](figs/NN-figs/L25-obj-det.png){width="75%" fig-align="center"}
 
-<center>    
-    
-<img src="figs/NN-figs/L25-shift-seg.png">
-    
-</center> 
+* Localize and classify objects in an image
+* Convolutional network with classification _and_ regression output
 
+::: {.content-visible when-profile="slides"}
+## Convolutional Network Applications
+:::
+
+<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
+
+![](figs/NN-figs/L25-img-seg.png){width="75%" fig-align="center"}
+
+* Classify each pixel in an image to 2 or more classes
+* Convolutional encoder-decoder network with a classification values for each pixel
+
+
+
+## Classification Invariant to Shift
+
+<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
+
+![](figs/NN-figs/L25-shift-img-class.png){width="75%" fig-align="center"}
+
+* Let's say we want to do classification on these two images.
+* If you look carefully, one image is shifted w.r.t. the other.
+* An FCN would have to learn a new set of weights for each shift.
+
+
+## Image Segmentation Invariant to Shift
+
+<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
+
+![](figs/NN-figs/L25-shift-seg.png){.r-stretch width="65%" fig-align="center"}
+
+* Same thing for image segmentation.
+* An FCN would have to learn a new set of weights for each shift.
+
+:::: {.fragment}
 Solution: Convolutional Neural Networks
 
 * Parameters only look at local data regions
-
 * Shares parameters across image or signal
+::::
 
-### Example with 1-D Input Data
+## 1-D Convolution
 
-In _convolutional neural networks_, we define a set of weights that we move across
+<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
+
+![](figs/NN-figs/L25-conv06.png){width="65%" fig-align="center"}
+
+In CNNs, we define a set of weights that are moved across
 the input data.
 
-<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
+Here is an example with 3 weights and input of length 6.
 
-<center>
-    
-<img src="figs/NN-figs/L25-conv04.png">
-    
-</center> 
+In Figure (a), we calculate 
 
-Example with 3 weights and input of length 6.
+$$
+z_2 = \omega_1 x_1 + \omega_2 x_2 + \omega_3 x_3.
+$$
 
-For figure (a), we calculate 
+::: {.content-visible when-profile="slides"}
+## 1-D Convolution
+![](figs/NN-figs/L25-conv06.png){width="65%" fig-align="center"}
+:::
 
-$$ z_2 = \omega_1 x_1 + \omega_2 x_2 + \omega_3 x_3 $$
-
-<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
-<center> 
-    
-<img src="figs/NN-figs/L25-conv05.png">
-    
-</center> 
-
-To calculate $z_2$, we shift the weights over 1 place (figure (b)) and then
+To calculate $z_3$, we shift the weights over 1 place (figure (b)) and then
 weight and sum the inputs. We can generalize the equation slightly.
 
-$$ z_i = \omega_1 x_{i - 1} + \omega_2 x_i + \omega_3 x_{i+1} $$
+$$
+z_i = \omega_1 x_{i - 1} + \omega_2 x_i + \omega_3 x_{i+1}.
+$$
 
-But what do we do about $z_1$?
+::: {.content-visible when-profile="slides"}
+## 1-D Convolution -- Edge Cases
+![](figs/NN-figs/L25-conv06.png){width="65%" fig-align="center"}
+:::
+
+What do we do about $z_1$?
+
+We calculate $z_1$ by _padding_ our input data. In figure (c), we
+simply add (pad with) $0$. This allows us to calculate $z_1$.
+
+::: {.content-visible when-profile="slides"}
+## 1-D Convolution -- Edge Cases
+:::
 
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
-<center>
-    
-<img src="figs/NN-figs/L25-conv06.png">
-    
-</center> 
-
-We can calculate $z_1$ by _padding_ our input data. In figure (c), we
-simply add $0$, which means we can now calculate $z_1$.
-
-<!-- Image Credit "https://udlbook.github.io/udlbook/"-->
-
-<center>
-    
-<img src="figs/NN-figs/L25-conv07.png">
-    
-</center> 
+![](figs/NN-figs/L25-conv07.png){width="85%" fig-align="center"}
 
 Alternatively, we can just reduce the size of the output, by only calculating where
 we have _valid_ input data, as in figure (d).
 
 For 1-D data, this reduces the output size by 1 at the beginning and end of the
-data, so by 2 overall for length-3 filter.
+data. This means that for a length-3 filter, the size of the output is reduced by 2.
+
+::: {.content-visible when-profile="slides"}
+## 1-D Convolution -- Parameters
+:::
 
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
-<center>    
-    
-<img src="figs/NN-figs/L25-conv-fig10-3.png">
-    
-</center> 
+![](figs/NN-figs/L25-conv-fig10-3.png){width="75%" fig-align="center"}
 
 There are a few design choices one can make with convolution layers, such as:
 
-1. _filter length_, e.g. size 3 in figures (a) and (b)
-2. _stride_, which is how much you shift to calculate the next output. Common values are
-    1. _stride 1_ as we saw in the previous examples and in figures (c) and (d)
-    2. _stride 2_, where you shift by 2 instead of 1, an effectively halve the size of the output as in figures (a) and (b)
-3. _dilation_, where you expand the filter as in figure (d)
+1. __filter length__, e.g., size 3 in figures (a) and (b) and 5 in (c).
 
-### 2D Convolution
+::: {.content-visible when-profile="slides"}
+## 1-D Convolution -- Parameters
+![](figs/NN-figs/L25-conv-fig10-3.png){width="75%" fig-align="center"}
+:::
+
+2. __stride__, the shift of the weights to calculate the next output. Common values are
+    1. _stride 1_ as we saw in the previous examples and in figures (c) and (d),
+    2. _stride 2_, which effectively halves the size of the output as in figures (a) and (b).
+
+::: {.content-visible when-profile="slides"}
+## 1-D Convolution -- Parameters
+![](figs/NN-figs/L25-conv-fig10-3.png){width="75%" fig-align="center"}
+:::
+
+3. __dilation__, the spacing between elements in the filter. There is an example of dilation=2 in the filter  in figure (d)
+
+## 2D Convolution
 
 For images and video frames we use a two-dimensional convolution
 (called `conv2d` in PyTorch) which is an extension of the 1-D
-convolution as shown in the following illustration.
+convolution.
+From [cs231n](https://cs231n.github.io/convolutional-networks/).
+
+Let's look at a 2D convolution layer: $7 \times 7 \times 3 \rightarrow 3 \times 3 \times 2$
 
 <!-- Image Credit "https://cs231n.github.io/convolutional-networks/"-->
-<center>    
-    
-<img src="figs/NN-figs/L25-conv-2d.png">
-    
-</center> 
 
-[cs231n](https://cs231n.github.io/convolutional-networks/)
+<iframe src="figs/NN-figs/conv-demo/index.html" width="100%" height="800px"></iframe>
 
-To see this figure animated, clone the class repo and click on the file `./conv-demo/index.html`.
+<!-- ![](figs/NN-figs/L25-conv-2d.png){width="75%" fig-align="center"} -->
 
-## Define a Convolutional Neural Network in PyTorch
+
+## Define a CNN in PyTorch
 
 We will do the following steps in order:
 
-1. We already loaded and scaled the MNIST training and test datasets using
-   ``torchvision``
-2. Define a Convolutional Neural Network
+1. Load and scale the MNIST training and test datasets using
+   ``torchvision`` (already done)
+2. Define a Convolutional Neural Network architecture
 3. Define a loss function
 4. Train the network on the training data
 5. Test the network on the test data
 
+::: {.content-visible when-profile="slides"}
+## Define a CNN in PyTorch
+:::
+
+Define and instantiate a CNN for MNIST.
+
 ```{python}
-#| slideshow: {slide_type: subslide}
+#| code-fold: false
 # network for MNIST
 import torch
 from torch import nn
@@ -530,12 +600,18 @@ class Net(nn.Module):
 net = Net()
 ```
 
-Where
+The `Conv2d` layer is defined as:
 
 ```python
 CLASS torch.nn.Conv2d(in_channels, out_channels, kernel_size, 
                       stride=1, padding_mode='valid', ...)
 ```
+
+::: {.content-visible when-profile="slides"}
+## Define a CNN in PyTorch
+:::
+
+We can see the layers and shapes of the data as it passes through the network.
 
 
 | Layer   | Kernel Size | Stride | Input Shape | Input Channels | Output Channels | Output Shape |
@@ -548,49 +624,63 @@ CLASS torch.nn.Conv2d(in_channels, out_channels, kernel_size,
 | FC Linear |           |        |  128x1      |    1           |    1            |  10x1        |
 | Soft Max |            |        |  10x1      |    1           |    1            |  10x1        |
 
+::: {.content-visible when-profile="slides"}
+## Define a CNN in PyTorch
+:::
+
+Here's a common way to visualize a CNN architecture.
+
 <!-- Image Credit "https://alexlenail.me/NN-SVG/AlexNet.html"-->
-<center>    
-    
-<img src="figs/NN-figs/L25-mnist-cnn2.svg">
-    
-</center> 
+
+![](figs/NN-figs/L25-mnist-cnn2.svg){width="75%" fig-align="center"}
 
 [NN-SVG](https://alexlenail.me/NN-SVG/AlexNet.html)
 
-### 3. Define a Loss function and optimizer
+## 3. Define a Loss function and optimizer
+
 We'll use a Classification Cross-Entropy loss and SGD with momentum.
 
 ```{python}
+#| code-fold: false
 import torch.optim as optim
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 ```
 
-#### Cross Entropy Loss
+## Cross Entropy Loss
 
-* Popular loss function for multi-class classification that measures the _dissimilarity_ between the predicted class log probability $\log(p_i)$ and the true class $y_i$.
+* Popular loss function for multi-class classification that measures the 
+  _dissimilarity_ between the predicted class log probability $\log(p_i)$ and
+  the true class $y_i$.
 
-$$ - \sum_i y_i \log(p_i) $$
+$$
+- \sum_i y_i \log(p_i).
+$$
 
-See for example [here](https://machinelearningmastery.com/cross-entropy-for-machine-learning/) for more information.
+See this
+[link](https://machinelearningmastery.com/cross-entropy-for-machine-learning/) 
+for more information.
 
-#### Momentum
+## Momentum
 
-Momentum is a technique used in optimizing neural networks that helps accelerate gradients vectors in the right directions, leading to faster convergence. It is inspired by physical laws of motion where the optimizer uses 'momentum' to push over hilly terrain and valleys to find the global minimum.
+Momentum is a useful technique in optimization. It accelerates
+gradients vectors in the right directions, which can lead to faster convergence. 
+
+It is inspired by physical laws of motion. The optimizer uses 'momentum' to push
+over hilly terrains and valleys to find the global minimum.
 
 In gradient descent, the weight update rule with momentum is given by:
 
-
 $$ 
-m_{t+1} = \beta m_t + (1 - \beta) \nabla J(w)
+m_{t+1} = \beta m_t + (1 - \beta) \nabla J(w),
 $$
 
 $$
-w_{t+1} = w_t - \alpha m_{t+1}
+w_{t+1} = w_t - \alpha m_{t+1},
 $$
 
-where:
+where
 
 * $m_t$ is the momentum (which drives the update at iteration $t$), 
 * $\beta \in [0, 1)$, typically 0.9, controls the degree to which the gradient is smoothed over time, and 
@@ -598,9 +688,10 @@ where:
 
 See _Understanding Deep Learning_, Section 6.3 to learn more.
 
-### 4. Train the network
+## 4. Train the network
 
 ```{python}
+#| code-fold: false
 print(f"[Epoch #, Iteration #] loss")
 
 # loop over the dataset multiple times
@@ -630,22 +721,28 @@ for epoch in range(1):
 print('Finished Training')
 ```
 
+::: {.content-visible when-profile="slides"}
+## 4. Train the network
+:::
+
 Display some of the images from the test set with the ground truth labels.
 
+:::: {.columns}
+::: {.column width="40%"}
+
 ```{python}
-#| scrolled: true
 dataiter = iter(testloader)
 images, labels = next(dataiter)
 
 # print images
 imshow(torchvision.utils.make_grid(images))
-#print('GroundTruth: ', ' '.join(f'{testset.classes[labels[j]]:5s}' for j in range(4)))
 ```
 
+:::
+::: {.column width="60%"}
+
+
 ```{python}
-#| hide_input: true
-#| scrolled: true
-#| tags: [hide-input]
 from IPython.display import display, HTML
 
 # Assuming batch_size is 64 and images are displayed in an 8x8 grid
@@ -654,16 +751,35 @@ labels_grid = np.array(labels_grid).reshape(8, 8)
 
 df = pd.DataFrame(labels_grid)
 
-# Generate HTML representation of DataFrame with border
+# Generate HTML representation of DataFrame with border and smaller font size
 html = df.to_html(border=1)
+
+# Add CSS to shrink the size of the table
+html = f"""
+<style>
+    table {{
+        font-size: 14px;
+    }}
+</style>
+{html}
+"""
 
 # Display the DataFrame
 display(HTML(html))
 ```
 
+:::
+::::
+
+
+::: {.content-visible when-profile="slides"}
+## 4. Train the network
+:::
+
 Let's run inference (forward pass) on the model to get numeric outputs.
 
 ```{python}
+#| code-fold: false
 outputs = net(images)
 ```
 
@@ -671,15 +787,28 @@ Get the index of the element with highest value and print the label
 associated with that index.
 
 ```{python}
+#| code-fold: false
 _, predicted = torch.max(outputs, 1)
-
-#print('Predicted: ', ' '.join(f'{testset.classes[predicted[j]]:5s}'
-#                              for j in range(4)))
 ```
 
+::: {.content-visible when-profile="slides"}
+## 4. Train the network
+:::
+
+We can display the predicted labels for the images.
+
+:::: {.columns}
+::: {.column width="40%"}
+
 ```{python}
-#| hide_input: true
-#| tags: [hide-input]
+# print images
+imshow(torchvision.utils.make_grid(images))
+```
+
+:::
+::: {.column width="60%"}
+
+```{python}
 # Assuming batch_size is 64 and images are displayed in an 8x8 grid
 labels_grid = [testset.classes[predicted[j]] for j in range(64)]
 labels_grid = np.array(labels_grid).reshape(8, 8)
@@ -689,13 +818,32 @@ df = pd.DataFrame(labels_grid)
 # Generate HTML representation of DataFrame with border
 html = df.to_html(border=1)
 
+# Add CSS to shrink the size of the table
+html = f"""
+<style>
+    table {{
+        font-size: 14px;
+    }}
+</style>
+{html}
+"""
+
 # Display the DataFrame
 display(HTML(html))
 ```
 
+:::
+::::
+
+
+::: {.content-visible when-profile="slides"}
+## 4. Train the network
+:::
+
 Evaluate over the entire test set.
 
 ```{python}
+#| code-fold: false
 correct = 0
 total = 0
 # since we're not training, we don't need to calculate the gradients for our outputs
@@ -711,6 +859,10 @@ with torch.no_grad():
 
 print(f'Accuracy of the network on the 10000 test images: {100 * correct // total} %')
 ```
+
+::: {.content-visible when-profile="slides"}
+## 4. Train the network
+:::
 
 Evaluate the performance per class.
 
@@ -738,9 +890,20 @@ for classname, correct_count in correct_pred.items():
     print(f'Accuracy for class: {classname:5s} is {accuracy:.1f} %')
 ```
 
-### To Dig Deeper
+## To Dig Deeper
 
-Look at common CNN network architectures. 
+Try working with common CNN network architectures. 
 
-For example in _Understanding Deep Learning_ section 10.5.
+For example see [_Understanding Deep Learning_](https://udlbook.github.io/udlbook/)
+section 10.5 or 
+[PyTorch models and pre-trained weights](https://pytorch.org/vision/stable/models.html).
+
+## Recap
+
+We covered the following topics:
+
+* Convolutional Neural Networks
+* 1-D and 2-D convolutions
+* Common CNN architectures
+* Training a CNN in PyTorch
 
