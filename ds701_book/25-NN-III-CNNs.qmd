@@ -366,6 +366,17 @@ display(HTML(html))
 
 # Convolutional Neural Networks
 
+## Problems with Fully-Connected Networks
+
+* Size
+    * 224x224 RGB image = 150,528 dimensions
+    * Hidden layers generally larger than inputs
+    * One hidden layer = $150,520x150,528\approx 22$ billion weights  22 billion weigth
+* Nearby pixels statistically related
+    * But fully connected network doesn't exploit spatial correlation
+* Should be stable under transformations
+    * Don’t want to re-learn appearance at different parts of image
+
 ## Convolutional Neural Network (CNN)
 
 - **Definition**:
@@ -416,24 +427,17 @@ display(HTML(html))
 * Classify each pixel in an image to 2 or more classes
 * Convolutional encoder-decoder network with a classification values for each pixel
 
-## Convolutional Neural Networks Issues
 
-Problems with fully-connected networks
-
-* Size
-    * 224x224 RGB image = 150,528 dimensions
-    * Hidden layers generally larger than inputs
-    * One hidden layer = $150,520x150,528\approx 22$ billion weights  22 billion weigth
-* Nearby pixels statistically related
-    * But fully connected network doesn't exploit spatial correlation
-* Should be stable under transformations
-    * Don’t want to re-learn appearance at different parts of image
 
 ## Classification Invariant to Shift
 
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
 ![](figs/NN-figs/L25-shift-img-class.png){width="75%" fig-align="center"}
+
+* Let's say we want to do classification on these two images.
+* If you look carefully, one image is shifted w.r.t. the other.
+* An FCN would have to learn a new set of weights for each shift.
 
 
 ## Image Segmentation Invariant to Shift
@@ -442,10 +446,15 @@ Problems with fully-connected networks
 
 ![](figs/NN-figs/L25-shift-seg.png){.r-stretch width="65%" fig-align="center"}
 
+* Same thing for image segmentation.
+* An FCN would have to learn a new set of weights for each shift.
+
+:::: {.fragment}
 Solution: Convolutional Neural Networks
 
 * Parameters only look at local data regions
 * Shares parameters across image or signal
+::::
 
 ## 1-D Convolution
 
