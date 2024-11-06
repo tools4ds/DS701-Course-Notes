@@ -371,11 +371,9 @@ display(HTML(html))
 * Size
     * 224x224 RGB image = 150,528 dimensions
     * Hidden layers generally larger than inputs
-    * One hidden layer = $150,520x150,528\approx 22$ billion weights  22 billion weigth
+    * One hidden layer = $150,520x150,528\approx 22$ billion weights
 * Nearby pixels statistically related
-    * But fully connected network doesn't exploit spatial correlation
-* Should be stable under transformations
-    * Don’t want to re-learn appearance at different parts of image
+    * Fully connected networks don't exploit spatial correlation
 
 ## Convolutional Neural Network (CNN)
 
@@ -479,7 +477,7 @@ $$
 :::
 
 To calculate $z_3$, we shift the weights over 1 place (figure (b)) and then
-weight and sum the inputs. We can generalize the equation slightly.
+weight and sum the inputs. We can generalize the equation slightly to
 
 $$
 z_i = \omega_1 x_{i - 1} + \omega_2 x_i + \omega_3 x_{i+1}.
@@ -673,18 +671,18 @@ over hilly terrains and valleys to find the global minimum.
 In gradient descent, the weight update rule with momentum is given by:
 
 $$ 
-m_{t+1} = \beta m_t + (1 - \beta) \nabla J(w),
+m_{t+1} = \beta m_t + \eta \nabla J(w),
 $$
 
 $$
-w_{t+1} = w_t - \alpha m_{t+1},
+w_{t+1} = w_t - m_{t+1},
 $$
 
 where
 
 * $m_t$ is the momentum (which drives the update at iteration $t$), 
 * $\beta \in [0, 1)$, typically 0.9, controls the degree to which the gradient is smoothed over time, and 
-* $\alpha$ is the learning rate.
+* $\eta$ is the learning rate.
 
 See _Understanding Deep Learning_, Section 6.3 to learn more.
 
