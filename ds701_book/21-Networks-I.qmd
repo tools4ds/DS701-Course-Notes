@@ -816,7 +816,7 @@ There is some non-random structure here, but it's not clear exactly what it is. 
 
 The standard `networkx` routine uses what is called a *spring* layout. 
 
-Here is how *spring* layout works
+Here is how the *spring* layout works.
 
 * Each edge has a `weight` parameter (could be 1 for all edges).  
 * The layout routine fixes 
@@ -826,7 +826,7 @@ Here is how *spring* layout works
 
 This is a kind of minimal distortion in a least-squares sense.
 
----
+## Spring Layout
 
 ```{python}
 #| fig-align: center
@@ -852,7 +852,7 @@ plt.show()
 
 Notice how the spring layout tends to bring clusters of densely connected nodes close to each other.
 
---- 
+## Spectral Layout
 
 Finally, we can try the spectral layout. We will define the spectral layout in the next lecture.
 
@@ -874,16 +874,30 @@ nx.draw_networkx(F_random, ax = ax2,
                  pos = nx.spectral_layout(F_random),
                  with_labels=False, alpha=.8, linewidths=2)
 plt.axis('off')
-plt.title('Same Density Random -- Spectral Layout', size = 16);
+plt.title('Same Density Random -- Spectral Layout', size = 16)
+plt.show()
 ```
 
 ---
 
-With this layout, we can start to understand the structure of the network.
+With the spectral layout, we can start to understand the structure of the network.
 
-We see clusters of teams that correspond to conferences,
+We see clusters of teams that correspond to conferences, and understand that there are not too many high-degree nodes.
 
-and understand that there are not too many high-degree nodes.
+
+```{python}
+#| fig-align: center
+plt.figure(figsize = (5, 7))
+nx.draw_networkx(football,
+                 node_size=35, 
+                 edge_color='gray', 
+                 pos = nx.spectral_layout(football),
+                 with_labels=False, alpha=.8, linewidths=2)
+plt.axis('off')
+plt.title('Title 1 Football -- Spectral Layout', size = 16)
+plt.show()
+```
+
 
 ## Metrics
 
@@ -945,3 +959,17 @@ plt.show()
 ```
 
 We can see the evidence of scheduling of games in this distribution: a much larger number of teams plays 11 games than would occur by chance.
+
+
+## Recap
+
+We introduced
+
+- Networks
+    - directed, undirected graphs,
+    - degree, paths, neighbors, connectivity
+- $G(n, p)$ random graph
+- Degree distributions
+- Cluster coefficients
+- Graph metrics
+- Visualizing graphs, spring and spectral layouts
