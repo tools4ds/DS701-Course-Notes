@@ -371,7 +371,7 @@ display(HTML(html))
 * Size
     * 224x224 RGB image = 150,528 dimensions
     * Hidden layers generally larger than inputs
-    * One hidden layer = $150,520x150,528\approx 22$ billion weights
+    * One hidden layer = $150,520\times 150,528\approx 22$ billion weights
 * Nearby pixels statistically related
     * Fully connected networks don't exploit spatial correlation
 
@@ -458,7 +458,13 @@ Solution: Convolutional Neural Networks
 
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
-![](figs/NN-figs/L25-conv06.png){width="65%" fig-align="center"}
+::: {.content-visible when-profile="web"}
+![](figs/NN-figs/L25-conv07.png){width="85%" fig-align="center"}
+:::
+
+::: {.content-visible when-profile="slides"}
+![](figs/NN-figs/L25-conv04.png){height="300px" fig-align="center"}
+:::
 
 In CNNs, we define a set of weights that are moved across
 the input data.
@@ -473,8 +479,9 @@ $$
 
 ::: {.content-visible when-profile="slides"}
 ## 1-D Convolution
-![](figs/NN-figs/L25-conv06.png){width="65%" fig-align="center"}
+![](figs/NN-figs/L25-conv05.png){height="300px" fig-align="center"}
 :::
+
 
 To calculate $z_3$, we shift the weights over 1 place (figure (b)) and then
 weight and sum the inputs. We can generalize the equation slightly to
@@ -495,11 +502,11 @@ simply add (pad with) $0$. This allows us to calculate $z_1$.
 
 ::: {.content-visible when-profile="slides"}
 ## 1-D Convolution -- Edge Cases
+![](figs/NN-figs/L25-conv07.png){width="85%" fig-align="center"}
 :::
 
 <!-- Image Credit "https://udlbook.github.io/udlbook/"-->
 
-![](figs/NN-figs/L25-conv07.png){width="85%" fig-align="center"}
 
 Alternatively, we can just reduce the size of the output, by only calculating where
 we have _valid_ input data, as in figure (d).
