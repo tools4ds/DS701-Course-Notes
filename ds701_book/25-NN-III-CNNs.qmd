@@ -371,7 +371,11 @@ display(HTML(html))
 * Size
     * 224x224 RGB image = 150,528 dimensions
     * Hidden layers generally larger than inputs
+<<<<<<< HEAD
+    * One hidden layer = $150,520 \times 150,528\approx 22$ billion weights
+=======
     * One hidden layer = $150,520\times 150,528\approx 22$ billion weights
+>>>>>>> main
 * Nearby pixels statistically related
     * Fully connected networks don't exploit spatial correlation
 
@@ -544,6 +548,60 @@ There are a few design choices one can make with convolution layers, such as:
 
 ## 2D Convolution
 
+:::: {.columns}
+::: {.column width="50%"}
+### Input Image
+$$
+\begin{bmatrix}
+1 & 2 & 3 & 0 \\
+4 & 5 & 6 & 1 \\
+7 & 8 & 9 & 2 \\
+0 & 1 & 2 & 3
+\end{bmatrix}
+$$
+:::
+::: {.column width="-5%"}
+### Kernel
+$$
+\begin{bmatrix}
+1 & 0 \\
+0 & -1
+\end{bmatrix}
+$$
+:::
+::::
+
+## Convolution Operation
+
+The convolution operation involves sliding the kernel over the input image and computing the dot product at each position.
+
+### Computing the Feature Map
+$$
+\begin{bmatrix}
+(1*1 + 5*(-1)) & (2*1 + 6*(-1)) & (3*1 +  1*(-1)) \\
+(4*1 + 8*(-1)) & (5*1 +  9*(-1)) & (6*1 +  2*(-1)) \\
+(7*1 + 1*(-1)) & (8*1 + 2*(-1)) & (9*1 + 3*(-1))
+\end{bmatrix}
+$$
+
+### Feature Map
+$$
+\begin{bmatrix}
+-4 & -4 & 2 \\
+-4 & -4 & 4 \\
+6 & 6 & 7
+\end{bmatrix}
+$$
+
+## Explanation
+
+- The kernel is applied to each 2x2 submatrix of the input image.
+- The resulting values form the feature map, which can highlight patterns of the input image.
+- Given an $n\times n$ image, $m\times m$ kernel size, and a stride of 1, the output of the convolution is an $n-m +1 \times n-m +1$ matrix.
+
+
+## 2D Convolution
+
 For images and video frames we use a two-dimensional convolution
 (called `conv2d` in PyTorch) which is an extension of the 1-D
 convolution.
@@ -556,6 +614,124 @@ Let's look at a 2D convolution layer: $7 \times 7 \times 3 \rightarrow 3 \times 
 <iframe src="figs/NN-figs/conv-demo/index.html" width="100%" height="800px"></iframe>
 
 <!-- ![](figs/NN-figs/L25-conv-2d.png){width="75%" fig-align="center"} -->
+
+## Max Pooling
+
+
+:::: {.columns}
+::: {.column width="5-%"}
+### Input Image
+$$
+\begin{bmatrix}
+1 & 3 & 2 & 4 \\
+5 & 6 & 1 & 2 \\
+7 & 8 & 3 & 0 \\
+4 & 2 & 1 & 5
+\end{bmatrix}
+$$
+:::
+::: {.column width="5-%"}
+### Max Pooling Operation
+
+- **Filter size**: $2 \times 2$
+- **Stride**: 2
+:::
+::::
+
+## Steps
+
+$$
+\begin{bmatrix}
+{\color{cyan}1} & {\color{cyan}3} & {\color{magenta}2} & {\color{magenta}4} \\
+{\color{cyan}5} & {\color{cyan}6} & {\color{magenta}1} & {\color{magenta}2} \\
+{\color{orange}7} & {\color{orange}8} & {\color{teal}3} & {\color{teal}0} \\
+{\color{orange}4} & {\color{orange}2} & {\color{teal}1} & {\color{teal}5}
+\end{bmatrix}
+$$
+
+1. Apply the $2 \times 2$ filter to the top-left corner of the input image:
+$$
+\begin{bmatrix}
+{\color{cyan}1} & {\color{cyan}3} \\
+{\color{cyan}5} & {\color{cyan}6}
+\end{bmatrix}
+$$
+Max value: 6
+
+
+---
+
+$$
+\begin{bmatrix}
+{\color{cyan}1} & {\color{cyan}3} & {\color{magenta}2} & {\color{magenta}4} \\
+{\color{cyan}5} & {\color{cyan}6} & {\color{magenta}1} & {\color{magenta}2} \\
+{\color{orange}7} & {\color{orange}8} & {\color{teal}3} & {\color{teal}0} \\
+{\color{orange}4} & {\color{orange}2} & {\color{teal}1} & {\color{teal}5}
+\end{bmatrix}
+$$
+
+2. Move the filter to the next position (stride 2):
+$$
+\begin{bmatrix}
+{\color{magenta}2} & {\color{magenta}4} \\
+{\color{magenta}1} & {\color{magenta}2}
+\end{bmatrix}
+$$
+Max value: 4
+
+---
+
+$$
+\begin{bmatrix}
+{\color{cyan}1} & {\color{cyan}3} & {\color{magenta}2} & {\color{magenta}4} \\
+{\color{cyan}5} & {\color{cyan}6} & {\color{magenta}1} & {\color{magenta}2} \\
+{\color{orange}7} & {\color{orange}8} & {\color{teal}3} & {\color{teal}0} \\
+{\color{orange}4} & {\color{orange}2} & {\color{teal}1} & {\color{teal}5}
+\end{bmatrix}
+$$
+
+3. Move the filter down to the next row:
+$$
+\begin{bmatrix}
+ {\color{orange}7} & {\color{orange}8} \\ 
+ {\color{orange}4} & {\color{orange}2} 
+\end{bmatrix}
+$$
+Max value: 8
+
+---
+
+$$
+\begin{bmatrix}
+{\color{cyan}1} & {\color{cyan}3} & {\color{magenta}2} & {\color{magenta}4} \\
+{\color{cyan}5} & {\color{cyan}6} & {\color{magenta}1} & {\color{magenta}2} \\
+{\color{orange}7} & {\color{orange}8} & {\color{teal}3} & {\color{teal}0} \\
+{\color{orange}4} & {\color{orange}2} & {\color{teal}1} & {\color{teal}5}
+\end{bmatrix}
+$$
+
+4. Move the filter to the next position (stride 2):
+$$
+\begin{bmatrix}
+{\color{teal}3} & {\color{teal}0} \\ 
+{\color{teal}1} & {\color{teal}5} 
+\end{bmatrix}
+$$
+Max value: 5
+
+
+## Resulting Feature Map
+$$
+\begin{bmatrix}
+6 & 4 \\
+8 & 5
+\end{bmatrix}
+$$
+
+### Explanation
+
+- Max pooling reduces the dimensionality of the input image by taking the maximum value from each $2 \times 2$ region.
+- This operation helps to retain the most important features while reducing the computational complexity.
 
 
 ## Define a CNN in PyTorch
@@ -586,6 +762,7 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, 3, 1)
         self.conv2 = nn.Conv2d(32, 64, 3, 1)
+        self.pool = nn.MaxPool2d(2)
         self.fc1 = nn.Linear(9216, 128)
         self.fc2 = nn.Linear(128, 10)
 
@@ -594,7 +771,7 @@ class Net(nn.Module):
         x = nn.functional.relu(x)
         x = self.conv2(x)
         x = nn.functional.relu(x)
-        x = nn.functional.max_pool2d(x, 2)
+        x = self.pool(x)
         x = torch.flatten(x, 1)
         x = self.fc1(x)
         x = nn.functional.relu(x)
@@ -603,6 +780,7 @@ class Net(nn.Module):
         return output
 
 net = Net()
+print(net)
 ```
 
 The `Conv2d` layer is defined as:
@@ -656,11 +834,11 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 ## Cross Entropy Loss
 
 * Popular loss function for multi-class classification that measures the 
-  _dissimilarity_ between the predicted class log probability $\log(p_i)$ and
+  _dissimilarity_ between the predicted class log probability $\log(\hat{y}_i)$ and
   the true class $y_i$.
 
 $$
-- \sum_i y_i \log(p_i).
+- \sum_i y_i \log(\hat{y}_i).
 $$
 
 See this
