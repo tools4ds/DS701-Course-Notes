@@ -268,12 +268,39 @@ If you sum the degrees of all nodes, you count each edge twice (once for each en
 ::::
 
 :::: {.fragment}
-In our previous example, the total degree is
+:::: {.columns}
+::: {.column width="40%"}
+```{python}
+#| echo: false
+#| fig-align: center
+
+# Create an undirected graph
+G = nx.Graph()
+G.add_edges_from([(1, 2), (1, 3), (2, 3), (3, 4), (3, 5)])
+
+# Plot the undirected graph
+plt.figure(figsize=(3, 2))
+nx.draw_networkx(G,
+                 node_size=300,
+                 edge_color='k',
+                 node_color='lightcoral',
+                 pos=nx.spring_layout(G, seed=1),
+                 with_labels=True,
+                 alpha=1, linewidths=2)
+plt.axis('off')
+plt.title('Undirected Graph', size=16)
+plt.show()
+```
+:::
+::: {.column width="60%"}
+In our previous undirected graph example, the total degree is
 $$
 \text{Total Degree} = 2 + 2 + 4 + 1 + 1 = 10.
 $$
 
 The number of edges is $5$ and $2\cdot 5 = 10$.
+:::
+::::
 ::::
 
 ## Neighbors
@@ -435,7 +462,7 @@ Understanding connectivity starts with determining the observed degrees in the g
 This is captured in the __degree distribution__
 
 $$ 
-P(D > x) = \text{probability that a node has degree at least } x.
+P(X > x) = \text{probability that a node has degree at least } x.
 $$
 
 We typically focus our attention on large values of $x$ -- nodes that are highly connected.
@@ -444,28 +471,57 @@ We typically focus our attention on large values of $x$ -- nodes that are highly
 
 It's common for a degree distribution to __approximately__ follow a power-law.
 
-The simplest power-law distribution is called the Pareto distribution:
+The simplest power-law distribution is called the Pareto distribution. If X is a random variable with a Pareto distribution, then the probability that X is greater than some number x.
 
-$$ P(D > x) = k^{\alpha} x^{-\alpha}\;\;\; k \leq x,\; \;0 < \alpha
-\leq 2. $$
+$$ P(X > x) =
+\begin{cases} 
+\left(\frac{k}{x}\right)^{\alpha} & k \geq x, \\
+1 & x < k 
+\end{cases}$$
 
-It takes on values in the range $[k, \infty]$. 
+We introduced the Pareto distribution the [Probability and Statistics Refresher](03-Probability-and-Statistics-Refresher.qmd).
 
 ---
 
-Here is an example Pareto probability density function.
+The pdf of the Pareto distribution is
+
+$$
+p(x) = 
+\begin{cases} 
+\frac{\alpha k^{\alpha}}{x^{\alpha + 1}} &  x \geq k, \\
+0 &  x < k.
+\end{cases}
+$$
+
+Here is a plot of the Pareto probability density function for different values of $\alpha$.
 
 ```{python}
 #| fig-align: center
 
-from scipy.stats import pareto
-alpha = 1.3
-x = np.linspace(pareto.ppf(0.005,alpha), pareto.ppf(0.995,alpha), 100)
-plt.figure(figsize = (8, 6))
-plt.plot(x, pareto.pdf(x,alpha),'b-', lw = 5, alpha = 0.6, label='pareto pdf')
-plt.title(r'Pareto PDF.  $\alpha$ = {}'.format(alpha), size=16)
-plt.xlabel('$x$', size=14)
-plt.ylabel('$p(x)$', size=14)
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the range of x values
+x = np.linspace(1, 10, 1000)
+
+# Define the Pareto distribution function
+def pareto_pdf(x, alpha, xm=1):
+    return (alpha * xm**alpha) / (x**(alpha + 1))
+
+# Plot the Pareto distribution for alpha values from 1 to 3
+alphas = [1, 2, 3]
+for alpha in alphas:
+    plt.plot(x, pareto_pdf(x, alpha), label=f'$\\alpha={alpha}$')
+
+# Add title and labels
+plt.title('Pareto Distribution for Different $\\alpha$ Values')
+plt.xlabel('x')
+plt.ylabel('Probability Density Function')
+
+# Add legend
+plt.legend()
+
+# Show the plot
 plt.show()
 ```
 
@@ -473,10 +529,7 @@ plt.show()
 
 In a distribution like this, almost all values are very small. However, there is a non-negligible fraction of values that are __very__ large.
 
-A tongue-in-cheek way to refer to this property is
-
-- grains of sand mixed with a few boulders, or
-- elephants and mice.
+[Vilfredo Pareto](https://en.wikipedia.org/wiki/Vilfredo_Pareto) originally used this distribution to describe the allocation of wealth among individuals. The size of sand particles are also seen as approximately Pareto-distributed.
 
 What does this mean for node degree?
 
@@ -489,18 +542,35 @@ It means that
 
 To capture such high-variable degree distributions, a common strategy is to plot them on __log-log__ axes.
 
-On log-log axes, a Pareto distribution appears as a straight line,
+On log-log axes, a Pareto distribution appears as a straight line. You can verify this yourselves by computing
+
+$$
+\log(p(x)) = \log(\alpha x_{\mathrm{m}}^{\alpha}) - (\alpha + 1) \log(x).
+$$
 
 ```{python}
-#| fig-align: center
+import numpy as np
+import matplotlib.pyplot as plt
 from scipy.stats import pareto
-alpha = 1.3
-plt.figure(figsize = (7, 5))
-x = np.linspace(pareto.ppf(0.005,alpha), pareto.ppf(0.995,alpha), 100)
-plt.plot(np.log10(x), np.log10(pareto.pdf(x,alpha)),'b-', lw = 5, alpha = 0.6, label='pareto pdf')
-plt.title(r'Pareto PDF.  $\alpha$ = {}'.format(alpha), size=16)
-plt.xlabel('$\log_{10}(x)$', size=14)
-plt.ylabel('$\log_{10}(p(x))$', size=14)
+
+# Define the range of x values
+x = np.linspace(pareto.ppf(0.005, 1), pareto.ppf(0.995, 3), 100)
+
+# Plot the log of the Pareto distribution for alpha values 1, 2, and 3
+alphas = [1, 2, 3]
+plt.figure(figsize=(7, 5))
+for alpha in alphas:
+    plt.plot(np.log10(x), np.log10(pareto.pdf(x, alpha)), lw=2, alpha=0.6, label=f'pareto pdf $\\alpha={alpha}$')
+
+# Add title and labels
+plt.title(r'Log-Log of Pareto PDF for Different $\alpha$ Values', size=16)
+plt.xlabel(r'$\log_{10}(x)$', size=14)
+plt.ylabel(r'$\log_{10}(p(x))$', size=14)
+
+# Add legend
+plt.legend()
+
+# Show the plot
 plt.show()
 ```
 
@@ -516,9 +586,7 @@ plt.show()
 >
 > https://arxiv.org/abs/cond-mat/0303516
 
-We remark that $G(n, p)$ random graphs do __not__ have power-law degree distributions. 
-
-Their degree distributions have exponential tails, similar to the power grid example above. Note that the $x$-axis of the power grid example is a linear scale but the $y$-axis is a log scale.
+Note that the $x$-axis of the power grid example is a linear scale but the $y$-axis is a log scale. This means that the degree distributions of the power grid example does not follow a power-law degree distribution. It has an exponential tail. 
 
 ## Clustering
 
@@ -532,9 +600,11 @@ The clustering coefficient tells you if the neighbors of a node tend to be neigh
 
 ---
 
-Specifically, clustering coefficient measures the __probability that two of your neighbors are connected.__ 
+Specifically, the clustering coefficient measures the __probability that two of your neighbors are connected.__ 
 
-There are two ways to measure this, the first is
+To define this measure, we introduce the notion of a triangle in a network. A triangle is a set of three nodes in the graph that are connected to each other.
+
+There are two definitions of the clustering coefficient. The first is
 
 $$
 C^{(1)} = \frac{\sum_i \text{number of triangles that include node } i}{\sum_i \text{number of pairs of neighbors of node }i}. 
@@ -606,7 +676,7 @@ Let's consider a highly clustered graph.
 
 ![](figs/L21-high-clustering.png){fig-align=center width=300px}
 
-In this graph, each node has 4 neighbor. Of the 6 pairs of neighbors, 3 are connected, yielding a clustering coefficient of 0.5. This is quite high.
+In this graph, each node has 4 neighbors. This means there are $\binom{4}{2} = 6$ possible pairs of neighbors. Of these 6 neighbors, 3 are connected, yielding a clustering coefficient of 0.5. This is quite high.
 
 What is the average shortest path between nodes?   
 
@@ -614,7 +684,7 @@ It seems to be around $n/8$. On average you go 1/4 of the way around the circle,
 
 In this example, the path length grows linearly with $n$. 
 
-In general, __if the number of nodes is large, the average path length is large.__
+In this example, __if the number of nodes is large, the average path length is large.__
 
 ---
 
@@ -651,7 +721,7 @@ The first clue comes from another classic social science paper, called _The Sten
 
 This is sometimes referred to as the most famous paper in sociology (with over 60,000 citations).   
 
-Granovetter interviewed people about how the found their jobs. He found that most people did not get a job through someone that was a close friend, but rather through a __distant__ acquaintance.
+Granovetter interviewed people about how they found their jobs. He found that most people did not get a job through someone that was a close friend, but rather through a __distant__ acquaintance.
 
 This suggests that an important way that information travels in a social network is via the rare connections that exist __outside__ of the local clustering of friendships.
 
@@ -678,7 +748,7 @@ As $p$ varies, what happens to
 
 ---
 
-Here is the famous figure from that paper. Observe the log scale on the $p$ axis.
+Here is the famous figure from that paper. Observe the log scale on the $p$ axis. The values of both the average path length and the clustering coefficient are plotted, normalized by their values when $p=0$.
    
 ![](figs/watts-strogatz-2.png){width="700px"}
 
@@ -903,7 +973,7 @@ plt.show()
 
 Another way to understand network structured data is to look at important metrics.
 
-For example, we can start with the __clustering coefficient:
+For example, we can start with the __clustering coefficient__:
 
 ```{python}
 clustering_coefficient = nx.average_clustering(football)
