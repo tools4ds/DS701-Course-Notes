@@ -1062,3 +1062,19 @@ When we embed it in six dimensions and cluster there we get an extremely high Ad
 print(f'Maximum ARI is {np.max(ri):0.3f}, using {1 + np.argmax(ri)} dimensions for spectral embedding.')
 ```
 
+## Recap
+
+Networks are present in many interesting applications.
+
+We have covered the following topics 
+
+- Graph representations
+- Cluster coefficients
+- Centrality measures
+- Clustering
+
+In addition we used the [NewtorkX](https://networkx.org) package to visualize our networks in the following formats
+
+- circular
+- spring
+- spectral
