@@ -3,12 +3,8 @@ title: Network Centrality and Clustering
 jupyter: python3
 ---
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/22-Networks-II-Centrality-Clustering.ipynb)
-
 ```{python}
-#| hide_input: true
-#| slideshow: {slide_type: skip}
-#| tags: [hide-input]
+#| echo: false
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -20,10 +16,11 @@ import networkx as nx
 from IPython.display import Image, HTML
 
 import laUtilities as ut
-
 ```
 
 # Overview
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/22-Networks-II-Centrality-Clustering.ipynb)
 
 We previously introduced the concept of a graph to describe networks. To further analyze networks we will discuss network centrality and clustering.
 
@@ -70,7 +67,7 @@ We will study three basic notions of centrality:
 
 To introduce concepts here, we'll look at a very famous dataset in the history of network analysis: Zachary's karate club.
 
-### Karate Club Graph
+## Karate Club Graph
 
 The back story: from 1970 to 1972 the anthropologist Wayne Zachary studied the social relationships inside a university karate club.
 
@@ -192,6 +189,8 @@ $$
 
 For a graph with $n$ nodes, we can convert this to a value between 0 and 1 by dividing by ${n \choose 2} = n(n-1)/2$.
 
+---
+
 In a general graph, there may be __multiple__ shortest paths between $j$ and $k$.  
 
 To handle this, we define:
@@ -212,6 +211,8 @@ Finally
 $$
 \text{betweenness}(i) = \sum_{i \neq j \neq k \in V} \text{dependency}(i \mid j, k).
 $$
+
+---
 
 ```{python}
 #| fig-align: center
@@ -262,7 +263,7 @@ plt.title('Distribution of Betweenness Centrality', size = 16)
 plt.show()
 ```
 
-### Adjacency Matrices
+## Adjacency Matrices
 
 To define the next centrality, we need to represent graph as a __matrix__.
 
@@ -336,12 +337,13 @@ where $\mathbf{x}$ is the eigenvector corresponding to the the eigenvalue $\lamb
 In general, there may be multiple eigenvalues $\lambda$ for which the above equation holds. In practice, the largest eigenvalue is used because it captures the most significant mode of influence propagation in the network.
 
 
-## Key Points
+## Key Points on Eigenvector Centrality
 
 - **Eigenvector**: The vector $\mathbf{x}$ represents the centrality scores.
 - **Largest Eigenvalue**: The centrality scores are derived from the eigenvector corresponding to the largest eigenvalue of the adjacency matrix.
 - **Perron-Frobenius Theorem**: For a connected graph, the largest eigenvalue is positive, and the corresponding eigenvector has all positive entries, ensuring meaningful centrality scores.
 
+---
 
 ```{python}
 Gk = nx.karate_club_graph()
@@ -463,6 +465,7 @@ The goal of a min $s$-$t$ cut is to partition the graph into two disjoint subset
     
 ![](figs/L23-max-flow-soviet-rail-1955.png){fig-align="center" width="75%"}
     
+---
 
 ::: aside
 For an interesting historical perspective on the min-cut problem and its relation to the Cold War, see
@@ -482,6 +485,8 @@ $$
 This is a very famous problem that can be solved in time that is polynomial in the number of nodes $|V|$ and edges $|E|$. 
 
 Increasingly better solutions have been found over the past 60+ years.  
+
+---
 
 What can a min $s$-$t$ cut tell us about a graph?
 
@@ -504,6 +509,8 @@ nx.draw_networkx(G, pos=pos,
 plt.axis('off')
 plt.show()
 ```
+
+---
 
 As mentioned, when Wayne Zachary studied the club, a conflict arose between the instructor and the president (nodes 0 and 33, respectively).  
 
@@ -533,8 +540,10 @@ Rather, we may want to simply find the *minimal* way to disconnect the graph.
 
 Clearly, we can do this using an $s$-$t$ min cut, by simply trying all $s$ and $t$ pairs.
 
-~[](figs/L23-min-cut.png){width="35%"}
+![](figs/L23-min-cut.png){width="35%"}
     
+---
+
 Let's try this approach of finding the minimum $s-t$ cut over all possibilities in the karate club graph.
 
 ```{python}
@@ -578,6 +587,8 @@ $$
 
 The idea is that finding $\alpha(G)$ gives a _balanced cut_ -- one that maximizes the number of disconnected nodes per edge removed.
 
+---
+
 Unfortunately, this is a challenging problem that is not computable in polynomial time.
 
 However, we can make good approximations, which we'll look at now.
@@ -605,6 +616,8 @@ $$
 L = D - A.
 $$
 
+---
+
 Below we show the Laplacian matrix $L$ for the karate club network as a heatmap.
 
 ```{python}
@@ -620,18 +633,14 @@ Now let us think about an $n$-component vector $\mathbf{x} \in \mathbb{R}^n$ as 
 
 For example, $\mathbf{x}$ could encode node *importance* or *strength* or even a more concrete notion like *temperature* or *altitude*.
 
+---
+
 Here is an amazing fact about the Laplacian of $G$.
     
 The quadratic form
 
 $$
-\mathbf{x}^TL\mathbf{x}
-$$
-
-is exactly the same as
-
-$$
-\sum_{(i,j)\in E} (x_i - x_j)^2.
+\mathbf{x}^TL\mathbf{x} = \sum_{(i,j)\in E} (x_i - x_j)^2.
 $$
 
 ::: {.content-visible when-profile="web"}
@@ -652,9 +661,9 @@ $$\sum_{(i,j)\in E} (x_i - x_j)^2 = \sum_{(i,j)\in E} x_i^2 - 2x_ix_j + x_j^2, $
 we have the same set of terms in the sum. 
 :::
 
-That is, the quadratic form $ \mathbf{x}^TL\mathbf{x}$ is the sum of squared differences of $\mathbf{x}$ __over the edges in $G$.__
+In words, $\mathbf{x}^TL\mathbf{x}$ is the sum of squared differences of $\mathbf{x}$ __over the edges in $G$.__
 
-This tells us wwhen nodes have values in $\mathbf{x}$, how much __adjacent__ nodes vary.
+---
 
 Now, let's think about vectors $\mathbf{x}$ that __minimize__ the differences over the edges in the graph.
 
@@ -668,13 +677,13 @@ $$
 
 We constrain $\mathbf{x}$ to have a nonzero norm, otherwise $\mathbf{x} = \mathbf{0}$ would be a trivial solution.
 
+---
+
 We can express this in terms of the graph Laplacian:
 
 $$
 \min_{\Vert \mathbf{x}\Vert = 1}\sum_{(i,j)\in E} (x_i - x_j)^2 = \min_{\Vert \mathbf{x}\Vert = 1} \mathbf{x}^TL\mathbf{x}.
 $$
-
-We already know how to solve this constrained minimization problem.
 
 From linear algebra, we know that when
 
@@ -684,7 +693,9 @@ $$
 
 then $\lambda$ is the __smallest eigenvalue of $L$__ and $\mathbf{x}$ is the corresponding eigenvector.
 
-So ... we are connecting functions on the graph $G$ with eigenvectors of the matrix $L$. This is quite remarkable.
+We are connecting functions on the graph $G$ with eigenvectors of the matrix $L$. This is quite remarkable.
+
+---
 
 What do we know about $L$?
 
@@ -700,6 +711,8 @@ Consider $ \sum_{(i,j)\in E} (x_i - x_j)^2.$  This is always a nonnegative quant
 
 As a result, $\mathbf{x}^T L\mathbf{x} \geq 0$ for all $\mathbf{x}$.
 :::
+
+---
 
 Assume that $G$ is connected.
 
@@ -723,11 +736,11 @@ $$
 \lambda_2 = \min_{\Vert \mathbf{x}\Vert = 1, \;\mathbf{x}\perp {\mathbf 1}} \mathbf{x}^TL\mathbf{x}.
 $$
 
-Another way of saying that $\mathbf{x} \perp {\mathbf 1}$ is that the entries of $\mathbf{x}$ sum to 0.
+Note that $\mathbf{x} \perp {\mathbf 1}$ implies that $\mathbf{x}$ is __mean-centered__.
 
-In other words, $\mathbf{x}$ is __mean-centered__ or __zero-mean.__
+## Fiedler Vector
 
-The corresponding eigenvector is called the __Fiedler vector.__
+The corresponding eigenvector to $\lambda_2$ is called the __Fiedler vector.__
 
 It minimizes
 
@@ -737,7 +750,9 @@ $$
 
 If we think of $x_i$ as a 1-D coordinate for node $i$ in the graph, then choosing $\mathbf{x} = \mathbf{w}_2$ (the eigenvector corresponding to $\lambda_2$) puts each node in a position that minimizes the sum of the squared stretching of each edge.
 
-Recall that the energy in a stretched spring is proportional to the square of its stretched length.  
+---
+
+Recall from physics that the energy in a stretched spring is proportional to the square of its stretched length.  
 
 If we use the entries in $\mathbf{w}_2$ to position the nodes of the graph along a single dimension, then using the Fiedler vector $\mathbf{w}_2$ for node coordinates is __exactly the spring layout__ of nodes that we discussed in the last lecture -- __except that it is in one dimension only.__
 
@@ -750,6 +765,9 @@ $\mathbf{w}_3$ is the eigenvector corresponding to
 $$
 \lambda_3 = \min_{\Vert \mathbf{x}\Vert = 1, \;\mathbf{x}\perp \{\mathbf{1}, \mathbf{w}_2\}} \mathbf{x}^TL\mathbf{x}.
 $$
+
+
+---
 
 Let's look again at layouts for the football network.
 
@@ -799,6 +817,8 @@ If $\mathbf{w}_2$ is the Fiedler vector, then split nodes according to a value $
 * sign: separate positive and negative vaues ($s = 0$)
 * gap: separate according to the largest gap in the values of $\mathbf{w}_2$
 
+---
+
 Here is a spectral parititioning for the karate club graph.
 
 ```{python}
@@ -827,6 +847,8 @@ In many cases we would like to move beyond graph partitioning, to allow for clus
 The idea of spectral clustering takes the observations about the Fiedler vector and extends them to more than one dimension.
 
 Let's look again at the spectral layout of the football dataset.  
+
+---
 
 Here we've labelled the nodes according to their conference, which we will think of as ground-truth labels.
 
@@ -859,6 +881,8 @@ plt.axis('off')
 plt.show()
 ```
 
+---
+
 Now, the key idea is that using the spectral layout, we have placed nodes into a Euclidean space.
 
 This means we could use a __standard clustering algorithm__ in that space.
@@ -878,6 +902,8 @@ plt.legend(handles = patches)
 plt.show()
 ```
 
+---
+
 This plot shows that many clusters are well-separated in this space, but some are still overlap.
 
 To address this, we can use additional eigenvectors of the Laplacian, i.e., $\mathbf{w}_4, \mathbf{w}_5, \dots$.
@@ -887,6 +913,8 @@ The idea of spectral clustering is:
 * use enough of the smallest eigenvectors of $L$ to sufficiently "spread out" the nodes,
 * cluster the nodes in the Euclidean space created by this embedding.
 
+---
+
 More specifically, given a graph $G$:
 
 * Compute $L$, the Laplacian of $G$
@@ -894,6 +922,8 @@ More specifically, given a graph $G$:
 * Let $U \in \mathbb{R}^{n\times d}$ be the matrix containing the eigenvectors $\mathbf{w}_2, \mathbf{w}_3, \dots, \mathbf{w}_{d+1}$ as columns
 * Let the position of each node $i$ be the point in $\mathbb{R}^d$ given by row $i$ of $U$
 * Cluster the points into $k$ clusters using $k$-means
+
+---
 
 Let's explore the results of spectral clustering using $d = 2$ dimensions.
 
@@ -955,11 +985,15 @@ plt.legend(handles = patches, loc='center left', bbox_to_anchor=(1, 0.5))
 plt.show()
 ```
 
+---
+
 This is pretty good, but we can see that in some cases the clustering is not able to separate clusters that overlap in the visualization.
 
 Which makes sense, as for the case $d = 2$, we are running $k$-means on the points just as we see them in the visualization.
 
 Let's try $d = 3$.   Now there will be another dimension available to the clustering, which we can't see in the visualization.
+
+---
 
 ```{python}
 # Here is a complete example of spectral clustering
@@ -1017,11 +1051,15 @@ plt.legend(handles = patches, loc='center left', bbox_to_anchor=(1, 0.5))
 plt.show()
 ```
 
+---
+
 We can see visually that using 3 dimensions is giving us a better clustering than 2 dimensions.
 
 What happens as we increase the dimension further?
 
-To evaluate this question we can use Adjusted Rand Index:
+To evaluate this question we can use Adjusted Rand Index.
+
+## ARI Spectral Clustering
 
 ```{python}
 import sklearn.metrics as metrics
