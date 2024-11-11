@@ -670,6 +670,15 @@ How long is a typical shortest path between nodes?
     
 The average shortest path length between nodes is one way to measure a network's *diameter*.
 
+If $d(i, j)$ represents the shortest path length between nodes (i) and (j), and $n$ is the total number of nodes in the network, the average shortest path length $L$ can be expressed as
+
+$$
+L = \frac{1}{\binom{N}{2}} \sum_{i \neq j} d(i, j).
+$$
+
+In this formula $\binom{N}{2}$ is the number of unique pairs of nodes.
+The sum $\sum_{i \neq j} d(i, j)$ is taken over all pairs of nodes (i) and (j).
+
 ---
 
 Let's consider a highly clustered graph.
@@ -678,9 +687,7 @@ Let's consider a highly clustered graph.
 
 In this graph, each node has 4 neighbors. This means there are $\binom{4}{2} = 6$ possible pairs of neighbors. Of these 6 neighbors, 3 are connected, yielding a clustering coefficient of 0.5. This is quite high.
 
-What is the average shortest path between nodes?   
-
-It seems to be around $n/8$. On average you go 1/4 of the way around the circle, in hops of 2. 
+This is an example of a ring lattice network with 4 vertices. The average shortest path between nodes in such graphs is approximately $n/8$. On average you go 1/4 of the way around the circle, in hops of 2. 
 
 In this example, the path length grows linearly with $n$. 
 
