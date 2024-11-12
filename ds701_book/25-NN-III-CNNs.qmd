@@ -1035,7 +1035,9 @@ with torch.no_grad():
         images, labels = data
         # calculate outputs by running images through the network
         outputs = net(images)
+
         # the class with the highest energy is what we choose as prediction
+        # here, we throw away the max value and just keep the class index
         _, predicted = torch.max(outputs.data, 1)
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
