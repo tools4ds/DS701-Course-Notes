@@ -545,7 +545,7 @@ To capture such high-variable degree distributions, a common strategy is to plot
 On log-log axes, a Pareto distribution appears as a straight line. You can verify this yourselves by computing
 
 $$
-\log(p(x)) = \log(\alpha x_{\mathrm{m}}^{\alpha}) - (\alpha + 1) \log(x).
+\log(p(x)) = \log(\alpha k^{\alpha}) - (\alpha + 1) \log(x).
 $$
 
 ```{python}
@@ -576,7 +576,7 @@ plt.show()
 
 ## Power Law Degree Distributions are Ubiquitous
 
-![](figs/L21-newman-powerlaws.png){fig-align=center width=40%}
+![](figs/L21-newman-powerlaws.png){fig-align=center width=65%}
 
 ---
 
