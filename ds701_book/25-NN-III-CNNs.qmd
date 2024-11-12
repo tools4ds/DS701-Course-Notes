@@ -856,7 +856,7 @@ over hilly terrains and valleys to find the global minimum.
 In gradient descent, the weight update rule with momentum is given by:
 
 $$ 
-m_{t+1} = \beta m_t + \eta \nabla J(w),
+m_{t+1} = \beta m_t + \eta \nabla J(w_t),
 $$
 
 $$
