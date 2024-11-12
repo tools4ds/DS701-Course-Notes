@@ -431,7 +431,23 @@ The $G(n, p)$ random graph model is very simple
 * we start with a set of $n$ nodes,
 * for each pair of nodes, we connect them with probability $p$.
 
-In this graph, the average node degree is $np$.
+## Average Node Degree of a Random Graph
+
+Every node is potentially connected to $n-1$ other nodes.
+
+Therefore, the expected degree, call it $\langle k \rangle$, of a node is given by:
+
+$$
+\langle k \rangle = p \cdot (n - 1)
+$$
+
+For large $n$, this can be approximated as:
+
+$$
+\langle k \rangle \approx np
+$$
+
+So for random graphs, the average node degree is $np$.
 
 ---
 
@@ -477,7 +493,8 @@ $$ P(X > x) =
 \begin{cases} 
 \left(\frac{k}{x}\right)^{\alpha} & k \geq x, \\
 1 & x < k 
-\end{cases}$$
+\end{cases}
+$$
 
 We introduced the Pareto distribution the [Probability and Statistics Refresher](03-Probability-and-Statistics-Refresher.qmd).
 
@@ -632,7 +649,9 @@ plt.axis('off')
 plt.show()
 ```
 
-The clustering coefficient $C^{(1)} = \frac{3}{1 + 1 + 6} = \frac{3}{8} = 0.375.$
+The clustering coefficient $C^{(1)} = \frac{3}{1 + 1 + \binom{4}{2}} = \frac{3}{1 + 1 + 6} = \frac{3}{8} = 0.375$, 
+
+where $\binom{4}{2} = \frac{4!}{2!(4-2)!}.$
 
 ---
 
@@ -685,20 +704,26 @@ Let's consider a highly clustered graph.
 
 ![](figs/L21-high-clustering.png){fig-align=center width=300px}
 
+
 In this graph, each node has 4 neighbors. This means there are $\binom{4}{2} = 6$ possible pairs of neighbors. Of these 6 neighbors, 3 are connected, yielding a clustering coefficient of 0.5. This is quite high.
 
+:::: {.fragment}
 This is an example of a ring lattice network with 4 vertices. The average shortest path between nodes in such graphs is approximately $n/8$. On average you go 1/4 of the way around the circle, in hops of 2. 
+::::
 
-In this example, the path length grows linearly with $n$. 
-
-In this example, __if the number of nodes is large, the average path length is large.__
+:::: {.fragment}
+In this example, the path length grows linearly with $n$ and __if the number of nodes is large, the average path length is large.__
+::::
 
 ---
 
 Real-world social networks are highly clustered. Based on this model, we might assume that the average path length between two people in a large social network is going to be quite large. Is this really true?
 
+:::: {.fragment}
 If you choose two people at random from the population of the United States, is the shortest path length between them long?
+::::
 
+:::: {.fragment}
 In 1967 the social psychologist Stanley Milgram set out to empirically answer this question.
 
 :::: {.columns}
@@ -715,8 +740,11 @@ The rules that he set were that they could only pass the letter between friends 
 Surprisingly, 62 of the letters made it to the stockbroker!
 :::
 ::::
+::::
 
+:::: {.fragment}
 More surprising was the fact that the __average path length was 6.2 people!__
+::::
 
 ---
 
