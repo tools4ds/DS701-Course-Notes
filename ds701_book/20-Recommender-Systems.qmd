@@ -3,7 +3,7 @@ title: Recommender Systems
 jupyter: python3
 ---
 
-## Introduction
+# Introduction
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/20-Recommender-Systems.ipynb)
 
@@ -52,12 +52,17 @@ In these systems content was exploding and users were having a hard time finding
 
 Users wanted recommendations.
 
+---
+
 Over time, the problem has only gotten worse:
 
 ![](figs/L20-netflix-options.png){fig-align="center"}
 
+---
+
 ![](figs/L20-amazon-options.png){fig-align="center"}
 
+---
 
 An enormous need has emerged for systems to help sort through products, services, and content items.
 
@@ -74,11 +79,13 @@ Some examples:
 * Priority inbox & spam filtering (Google)
 * Online dating (OK Cupid)
 
+---
+
 A more formal view:
     
 * User - requests content
 * Objects - that can be displayed
-* Context - device, location, time
+* Context - device, location, time, history
 * Interface - browser, mobile
 
 ![](figs/L20-recsys-abstractly.png){fig-align="center"}
@@ -94,6 +101,8 @@ systems did not work very well.
 ::: aside
 A very interesting article about the earliest personalization systems is [User Modeling via Stereotypes](https://www.cs.utexas.edu/users/ear/CogSci.pdf) by Elaine Rich, dating from 1979.
 :::
+
+---
 
 Instead, modern systems work by capturing user's opinions about __specific__ items.
 
@@ -125,6 +134,12 @@ modeling the evolution of user expertise through online reviews," by J. McAuley
 and J. Leskovec. WWW, 2013
 :::
 
+---
+
+Example: Let's look at a dataset for testing recommender systems consisting of Amazon movie reviews:
+
+We'll download a compressed pickle file containing the data if it is not already present:
+
 ```{python}
 # This is a 647 MB file, delete it after use
 import gdown
@@ -135,6 +150,8 @@ import os.path
 if not os.path.exists(pickle_output):
     gdown.download(url, pickle_output)
 ```
+
+We'll load the data into a pandas DataFrame:
 
 ```{python}
 import gzip
@@ -147,33 +164,52 @@ elapsed_time = time.time() - start_time
 print(f"Elapsed read time: {elapsed_time:.2f} seconds")
 ```
 
+Run `df.info()` to see the column names and data types.
+
 ```{python}
+df.info()
+```
+
+It looks like the `Id` column can be used as the dataframe index.
+
+```{.python}
+df = df.set_index("Id")
+df.info()
+```
+---
+
+Now we can count the number of users and movies:
+
+```{python}
+from IPython.display import display, Markdown
+
 n_users = df["UserId"].unique().shape[0]
 n_movies = df["ProductId"].unique().shape[0]
 n_reviews = len(df)
-print(f'There are {n_reviews} reviews, {n_movies} movies and {n_users} users.')
-print(f'There are {n_users * n_movies} potential reviews, meaning sparsity of {(n_reviews/(n_users * n_movies)):0.4%}')
+display(Markdown(f'There are:\n'))
+display(Markdown(f'* {n_reviews:,} reviews\n* {n_movies:,} movies\n* {n_users:,} users'))
+
+display(Markdown(f'There are {n_users * n_movies:,} potential reviews, meaning sparsity of {(n_reviews/(n_users * n_movies)):0.4%}'))
 ```
 
-__Reviews are Sparse.__
+where
 
-Example: A commonly used dataset for testing consists of Amazon movie reviews:
+$$
+\text{sparsity} 
+= \frac{\text{\# of reviews}}{\text{\# of users} \times \text{\# of movies}}
+= \frac{\text{\# of reviews}}{\text{\# of potential reviews}}
+$$
 
-* 1,697,533 reviews
-* 123,960 users
-* 50,052 movies
-
-Notice that there are 6,204,445,920 __potential__ reviews, but we only have 
-1,697,533 __actual__ reviews.
+## Reviews are Sparse
 
 Only 0.02% of the reviews are available -- 99.98% of the reviews are missing.
 
 ```{python}
-print(f'There are on average {n_reviews/n_movies:0.1f} reviews per movie' +
-     f' and {n_reviews/n_users:0.1f} reviews per user')
+display(Markdown(f'There are on average {n_reviews/n_movies:0.1f} reviews per movie' +
+     f' and {n_reviews/n_users:0.1f} reviews per user'))
 ```
 
-__Sparseness is skewed.__
+## Sparseness is Skewed
 
 Although on average a movie receives 34 reviews, __almost all movies have even
 fewer reviews.__
@@ -181,44 +217,64 @@ fewer reviews.__
 ```{python}
 reviews_per_movie = df.groupby('ProductId').count()['Id'].values
 frac_below_mean = np.sum(reviews_per_movie < (n_reviews/n_movies))/len(reviews_per_movie)
-plt.plot(sorted(reviews_per_movie), '.-')
+plt.plot(sorted(reviews_per_movie, reverse=True), '.-')
 xmin, xmax, ymin, ymax = plt.axis()
 plt.hlines(n_reviews/n_movies, xmin, xmax, 'r', lw = 3)
 plt.ylabel('Number of Ratings', fontsize = 14)
 plt.xlabel('Movie', fontsize = 14)
+plt.legend(['Number of Ratings', 'Average Number of Ratings'], fontsize = 14)
 plt.title(f'Amazon Movie Reviews\nNumber of Ratings Per Movie\n' +
           f'{frac_below_mean:0.0%} of Movies Below Average', fontsize = 16);
 ```
+
+---
 
 Likewise, although the average user writes 14 reviews, almost all users write even fewer reviews.
 
 ```{python}
 reviews_per_user = df.groupby('UserId').count()['Id'].values
 frac_below_mean = np.sum(reviews_per_user < (n_reviews/n_users))/len(reviews_per_user)
-plt.plot(sorted(reviews_per_user), '.-')
+plt.plot(sorted(reviews_per_user, reverse=True), '.-')
 xmin, xmax, ymin, ymax = plt.axis()
 plt.hlines(n_reviews/n_users, xmin, xmax, 'r', lw = 3)
 plt.ylabel('Number of Ratings', fontsize = 14)
 plt.xlabel('User', fontsize = 14)
+plt.legend(['Number of Ratings', 'Average Number of Ratings'], fontsize = 14)
 plt.title(f'Amazon Movie Reviews\nNumber of Ratings Per User\n' +
           f'{frac_below_mean:0.0%} of Users Below Average', fontsize = 16);
 ```
 
+## Objective Function
+
+Ultimately, our goal is to predict the rating that a user would give to an item.
+
+For that, we need to define a loss or objective function.
+
 A typical objective function is root mean square error (RMSE)
 
 $$ 
-\text{RMSE} = \sqrt{1/|S| \sum_{(i,u)\in S} (\hat{r}_{ui} - r_{ui})^2} 
+\text{RMSE} = \sqrt{\frac{1}{|S|} \sum_{(i,u)\in S} (\hat{r}_{ui} - r_{ui})^2} 
 $$
 
-where $r_{ui}$ is the rating that user $u$ gives to item $i$, and $S$ is the set of all ratings.
+where 
+
+* $r_{ui}$ is the rating that 
+* user $u$ gives to 
+* item $i$, and 
+* $S$ is the set of all ratings.
+
+---
 
 OK, now we know the problem and the data available.   How can we address the problem?
 
 The earliest method developed is called __collaborative filtering.__
 
+# Colaborative Filtering
+
 ## Collaborative Filtering
 
-The central idea of collaborative filtering is that the set of known recommendations can be considered to be a __bipartite graph.__
+The central idea of collaborative filtering is that the set of known 
+recommendations can be considered to be a __bipartite graph.__
 
 ![](figs/L20-bipartite.png){width="35%" fig-align="center"}
 
@@ -226,42 +282,62 @@ The nodes of the bipartite graph are __users__ and __items__.
 
 Each edge corresponds to a known rating $r_{ui}.$
 
+---
+
 Then recommendations are formed by traversing or processing the bipartite graph.
 
 ![](figs/L20-cf-basic-idea.png){width="60%" fig-align="center"}
 
-There are at least two ways this graph can be used.
+There are at least two ways this graph can be used. 
 
-To form a rating for item $(u, i)$: 
-    
-1. Using user-user similarity:
+---
+
+Two ways to form a rating for item $(u, i)$: 
+
+:::: {.fragment}
+1. Using **user-user similarity**:
       * look at users that have similar item preferences to user $u$
       * look at how those users rated item $i$
-      
-Good for many users, fewer items
+::::  
 
-    
-2. Using item-item similarity:
+:::: {.fragment}
+⟹ <span style="background-color: yellow;">Good for many users, fewer items</span>
+::::
+
+:::: {.fragment}
+2. Using **item-item similarity**:
       * look at other items that have been liked by similar users as item $i$
       * look at how user $u$ rated those items
+::::
       
-Good for many items, fewer users
+:::: {.fragment}
+⟹ <span style="background-color: yellow;">Good for many items, fewer users</span>
+::::
 
-### Item-item CF
+## Item-Item CF
 
-Let's look at the item-item CF approach in detail.
+For item-item similarity, we'll look at **item-item Collaborative Filtering (CF).**
 
 The questions are:
+
+::: {.incremental}
 * How do we judge "similarity" of items?
 * How do we form a predicted rating?
+:::
+
+---
 
 Here is another view of the ratings graph, this time as a matrix that includes missing entries:
 
 ![](figs/L20-u-u-cf-1.png){width="60%" fig-align="center"}
 
+---
+
 Let's say we want to predict the value of this unknown rating:
 
 ![](figs/L20-u-u-cf-2.png){width="60%" fig-align="center"}
+
+---
 
 We'll consider two other items, namely items 3 and 6 (for example).
 
@@ -269,6 +345,13 @@ Note that we are only interested in items that this user has rated.
 
 ![](figs/L20-u-u-cf-3.png){width="60%" fig-align="center"}
 
+---
+
+:::: {.columns}
+::: {.column width="50%"}
+![](figs/L20-u-u-cf-3.png){width="100%" fig-align="center"}
+:::
+::: {.column width="50%"}
 We will discuss strategies for assessing similarity shortly. 
 
 How did we choose these two items?   
@@ -285,25 +368,30 @@ $$
 s_{16} = 0.3 
 $$
 
-![](figs/L20-u-u-cf-3.png){width="60%" fig-align="center"}
+:::
+::::
+
+---
 
 These similarity scores tell us how much weight to put on the rating of the other items.
 
+![](figs/L20-u-u-cf-4.png){width="50%" fig-align="center"}
+
 So we can form a prediction of $\hat{r}_{15}$ as:
-    
+  
 $$
 \hat{r}_{15} = \frac{s_{13} \cdot r_{35} + s_{16} \cdot r_{65}}{s_{13} + s_{16}} = \frac{0.2 \cdot 2 + 0.3 \cdot 3}{0.2 + 0.3} = 2.6 
 $$
 
-![](figs/L20-u-u-cf-4.png){width="60%" fig-align="center"}
-
-### Similarity
+## Similarity
 
 How should we assess similarity of items?
 
-A reasonable approach is to consider items similar if their ratings are __correlated.__
+A reasonable approach is to consider items similar if their ratings are
+__correlated__, for example using the Pearson correlation coefficient
+$r$[^pearson].
 
-So we can use the Pearson correlation coefficient $r$.
+[^pearson]: See this part of the Course Notes for the definition of Pearson correlation coefficient.
 
 However, note that two items will not have ratings in the same positions.
 
@@ -311,17 +399,87 @@ However, note that two items will not have ratings in the same positions.
 
 So we want to compute correlation only over the users who rated both the items.
 
+## Example
+
+::: {.content-visible when-profile="slides"}
+![](figs/L20-corr-support.png){width="60%" fig-align="center"}
+:::
+
+Let's compute the Pearson correlation coefficient for the following two items:
+
+```{python}
+import numpy as np
+from IPython.display import display, Markdown
+
+ratings_item_i = [1, np.nan, np.nan, 5, 5, 3, np.nan, np.nan, np.nan, 4, 2, np.nan, np.nan, np.nan, np.nan, 4, np.nan, 5, 4, 1, np.nan]
+ratings_item_j = [np.nan, np.nan, 4, 2, 5, np.nan, np.nan, 1, 2, 5, np.nan, np.nan, 2, np.nan, np.nan, 3, np.nan, np.nan, np.nan, 5, 4]
+
+display(Markdown(f'Ratings for item $i$:\n{ratings_item_i}'))
+display(Markdown(f'Ratings for item $j$:\n{ratings_item_j}'))
+```
+
+Let's drop the non-common ratings:
+
+```{python}
+# Create new lists where only numbers are kept that are not np.nan in both lists
+filtered_ratings_item_i = [rating_i for rating_i, rating_j in zip(ratings_item_i, ratings_item_j) if not np.isnan(rating_i) and not np.isnan(rating_j)]
+filtered_ratings_item_j = [rating_j for rating_i, rating_j in zip(ratings_item_i, ratings_item_j) if not np.isnan(rating_i) and not np.isnan(rating_j)]
+
+display(Markdown(f'Common ratings for item $i$: {filtered_ratings_item_i}'))
+display(Markdown(f'Common ratings for item $j$: {filtered_ratings_item_j}'))
+```
+
+Now we can compute the Pearson correlation coefficient:
+
+```{python}
+display(Markdown(f'Pearson correlation coefficient: {np.corrcoef(filtered_ratings_item_i, filtered_ratings_item_j)[0, 1]:0.2f}'))
+```
+
+::: {.content-visible when-profile="web"}
+## Pearson Correlation Coefficient
+
+The Pearson correlation coefficient, often denoted as $r$, is a measure of the
+linear correlation between two variables $X$ and $Y$. It quantifies the degree
+to which a linear relationship exists between the variables. The value of $r$
+ranges from -1 to 1, where:
+
+- $r = 1$ indicates a perfect positive linear relationship,
+- $r = -1$ indicates a perfect negative linear relationship,
+- $r = 0$ indicates no linear relationship.
+
+The formula for the Pearson correlation coefficient is:
+
+$$
+r = \frac{\sum (X_i - \bar{X})(Y_i - \bar{Y})}{\sqrt{\sum (X_i - \bar{X})^2 \sum (Y_i - \bar{Y})^2}}
+$$
+
+Where:
+- $X_i$ and $Y_i$ are the individual sample points,
+- $\bar{X}$ and $\bar{Y}$ are the means of the $X$ and $Y$ samples, respectively.
+
+The Pearson correlation coefficient is sensitive to outliers and assumes that the
+relationship between the variables is linear and that the data is normally distributed.
+:::
+
+## Similarity for Binary Data
+
 In some cases we will need to work with binary $r_{ui}$.  
 
 For example, purchase histories on an e-commerce site, or clicks on an ad.
 
-In this case, an appropriate replacement for Pearson $r$ is the Jaccard similarity coefficient.
+In this case, an appropriate replacement for Pearson $r$ is the 
+**Jaccard similarity coefficient** or **Intersection over Union**.
 
-(See the lecture on similarity measures.)
+$$
+J_{Sim}(\mathbf{x}, \mathbf{y}) = \frac{|\mathbf{x} \cap \mathbf{y}|}{|\mathbf{x} \cup \mathbf{y}|}.
+$$
 
-### Improving CF
+(See the lecture on [similarity measures](05-Distances-Timeseries.qmd#norms).)
+
+## Improving CF in the presence of bias
 
 One problem with the story so far arises due to __bias__.
+
 * Some items are significantly higher or lower rated
 * Some users rate substantially higher or lower in general
 
@@ -335,15 +493,30 @@ We need to include
 * Per-item offset
 * Global offset
 
+## Representing biases
+
 Hence we need to form a per-item bias of:
     
 $$ 
 b_{ui} = \mu + \alpha_u + \beta_i 
 $$
 
-where $\alpha_u$ is the per-user offset of user $u$ and $\beta_i$ is the per-item offset of item $i$.
+where 
 
-How can we estimate the $\alpha\textnormal{s}$, the $\beta\textnormal{s}$, and the $\mu\textnormal{s}$?
+* $\alpha_u$ is the per-user offset of user $u$ and 
+* $\beta_i$ is the per-item offset of item $i$.
+
+
+## Estimating biases
+
+::: {.content-visible when-profile="slides"}
+$$ 
+b_{ui} = \mu + \alpha_u + \beta_i 
+$$
+:::
+
+How can we estimate the $\alpha\textnormal{s}$, the $\beta\textnormal{s}$, and
+the $\mu\textnormal{s}$?
 
 Let's assume for a minute that we had a fully-dense matrix of ratings $R$.
 
@@ -359,6 +532,16 @@ $$
 
 Here, $\mathbf{1}$ represents appropriately sized vectors of ones, and $1$ is a matrix of ones.
 
+---
+
+::: {.content-visible when-profile="slides"}
+$$
+\min_{\alpha,\beta,\mu} 
+\Vert R - \mathbf{1}\alpha^T + \beta\mathbf{1}^T + \mu1\Vert^2 
++ \lambda(\Vert\alpha\Vert^2 + \Vert\beta\Vert^2) 
+$$
+:::
+
 While this is not a simple ordinary least squares problem, there is a strategy for solving it.
 
 Assume we hold $\beta\mathbf{1}^T + \mu1$ constant.  
@@ -371,7 +554,9 @@ $$
 
 which (for each column of $R$) is a standard least squares problem (which we solve via Ridge regression).
 
-This sort of problem is called __jointly convex__.   
+---
+
+This sort of problem is called __jointly convex__ in that it is convex in each of the variables $\alpha$, $\beta$, and $\mu$.
 
 The strategy for solving is:
     
@@ -381,9 +566,13 @@ The strategy for solving is:
 
 Each of the three steps will reduce the overall error.   So we iterate over them until convergence.
 
+---
+
 The last issue is that the matrix $R$ is not dense - in reality we only have a small subset of its entries.
 
 We simply need to adapt the least-squares solution to only consider the entries in $R$ that we know.
+
+---
 
 As a result, the actual calculation is:
 
@@ -407,6 +596,8 @@ $$
 
 Step 4: If not converged, go to Step 1.
 
+---
+
 Now that we have the biases learned, we can do a better job of estimating correlation:
 
 $$ 
@@ -419,6 +610,8 @@ where
 * $b_{ui} = \mu + \alpha_u + \beta_i$, and
 * $U(i,j)$ are the users who have rated both $i$ and $j$.
 
+---
+
 And using biases we can also do a better job of estimating ratings:
 
 $$ 
@@ -430,7 +623,7 @@ where
 * $b_{ui} = \mu + \alpha_u + \beta_i$, and
 * $n_k(i, u)$ are the $k$ nearest neighbors to $i$ that were rated by user $u$.
 
-### Assessing CF
+## Assessing CF
 
 This completes the high level view of CF.
 
@@ -449,6 +642,8 @@ Weaknesses:
 * Accuracy can be a problem
 * Scalability can be a problem (think $k$-NN)
 
+# Matrix Factorization
+
 ## Matrix Factorization
 
 Note that standard CF forces us to consider similarity among items, __or__ among
@@ -459,33 +654,44 @@ Can we use both kinds of similarity simultaneously?
 We can't use both the rows and columns of the ratings matrix $R$ at the same
 time -- the user and item vectors live in different vector spaces.
 
+---
+
+:::: {.columns}
+::: {.column width="50%"}
+![](figs/L10-Movie-Latent-Space.png){width="100%" fig-align="center"}
+
+Koren et al, IEEE Computer, 2009 
+:::
+::: {.column width="50%"}
 What we could try to do is find a __single__ vector space in which we represent
 __both__ users __and__ items, along with a similarity function, such that:
 
 * users who have similar item ratings are similar in the vector space
 * items who have similar user ratings are similar in the vector space
 * when a given user highly rates a given item, that user and item are similar in the vector space.
-
-![](figs/L10-Movie-Latent-Space.png){width="60%" fig-align="center"}
-
-Koren et al, IEEE Computer, 2009 
+:::
+::::
 
 We saw this idea previously, in an SVD lecture.
 
-This new vector space is called a __latent__ space,
+This new vector space is called a __latent__ space, and the user and item
+representations are called __latent vectors.__
 
-and the user and item representations are called __latent vectors.__
+---
 
 Now, however, we are working with a matrix which is only __partially observed.__
-
 That is, we only know __some__ of the entries in the ratings matrix.
 
 Nonetheless, we can imagine a situation like this:
 
-![](figs/L20-mf-1.png){width="60%" fig-align="center"}
+![](figs/L20-mf-1.png){.lightbox width="50%" fig-align="center"}
 
-Now we want the product of the two matrices on the right to be as close as 
-possible __to the known values__ of the ratings matrix.
+where we decompose the ratings matrix $R$ into two matrices.
+
+We want the product of the two matrices to be as close as possible 
+__to the known values__ of the ratings matrix.
+
+---
 
 What this setup implies is that our similarity function is the __inner product.__
 
@@ -494,24 +700,41 @@ latent vectors:__
 
 ![](figs/L20-mf-2.png){width="60%" fig-align="center"}
 
-Now $(-2 \cdot -0.5)+(0.3 \cdot 0.6)+(2.5 \cdot 0.5) = 2.43$, so:
+Taking, for example, the 2nd row of "items" and the 5th row of "users"...
+
+---
+
+We have
+
+$$
+(-0.5 \cdot -2)+(0.6 \cdot 0.3)+(0.5 \cdot 2.4) = 2.43,
+$$
+
+so:
 
 ![](figs/L20-mf-3.png){width="60%" fig-align="center"}
 
-### Solving Matrix Factorization
+## Solving Matrix Factorization
 
+:::: {.columns}
+::: {.column width="40%"}
+![](figs/L20-mf-1.png){.lightbox width="100%" fig-align="center"}
+:::
+::: {.column width="60%"}
 Notice that in this case we've decided that the factorization should be rank 3,
 i.e., low-rank.
 
 So we want something like an SVD.
 
 (Recall that SVD gives us the most-accurate-possible low-rank factorization of a matrix).
+:::
+::::
 
 However, we can't use the SVD algorithm directly, because we don't know all the entries in $R$. 
 
-(Indeed, the unseen entries in $R$ as exactly what we want to predict.)
+> Indeed, the unseen entries in $R$ are exactly what we want to predict.
 
-![](figs/L20-mf-1.png){width="60%" fig-align="center"}
+---
 
 Here is what we want to solve: 
     
@@ -519,27 +742,50 @@ $$
 \min_{U,V} \Vert (R - UV^T)_S\Vert^2 + \lambda(\Vert U\Vert^2 + \Vert V\Vert^2) 
 $$
 
-where $R$ is $m\times n$, $U$ is the $m\times k$ items matrix and $V$ is the $n\times k$ users matrix.
+where:
 
-The $(\cdot)_S$ notation means that we are only considering the matrix entries that correspond to known reviews (the set $S$).
+* $R$ is $m\times n$, 
+* $U$ is the $m\times k$ items matrix and 
+* $V$ is the $n\times k$ users matrix.
 
-Note that as usual, we add $\ell_2$ penalization to avoid overfitting (Ridge regression).
+The $(\cdot)_S$ notation means that we are only considering the _subset_ of
+matrix entries that correspond to known reviews (the set $S$).
 
-Once again, this problem is __jointly convex.__   
+Note that as usual, we add $\ell_2$ penalization to avoid overfitting
+(Ridge regression).
+
+---
+
+::: {.content-visible when-profile="slides"}
+$$
+\min_{U,V} \Vert (R - UV^T)_S\Vert^2 + \lambda(\Vert U\Vert^2 + \Vert V\Vert^2) 
+$$
+:::
+
+Once again, this problem is __jointly convex__ in that it is convex in each of the variables $U$ and $V$.
 
 In particular, it we hold either $U$ or $V$ constant, then the result is a simple ridge regression.
 
-So one commonly used algorithm for this problem is called __alternating least squares:__
+---
+
+::: {.content-visible when-profile="slides"}
+$$
+\min_{U,V} \Vert (R - UV^T)_S\Vert^2 + \lambda(\Vert U\Vert^2 + \Vert V\Vert^2) 
+$$
+:::
+
+
+So one commonly used algorithm for this problem is called __alternating least squares (ALS):__
     
 1. Hold $U$ constant, and solve for $V$
 2. Hold $V$ constant, and solve for $U$
 3. If not converged, go to Step 1.
 
-The only thing I've left out at this point is how to deal with the missing entries of $R$.  
+The only thing we've left out at this point is how to deal with the missing entries of $R$.  
 
-It's not hard, but the details aren't that interesting, so I will give you code instead!
+It's not hard, but the details aren't that interesting, so we'll give you code instead!
 
-### ALS in Practice
+## ALS in Practice
 
 The entire Amazon reviews dataset is too large to work with easily, and it is too sparse. 
 
@@ -560,11 +806,12 @@ hi_uids = uids[uids > 50].index
 # reviews that are from these users
 hi_uid_rec = [r in hi_uids for r in df['UserId']]
 
-# reviews that are from those users and for those movies
+# The result is a list of booleans equal to the number of rewviews
+# that are from those dense users and movies
 goodrec = [a and b for a, b in zip(hi_uid_rec, hi_pid_rec)]
 ```
 
-Now we create a matrix from these reviews.
+Now we create a $\textnormal{UserID} \times \textnormal{ProductID}$ matrix from these reviews.
 
 Missing entries will be filled with NaNs.
 
@@ -574,15 +821,26 @@ good_df = dense_df.loc[~df['Score'].isnull()]
 R = good_df.pivot_table(columns = 'ProductId', index = 'UserId', values = 'Score')
 ```
 
+---
+
+And we can look at the matrix:
+
 ```{python}
 R
 ```
 
-```{python}
-import MF as MF
+---
 
-# We are pulling these hyperparameters out of the air;
-# That's not the right way to do it!
+We'll use code from the [Antidote Data Framework](https://github.com/rastegarpanah/antidote-data-framework) to do the matrix factorization and ALS. We have local copies 
+[recommender_MF.py](recommender_MF.py), [recommender_ALS.py](recommender_ALS.py)
+and [recommender_lmafit.py](recommender_lmafit.py) in our repository.
+
+```{python}
+# Import local python package MF.py
+import recommender_MF as MF
+
+# Instantiate the model
+# We are pulling these hyperparameters out of the air -- that's not the right way to do it!
 RS = MF.als_MF(rank = 20, lambda_ = 1)
 ```
 
@@ -594,14 +852,27 @@ RS = MF.als_MF(rank = 20, lambda_ = 1)
 print(f'RMSE on visible entries (training data): {np.sqrt(error/R.count().sum()):0.3f}')
 ```
 
+And we can look at the predicted ratings matrix and see that it is a dense matrix:
+
 ```{python}
 pred
 ```
 
+---
+
 ```{python}
 ## todo: hold out test data, compute oos error
+
+# We create a mask of the known entries, then calculate the indices of the known
+# entries, then split that data into training and test sets.
+
+# Create a mask for the known entries
 RN = ~R.isnull()
+
+# Get the indices of the known entries
 visible = np.where(RN)
+
+# Split the data into training and test sets
 import sklearn.model_selection as model_selection
 X_train, X_test, Y_train, Y_test = model_selection.train_test_split(visible[0], visible[1], test_size = 0.1)
 ```
@@ -615,8 +886,13 @@ And note that this is a subset of the full dataset -- the subset that is "easies
 ```{python}
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import mean_squared_error
+
+# Drop the columns that are not features
 X_train = good_df.drop(columns=['Id', 'ProductId', 'UserId', 'Text', 'Summary'])
+
+# The target is the score
 y_train = good_df['Score']
+
 # Using k-NN on features HelpfulnessNumerator, HelpfulnessDenominator, Score, Time
 model = KNeighborsClassifier(n_neighbors=3).fit(X_train, y_train)
 %time y_hat = model.predict(X_train)
@@ -626,7 +902,7 @@ model = KNeighborsClassifier(n_neighbors=3).fit(X_train, y_train)
 print(f'RMSE on visible entries (test set): {mean_squared_error(y_train, y_hat, squared = False):0.3f}')
 ```
 
-### Assessing MF
+## Assessing Matrix Factorization
 
 Matrix Factorization per se is a good idea.    
 However, many of the improvements we've discussed for CF apply to MF as well.
@@ -644,7 +920,7 @@ $$
 \min_{U, V} \sum_{(u, i)\in S}(r_{ui} - u_u^Tv_i)^2 + \lambda(\Vert U\Vert^2 + \Vert V\Vert^2) 
 $$
 
-__1. Adding Biases__
+## 1. Adding Biases
 
 $$ 
 \min_{U, V} \sum_{(u, i)\in S}(r_{ui} - (\mu + \alpha_u + \beta_i + u_u^Tv_i)^2 
@@ -653,7 +929,7 @@ $$
 
 ![](figs/L20-netflix-1.png){width="70%" fig-align="center"}
 
-__2. Who Rated What?__
+## 2. Who Rated What?
 
 In reality, ratings are not provided __at random.__
 
@@ -663,7 +939,7 @@ Take note of which users rated the same movies (ala CF) and use this information
 
 ![](figs/L20-netflix-3.png){width="70%" fig-align="center"}
 
-__3. Ratings Change Over Time__
+## 3. Ratings Change Over Time
 
 Older movies tend to get higher ratings!
 
@@ -680,6 +956,8 @@ To estimate these billions of parameters, we cannot use alternating least square
 
 We need to use gradient descent (which we will cover in a future lecture).
 
+# Assessing Recommender Systems
+
 ## Assessing Recommender Systems
 
 There are a number of concerns with the widespread use of recommender systems and personalization in society.
@@ -691,6 +969,8 @@ A filter bubble is the tendency for recommender systems to limit the variety of 
 The concern is that a user's past expression of interests will guide the algorithm in continuing to provide "more of the same."
 
 This is believed to increase polarization in society, and to reinforce confirmation bias.
+
+---
 
 Second, recommender systems in modern usage are often tuned to __maximize engagement.__
 
@@ -718,8 +998,10 @@ Ways of addressing these issues can be:
 * via technology
 * via public policy
 
-::: {.callout-note}
-You can read about some of the work done in my group on this topic:
+## BU CS/CDS Research
+
+You can read about some of the work done in Professor Mark Crovella's group on
+this topic:
 
 * [How YouTube Leads Privacy-Seeking Users Away from Reliable Information,](http://www.cs.bu.edu/faculty/crovella/paper-archive/youtube-fairumap20.pdf) 
    Larissa Spinelli and Mark Crovella, _Proceedings of the Workshop on Fairness in User Modeling, Adaptation, and Personalization (FairUMAP)_, 2020.   
@@ -727,7 +1009,6 @@ You can read about some of the work done in my group on this topic:
    _Proceedings of the 9th International ACM Web Science Conference (WebSci)_, 2017.
 * [Fighting Fire with Fire: Using Antidote Data to Improve Polarization and Fairness of Recommender Systems,](http://www.cs.bu.edu/faculty/crovella/paper-archive/wsdm19-antidote-data.pdf)
   Bashir Rastegarpanah, Krishna P. Gummadi and Mark Crovella _Proceedings of WSDM_, 2019.
-:::
 
 ## Recap
 
@@ -739,3 +1020,4 @@ You can read about some of the work done in my group on this topic:
 * Comparison of CF and MF, highlighting their strengths and weaknesses.
 * Overview of advanced techniques used by the Netflix prize-winning team to improve MF accuracy.
 * Discussion on the societal impact of recommender systems, including filter bubbles and engagement maximization.
+
