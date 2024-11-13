@@ -104,7 +104,7 @@ plt.show()
 
 The closeness centrality of a node $i$ is an indicator of the proximity between node $i$ and all the other nodes in the graph.
 
-Let $G$ be a connected graph with $n$ nodes. Let $d(i,j)$ be the shortest path distance between node $i$ and node $j$ in $G$.   
+Let $G=(V, E)$ be a connected graph with $n$ nodes. Let $d(i,j)$ be the shortest path distance between node $i$ and node $j$ in $G$.   
 
 The standard way of formulating closeness centrality is the reciprocal of the total distance to all other nodes
 
@@ -156,6 +156,8 @@ plt.show()
 In this graph, most nodes are close to most other nodes.   
 
 However we can see that some nodes are slightly more central than others.
+
+---
 
 ```{python}
 #| fig-align: center
@@ -254,6 +256,8 @@ We start to see with this metric the *importance* of two or three key members of
 
 Note that many nodes will have a betweenness centrality of zero -- no shortest paths go through them.
 
+---
+
 ```{python}
 plt.figure(figsize = (6, 4))
 plt.hist(cent, bins=np.linspace(0, 1, 30))
@@ -324,6 +328,8 @@ where
 - $\lambda$ is a constant (an eigenvalue). 
 - $A_{ij}$ is the element of the adjacency matrix corresponding to the edge from node $i$ to node $j$.
 
+The above equation says that the importance of node $i$ is proportional to the sum of the other nodes $j$ when $i$ is connected to $j$.
+
 ---
 
 In matrix form, this can be written as
@@ -334,14 +340,17 @@ $$
 
 where $\mathbf{x}$ is the eigenvector corresponding to the the eigenvalue $\lambda$ of the adjacency matrix $\mathbf{A}$. The eigenvector $\mathbf{x}$ gives the centrality scores for all nodes in the network.
 
+::: {.content-visible when-profile="web"}
 In general, there may be multiple eigenvalues $\lambda$ for which the above equation holds. In practice, the largest eigenvalue is used because it captures the most significant mode of influence propagation in the network.
-
+:::
 
 ## Key Points on Eigenvector Centrality
 
 - **Eigenvector**: The vector $\mathbf{x}$ represents the centrality scores.
 - **Largest Eigenvalue**: The centrality scores are derived from the eigenvector corresponding to the largest eigenvalue of the adjacency matrix.
-- **Perron-Frobenius Theorem**: For a connected graph, the largest eigenvalue is positive, and the corresponding eigenvector has all positive entries, ensuring meaningful centrality scores.
+- **Perron-Frobenius Theorem**: For a connected graph, the largest eigenvalue is positive. In addition, there is only 1 corresponding eigenvector with all positive entries.
+
+The [Perron-Frobenius Theorem](https://nhigham.com/2021/07/13/what-is-the-perron-frobenius-theorem/) is an important theoretical tool when working with adjacency matrices, which are by definition nonnegative and positive. 
 
 ---
 
@@ -376,9 +385,12 @@ plt.title('Distribution of Eigenvector Centrality', size = 16)
 plt.show()
 ```
 
+<!-- 
 ## Eigenvector Centrality: Football Dataset
 
 As a more detailed example, we can ask whether this definition of *prestige* applies to NCAA Division 1A football teams, based on who they play against. Remember this data is from 2000.
+
+We can observe that some of the best teams that year, e.g., Wisconsin and Southern California have a large eigenvalue centrality score. It also appears that two of the powerhouse conferences (at that time) the Big 12 and Big 10 have many schools with larger eigenvalue scores.
 
 ```{python}
 # data from http://www-personal.umich.edu/~mejn/netdata/
@@ -411,7 +423,9 @@ plt.axis('off')
 
 # Show the plot
 plt.show()
-```
+``` 
+
+-->
 
 ## Centrality Comparison: Karate Example
 
@@ -441,6 +455,8 @@ axs[1, 0].set_ylabel('Number of Nodes', size = 14)
 plt.show()
 ```
 
+It appears that we have identified the teacher and club president as important nodes based on our centrality measures.
+
 # Clustering and Partitioning
 
 We now turn to the question of finding important __groups__ of nodes.
@@ -459,6 +475,12 @@ Why might we want to cluster graph nodes?
 We'll start with a problem that is fundamental to many other problems in graph analysis. It involves finding the smallest set of edges that, if removed, would disconnect a specified source node (s) from a target node (t) in a graph.
 
 The goal of a min $s$-$t$ cut is to partition the graph into two disjoint subsets such that (s) is in one subset and (t) is in the other, and the total weight (or number) of the edges that need to be removed to achieve this separation is minimized.
+
+::: {.content-visible when-profile="web"}
+Below is a figure depicting a schematic diagram of the railway network of the Western Soviet Union and Eastern European countries. 
+
+This is from a historical analysis paper of Alexander Schrijver in Math Programming, 91: 3, 2002. The idea was to determine a minimum cut, which would best halt the flow of materials in the railway network. 
+:::
 
 <!-- Image credit: On the history of the transportation and maximum flow problems. -->
 <!--     Alexander Schrijver in Math Programming, 91: 3, 2002. -->
@@ -640,8 +662,12 @@ Here is an amazing fact about the Laplacian of $G$.
 The quadratic form
 
 $$
-\mathbf{x}^TL\mathbf{x} = \sum_{(i,j)\in E} (x_i - x_j)^2.
+\mathbf{x}^TL\mathbf{x} = \sum_{(i,j)\in E} (x_i - x_j)^2,
 $$
+
+i.e., $\mathbf{x}^TL\mathbf{x}$ is the sum of squared differences of $\mathbf{x}$ __over the edges in $G$.__
+
+A proof of this is given in the web notes.
 
 ::: {.content-visible when-profile="web"}
 To see that 
@@ -660,8 +686,6 @@ $$\sum_{(i,j)\in E} (x_i - x_j)^2 = \sum_{(i,j)\in E} x_i^2 - 2x_ix_j + x_j^2, $
 
 we have the same set of terms in the sum. 
 :::
-
-In words, $\mathbf{x}^TL\mathbf{x}$ is the sum of squared differences of $\mathbf{x}$ __over the edges in $G$.__
 
 ---
 
@@ -707,7 +731,7 @@ We can order the eigenvalues from largest to smallest $\lambda_n  \geq \dots \ge
 ::: {.content-visible when-profile="web"}
 How do we know that $L$ is positive semidefinite?
 
-Consider $ \sum_{(i,j)\in E} (x_i - x_j)^2.$  This is always a nonnegative quantity.
+Consider $\sum_{(i,j)\in E} (x_i - x_j)^2.$  This is always a nonnegative quantity.
 
 As a result, $\mathbf{x}^T L\mathbf{x} \geq 0$ for all $\mathbf{x}$.
 :::
@@ -904,7 +928,7 @@ plt.show()
 
 ---
 
-This plot shows that many clusters are well-separated in this space, but some are still overlap.
+This plot shows that many clusters are well-separated in this space, but some still overlap.
 
 To address this, we can use additional eigenvectors of the Laplacian, i.e., $\mathbf{w}_4, \mathbf{w}_5, \dots$.
 
