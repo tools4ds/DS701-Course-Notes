@@ -340,10 +340,23 @@ $$
 
 where $\mathbf{x}$ is the eigenvector corresponding to the the eigenvalue $\lambda$ of the adjacency matrix $\mathbf{A}$. The eigenvector $\mathbf{x}$ gives the centrality scores for all nodes in the network.
 
+Geometrically
+
 ::: {.content-visible when-profile="web"}
 In general, there may be multiple eigenvalues $\lambda$ for which the above equation holds. In practice, the largest eigenvalue is used because it captures the most significant mode of influence propagation in the network.
 :::
 
+## Geometric Intuition
+
+- **Eigenvector as a direction**:
+    - The eigenvector is a direction in the network space. Applying the adjacency matrix (representing connections between nodes) to this vector, *stretches* the vector along that direction. The amount of stretch is determined by the eigenvalue. 
+ 
+- **High centrality, high stretch**:
+    - A node with a large eigenvector centrality corresponds to an eigenvector that experiences a large *stretch* when transformed by the adjacency matrix. This indicates that it is connected to many other nodes that are also considered high-status. 
+ 
+- **No direction change**:
+    - The eigenvector doesn't change its direction when transformed, only its magnitude. This means that a node with a high eigenvector centrality remains relatively *central* even when considering its connections to other central nodes. 
+ 
 ## Key Points on Eigenvector Centrality
 
 - **Eigenvector**: The vector $\mathbf{x}$ represents the centrality scores.
