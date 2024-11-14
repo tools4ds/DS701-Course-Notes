@@ -487,14 +487,49 @@ We typically focus our attention on large values of $x$ -- nodes that are highly
 
 It's common for a degree distribution to __approximately__ follow a power-law.
 
-The simplest power-law distribution is called the Pareto distribution. If X is a random variable with a Pareto distribution, then the probability that X is greater than some number x.
+The simplest power-law distribution is called the Pareto distribution. If X is a
+random variable with a Pareto distribution, then the probability that X is 
+greater than some number $x$ is given by:
 
 $$ P(X > x) =
 \begin{cases} 
-\left(\frac{k}{x}\right)^{\alpha} & k \geq x, \\
+\left(\frac{k}{x}\right)^{\alpha} & x \geq k, \\
 1 & x < k 
 \end{cases}
 $$
+
+where $k$ is the minimum value of $X$, sometimes called the __scale parameter__,
+and $\alpha$ is the exponent, sometimes called the __shape parameter__.
+
+Here is a plot for different values of $\alpha$ and $k=1$.
+
+```{python}
+#| fig-align: center
+
+# Define the range of x values
+x = np.linspace(0, 20, 1000)
+
+# Define the Pareto distribution function for P(X > x)
+def pareto_cdf_complement(x, alpha, k=1):
+    return np.where(x >= k, (k / x)**alpha, 1)
+
+# Plot the Pareto distribution for alpha values 1, 2, and 3
+alphas = [1, 2, 3]
+for alpha in alphas:
+    plt.plot(x, pareto_cdf_complement(x, alpha), label=f'$\\alpha={alpha}$')
+
+# Add title and labels
+plt.title('$P(X > x)$ for Pareto Distribution with $k=5$')
+plt.xlabel('x')
+plt.ylabel('$P(X > x)$')
+
+# Add legend
+plt.legend()
+
+# Show the plot
+plt.show()
+
+```
 
 We introduced the Pareto distribution the [Probability and Statistics Refresher](03-Probability-and-Statistics-Refresher.qmd).
 
@@ -510,7 +545,7 @@ p(x) =
 \end{cases}
 $$
 
-Here is a plot of the Pareto probability density function for different values of $\alpha$.
+Here is a plot of the Pareto probability density function for different values of $\alpha$ and $k=1$.
 
 ```{python}
 #| fig-align: center
@@ -692,11 +727,11 @@ The average shortest path length between nodes is one way to measure a network's
 If $d(i, j)$ represents the shortest path length between nodes (i) and (j), and $n$ is the total number of nodes in the network, the average shortest path length $L$ can be expressed as
 
 $$
-L = \frac{1}{\binom{N}{2}} \sum_{i \neq j} d(i, j).
+L = \frac{1}{\binom{N}{2}} \sum_{i \neq j} d_{\text{shortest}}(i, j).
 $$
 
 In this formula $\binom{N}{2}$ is the number of unique pairs of nodes.
-The sum $\sum_{i \neq j} d(i, j)$ is taken over all pairs of nodes (i) and (j).
+The sum $\sum_{i \neq j} d_{\text{shortest}}(i, j)$ is taken over all pairs of nodes (i) and (j).
 
 ---
 
@@ -827,7 +862,9 @@ Because movie co-appearance forms a small world network, most any path between t
 
 Viruses spread rapidly in small worlds.  
 
-One of the goals of pandemic lock-downs is to prevent people circulating in their local social groups. This is an attempt to eliminate the effect of long-range (weak-tie) connections.
+One of the goals of pandemic lock-downs is to prevent people circulating
+_outside_ of their local social groups. This is an attempt to eliminate the
+effect of long-range (weak-tie) connections.
 
 This is the idea behind travel bans and mandatory quarantining after travel.
 
@@ -1017,7 +1054,7 @@ cc_random = nx.average_clustering(F_random)
 print(f'The clustering coefficient for the equivalent random network is {cc_random:0.3f}')
 ```
 
-Another useful metric is the diameter.
+Another useful metric is the diameter[^diameter].
 
 ```{python}
 print(f'The diameter of the Football network is {nx.diameter(football)}' +
@@ -1025,6 +1062,8 @@ print(f'The diameter of the Football network is {nx.diameter(football)}' +
 print(f'The diameter of the equivalent random network is {nx.diameter(F_random)}' +
       f' and the average shortest path length is {nx.average_shortest_path_length(F_random):0.3f}')
 ```
+
+[^diameter]: The diameter is the greatest shortest path length between any two nodes.
 
 ---
 

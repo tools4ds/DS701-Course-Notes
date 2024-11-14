@@ -340,8 +340,6 @@ $$
 
 where $\mathbf{x}$ is the eigenvector corresponding to the the eigenvalue $\lambda$ of the adjacency matrix $\mathbf{A}$. The eigenvector $\mathbf{x}$ gives the centrality scores for all nodes in the network.
 
-Geometrically
-
 ::: {.content-visible when-profile="web"}
 In general, there may be multiple eigenvalues $\lambda$ for which the above equation holds. In practice, the largest eigenvalue is used because it captures the most significant mode of influence propagation in the network.
 :::
@@ -605,7 +603,6 @@ To get a more useful partition, we need to define a new goal. The new goal will 
 ## Balanced Cuts
 
 The idea to avoid the problem above is to normalize the cut by the size of the __smaller__ of the two components.
-
 The problem above would be avoided because the smaller of the two cuts is just a single node.
 
 This leads us to define the __isoperimetric ratio__
@@ -617,8 +614,10 @@ $$
 and the __isoperimetric number of G__
     
 $$
-\alpha(G) = \min_U \frac{E(U, V\setminus U)}{\min(|U|, |V\setminus U|)}.
+\alpha(G) = \min_U \frac{E(U, V\setminus U)}{\min(|U|, |V\setminus U|)},
 $$
+
+where $E(U, V\setminus U)$ is the number of edges between the two parts.
 
 The idea is that finding $\alpha(G)$ gives a _balanced cut_ -- one that maximizes the number of disconnected nodes per edge removed.
 
@@ -634,6 +633,7 @@ To do so, we'll introduce __spectral graph theory__.
 
 ::: aside
 If you want to study this in more detail, some excellent references are
+
 * [Allow Me to Introduce
 Spectral and Isoperimetric Graph Partitioning](https://people.eecs.berkeley.edu/~jrs/papers/partnotes.pdf) by Jonathan Shewchuck, which has outstanding visualizations and physical intuition.
 * [Spectral and Algebraic Graph Theory](http://cs-www.cs.yale.edu/homes/spielman/sagt/sagt.pdf) by Daniel Spielman which provides proofs and much more detail.
