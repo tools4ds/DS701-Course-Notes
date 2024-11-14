@@ -31,6 +31,7 @@ project:
     - 23-NN-I-Gradient-Descent.qmd
     - 24-NN-II-Backprop.qmd
     - 25-NN-III-CNNs.qmd
+    - 26-TimeSeries.qmd
 
 resources:
   - figs/NN-figs/conv-demo/index.html
