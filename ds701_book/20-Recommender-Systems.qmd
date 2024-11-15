@@ -145,11 +145,11 @@ modeling the evolution of user expertise through online reviews," by J. McAuley
 and J. Leskovec. WWW, 2013
 :::
 
----
+## Example
 
-Example: Let's look at a dataset for testing recommender systems consisting of Amazon movie reviews:
+Let's look at a dataset for testing recommender systems consisting of Amazon movie reviews:
 
-We'll download a compressed pickle file containing the data if it is not already present:
+We'll download a compressed pickle file containing the data if it is not already present.
 
 ```{python}
 # This is a 647 MB file, delete it after use
@@ -162,7 +162,7 @@ if not os.path.exists(pickle_output):
     gdown.download(url, pickle_output)
 ```
 
-We'll load the data into a pandas DataFrame:
+We'll load the data into a pandas DataFrame.
 
 ```{python}
 import gzip
@@ -264,17 +264,13 @@ For that, we need to define a loss or objective function.
 A typical objective function is root mean square error (RMSE)
 
 $$ 
-\text{RMSE} = \sqrt{\frac{1}{|S|} \sum_{(i,u)\in S} (\hat{r}_{ui} - r_{ui})^2} 
+\text{RMSE} = \sqrt{\frac{1}{|S|} \sum_{(i,u)\in S} (\hat{r}_{ui} - r_{ui})^2},
 $$
 
 where 
 
-* $r_{ui}$ is the rating that 
-* user $u$ gives to 
-* item $i$, and 
+* $r_{ui}$ is the rating that user $u$ gives to item $i$, and 
 * $S$ is the set of all ratings.
-
----
 
 OK, now we know the problem and the data available.   How can we address the problem?
 
@@ -289,7 +285,7 @@ recommendations can be considered to be a __bipartite graph.__
 
 ![](figs/L20-bipartite.png){width="35%" fig-align="center"}
 
-The nodes of the bipartite graph are __users__ and __items__.   
+The nodes of the bipartite graph are __users__ ($U$) and __items__ ($V$).   
 
 Each edge corresponds to a known rating $r_{ui}.$
 
@@ -402,7 +398,7 @@ A reasonable approach is to consider items similar if their ratings are
 __correlated__, for example using the Pearson correlation coefficient
 $r$[^pearson].
 
-[^pearson]: See this part of the Course Notes for the definition of Pearson correlation coefficient.
+[^pearson]: See the [Course Notes](#pearson-correlation-coefficient) for the definition of Pearson correlation coefficient.
 
 However, note that two items will not have ratings in the same positions.
 
@@ -428,6 +424,12 @@ ratings_item_j = [np.nan, np.nan, 4, 2, 5, np.nan, np.nan, 1, 2, 5, np.nan, np.n
 display(Markdown(f'Ratings for item $i$:\n{ratings_item_i}'))
 display(Markdown(f'Ratings for item $j$:\n{ratings_item_j}'))
 ```
+
+---
+
+::: {.content-visible when-profile="slides"}
+![](figs/L20-corr-support.png){width="60%" fig-align="center"}
+:::
 
 Let's drop the non-common ratings:
 
@@ -485,7 +487,7 @@ $$
 J_{Sim}(\mathbf{x}, \mathbf{y}) = \frac{|\mathbf{x} \cap \mathbf{y}|}{|\mathbf{x} \cup \mathbf{y}|}.
 $$
 
-(See the lecture on [similarity measures](05-Distances-Timeseries.qmd#norms).)
+See the lecture on [similarity measures](05-Distances-Timeseries.qmd#norms).
 
 ## Improving CF in the presence of bias
 
@@ -514,8 +516,8 @@ $$
 
 where 
 
-* $\alpha_u$ is the per-user offset of user $u$ and 
-* $\beta_i$ is the per-item offset of item $i$.
+* $\alpha_u$ is the $n\times 1$ per-user offset of user $u$ and 
+* $\beta_i$ is the $m\times 1$ per-item offset of item $i$.
 
 
 ## Estimating biases
@@ -531,14 +533,14 @@ the $\mu\textnormal{s}$?
 
 Let's assume for a minute that we had a fully-dense matrix of ratings $R$.
 
-$R$ has items on the rows and users on the columns.
+Each row of $R$ represents an item and each column a user.
 
 Then what we want to estimate is
 
 $$
 \min_{\alpha,\beta,\mu} 
 \Vert R - \mathbf{1}\alpha^T + \beta\mathbf{1}^T + \mu1\Vert^2 
-+ \lambda(\Vert\alpha\Vert^2 + \Vert\beta\Vert^2) 
++ \lambda(\Vert\alpha\Vert^2 + \Vert\beta\Vert^2).
 $$
 
 Here, $\mathbf{1}$ represents appropriately sized vectors of ones, and $1$ is a matrix of ones.
@@ -560,10 +562,10 @@ Assume we hold $\beta\mathbf{1}^T + \mu1$ constant.
 Then the remaining problem is 
 
 $$
-\min_{\alpha} \Vert R - \mathbf{1}\alpha^T \Vert^2 + \lambda \Vert\alpha\Vert^2 
+\min_{\alpha} \Vert R - \mathbf{1}\alpha^T \Vert^2 + \lambda \Vert\alpha\Vert^2,
 $$
 
-which (for each column of $R$) is a standard least squares problem (which we solve via Ridge regression).
+which (for each column of $R$) is a standard regularized least squares problem solved via Ridge regression.
 
 ---
 
@@ -575,7 +577,7 @@ The strategy for solving is:
 2. Hold $\alpha$ and $\mu$ constant, solve for $\beta$.
 3. Hold $\beta$ and $\mu$ constant, solve for $\alpha$.
 
-Each of the three steps will reduce the overall error.   So we iterate over them until convergence.
+Each of the three steps will reduce the overall error.  As a result, we iterate over them until convergence.
 
 ---
 
@@ -609,11 +611,11 @@ Step 4: If not converged, go to Step 1.
 
 ---
 
-Now that we have the biases learned, we can do a better job of estimating correlation:
+Now that we have leanred the biases, we can do a better job of estimating correlation:
 
 $$ 
 \hat{\rho}_{ij} = \frac{\sum_{u\in U(i,j)}(r_{ui} - b_{ui})(r_{uj}-b_{uj})} 
-{\sqrt{\sum_{u\in U(i,j)}(r_{ui} - b_{ui})^2\sum_{u\in U(i,j)}(r_{uj}-b_{uj})^2}} 
+{\sqrt{\sum_{u\in U(i,j)}(r_{ui} - b_{ui})^2\sum_{u\in U(i,j)}(r_{uj}-b_{uj})^2}},
 $$
 
 where 
@@ -626,7 +628,7 @@ where
 And using biases we can also do a better job of estimating ratings:
 
 $$ 
-\hat{r}_{ui} = b_{ui} + \frac{\sum_{j \in n_k(i, u)} s_{ij}(r_{uj} - b_{uj})}{\sum_{j \in n_k(i, u)} s_{ij}} 
+\hat{r}_{ui} = b_{ui} + \frac{\sum_{j \in n_k(i, u)} s_{ij}(r_{uj} - b_{uj})}{\sum_{j \in n_k(i, u)} s_{ij}},
 $$
 
 where 
@@ -644,14 +646,14 @@ Strengths:
 
 * Essentially no training.
     * The reliance on $k$-nearest neighbors helps in this respect.
-* Easy to update with new users, items, and ratings
-* Can be explained to user: 
+* Easy to update with new users, items, and ratings.
+* Explainable: 
     * "We recommend _Minority Report_ because you liked _Blade Runner_ and _Total Recall._"
 
 Weaknesses:
 
-* Accuracy can be a problem
-* Scalability can be a problem (think $k$-NN)
+* Accuracy can be a problem -- resulting in poor recommendations
+* Scalability can be a problem -- compute grows (think $k$-NN)
 
 # Matrix Factorization
 
@@ -834,10 +836,10 @@ R = good_df.pivot_table(columns = 'ProductId', index = 'UserId', values = 'Score
 
 ---
 
-And we can look at the matrix:
+And we can look at a small part of the matrix:
 
 ```{python}
-R
+R.iloc[900:910, 1000:1010]
 ```
 
 ---
@@ -931,6 +933,8 @@ $$
 \min_{U, V} \sum_{(u, i)\in S}(r_{ui} - u_u^Tv_i)^2 + \lambda(\Vert U\Vert^2 + \Vert V\Vert^2) 
 $$
 
+where we have written out the vector L2 norm as the summation.
+
 ## 1. Adding Biases
 
 $$ 
@@ -990,6 +994,8 @@ In other words, the objective function of the system is not to present the user'
 The incentive to maximize engagement arises on sites that are supported by advertising revenue.   
 
 More engagement time means more revenue for the site.
+
+---
 
 However, many studies have shown that sites that strive to __maximize 
 engagement__ do so in large part by guiding users toward __extreme content:__
