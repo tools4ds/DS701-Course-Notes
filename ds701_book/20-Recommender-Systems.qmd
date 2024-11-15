@@ -8,6 +8,7 @@ jupyter: python3
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/20-Recommender-Systems.ipynb)
 
 ```{python}
+#| echo: false
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -24,6 +25,10 @@ import laUtilities as ut
 
 Today, we look at a topic that has become enormously important in society: recommender systems.
 
+:::: {.columns}
+::: {.column width="50%"}
+
+
 We will
 
 * Define recommender systems
@@ -32,13 +37,19 @@ We will
     * Collaborative Filtering
     * Matrix Factorization
 
-::: aside
+:::
+::: {.column width="50%"}
+
+
 This section draws heavily on
 
 * These [slides](http://alex.smola.org/teaching/berkeley2012/slides/8_Recommender.pdf) by Alex Smola
 * [Matrix Factorization Techniques for Recommender Systems,](https://ieeexplore.ieee.org/document/5197422) by Yehuda Koren, Robert Bell, and Chris Volinsky, and
 * [Collaborative Filtering with Temporal Dynamics,](https://dl.acm.org/doi/10.1145/1557019.1557072) by Yehuda Koren
+
 :::
+::::
+
 
 ## What are Recommender Systems?
 
@@ -48,9 +59,9 @@ The concept of recommender systems emerged in the late 1990s / early 2000s as so
 * online discussions and ratings
 * social information sharing
 
-In these systems content was exploding and users were having a hard time finding things they were interested in.
+In these systems the amount of content was exploding and users were having a hard time finding things they were interested in.
 
-Users wanted recommendations.
+> Users wanted recommendations.
 
 ---
 
@@ -76,15 +87,15 @@ Some examples:
 * Social content filtering (Facebook, Twitter)
 * Services (Airbnb, Uber, TripAdvisor)
 * News content recommendation (Apple News)
-* Priority inbox & spam filtering (Google)
-* Online dating (OK Cupid)
+* Priority inbox & spam filtering (Gmail)
+* Online dating (Match.com)
 
 ---
 
 A more formal view:
     
 * User - requests content
-* Objects - that can be displayed
+* Objects - instances of content
 * Context - device, location, time, history
 * Interface - browser, mobile
 
@@ -110,7 +121,7 @@ This can be done actively:
 
 * When a user is asked to **rate** a movie, product, or experience,
 
-Or it can be done passively:
+or it can be done passively:
 
 * By noting which items a user **chooses** to purchase (for example).
 
