@@ -118,7 +118,7 @@ This will render an HTML book format to `_book` which is ignored by git.
 
 In many cases citations are directly referenced in the text, but in some cases
 we use Quarto's support for [citations](https://quarto.org/docs/authoring/citations.html)
-in the bibtex format.
+in the BibTeX format.
 
 For bibtex citations, add entries to 
 [`ds701_book/references.bib`](./ds701_book/references.bib) and cite them as
@@ -135,3 +135,5 @@ a div with id `refs` such as:
 :::
 ```
 
+The WikiBook on [LaTeX Bibliography Management](https://en.wikibooks.org/wiki/LaTeX/Bibliography_Management#BibTeX)
+is a good reference on BibTeX format.
