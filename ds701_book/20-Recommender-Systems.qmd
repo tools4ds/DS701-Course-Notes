@@ -422,8 +422,8 @@ from IPython.display import display, Markdown
 ratings_item_i = [1, np.nan, np.nan, 5, 5, 3, np.nan, np.nan, np.nan, 4, 2, np.nan, np.nan, np.nan, np.nan, 4, np.nan, 5, 4, 1, np.nan]
 ratings_item_j = [np.nan, np.nan, 4, 2, 5, np.nan, np.nan, 1, 2, 5, np.nan, np.nan, 2, np.nan, np.nan, 3, np.nan, np.nan, np.nan, 5, 4]
 
-display(Markdown(f'Ratings for item $i$:\n{ratings_item_i}'))
-display(Markdown(f'Ratings for item $j$:\n{ratings_item_j}'))
+display(Markdown(f'Ratings for item $i$:\n\n{ratings_item_i}'))
+display(Markdown(f'Ratings for item $j$:\n\n{ratings_item_j}'))
 ```
 
 ---
