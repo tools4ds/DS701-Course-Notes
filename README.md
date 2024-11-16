@@ -135,5 +135,15 @@ a div with id `refs` such as:
 :::
 ```
 
+Bibliographies are not included by default in the configuraiton files. Instead,
+include the configuration in the `.qmd` file front matter, e.g.
+
+```
+--- 
+title: document title
+bibliography: references.bib
+---
+```
+
 The WikiBook on [LaTeX Bibliography Management](https://en.wikibooks.org/wiki/LaTeX/Bibliography_Management#BibTeX)
 is a good reference on BibTeX format.
