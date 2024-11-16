@@ -1,6 +1,7 @@
 ---
 title: Recommender Systems
 jupyter: python3
+bibliography: references.bib
 ---
 
 # Introduction
@@ -44,8 +45,8 @@ We will
 This section draws heavily on
 
 * These [slides](http://alex.smola.org/teaching/berkeley2012/slides/8_Recommender.pdf) by Alex Smola
-* [Matrix Factorization Techniques for Recommender Systems,](https://ieeexplore.ieee.org/document/5197422) by Yehuda Koren, Robert Bell, and Chris Volinsky, and
-* [Collaborative Filtering with Temporal Dynamics,](https://dl.acm.org/doi/10.1145/1557019.1557072) by Yehuda Koren
+* _Matrix Factorization Techniques for Recommender Systems_, [@koren2009matrix]
+* _Collaborative Filtering with Temporal Dynamics_, [@koren2009collaborative]
 
 :::
 ::::
@@ -1015,17 +1016,16 @@ Ways of addressing these issues can be:
 * via technology
 * via public policy
 
+# Recap and References
+
 ## BU CS/CDS Research
 
 You can read about some of the work done in Professor Mark Crovella's group on
 this topic:
 
-* [How YouTube Leads Privacy-Seeking Users Away from Reliable Information,](http://www.cs.bu.edu/faculty/crovella/paper-archive/youtube-fairumap20.pdf) 
-   Larissa Spinelli and Mark Crovella, _Proceedings of the Workshop on Fairness in User Modeling, Adaptation, and Personalization (FairUMAP)_, 2020.   
-* [Closed-Loop Opinion Formation,](http://www.cs.bu.edu/faculty/crovella/paper-archive/netsci17-filterbubble.pdf) Larissa Spinelli and Mark Crovella 
-   _Proceedings of the 9th International ACM Web Science Conference (WebSci)_, 2017.
-* [Fighting Fire with Fire: Using Antidote Data to Improve Polarization and Fairness of Recommender Systems,](http://www.cs.bu.edu/faculty/crovella/paper-archive/wsdm19-antidote-data.pdf)
-  Bashir Rastegarpanah, Krishna P. Gummadi and Mark Crovella _Proceedings of WSDM_, 2019.
+* _How YouTube Leads Privacy-Seeking Users Away from Reliable Information_, [@spinelli2020youtube] 
+* _Closed-Loop Opinion Formation_, [@spinelli2017closed] 
+* _Fighting Fire with Fire: Using Antidote Data to Improve Polarization and Fairness of Recommender Systems_, [@rastegarpanah2019fighting] 
 
 ## Recap
 
@@ -1037,4 +1037,9 @@ this topic:
 * Comparison of CF and MF, highlighting their strengths and weaknesses.
 * Overview of advanced techniques used by the Netflix prize-winning team to improve MF accuracy.
 * Discussion on the societal impact of recommender systems, including filter bubbles and engagement maximization.
+
+## References
+
+::: {#refs}
+:::
 
