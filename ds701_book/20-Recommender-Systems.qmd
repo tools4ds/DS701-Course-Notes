@@ -6,6 +6,8 @@ bibliography: references.bib
 
 # Introduction
 
+## Introduction
+
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/20-Recommender-Systems.ipynb)
 
 ```{python}
@@ -37,6 +39,8 @@ We will
 * Discuss two classic methods:
     * Collaborative Filtering
     * Matrix Factorization
+* And one modern method:
+    * Deep Learning Recommender Model (DLRM)
 
 :::
 ::: {.column width="50%"}
@@ -47,6 +51,7 @@ This section draws heavily on
 * These [slides](http://alex.smola.org/teaching/berkeley2012/slides/8_Recommender.pdf) by Alex Smola
 * _Matrix Factorization Techniques for Recommender Systems_, [@koren2009matrix]
 * _Collaborative Filtering with Temporal Dynamics_, [@koren2009collaborative]
+* _Deep Learning Recommender Model for Personalization and Recommendation Systems_, [@naumov2019deep]
 
 :::
 ::::
@@ -182,12 +187,6 @@ Run `df.info()` to see the column names and data types.
 df.info()
 ```
 
-It looks like the `Id` column can be used as the dataframe index.
-
-```{.python}
-df = df.set_index("Id")
-df.info()
-```
 ---
 
 Now we can count the number of users and movies:
@@ -271,7 +270,7 @@ $$
 where 
 
 * $r_{ui}$ is the rating that user $u$ gives to item $i$, and 
-* $S$ is the set of all ratings.
+* $S$ is the subset of items that have ratings.
 
 OK, now we know the problem and the data available.   How can we address the problem?
 
@@ -517,8 +516,9 @@ $$
 
 where 
 
-* $\alpha_u$ is the $n\times 1$ per-user offset of user $u$ and 
-* $\beta_i$ is the $m\times 1$ per-item offset of item $i$.
+* $\alpha_u$ is the $n\times 1$ per-user offset of user $u$, 
+* $\beta_i$ is the $m\times 1$ per-item offset of item $i$, and
+* $\mu$ is the global average rating across all items and users.
 
 
 ## Estimating biases
@@ -534,7 +534,7 @@ the $\mu\textnormal{s}$?
 
 Let's assume for a minute that we had a fully-dense matrix of ratings $R$.
 
-Each row of $R$ represents an item and each column a user.
+Each of the $m$ rows of $R$ represents an item and each of the $n$ columns a user.
 
 Then what we want to estimate is
 
@@ -544,7 +544,8 @@ $$
 + \lambda(\Vert\alpha\Vert^2 + \Vert\beta\Vert^2).
 $$
 
-Here, $\mathbf{1}$ represents appropriately sized vectors of ones, and $1$ is a matrix of ones.
+Here, bold-faced $\mathbf{1}$ represents appropriately sized vectors of ones,
+and non-boldfaced $1$ is an $m\times n$ matrix of ones.
 
 ---
 
@@ -566,7 +567,8 @@ $$
 \min_{\alpha} \Vert R - \mathbf{1}\alpha^T \Vert^2 + \lambda \Vert\alpha\Vert^2,
 $$
 
-which (for each column of $R$) is a standard regularized least squares problem solved via Ridge regression.
+which (for each column of $R$) is a standard regularized least squares problem
+solved via [Ridge regression](./19-Regression-III-More-Linear.qmd#ridge-regression).
 
 ---
 
@@ -610,6 +612,9 @@ $$
 
 Step 4: If not converged, go to Step 1.
 
+Here $i \in R(u)$ means the set of items rated by user $u$ and $u \in R(i)$ means
+the set of users who have rated item $i$.
+
 ---
 
 Now that we have leanred the biases, we can do a better job of estimating correlation:
@@ -634,8 +639,9 @@ $$
 
 where 
 
-* $b_{ui} = \mu + \alpha_u + \beta_i$, and
-* $n_k(i, u)$ are the $k$ nearest neighbors to $i$ that were rated by user $u$.
+* $b_{ui} = \mu + \alpha_u + \beta_i$,
+* $n_k(i, u)$ are the $k$ nearest neighbors to $i$ that were rated by user $u$ and
+* $s_{ij}$ is the similarity between items $i$ and $j$, estimated as above.
 
 ## Assessing CF
 
@@ -672,9 +678,9 @@ time -- the user and item vectors live in different vector spaces.
 
 :::: {.columns}
 ::: {.column width="50%"}
-![](figs/L10-Movie-Latent-Space.png){width="100%" fig-align="center"}
+![](figs/L10-Movie-Latent-Space.png){width="100%" fig-align="center" #fig-movie-latent-space}
 
-Koren et al, IEEE Computer, 2009 
+[@koren2009matrix]
 :::
 ::: {.column width="50%"}
 What we could try to do is find a __single__ vector space in which we represent
@@ -690,6 +696,9 @@ We saw this idea previously, in an SVD lecture.
 
 This new vector space is called a __latent__ space, and the user and item
 representations are called __latent vectors.__
+
+This notion of a shared latent space is also central to deep learning 
+recommender approaches [@naumov2019deep] we will look at later.
 
 ---
 
@@ -759,14 +768,15 @@ $$
 where:
 
 * $R$ is $m\times n$, 
-* $U$ is the $m\times k$ items matrix and 
-* $V$ is the $n\times k$ users matrix.
+* $U$ is the $m\times k$ items matrix,
+* $V$ is the $n\times k$ users matrix and
+* $k$ is the rank of the factorization and dimensionality of the latent space.
 
 The $(\cdot)_S$ notation means that we are only considering the _subset_ of
 matrix entries that correspond to known reviews (the set $S$).
 
 Note that as usual, we add $\ell_2$ penalization to avoid overfitting
-(Ridge regression).
+([Ridge regression](./19-Regression-III-More-Linear.qmd#ridge-regression)).
 
 ---
 
@@ -778,7 +788,8 @@ $$
 
 Once again, this problem is __jointly convex__ in that it is convex in each of the variables $U$ and $V$.
 
-In particular, it we hold either $U$ or $V$ constant, then the result is a simple ridge regression.
+In particular, if we hold either $U$ or $V$ constant, then the result is a simple
+ridge regression.
 
 ---
 
@@ -934,14 +945,17 @@ $$
 \min_{U, V} \sum_{(u, i)\in S}(r_{ui} - u_u^Tv_i)^2 + \lambda(\Vert U\Vert^2 + \Vert V\Vert^2) 
 $$
 
-where we have written out the vector L2 norm as the summation.
+where we have written out the vector $\ell_2$ norm as the summation.
 
 ## 1. Adding Biases
 
+If we add biases:
 $$ 
 \min_{U, V} \sum_{(u, i)\in S}(r_{ui} - (\mu + \alpha_u + \beta_i + u_u^Tv_i)^2 
 + \lambda(\Vert U\Vert^2 + \Vert V\Vert^2 + \Vert \alpha\Vert^2 + \Vert \beta \Vert^2) 
 $$
+
+we see improvements in accuracy:
 
 ![](figs/L20-netflix-1.png){width="70%" fig-align="center"}
 
@@ -961,16 +975,191 @@ Older movies tend to get higher ratings!
 
 ![](figs/L20-netflix-4.png){width="70%" fig-align="center"}
 
+---
+
+If we add time-varying biases:
+
 $$
 \min_{U, V} \sum_{(u, i)\in S}(r_{ui} - (\mu + \alpha_u(t) + \beta_i(t) + u_u^Tv_i(t))^2 
 + \lambda(\Vert U\Vert^2 + \Vert V\Vert^2 + \Vert \alpha\Vert^2 + \Vert \beta \Vert^2) 
 $$
 
+we see further improvements in accuracy:
+
 ![](figs/L20-netflix-5.png){width="70%" fig-align="center"}
 
 To estimate these billions of parameters, we cannot use alternating least squares or any linear algebraic method.
 
-We need to use gradient descent (which we will cover in a future lecture).
+We need to use gradient descent (which we covered previously).
+
+# Deep Learning for Recommender Systems
+
+## Deep Learning for Recommender Systems
+
+Besides the Collaborative Filtering and Matrix Factorization models, other popular
+approaches to building recommender systems are use Deep Learning.
+
+We'll look at the Deep Learning Recommender Model (DLRM) proposed by Facebook in
+2019 [@naumov2019deep] with [GitHub repository](https://github.com/facebookresearch/dlrm).
+
+## DLRM Architecture
+
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- Components (@fig-dlrm-model):
+  1. **Embeddings**: Dense representations for categorical data.
+  2. **Bottom MLP**: Transforms dense continuous features.
+  3. **Feature Interaction**: Dot-product of embeddings and dense features.
+  4. **Top MLP**: Processes interactions and outputs probabilities.
+
+:::
+::: {.column width="50%"}
+
+![DLRM Architecture](figs/RecSys-figs/dlrm-model.png){.lightbox width=80% fig-align="center" #fig-dlrm-model}
+
+:::
+::::
+
+Let's look at each of these components in turn.
+
+## Embeddings
+
+**Embeddings**: Map categorical inputs to latent factor space.
+
+:::: {.columns}
+::: {.column width="65%"}
+- A learned embedding matrix $W \in \mathbb{R}^{m \times d}$ for each category of input
+- One-hot vector $e_i$ with $i\text{-th}$ entry 1 and rest are 0s
+- Embedding of $e_i$ is $i\text{-th}$ row of $W$, i.e., $w_i^T = e_i^T W$
+
+We can also use weighted combination of multiple items with a multi-hot vector
+of weights $a^T = [0, ..., a_{i_1}, ..., a_{i_k}, ..., 0]$.
+
+The embedding of this multi-hot vector is then $a^T W$.
+
+:::
+::: {.column width="35%"}
+![DLRM Architecture](figs/RecSys-figs/dlrm-model01.png){.lightbox width=100% fig-align="center"}
+:::
+::::
+
+---
+
+PyTorch has a convenient way to do this using `EmbeddingBag`, which besides summing
+can combine embeddings via mean or max pooling.
+
+Here's an example with 5 embeddings of dimension 3:
+
+```{python}
+import torch
+import torch.nn as nn
+
+# Example embedding matrix: 5 embeddings, each of dimension 3
+embedding_matrix = nn.EmbeddingBag(num_embeddings=5, embedding_dim=3, mode='mean')
+
+# Input: Indices into the embedding matrix
+input_indices = torch.tensor([1, 2, 3, 4])  # Flat list of indices
+offsets = torch.tensor([0, 2])  # Start new bag at position 0 and 2 in input_indices
+
+# Forward pass
+output = embedding_matrix(input_indices, offsets)
+
+print("Embedding Matrix:\n", embedding_matrix.weight)
+print("Output:\n", output)
+```
+
+## Dense Features
+
+:::: {.columns}
+::: {.column width="65%"}
+The advantage of the DLRM architecture is that it can take continuous features
+as input such as the user's age, time of day, etc.
+
+There is a bottom MLP that transforms these dense features into a latent space of
+the same dimension $d$.
+:::
+::: {.column width="35%"}
+![DLRM Architecture](figs/RecSys-figs/dlrm-model02.png){.lightbox width=100% fig-align="center"}
+:::
+::::
+
+## Optional Sparse Feature MLPs
+
+:::: {.columns}
+::: {.column width="65%"}
+Optionally, one can add MLPs to transform the sparse features as well.
+
+:::
+::: {.column width="35%"}
+![DLRM Architecture](figs/RecSys-figs/dlrm-model03.png){.lightbox width=100% fig-align="center"}
+:::
+::::
+
+## Feature Interactions
+
+:::: {.columns}
+::: {.column width="65%"}
+The 2nd order interactions are modeled via dot-products of all pairs from the
+collections of embedding vectors and processed dense features.
+
+The results of the dot-product interactions are concatenated with the processed
+dense vectors and passed to a final MLP.
+
+:::
+::: {.column width="35%"}
+![DLRM Architecture](figs/RecSys-figs/dlrm-model04.png){.lightbox width=100% fig-align="center"}
+:::
+::::
+
+## Top MLP
+
+:::: {.columns}
+::: {.column width="65%"}
+The concatenated vector is then passed to a final MLP and then to a sigmoid
+function to produce the final prediction (e.g. probability score of recommendation)
+
+This entire model is trained end-to-end using standard deep learning techniques.
+
+:::
+::: {.column width="35%"}
+![DLRM Architecture](figs/RecSys-figs/dlrm-model05.png){.lightbox width=100% fig-align="center"}
+:::
+::::
+
+## Training Results
+
+![DLRM Training Results](figs/RecSys-figs/dlrm-training-results.png){width="70%" fig-align="center" #fig-dlrm-training-results}
+
+@fig-dlrm-training-results shows the training (solid) and validation (dashed)
+accuracies of DLRM on the [Criteo Ad Kaggle dataset](https://www.kaggle.com/competitions/criteo-display-ad-challenge/overview).
+
+Accuracy is compared with Deep and Cross network (DCN) [@wang2017deep].
+
+## Other Modern Approaches
+
+There are many other modern approaches to recommender systems for example:
+
+1. **Graph-Based Recommender Systems**:
+   - Leverage graph structures to capture relationships between users and items.
+   - Use techniques like Graph Neural Networks (GNNs) to enhance recommendation accuracy.
+
+2. **Context-Aware Recommender Systems**:
+   - Incorporate contextual information such as time, location, and user mood to provide more personalized recommendations.
+   - Contextual data can be integrated using various machine learning models.
+
+3. **Hybrid Recommender Systems**:
+   - Combine multiple recommendation techniques, such as collaborative filtering and content-based filtering, to improve performance.
+   - Aim to leverage the strengths of different methods while mitigating their weaknesses.
+
+4. **Reinforcement Learning-Based Recommender Systems**:
+   - Use reinforcement learning to optimize long-term user engagement and satisfaction.
+   - Models learn to make sequential recommendations by interacting with users and receiving feedback.
+
+These approaches often leverage advancements in machine learning and data processing to provide more accurate and personalized recommendations.
+
+See [@ricci2022recommender] for a comprehensive overview of recommender systems.
 
 # Assessing Recommender Systems
 
@@ -1034,8 +1223,7 @@ this topic:
 * Discussion on the challenges of recommender systems, including scalability and data sparsity.
 * Introduction to matrix factorization (MF) as an improvement over CF, using latent vectors and alternating least squares (ALS) for optimization.
 * Practical implementation of ALS for matrix factorization on a subset of Amazon movie reviews.
-* Comparison of CF and MF, highlighting their strengths and weaknesses.
-* Overview of advanced techniques used by the Netflix prize-winning team to improve MF accuracy.
+* Review of Deep Learning Recommender Model (DLRM) architecture and its components.
 * Discussion on the societal impact of recommender systems, including filter bubbles and engagement maximization.
 
 ## References
