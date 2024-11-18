@@ -516,9 +516,14 @@ $$
 
 where 
 
-* $\alpha_u$ is the $n\times 1$ per-user offset of user $u$, 
-* $\beta_i$ is the $m\times 1$ per-item offset of item $i$, and
 * $\mu$ is the global average rating across all items and users.
+* $\alpha_u$ is the offset of user $u$ and 
+* $\beta_i$ is the offset of item $i$.
+
+If we gather all these elements together we can form: 
+
+* $\boldsymbol{\alpha}$ an $n\times 1$ vector of per-user offsets, and
+* $\boldsymbol{\beta}$ an $m\times 1$ vector of per-item offsets.
 
 
 ## Estimating biases
@@ -529,8 +534,7 @@ b_{ui} = \mu + \alpha_u + \beta_i
 $$
 :::
 
-How can we estimate the $\alpha\textnormal{s}$, the $\beta\textnormal{s}$, and
-the $\mu\textnormal{s}$?
+How can we estimate the parameters $\boldsymbol{\alpha}$, $\boldsymbol{\beta}$, and $\mu$?
 
 Let's assume for a minute that we had a fully-dense matrix of ratings $R$.
 
