@@ -621,7 +621,7 @@ the set of users who have rated item $i$.
 
 ---
 
-Now that we have leanred the biases, we can do a better job of estimating correlation:
+Now that we have learned the biases, we can do a better job of estimating correlation:
 
 $$ 
 \hat{\rho}_{ij} = \frac{\sum_{u\in U(i,j)}(r_{ui} - b_{ui})(r_{uj}-b_{uj})} 
