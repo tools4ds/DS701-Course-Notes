@@ -113,3 +113,37 @@ quarto render --profile book
 ```
 
 This will render an HTML book format to `_book` which is ignored by git.
+
+## Citations and Bibliography
+
+In many cases citations are directly referenced in the text, but in some cases
+we use Quarto's support for [citations](https://quarto.org/docs/authoring/citations.html)
+in the BibTeX format.
+
+For bibtex citations, add entries to 
+[`ds701_book/references.bib`](./ds701_book/references.bib) and cite them as
+directed Quarto [citations](https://quarto.org/docs/authoring/citations.html).
+
+As stated in the Quarto documentation, the list of works will be placed at the
+end of the web page or the last slide. You can control the location by including
+a div with id `refs` such as:
+
+```
+## References
+
+::: {#refs}
+:::
+```
+
+Bibliographies are not included by default in the configuraiton files. Instead,
+include the configuration in the `.qmd` file front matter, e.g.
+
+```
+--- 
+title: document title
+bibliography: references.bib
+---
+```
+
+The WikiBook on [LaTeX Bibliography Management](https://en.wikibooks.org/wiki/LaTeX/Bibliography_Management#BibTeX)
+is a good reference on BibTeX format.
