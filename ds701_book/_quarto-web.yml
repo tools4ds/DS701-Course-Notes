@@ -35,6 +35,8 @@ project:
     - 21-Networks-I.qmd
     - 22-Networks-II-Centrality-Clustering.qmd
     - 26-TimeSeries.qmd
+    - 27-RNN.qmd
+
 resources:
   - figs/NN-figs/conv-demo/index.html
   - figs/NN-figs/conv-demo/utils.js
@@ -94,6 +96,7 @@ website:
         - 22-Networks-II-Centrality-Clustering.qmd
         - 20-Recommender-Systems.qmd
         - 26-TimeSeries.qmd
+        - 27-RNN.qmd
 
 # bibliography: references.bib
 

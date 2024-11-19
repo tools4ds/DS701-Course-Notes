@@ -32,6 +32,7 @@ project:
     - 24-NN-II-Backprop.qmd
     - 25-NN-III-CNNs.qmd
     - 26-TimeSeries.qmd
+    - 27-RNN.qmd
 
 resources:
   - figs/NN-figs/conv-demo/index.html

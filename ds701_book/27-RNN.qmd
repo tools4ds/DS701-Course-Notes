@@ -1,0 +1,202 @@
+---
+title: 'Recurrent Neural Networks'
+jupyter: python3
+---
+
+# RNNs
+```{python}
+#| echo: false
+import numpy as np
+```
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/26-RNN.ipynb)
+
+We introduce recurrent neural networks (RNNs) which is a neural network architecture used for machine learning on sequential data.
+
+## What are RNNs?
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- A type of artificial neural network designed for processing sequences of data.
+- Unlike traditional neural networks, RNNs have connections that form directed cycles, allowing information to persist.
+:::
+::: {.column width="50%"}
+```{python}
+#| fig-align: center
+#| echo: false
+import matplotlib.pyplot as plt
+import networkx as nx
+
+# Create a directed graph
+G = nx.DiGraph()
+
+# Add nodes with labels
+nodes = {
+    'x1': 'x_1', 'x2': 'x_2', 'x3': 'x_3',
+    'h1': 'h_1', 'h2': 'h_2', 'h3': 'h_3',
+    'y1': 'y_1', 'y2': 'y_2', 'y3': 'y_3'
+}
+G.add_nodes_from(nodes.keys())
+
+# Add edges
+edges = [
+    ('x1', 'h1'), ('x2', 'h2'), ('x3', 'h3'),
+    ('h1', 'h2'), ('h2', 'h3'),
+    ('h1', 'y1'), ('h2', 'y2'), ('h3', 'y3')
+]
+G.add_edges_from(edges)
+
+# Define node positions
+pos = {
+    'x1': (0, 0), 'x2': (1, 0), 'x3': (2, 0),
+    'h1': (0, 0.25), 'h2': (1, 0.25), 'h3': (2, 0.25),
+    'y1': (0, .5), 'y2': (1, .5), 'y3': (2, .5)
+}
+
+# Draw the graph
+plt.figure(figsize=(6, 3))
+nx.draw(G, pos, with_labels=True, labels=nodes, node_size=1000, node_color='lightblue', font_size=10, font_weight='bold', arrowsize=20)
+plt.title('Simple RNN Diagram')
+plt.show()
+```
+:::
+::::
+
+The above figure shows an unrolled RNN architecture. The input $x_i$ feed into an $h_i$ layer, which produces sequential output $y_i$. The information from $h_i$ is passed to $h_{i+1}$ so that previous information about $x_i$ propagates forward in the architecture.
+
+
+
+## Why Use RNNs?
+
+- **Sequential Data**: Ideal for tasks where data points are dependent on previous ones.
+- **Memory**: Capable of retaining information from previous inputs, making them powerful for tasks involving context. This is achieved from hidden states and feedback loops.
+
+## RNN Applications
+
+- **Natural Language Processing (NLP)**: Language translation, sentiment analysis, and text generation.
+- **Speech Recognition**: Converting spoken language into text.
+- **Time Series Prediction**: Forecasting stock prices, weather, and other temporal data.
+- **Music Generation**: Creating a sequence of musical notes.
+
+## Outline
+
+1. RNN Architecture
+1. LSTM (Long Short-Term Memory) and GRU (Gated Recurrent Units)
+1. Stock Prediction
+
+## RNN Architecture
+
+```{python}
+#| fig-align: center
+#| echo: false
+import matplotlib.pyplot as plt
+import networkx as nx
+
+# Create a directed graph
+G = nx.DiGraph()
+
+# Add nodes with labels
+nodes = {
+    'x1': 'x_1', 'x2': 'x_2',
+    'h0': 'h_0', 'h1': 'h_1', 'h2': 'h_2',
+    'y1': 'y_1', 'y2': 'y_2',
+    'xt': 'x_t', 'yt': 'y_t', 'ht': 'h_t'
+}
+G.add_nodes_from(nodes.keys())
+
+# Add edges
+edges = [
+    ('x1', 'h1'), ('x2', 'h2'),
+    ('h0', 'h1'), ('h1', 'h2'),
+    ('h1', 'y1'), ('h2', 'y2'),
+    ('xt', 'ht'), ('ht', 'yt')
+]
+G.add_edges_from(edges)
+
+# Define node positions with y's on top and x's on the bottom
+pos = {
+    'x1': (1, 0), 'x2': (2, 0),
+    'h0': (0.5, 1), 'h1': (1, 1), 'h2': (2, 1),
+    'y1': (1, 2), 'y2': (2, 2),
+    'xt': (3, 0), 'ht': (3, 1), 'yt': (3, 2)
+}
+
+# Draw the graph
+plt.figure(figsize=(10, 5))
+nx.draw(G, pos, with_labels=True, labels=nodes, node_size=2000, node_color='lightblue', font_size=10, font_weight='bold', arrowsize=20)
+
+# Add ellipsis and arrow to x_t and h_t
+plt.text(2.5, 1, r'$\cdots$', fontsize=20)
+
+plt.show()
+```
+
+## Forward Propagation
+
+The forward pass in the RNN architecture is given by the following operations
+
+1. $h_t = g_h(W_{hh} h_{t-1} + W_{hx} x_t + b_h)$
+1. $y_t = g_y(W_{yh} h_t + b_y)$
+
+The vector $x_t$ is the $t$-th element of the input sequence. The vector $h_t$ is the hidden state at the $t$-th point of the sequence. The vector $y_t$ is the $t$-th output of the sequence. The functions $g_h$ and $g_y$ are nonlinear activation functions. The weight matrices $W_{hh}$, $W_{hx}$, $W_{yh}$, and biases $b_h$, $b_y$ are trainable parameters.
+
+## Rolled and Unrolled
+
+![[Source](https://colah.github.io/posts/2015-08-Understanding-LSTMs/)](figs/RNN-unrolled.png){fig-align="center"}
+
+## Model Types
+
+Depending on the application there many be varying number of outputs $y_t$.
+
+:::: {.columns}
+::: {.column width="60%"}
+![](figs/RNNConfigurations.png)
+:::
+::: {.column width="40%"}
+1. One-to-one, is a regular feed forward neural network.
+1. One-to-many, e.g., be used for image captioning (1 image and output a sequence of words).
+1. Many-to-one, e.g., sentiment analysis from a sequence of words or stock price prediction.
+1. Many-to-many, e.g., machine translation or video frame-by-frame action classification.
+:::
+::::
+
+
+## RNN Limitations
+
+- **Vanishing and Exploding Gradients**:
+  - During training, gradients can become very small (vanish) or very large (explode), making it difficult for the network to learn long-term dependencies.
+
+- **Long-Term Dependencies**:
+  - RNNs struggle to capture dependencies that are far apart in the sequence, leading to poor performance on tasks requiring long-term memory.
+
+- **Difficulty in Parallelization**:
+  - The sequential processing of data in RNNs makes it challenging to parallelize training, leading to slower training times.
+
+- **Limited Context**:
+  - Standard RNNs have a limited ability to remember context over long sequences, which can affect their performance on complex tasks.
+
+## Addressing RNN Limitations
+
+Some proposed solutions for mitigating the previous issues are
+
+- **LSTM (Long Short-Term Memory)**
+- **GRU (Gated Recurrent Units)** 
+
+These are more advanced variants of RNNs designed to address some of these limitations by improving the ability to capture long-term dependencies and mitigating gradient issues.
+
+## LSTM
+
+## GRU
+
+# Coding Example
+
+## Stock Prices
+
+## Recap
+
+## References
+
+1. Understanding LSTMs, Colah’s blog, 2015, [https://colah.github.io/posts/2015-08-Understanding-LSTMs/](https://colah.github.io/posts/2015-08-Understanding-LSTMs/) 
+1. Speech and Language Processing. Daniel Jurafsky & James H. Martin. Draft of January 5, 2024. – Chapter 9, RNNs and LSTMs, [https://web.stanford.edu/~jurafsky/slpdraft/9.pdf](https://web.stanford.edu/~jurafsky/slpdraft/9.pdf) 
+1. The Unreasonable Effectiveness of LSTMs, Andrej Karpathy, 2015, [https://karpathy.github.io/2015/05/21/rnn-effectiveness/](https://karpathy.github.io/2015/05/21/rnn-effectiveness/)
