@@ -1,19 +1,12 @@
 ---
 title: 'Time Series Analysis'
 jupyter: python3
+bibliography: references.bib
 ---
 
 ## Introduction
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/26-TimeSeries.ipynb)
-
-## References
-
-- [Time Series Analysis](https://en.wikipedia.org/wiki/Time_series)
-- [Time Series Analysis](https://otexts.com/fpp3/)
-
-- [Complete Guide on Time Series Analysis in Python](https://www.kaggle.com/code/prashant111/complete-guide-on-time-series-analysis-in-python/notebook)
-- [Time Series Data Visualization in Python](https://www.geeksforgeeks.org/time-series-data-visualization-in-python/)
 
 
 ## Lecture Outline
@@ -65,18 +58,90 @@ jupyter: python3
    - Recommended resources for further study (books, online courses, research papers)
    - Introduction to software tools for time series analysis (e.g., Python libraries, R packages)
 
-# **1. Introduction to Time Series (10 minutes)**
+# 1. Introduction to Time Series (10 minutes)
 
 ## Definition and examples of time series data
 
-- **Definition**: A time series is a sequence of data points typically measured at successive points in time, spaced at uniform time intervals.
-- **Examples**: Stock prices, daily temperature readings, monthly sales data, etc.
+```{python}
+#| echo: false
+import pandas as pd
+import yfinance as yf
 
-## Importance and applications in various fields (e.g., finance, economics, meteorology)
+# Load 10 years of AAPL stock prices into a dataframe
+aapl_data = yf.download('AAPL', start='2022-01-01', end='2024-11-01', progress=False)
+aapl_close_px = aapl_data['Close']
+# Plot the closing prices
+plt = aapl_close_px.plot(label='AAPL', figsize=(8,3), ylabel='Price')
+plt.legend()
+```
+
+- A **time series** is a series of data points or observations recorded at different
+  or regular time intervals, e.g. hourly, daily, monthly, quarterly, yearly, etc.
+- **Time Series Analysis** is the process of analyzing time series data to extract
+  meaningful statistics and other characteristics of the data such as trends,
+  cycles, and seasonal patterns.
+- **Time-Series Forecasting** is the process of using statistical models to predict
+  future values based on past values.
+
+## Applications
+
+```{python}
+#| echo: false
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+
+# Download a meteorology dataset example
+# For this example, we will use a sample dataset from NOAA (National Oceanic and Atmospheric Administration)
+# The dataset contains daily weather observations from the Global Historical Climatology Network (GHCN)
+
+if not os.path.exists('weather_data_filtered_2022.csv'):
+  # Load the dataset into a dataframe
+  url = 'https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/2022.csv.gz'
+  column_names = ['ID', 'Date', 'Element', 'Data_Value', 'M_Flag', 'Q_Flag', 'S_Flag', 'Obs_Time']
+  weather_data = pd.read_csv(url, compression='gzip', header=None, names=column_names)
+
+  # Filter the dataset for a specific weather station and element (e.g., daily maximum temperature)
+  station_id = 'USW00094728'  # Example station ID (New York Central Park)
+  element = 'TMAX'  # Daily maximum temperature
+  weather_data_filtered = weather_data[(weather_data['ID'] == station_id) & (weather_data['Element'] == element)]
+  # Convert the 'Date' column to datetime format
+  weather_data_filtered.loc[:, 'Date'] = pd.to_datetime(weather_data_filtered['Date'], format='%Y%m%d')
+  weather_data_filtered.to_csv('weather_data_filtered_2022.csv', index=False)
+  print("Filtered weather data has been written to 'weather_data_filtered_2022.csv'")
+```
+
+```{python}
+#| echo: false
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Read the filtered weather data from the CSV file into a dataframe
+weather_data_filtered = pd.read_csv('weather_data_filtered_2022.csv', parse_dates=['Date'])
+
+# Plot the daily maximum temperature
+plt.figure(figsize=(8, 4))
+plt.plot(weather_data_filtered['Date'], weather_data_filtered['Data_Value'] / 10, label='Daily Max Temperature (°C)')
+plt.xlabel('Date')
+plt.ylabel('Temperature (°C)')
+plt.title('Daily Maximum Temperature in 2022 - New York Central Park')
+plt.legend()
+plt.show()
+```
 
 - **Finance**: Time series analysis is used for stock price prediction, risk management, and economic forecasting.
 - **Economics**: It helps in understanding economic indicators, GDP growth, and inflation rates.
 - **Meteorology**: Time series data is crucial for weather forecasting, climate change studies, and analyzing seasonal patterns.
+- **Healthcare**: Time series analysis is used for analyzing patient data, monitoring disease outbreaks, and predicting patient outcomes.
+- **Marketing**: Time series analysis is used for analyzing sales data, customer behavior, and predicting future trends.
+- **Manufacturing**: Time series analysis is used for analyzing production data, monitoring equipment performance, and predicting maintenance needs.
+
+## Components of a Time Series
+
+- **Trend**: Long-term movement in the data. "Are car model sales going up or down?"
+- **Seasonality**: Regular pattern repeating over a known, fixed period. "Do sales of ice cream increase during the summer?"
+- **Cyclic**: Long-term oscillations not of a fixed period. "Are there long term business cycles in the sales of a product?"
+- **Irregular/Noise**: Random variation. "Are there random variations in the daily temperature that are not explained by the trend or seasonality?"
 
 ## Distinction between time series and other types of data
 
@@ -84,7 +149,256 @@ jupyter: python3
 - **Cross-Sectional Data**: Data collected at a single point in time, representing a snapshot. Examples include survey results and census data.
 - **Panel Data**: A combination of time series and cross-sectional data, where multiple subjects are observed over time. Examples include longitudinal studies and repeated measures data.
 
-# **2. Components of Time Series (10 minutes)**
+TODO: Add example of panel data... maybe from Tableau??
+
+
+# Time and Date Manipulation
+
+Many time series data sets are indexed by date or time. The python `datetime`
+library and the `pandas` library provide a powerful set of tools for manipulating
+time series data.
+
+The [Time Series](https://wesmckinney.com/book/time-series) chapter of the book
+[Python for Data Analysis, 3rd Ed.](https://wesmckinney.com/book/time-series)
+provides a good overview of these tools.
+
+```{python}
+import numpy as np
+import pandas as pd
+from datetime import datetime
+
+now = datetime.now()
+print(f"Date and time when this cell was executed: {now}")
+print(f"Year: {now.year}, month: {now.month}, day: {now.day}")
+
+delta = now - datetime(2024, 1, 1)
+print(f"Since beginning of 2024 till when this cell was run there were {delta.days} days and {delta.seconds} seconds.")
+```
+
+You can also convert between strings and datetime.
+
+```{python}
+# string to datetime
+date_string = "2024-01-01"
+date_object = datetime.strptime(date_string, "%Y-%m-%d")
+print(date_object)
+```
+
+You can also format datetime objects as strings.
+
+```{python}
+# datetime to string
+now_str = now.strftime("%Y-%m-%d")
+print(now_str)
+```
+
+See Table 11.2 in the [book](https://wesmckinney.com/book/time-series) for a list of formatting codes.
+
+Let's explore some of the pandas time series tools.
+
+Create a time series with a datetime index.
+
+```{python}
+longer_ts = pd.Series(np.random.standard_normal(1000),
+                      index=pd.date_range("2022-01-01", periods=1000))
+print(type(longer_ts))
+longer_ts
+```
+
+We can access just the samples from 2023 with simply:
+
+```{python}
+longer_ts["2023"]
+```
+
+Or the month of September 2023:
+
+```{python}
+longer_ts["2023-09"]
+```
+
+Or slice by date range:
+
+```{python}
+longer_ts["2023-03-01":"2023-03-10"]
+```
+
+or:
+
+```{python}
+longer_ts["2023-09-15":]
+```
+
+There are many more time series tools available that let you do things like:
+
+- Shifting and setting frequencies of date ranges
+- Time zone handling
+- Time series resampling
+- Time series rolling and expanding windows
+
+## Moving Window Functions
+
+Let's dive into the moving window functions.
+
+```{python}
+import pandas as pd
+import yfinance as yf
+
+# Load 10 years of AAPL stock prices into a dataframe
+aapl_data = yf.download('AAPL', start='2012-01-01', end='2022-01-01')
+print(aapl_data.head())
+
+aapl_close_px = aapl_data['Close']
+```
+
+```{python}
+# Plot the closing prices
+plt = aapl_close_px.plot(label='AAPL')
+aapl_close_px.rolling(window=250).mean().plot(label='250d MA')
+plt.legend()
+```
+
+
+# Visualization
+
+## Time Series Plot
+
+We're going to use a dataset of air passengers per month from 1949 to 1960.
+
+```{python}
+#| echo: false
+path = './air_passengers_1949_1960.csv'
+air_passengers = pd.read_csv(path, index_col='Date', parse_dates=True)
+air_passengers.head()
+```
+
+```{python}
+ts = air_passengers['Number of Passengers']
+ts.plot(ylabel='Number of Passengers', title='Air Passengers 1949-1960', figsize=(8, 4))
+```
+
+Clearly there are some trends and seasonality in the data.
+
+One way to accentuate that is to use a two-sided plot.
+
+```{python}
+import matplotlib.pyplot as plt
+
+x = air_passengers.index.values
+y1 = air_passengers['Number of Passengers'].values
+
+fig, ax = plt.subplots(1, 1, figsize=(8, 4))
+plt.fill_between(x, y1=y1, y2=-y1, color='tab:blue', alpha=0.2)
+plt.ylim(-800, 800)
+plt.title('Air Passengers (Two-Sided View)')
+plt.hlines(y=0, xmin=x[0], xmax=x[-1], color='black', linewidth=0.5)
+plt.show()
+```
+
+Since there is a clear seasonal pattern in the data, we can plot the data by month.
+
+```{python}
+# Seasonal plot of air_passengers
+import seaborn as sns
+
+# Extract month and year from the index
+air_passengers['Month'] = air_passengers.index.month
+air_passengers['Year'] = air_passengers.index.year
+
+# Create a seasonal plot
+plt.figure(figsize=(8, 4))
+sns.lineplot(data=air_passengers, x='Month', y='Number of Passengers', hue='Year', palette='tab10')
+plt.title('Seasonal Plot of Air Passengers')
+plt.ylabel('Number of Passengers')
+plt.xlabel('Month')
+plt.legend(title='Year', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.show()
+```
+
+The seasonality looks like it is increasing over time, but relatively speaking that
+might not be the case. We can normalize the data by the first month of each year.
+
+```{python}
+# Normalize the number of passengers by the first month of each year
+air_passengers['Normalized_Passengers'] = air_passengers.groupby('Year')['Number of Passengers'].transform(lambda x: x / x.iloc[0])
+
+# Create a seasonal plot with normalized values
+plt.figure(figsize=(8, 4))
+sns.lineplot(data=air_passengers, x='Month', y='Normalized_Passengers', hue='Year', palette='tab10')
+plt.title('Seasonal Plot of Air Passengers (Normalized by First Month of Each Year)')
+plt.ylabel('Normalized Number of Passengers')
+plt.xlabel('Month')
+plt.legend(title='Year', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.show()
+
+```
+
+Now the seasonality looks more similar across years, but perhaps it is still
+increasing a bit over time.
+
+```{python}
+# Year-wise box plot of air passengers
+plt.figure(figsize=(8, 4))
+sns.boxplot(data=air_passengers, x='Year', y='Number of Passengers', palette='tab10')
+plt.title('Year-wise Box Plot of Air Passengers')
+plt.ylabel('Number of Passengers')
+plt.xlabel('Year')
+plt.show()
+
+```
+
+You can see the trends, median, and interquartile range of the data by year.
+
+```{python}
+# Draw seasonal subseries plots
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Create a subseries plot for each month
+plt.figure(figsize=(8, 4))
+sns.boxplot(data=air_passengers, x='Month', y='Number of Passengers', palette='tab10')
+plt.title('Seasonal Subseries Plot of Air Passengers')
+plt.ylabel('Number of Passengers')
+plt.xlabel('Month')
+plt.show()
+
+```
+
+```{python}
+# Create seasonal subseries plot of monthly passengers
+fig, axes = plt.subplots(1, 12, figsize=(15, 10), sharey=True)
+fig.suptitle('Seasonal Subseries Plot of Monthly Air Passengers')
+
+# Iterate over each month and create a subplot
+for i, ax in enumerate(axes.flatten(), start=1):
+    monthly_data = air_passengers[air_passengers['Month'] == i]
+    ax.plot(monthly_data['Year'], monthly_data['Number of Passengers'], marker='o')
+    ax.set_title(f'Month: {i}')
+    ax.set_xlabel('Year')
+    ax.set_ylabel('Number of Passengers')
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.show()
+```
+
+```{python}
+from statsmodels.graphics.tsaplots import plot_acf
+
+# Draw the autocorrelation plot of air passengers
+plt.figure(figsize=(8, 4))
+plot_acf(air_passengers['Number of Passengers'], lags=48, )
+plt.title('Autocorrelation Plot of Air Passengers')
+plt.xlabel('Lags')
+plt.ylabel('Autocorrelation')
+plt.show()
+```
+
+The blue shaded area is the 95% confidence interval. The autocorrelation is
+significantly different when it is outside the confidence interval. Although we can see peaks at lags 12, 24, 36, and 48, they are not statistically significant.
+
+# 2. Components of Time Series (10 minutes)
+
+Let's now try to decompose the time series into its components.
 
 ## Trend: Long-term movement in the data
 
@@ -116,7 +430,7 @@ jupyter: python3
   - Random fluctuations in daily temperature readings.
   - Unpredictable changes in sales figures due to unforeseen events.
 
-# **3. Time Series Decomposition (10 minutes)**
+# 3. Time Series Decomposition (10 minutes)
 
 ## Additive vs. multiplicative models
 
@@ -138,6 +452,60 @@ jupyter: python3
     2. Remove the trend component to get the detrended series.
     3. Estimate the seasonal component from the detrended series.
     4. Remove the seasonal component to get the irregular component.
+
+Let's take each step by step. First we'll estimate the trend component by
+applying a moving average.
+
+```{python}
+ts.plot(figsize=(8, 4), label='Monthly')
+ts.rolling(window=12, center=True).mean().plot(label='12m MA')
+plt.ylabel('Number of Passengers')
+plt.title('Air Passengers 1949-1960')
+plt.legend()
+plt.show()
+```
+
+Now we can remove the trend component to get the detrended series.
+
+```{python}
+detrended_ts = ts - ts.rolling(window=12, center=True).mean()
+detrended_ts.plot(figsize=(8, 4), label='Detrended')
+plt.ylabel('Number of Passengers')
+plt.title('Air Passengers 1949-1960')
+plt.legend()
+plt.show()
+```
+
+Now we can estimate the seasonal component by taking the mean of the detrended
+series for each month.
+
+```{python}
+seasonal_ts = detrended_ts.groupby(detrended_ts.index.month).mean()
+seasonal_ts.plot(figsize=(8, 4), label='Seasonal')
+plt.ylabel('Number of Passengers')
+plt.title('Air Passengers 1949-1960')
+plt.legend()
+plt.show()
+```
+
+```{python}
+# Box plot of the detrended series for each month
+import seaborn as sns
+
+# Create a DataFrame with the detrended series and the corresponding month
+detrended_df = pd.DataFrame({'Detrended': detrended_ts, 'Month': detrended_ts.index.month})
+
+# Plot the box plot
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='Month', y='Detrended', data=detrended_df)
+plt.xlabel('Month')
+plt.ylabel('Detrended Number of Passengers')
+plt.title('Box Plot of Detrended Air Passengers by Month')
+plt.show()
+```
+
+
+## STL (Seasonal and Trend decomposition using Loess)
 - **STL (Seasonal and Trend decomposition using Loess)**: This is a more flexible and robust method for decomposing time series data. It uses locally weighted regression (Loess) to estimate the trend and seasonal components.
   - **Advantages**:
     - Handles any type of seasonality (e.g., weekly, monthly).
@@ -155,17 +523,48 @@ jupyter: python3
 
 - **Code**:
 
-```{.python}
+```{python}
 import pandas as pd
 import matplotlib.pyplot as plt
 from statsmodels.tsa.seasonal import seasonal_decompose
 
 # Load a sample time series dataset
-data = pd.read_csv('sample_time_series.csv', index_col='Date', parse_dates=True)
-ts = data['value']
+data = pd.read_csv('air_passengers_1949_1960.csv', index_col='Date', parse_dates=True)
+ts = data['Number of Passengers']
+```
 
+```{.python}
+ts.plot(figsize=(8, 4))
+plt.ylabel('Number of Passengers')
+plt.title('Air Passengers 1949-1960')
+plt.show()
+```
+
+```{python}
 # Apply classical decomposition
 decomposition = seasonal_decompose(ts, model='additive')
+
+# Plot the decomposed components
+fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(8, 8))
+decomposition.observed.plot(ax=ax1)
+ax1.set_ylabel('Observed')
+ax1.set_title('Air Passengers 1949-1960')
+decomposition.trend.plot(ax=ax2)
+ax2.set_ylabel('Trend')
+decomposition.seasonal.plot(ax=ax3)
+ax3.set_ylabel('Seasonal')
+decomposition.resid.plot(ax=ax4)
+ax4.set_ylabel('Residual')
+plt.tight_layout()
+plt.show()
+```
+
+Let's try the multiplicative model:
+
+```{python}
+
+# Apply classical decomposition
+decomposition = seasonal_decompose(ts, model='multiplicative')
 
 # Plot the decomposed components
 fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(12, 8))
@@ -181,7 +580,47 @@ plt.tight_layout()
 plt.show()
 ```
 
-# **4. Stationarity and Differencing (10 minutes)**
+
+The STL decomposition is more flexible and can handle the seasonality in the data
+better.
+
+Let's try the STL decomposition:
+
+```{python}
+from statsmodels.tsa.seasonal import STL
+
+stl = STL(ts, period=12, robust=True)
+result = stl.fit()
+# result.plot()
+
+# Plot the decomposed components
+fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(8, 6))
+result.observed.plot(ax=ax1)
+ax1.set_ylabel('Observed')
+ax1.set_title('Air Passengers 1949-1960 (STL)')
+result.trend.plot(ax=ax2)
+ax2.set_ylabel('Trend')
+result.seasonal.plot(ax=ax3)
+ax3.set_ylabel('Seasonal')
+result.resid.plot(ax=ax4)
+ax4.set_ylabel('Residual')
+plt.tight_layout()
+plt.show()
+```
+From [@hyndman2021forecasting]
+
+STL is a versatile and robust method for decomposing time series. STL is an acronym for “Seasonal and Trend decomposition using Loess”, while Loess is a method for estimating nonlinear relationships. The STL method was developed by [@cleveland1990stl].
+
+STL has several advantages over the classical, SEATS and X11 decomposition methods:
+
+* Unlike SEATS and X11, STL will handle any type of seasonality, not only monthly and quarterly data.
+* The seasonal component is allowed to change over time, and the rate of change can be controlled by the user.
+* The smoothness of the trend-cycle can also be controlled by the user.
+* It can be robust to outliers (i.e., the user can specify a robust decomposition), so that occasional unusual observations will not affect the estimates of the trend-cycle and seasonal components. They will, however, affect the remainder component.
+
+On the other hand, STL has some disadvantages. In particular, it does not handle trading day or calendar variation automatically, and it only provides facilities for additive decompositions.
+
+# 4. Stationarity and Differencing (10 minutes)
 
 ## Definition of stationarity
 
@@ -212,11 +651,15 @@ plt.show()
 - **KPSS Test (Kwiatkowski-Phillips-Schmidt-Shin Test)**: Another test for stationarity that tests the null hypothesis that the time series is stationary around a deterministic trend.
 - **PP Test (Phillips-Perron Test)**: Similar to the ADF test but uses a non-parametric method to account for serial correlation in the error terms.
 
-# **5. Time Series Models (15 minutes)**
+# 5. Time Series Models (15 minutes)
 
 ## Autoregressive (AR) models
 
-- **Autoregressive (AR) Models**: A type of time series model where the current value of the series is based on its previous values. The model is defined as:
+- **Autoregressive (AR) Models**: A type of time series model where the current
+  value of the series is based on its previous values. 
+  
+  The model is defined as:
+
   $$
   y_t = c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t
   $$
@@ -257,7 +700,9 @@ where:
 
 ## ARIMA (Autoregressive Integrated Moving Average) models
 
-- **ARIMA Models**: A type of time series model that combines Autoregressive (AR) and Moving Average (MA) models with differencing to make the series stationary. The model is defined as:
+- **ARIMA Models**: A type of time series model that combines Autoregressive (AR)
+  and Moving Average (MA) models with differencing to make the series stationary.
+  The model is defined as:
 
 $$
 y_t = c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \ldots + \theta_q \epsilon_{t-q}
@@ -336,11 +781,12 @@ $$
 1. **GARCH Models**: Useful for modeling time series data with time-varying volatility.
 2. **VAR Models**: Useful for capturing the linear interdependencies among multiple time series.
 
-# **6. Model Evaluation and Forecasting (10 minutes)**
+# 6. Model Evaluation and Forecasting (10 minutes)
 
 ## Criteria for model selection (e.g., AIC, BIC)
 
-- **AIC (Akaike Information Criterion)**: A measure of the relative quality of a statistical model for a given set of data. It is defined as:
+- **AIC (Akaike Information Criterion)**: A measure of the relative quality of a
+  statistical model for a given set of data. It is defined as:
 
 $$
 \text{AIC} = 2k - 2\ln(L)
@@ -405,7 +851,7 @@ $$
   - **Evaluation**: Assess the accuracy of the forecasts using appropriate metrics.
   - **Visualization**: Plot the historical data, forecasts, and confidence intervals.
 
-# **7. Case Study and Discussion (10 minutes)**
+# 7. Case Study and Discussion (10 minutes)
 
 ## Real-world case study: Application of time series analysis
 
@@ -428,7 +874,7 @@ $$
 
 ## Q&A session
 
-# **8. Conclusion and Further Reading (5 minutes)**
+# 8. Conclusion and Further Reading (5 minutes)
 
 ## Summary of key points
 
@@ -452,12 +898,25 @@ $$
   - **Statsmodels**: For statistical modeling and time series analysis.
   - **scikit-learn**: For machine learning and predictive modeling.
   - **TensorFlow/Keras**: For deep learning models.
-  - **Prophet**: For forecasting time series data.
+  - **Prophet**: For forecasting time series data. [web](https://facebook.github.io/prophet/) [@taylor2017forecasting]
 - **R Packages**: 
-  - **forecast**: For time series forecasting.
+  - **forecast**: For time series forecasting. [web](https://pkg.robjhyndman.com/forecast/)
   - **tseries**: For time series analysis and computational finance.
   - **zoo**: For working with regular and irregular time series data.
   - **xts**: For extensible time series.
-  - **prophet**: For forecasting time series data.
+  - **prophet**: For forecasting time series data. [web](https://facebook.github.io/prophet/) [@taylor2017forecasting]
 
 
+# Recap and References
+
+
+## Recap
+
+
+## References
+
+- [Wikipedia: Time Series Analysis](https://en.wikipedia.org/wiki/Time_series)
+- [Time Series Analysis](https://otexts.com/fpp3/)
+
+- [Complete Guide on Time Series Analysis in Python](https://www.kaggle.com/code/prashant111/complete-guide-on-time-series-analysis-in-python/notebook)
+- [Time Series Data Visualization in Python](https://www.geeksforgeeks.org/time-series-data-visualization-in-python/)
