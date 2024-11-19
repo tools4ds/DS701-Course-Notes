@@ -87,9 +87,9 @@ This often goes by the term __personalization.__
 
 Some examples:
     
-* Movie recommendation (Netflix, YouTube)
-* Related product recommendation (Amazon)
-* Web page ranking (Google)
+* Movie recommendation (Netflix ~6.5K movies and shows, YouTube ~14B videos)
+* Related product recommendation (Amazon ~600M products)
+* Web page ranking (Google >>100B pages)
 * Social content filtering (Facebook, Twitter)
 * Services (Airbnb, Uber, TripAdvisor)
 * News content recommendation (Apple News)
@@ -308,7 +308,8 @@ Two ways to form a rating for item $(u, i)$:
 ::::  
 
 :::: {.fragment}
-⟹ <span style="background-color: yellow;">Good for many users, fewer items</span>
+⟹ <span style="background-color: yellow;">Good for many users, fewer items.</span><br>
+(e.g., NetFix had ~280M subscribers, ~6.5K movies/shows)
 ::::
 
 :::: {.fragment}
@@ -318,7 +319,8 @@ Two ways to form a rating for item $(u, i)$:
 ::::
       
 :::: {.fragment}
-⟹ <span style="background-color: yellow;">Good for many items, fewer users</span>
+⟹ <span style="background-color: yellow;">Good for many items, fewer users</span><br>
+(e.g. Amazon had ~300M accounts, ~600M products)
 ::::
 
 ## Item-Item CF
@@ -412,7 +414,7 @@ So we want to compute correlation only over the users who rated both the items.
 ![](figs/L20-corr-support.png){width="60%" fig-align="center"}
 :::
 
-Let's compute the Pearson correlation coefficient for the following two items:
+Let's compute the Pearson correlation coefficient for the above two items:
 
 ```{python}
 import numpy as np
@@ -617,7 +619,7 @@ $$
 Step 4: If not converged, go to Step 1.
 
 Here $i \in R(u)$ means the set of items rated by user $u$ and $u \in R(i)$ means
-the set of users who have rated item $i$.
+the set of users who have rated item $i$ and $|R(u)|$ is the number of ratings.
 
 ---
 
@@ -696,6 +698,7 @@ __both__ users __and__ items, along with a similarity function, such that:
 :::
 ::::
 
+:::: {.fragment}
 We saw this idea previously, in an SVD lecture.
 
 This new vector space is called a __latent__ space, and the user and item
@@ -703,6 +706,7 @@ representations are called __latent vectors.__
 
 This notion of a shared latent space is also central to deep learning 
 recommender approaches [@naumov2019deep] we will look at later.
+::::
 
 ---
 
@@ -961,7 +965,7 @@ $$
 
 we see improvements in accuracy:
 
-![](figs/L20-netflix-1.png){width="70%" fig-align="center"}
+![Matrix factorization models’ accuracy. The plots show the root-mean-square error of each of four individual factor models (lower is better). Accuracy improves when the factor model’s dimensionality (denoted by numbers on the charts) increases. In addition, the more refined factor models, whose descriptions involve more distinct sets of parameters, are more accurate.](figs/L20-netflix-1.png){width="70%" fig-align="center" #fig-mf}
 
 ## 2. Who Rated What?
 
@@ -1109,7 +1113,7 @@ The 2nd order interactions are modeled via dot-products of all pairs from the
 collections of embedding vectors and processed dense features.
 
 The results of the dot-product interactions are concatenated with the processed
-dense vectors and passed to a final MLP.
+dense vectors.
 
 :::
 ::: {.column width="35%"}
