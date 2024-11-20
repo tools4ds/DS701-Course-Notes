@@ -44,3 +44,6 @@ ffmpeg
 graphviz
 torch
 torchvision
+
+# 26-TimeSeries
+kagglehub

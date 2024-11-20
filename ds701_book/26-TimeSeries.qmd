@@ -1,0 +1,1351 @@
+---
+title: 'Time Series Analysis'
+jupyter: python3
+bibliography: references.bib
+---
+
+## Introduction
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/26-TimeSeries.ipynb)
+
+
+# Introduction to Time Series
+
+## Definition and examples
+
+```{python}
+#| echo: false
+#| fig-align: center
+import pandas as pd
+import yfinance as yf
+
+# Load 10 years of AAPL stock prices into a dataframe
+aapl_data = yf.download('AAPL', start='2022-01-01', end='2024-11-01', progress=False)
+aapl_close_px = aapl_data['Close']
+# Plot the closing prices
+plt = aapl_close_px.plot(label='AAPL', figsize=(10 ,3), ylabel='Price', title='AAPL Stock Price')
+```
+
+- A **time series** is a series of data points or observations recorded at different
+  or regular time intervals, e.g., hourly, daily, monthly, quarterly, yearly, etc.
+- **Time Series Analysis** is the process of analyzing time series data to extract
+  meaningful statistics and other characteristics of the data such as trends,
+  cycles, and seasonal patterns.
+- **Time-Series Forecasting** is the process of using statistical models to predict
+  future values based on past values.
+
+## Applications
+
+```{python}
+#| echo: false
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+
+# Download a meteorology dataset example
+# For this example, we will use a sample dataset from NOAA (National Oceanic and Atmospheric Administration)
+# The dataset contains daily weather observations from the Global Historical Climatology Network (GHCN)
+
+if not os.path.exists(os.path.join('data', 'weather_data_filtered_2022.csv')):
+  # Load the dataset into a dataframe
+  url = 'https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/2022.csv.gz'
+  column_names = ['ID', 'Date', 'Element', 'Data_Value', 'M_Flag', 'Q_Flag', 'S_Flag', 'Obs_Time']
+  weather_data = pd.read_csv(url, compression='gzip', header=None, names=column_names)
+
+  # Filter the dataset for a specific weather station and element (e.g., daily maximum temperature)
+  station_id = 'USW00094728'  # Example station ID (New York Central Park)
+  element = 'TMAX'  # Daily maximum temperature
+  weather_data_filtered = weather_data[(weather_data['ID'] == station_id) & (weather_data['Element'] == element)]
+  # Convert the 'Date' column to datetime format
+  weather_data_filtered.loc[:, 'Date'] = pd.to_datetime(weather_data_filtered['Date'], format='%Y%m%d')
+  weather_data_filtered.to_csv(os.path.join('data', 'weather_data_filtered_2022.csv'), index=False)
+  print("Filtered weather data has been written to 'data/weather_data_filtered_2022.csv'")
+```
+
+```{python}
+#| echo: false
+#| fig-align: center
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Read the filtered weather data from the CSV file into a dataframe
+weather_data_filtered = pd.read_csv(os.path.join('data', 'weather_data_filtered_2022.csv'), parse_dates=['Date'])
+
+# Plot the daily maximum temperature
+plt.figure(figsize=(10, 3))
+plt.plot(weather_data_filtered['Date'], weather_data_filtered['Data_Value'] / 10, label='Daily Max Temperature (°C)')
+plt.xlabel('Date')
+plt.ylabel('Temperature (°C)')
+plt.title('Daily Maximum Temperature in 2022 - New York Central Park')
+plt.show()
+```
+
+- **Finance**: Time series analysis is used for stock price prediction, risk management, and economic forecasting.
+- **Economics**: It helps in understanding economic indicators, GDP growth, and inflation rates.
+- **Meteorology**: Time series data is crucial for weather forecasting, climate change studies, and analyzing seasonal patterns.
+- **Healthcare**: Time series analysis is used for analyzing patient data, monitoring disease outbreaks, and predicting patient outcomes.
+- **Marketing**: Time series analysis is used for analyzing sales data, customer behavior, and predicting future trends.
+- **Manufacturing**: Time series analysis is used for analyzing production data, monitoring equipment performance, and predicting maintenance needs.
+
+## Components of a Time Series
+
+- **Trend**: Long-term movement in the data. "Are car model sales going up or down?"
+- **Seasonality**: Regular pattern repeating over a known, fixed period. "Do sales of ice cream increase during the summer?"
+- **Acyclic**: Long-term oscillations not of a fixed period. "Are there long term business cycles in the sales of a product?"
+- **Irregular/Noise**: Random variation. "Are there random variations in the daily temperature that are not explained by the trend or seasonality?"
+
+## Distinction between time series and other types of data
+
+- **Time Series Data**: Data points collected or recorded at specific time intervals. Examples include stock prices, weather data, and sales figures.
+- **Cross-Sectional Data**: Data collected at a single point in time, representing a snapshot. Examples include survey results and census data.
+- **Panel Data**: A combination of time series and cross-sectional data, where multiple subjects are observed over time. Examples include longitudinal studies and repeated measures data.
+
+## Analysis and Forecasting
+
+We'll look at two main aspects of time series analysis:
+
+1. Analyzing historical data to answer questions about past behavior
+2. Forecasting future values based on past values
+
+::: {.content-visible when-profile="slides"}
+## Time and Date Manipulation
+
+**Note**:
+
+In the course notes version of this chapter, there's a section on time and date
+manipulation using the `datetime` library and the `pandas` library.
+:::
+
+::: {.content-visible when-profile="web"}
+# Time and Date Manipulation
+
+Many time series data sets are indexed by date or time. The python `datetime`
+library and the `pandas` library provide a powerful set of tools for manipulating
+time series data.
+
+The [Time Series](https://wesmckinney.com/book/time-series) chapter of the book
+[Python for Data Analysis, 3rd Ed.](https://wesmckinney.com/book/time-series)
+provides a good overview of these tools. We'll share a few excerpts here.
+
+```{python}
+import numpy as np
+import pandas as pd
+from datetime import datetime
+
+now = datetime.now()
+print(f"Date and time when this cell was executed: {now}")
+print(f"Year: {now.year}, month: {now.month}, day: {now.day}")
+
+delta = now - datetime(2024, 1, 1)
+print(f"Since beginning of 2024 till when this cell was run there were {delta.days} days and {delta.seconds} seconds.")
+```
+
+You can also convert between strings and datetime.
+
+```{python}
+# string to datetime
+date_string = "2024-01-01"
+date_object = datetime.strptime(date_string, "%Y-%m-%d")
+print(date_object)
+```
+
+You can also format datetime objects as strings.
+
+```{python}
+# datetime to string
+now_str = now.strftime("%Y-%m-%d")
+print(now_str)
+```
+
+See Table 11.2 in the [book](https://wesmckinney.com/book/time-series) for a list of formatting codes.
+
+Let's explore some of the pandas time series tools.
+
+Create a time series with a datetime index.
+
+```{python}
+longer_ts = pd.Series(np.random.standard_normal(1000),
+                      index=pd.date_range("2022-01-01", periods=1000))
+print(type(longer_ts))
+longer_ts
+```
+
+We can access just the samples from 2023 with simply:
+
+```{python}
+longer_ts["2023"]
+```
+
+Or the month of September 2023:
+
+```{python}
+longer_ts["2023-09"]
+```
+
+Or slice by date range:
+
+```{python}
+longer_ts["2023-03-01":"2023-03-10"]
+```
+
+or:
+
+```{python}
+longer_ts["2023-09-15":]
+```
+
+There are many more time series tools available that let you do things like:
+
+- Shifting and setting frequencies of date ranges
+- Time zone handling
+- Time series resampling
+- Time series rolling and expanding windows
+
+## Moving Window Functions
+
+Let's dive into the moving window functions.
+
+```{python}
+import pandas as pd
+import yfinance as yf
+
+# Load 10 years of AAPL stock prices into a dataframe
+aapl_data = yf.download('AAPL', start='2012-01-01', end='2022-01-01')
+print(aapl_data.head())
+
+aapl_close_px = aapl_data['Close']
+```
+
+```{python}
+# Plot the closing prices
+plt = aapl_close_px.plot(label='AAPL')
+aapl_close_px.rolling(window=250).mean().plot(label='250d MA')
+plt.legend()
+```
+
+:::
+
+# Visualization
+
+Like with any data, it is important to visualize time series data to get a sense of
+various characteristics.
+
+We'll show a few examples of time series plots and include the code to generate them.
+
+## Air Passengers Dataset
+
+We're going to use a dataset of air passengers per month from 1949 to 1960.
+
+```{python}
+path = os.path.join('data', 'air_passengers_1949_1960.csv')
+air_passengers = pd.read_csv(path, index_col='Date', parse_dates=True)
+air_passengers.head()
+```
+
+## Time Series Plot
+
+Let's look at the time series plot.
+
+```{python}
+#| fig-align: center
+ts = air_passengers['Number of Passengers']
+ts.plot(ylabel='Number of Passengers', title='Air Passengers 1949-1960', figsize=(10, 4))
+```
+
+Clearly there are some trends and seasonality in the data.
+
+---
+
+One way to accentuate that is to use a two-sided plot.
+
+```{python}
+#| fig-align: center
+import matplotlib.pyplot as plt
+
+x = air_passengers.index.values
+y1 = air_passengers['Number of Passengers'].values
+
+fig, ax = plt.subplots(1, 1, figsize=(10, 4))
+plt.fill_between(x, y1=y1, y2=-y1, color='tab:blue', alpha=0.2)
+plt.ylim(-800, 800)
+plt.title('Air Passengers (Two-Sided View)')
+plt.hlines(y=0, xmin=x[0], xmax=x[-1], color='black', linewidth=0.5)
+plt.show()
+```
+
+---
+
+Since there is a clear seasonal pattern in the data, we can plot the data by month.
+
+```{python}
+#| fig-align: center
+# Seasonal plot of air_passengers
+import seaborn as sns
+
+# Extract month and year from the index
+air_passengers['Month'] = air_passengers.index.month
+air_passengers['Year'] = air_passengers.index.year
+
+# Create a seasonal plot
+plt.figure(figsize=(10, 4))
+sns.lineplot(data=air_passengers, x='Month', y='Number of Passengers', hue='Year', palette='tab10')
+plt.title('Seasonal Plot of Air Passengers')
+plt.ylabel('Number of Passengers')
+plt.xlabel('Month')
+plt.legend(title='Year', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.show()
+```
+
+---
+
+The seasonality looks like it is increasing over time, but relatively speaking that
+might not be the case. We can normalize the data by the first month of each year.
+
+```{python}
+#| fig-align: center
+# Normalize the number of passengers by the first month of each year
+air_passengers['Normalized_Passengers'] = air_passengers.groupby('Year')['Number of Passengers'].transform(lambda x: x / x.iloc[0])
+
+# Create a seasonal plot with normalized values
+plt.figure(figsize=(10, 4))
+sns.lineplot(data=air_passengers, x='Month', y='Normalized_Passengers', hue='Year', palette='tab10')
+plt.title('Seasonal Plot of Air Passengers (Normalized by First Month of Each Year)')
+plt.ylabel('Normalized Number of Passengers')
+plt.xlabel('Month')
+plt.legend(title='Year', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.show()
+
+```
+
+Now the seasonality looks more similar across years, but perhaps it is still
+increasing a bit over time.
+
+---
+
+We can also look at the year-wise box plot.
+
+```{python}
+#| fig-align: center
+# Year-wise box plot of air passengers
+plt.figure(figsize=(10, 4))
+sns.boxplot(data=air_passengers, x='Year', y='Number of Passengers', palette='tab10')
+plt.title('Year-wise Box Plot of Air Passengers')
+plt.ylabel('Number of Passengers')
+plt.xlabel('Year')
+plt.show()
+
+```
+
+You can see the trends, median, and interquartile range of the data by year.
+
+---
+
+We can also look at the seasonal subseries box plot that indicates the
+distribution of the data over the years for each month.
+
+```{python}
+#| fig-align: center
+# Draw seasonal subseries plots
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Create a subseries plot for each month
+plt.figure(figsize=(10, 4))
+sns.boxplot(data=air_passengers, x='Month', y='Number of Passengers', palette='tab10', hue='Month', legend=False)
+plt.title('Seasonal Subseries Plot of Air Passengers')
+plt.ylabel('Number of Passengers')
+plt.xlabel('Month')
+plt.show()
+```
+
+---
+
+We can also look at the seasonal subseries plot that shows the trend over the years
+for each month.
+
+```{python}
+#| fig-align: center
+# Create seasonal subseries plot of monthly passengers
+fig, axes = plt.subplots(1, 12, figsize=(10, 4), sharey=True)
+fig.suptitle('Seasonal Subseries Plot of Monthly Air Passengers')
+
+# List of abbreviated month names
+month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+# Iterate over each month and create a subplot
+for i, ax in enumerate(axes.flatten(), start=1):
+    monthly_data = air_passengers[air_passengers['Month'] == i]
+    ax.plot(monthly_data['Year'], monthly_data['Number of Passengers'], marker='.')
+    ax.set_title(month_names[i-1])
+    ax.set_xticks([])  # Remove x-axis numbers
+    # ax.set_xlabel('Year')
+    #ax.set_ylabel('Number of Passengers')
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.show()
+```
+
+
+
+## Autocorrelation Function
+
+For the next visualization, we will use the autocorrelation function (ACF).
+
+* The autocorrelation function (ACF) measures the correlation between a time series and its lagged values. 
+* It helps to identify the extent to which current values of the series are related to its past values. 
+* The ACF is useful for identifying patterns such as seasonality and for determining the appropriate parameters for time series models like ARIMA.
+
+## ACF Definition
+
+The autocorrelation function at lag $k$ is defined as:
+
+$$
+\rho_k = \frac{\sum_{t=k+1}^{T} (y_t - \bar{y})(y_{t-k} - \bar{y})}{\sum_{t=1}^{T} (y_t - \bar{y})^2}
+$$
+
+where:
+
+- $y_t$ is the value of the time series at time $t$,
+- $\bar{y}$ is the mean of the time series,
+- $T$ is the total number of observations,
+- $k$ is the lag.
+
+**Interpretation:**
+
+- **Peaks in Autocorrelation**: Indicate that there are cyclic components.
+- **No Autocorrelation**: Indicates that the values of the series are independent of each other.
+
+## ACF Example in Python
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define a function with noise added
+def interesting_function(t):
+    return np.sin(t) + 0.5 * np.random.normal(size=len(t))
+
+# Generate time values
+t = np.linspace(0, 10, 500)
+
+# Generate the function values
+function_values = interesting_function(t)
+
+# Shift the function values
+shift = 50
+function_values_shifted = np.roll(function_values, shift)
+
+# Plot the function and its shifted version
+plt.figure(figsize=(10, 4))
+plt.plot(t, function_values, label='Original Function')
+plt.plot(t, function_values_shifted, label='Shifted Function', linestyle='dashed')
+plt.xlabel('Time')
+plt.ylabel('Amplitude')
+plt.title('Original Function and Shifted Function with Noise')
+plt.legend()
+plt.show()
+
+# Compute the autocorrelation
+autocorrelation = np.correlate(function_values, function_values_shifted, mode='full')
+lags = np.arange(-len(function_values) + 1, len(function_values))
+
+# Plot the autocorrelation
+plt.figure(figsize=(10, 4))
+plt.plot(lags, autocorrelation)
+plt.xlabel('Lag')
+plt.ylabel('Autocorrelation')
+plt.title('Autocorrelation of Function with Noise')
+plt.show()
+
+```
+
+## ACF of Air Passengers
+
+An interesting perspective is to plot the autocorrelation to see if there are any
+significant lags in the data.
+
+```{python}
+#| fig-align: center
+from statsmodels.graphics.tsaplots import plot_acf
+
+# Draw the autocorrelation plot of air passengers
+plot_acf(air_passengers['Number of Passengers'], lags=48)
+plt.title('Autocorrelation Plot of Air Passengers')
+plt.xlabel('Lags')
+plt.ylabel('Autocorrelation')
+plt.show()
+```
+
+The blue shaded area is the 95% confidence interval. The autocorrelation is
+significant when it is outside the confidence interval, e.g., the peak at 12. 
+
+Although we can see peaks at lags 24, 36, and 48, they are not statistically significant.
+
+
+# Components of Time Series
+
+Let's now try to decompose the time series into constituent components.
+
+First we'll define the components and then look at how we find them.
+
+## Trend
+
+- **Trend**: Represents the long-term progression of the series. It can be increasing, decreasing, or constant over time.
+- **Examples**: 
+  - An upward trend in stock prices over several years.
+  - A downward trend in the sales of a product as it becomes obsolete.
+
+## Seasonality
+
+- **Seasonality**: Refers to regular, predictable changes that recur every calendar year. It is a pattern that repeats over a known, fixed period.
+- **Examples**: 
+  - Increased retail sales during the holiday season.
+  - Higher ice cream sales during the summer months.
+  - Regular fluctuations in electricity consumption due to seasonal temperature changes.
+
+## Cyclic (Acyclic)
+
+- **Cyclic**: Refers to long-term oscillations or fluctuations in the data that are not of a fixed period. These cycles can vary in length and are often influenced by economic or business conditions.
+- **Examples**: 
+  - Business cycles with periods of expansion and contraction.
+  - Agricultural cycles influenced by factors such as weather and market conditions.
+
+## Irregular/Noise
+
+- **Irregular/Noise**: Refers to the random variation in the data that cannot be attributed to trend, seasonality, or cyclic patterns. It is the residual variation after accounting for other components.
+- **Examples**: 
+  - Sudden spikes or drops in stock prices due to unexpected news.
+  - Random fluctuations in daily temperature readings.
+  - Unpredictable changes in sales figures due to unforeseen events.
+
+# Time Series Decomposition
+
+Let's look at _how_ we can decompose the time series into its components.
+
+## Combination of components
+
+We've identified the components of the time series. Now we need to combine them.
+
+There are two main ways to combine the components:
+
+- **Additive model**
+- **Multiplicative model**
+
+## Additive model
+
+- **Additive Model**: Assumes that the components of the time series (trend, seasonality, and noise) are added together. The model can be represented as:
+  - $Y(t) = T(t) + S(t) + e(t)$
+  - Where $Y(t)$ is the observed value, $T(t)$ is the trend component, $S(t)$ is the seasonal component, and $e(t)$ is the noise or error term.
+- **Example**:
+  - Monthly sales data where the seasonal effect is constant over time.
+
+## Multiplicative model
+
+- **Multiplicative Model**: Assumes that the components of the time series are multiplied together. The model can be represented as:
+  - $Y(t) = T(t) \times S(t) \times e(t)$
+  - Where $Y(t)$, $T(t)$ and $S(t)$ are the trend, seasonal, and noise components respectively.
+- **Examples**
+  - Monthly sales data where the seasonal effect increases or decreases proportionally with the trend.
+
+## Decomposition Approaches
+
+We'll look at two approaches to decomposing the time series:
+
+- **Classical Decomposition**
+- **STL Decomposition**
+
+Both approaches support both additive and multiplicative models.
+
+## "Classical" Decomposition
+
+- This technique involves breaking down a time series into its **trend**,
+  **seasonal**, and **irregular** (or noise) components. 
+- It can be applied using either an additive or multiplicative model.
+- **Steps**:
+  1. Estimate the trend component by applying a moving average.
+  2. Remove the trend component to get the detrended series.
+  3. Estimate the seasonal component from the detrended series.
+  4. Remove the seasonal component to get the irregular component.
+
+Let's take each step by step.
+
+## Estimate the trend component
+
+First we'll estimate the trend component by applying a moving average using the
+Pandas `rolling` method.
+
+```{python}
+#| fig-align: center
+ts.plot(figsize=(8, 3), label='Monthly')
+ts.rolling(window=11, center=True).mean().plot(label='11m MA')
+plt.ylabel('Number of Passengers')
+plt.title('Air Passengers 1949-1960')
+plt.legend()
+plt.show()
+```
+
+We're actually using a 11-month moving average because we want to center the
+average.
+
+## Remove the trend component
+
+Now we can subtract the trend component to get the detrended series.
+
+```{python}
+#| fig-align: center
+detrended_ts = ts - ts.rolling(window=11, center=True).mean()
+detrended_ts.plot(figsize=(8, 3), label='Detrended')
+plt.ylabel('Number of Passengers')
+plt.title('Air Passengers 1949-1960')
+plt.legend()
+plt.show()
+```
+
+## Estimate the seasonal component
+
+Estimate the seasonal component by taking the mean of the detrended
+series for each month.
+
+```{python}
+#| fig-align: center
+seasonal_ts = detrended_ts.groupby(detrended_ts.index.month).mean()
+seasonal_ts.plot(figsize=(8, 3), label='Seasonal')
+plt.ylabel('Number of Passengers')
+plt.title('Air Passengers 1949-1960')
+plt.legend()
+plt.show()
+```
+
+---
+
+We can also look at the box plot of the detrended series for each month.
+
+```{python}
+#| fig-align: center
+# Box plot of the detrended series for each month
+import seaborn as sns
+
+# Create a DataFrame with the detrended series and the corresponding month
+detrended_df = pd.DataFrame({'Detrended': detrended_ts, 'Month': detrended_ts.index.month})
+
+# Plot the box plot
+plt.figure(figsize=(8, 4))
+sns.boxplot(x='Month', y='Detrended', data=detrended_df, palette='tab10', hue='Month', legend=False)
+plt.xlabel('Month')
+plt.ylabel('Detrended Number of Passengers')
+plt.title('Box Plot of Detrended Air Passengers by Month')
+plt.show()
+```
+
+Clearly, certain months have more variability than others.
+
+## Remove the seasonal component
+
+Now we can subtract the seasonal component to get the irregular component.
+
+```{python}
+#| code-fold: false
+# Broadcast the seasonal component to the length of the detrended series
+# and subtract it from the detrended series
+
+irregular_ts = detrended_ts - np.tile(seasonal_ts, len(detrended_ts) // len(seasonal_ts))
+```
+
+And plot the residual irregular component.
+
+```{python}
+#| fig-align: center
+plt.figure(figsize=(8, 3))
+irregular_ts.plot(label='Irregular', color='red')
+plt.ylabel('Irregular')
+plt.title('Irregular Component')
+plt.legend()
+plt.show()
+```
+
+**Question**: What do you observe about the irregular component? Is it truly
+random?
+
+---
+
+Finally, we can put the detrended, seasonal, and irregular plots together.
+
+```{python}
+#| fig-align: center
+# Plot detrended, seasonal, and irregular components
+plt.figure(figsize=(8, 6))
+
+# Plot detrended series
+plt.subplot(3, 1, 1)
+detrended_ts.plot(label='Detrended', color='blue')
+plt.ylabel('Detrended')
+plt.title('Detrended Component')
+plt.legend()
+
+# Plot seasonal series
+plt.subplot(3, 1, 2)
+seasonal_ts.plot(label='Seasonal', color='green')
+plt.ylabel('Seasonal')
+plt.title('Seasonal Component')
+plt.legend()
+
+# Plot irregular series
+plt.subplot(3, 1, 3)
+irregular_ts.plot(label='Irregular', color='red')
+plt.ylabel('Irregular')
+plt.title('Irregular Component')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+
+```
+
+
+## Seasonal and Trend decomposition using Loess (STL)
+
+- **STL** is a more flexible and robust method for decomposing time series data.
+- It uses locally weighted regression (Loess) to estimate the trend and seasonal components [@cleveland1990stl].
+- **Advantages**:
+  - Handles any type of seasonality (e.g., weekly, monthly).
+  - Can deal with missing values and outliers.
+  - Provides smooth and adaptable trend and seasonal components.
+
+> See [Course Notes](#locally-estimated-scatterplot-smoothing----loessgpt4o) for a more detailed description of Loess.
+
+See also [@hyndman2021forecasting].
+
+::: {.content-visible when-profile="web"}
+
+## Locally Estimated Scatterplot Smoothing -- Loess[^gpt4o]
+
+[^gpt4o]: gpt-4o, personal communication, Nov 2024
+
+**Loess**, which stands for "Locally Estimated Scatterplot Smoothing," is a non-parametric method used to estimate non-linear relationships in data. It is particularly useful for smoothing scatterplots and is a type of local regression.
+
+### Key Features of Loess:
+
+1. **Local Fitting**: Loess fits simple models to localized subsets of the data to build up a function that describes the deterministic part of the variation in the data, point by point.
+
+2. **Weighted Least Squares**: It uses weighted least squares to fit a polynomial surface to the data. The weights decrease with distance from the point of interest, giving more influence to points near the target point.
+
+3. **Flexibility**: Loess is flexible and can model complex relationships without assuming a specific global form for the data. It can adapt to various shapes and patterns in the data.
+
+4. **Smoothing Parameter**: The degree of smoothing is controlled by a parameter, often denoted as $\alpha$ or the span. This parameter determines the proportion of data points used in each local fit. A smaller span results in a curve that follows the data more closely, while a larger span results in a smoother curve.
+
+5. **Polynomial Degree**: Loess can fit either linear or quadratic polynomials to the data. The choice of polynomial degree affects the smoothness and flexibility of the fit.
+
+### How Loess Works:
+
+- **Step 1**: For each point in the dataset, a neighborhood of points is selected based on the smoothing parameter.
+- **Step 2**: A weighted least squares regression is performed on the points in the neighborhood, with weights decreasing with distance from the target point.
+- **Step 3**: The fitted value at the target point is computed from the local regression model.
+- **Step 4**: This process is repeated for each point in the dataset, resulting in a smooth curve that captures the underlying trend.
+
+### Applications:
+
+Loess is widely used in exploratory data analysis to visualize trends and patterns in data. It is particularly useful when the relationship between variables is complex and not well-represented by a simple linear or polynomial model.
+
+### Example in Python:
+
+In Python, the `statsmodels` library provides a function for performing Loess smoothing:
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.nonparametric.smoothers_lowess import lowess
+
+# Example data
+x = np.linspace(0, 10, 100)
+y = np.sin(x) + np.random.normal(0, 0.1, 100)
+
+# Apply Loess smoothing
+smoothed = lowess(y, x, frac=0.2)
+
+# Plot
+plt.scatter(x, y, label='Data', alpha=0.5)
+plt.plot(smoothed[:, 0], smoothed[:, 1], color='red', label='Loess Smoothed')
+plt.legend()
+plt.show()
+```
+
+In this example, `frac` is the smoothing parameter that controls the amount of smoothing applied to the data.
+:::
+
+## Practical example using Python
+
+Let's demonstrate a practical example of time series decomposition using Python.
+
+**Steps**:
+
+1. Load a sample time series dataset.
+2. Apply a decomposition technique (e.g., classical decomposition or STL).
+3. Visualize the decomposed components (trend, seasonal, and residual).
+
+
+## Air Passengers Dataset
+
+Let's load the Air Passengers dataset again.
+
+```{python}
+#| code-fold: false
+import pandas as pd
+import matplotlib.pyplot as plt
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+# Load a sample time series dataset
+data = pd.read_csv(os.path.join('data', 'air_passengers_1949_1960.csv'), index_col='Date', parse_dates=True)
+ts = data['Number of Passengers']
+```
+
+## `statsmodels` Classical Decomposition -- Additive Model
+
+We'll apply the classical decomposition using the `statsmodels` 
+`seasonal_decompose` function with the additive model.
+
+```{python}
+#| fig-align: center
+# Apply classical decomposition
+decomposition = seasonal_decompose(ts, model='additive')
+
+# Plot the decomposed components
+fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(8, 8))
+decomposition.observed.plot(ax=ax1)
+ax1.set_ylabel('Observed')
+ax1.set_title('Air Passengers 1949-1960')
+decomposition.trend.plot(ax=ax2)
+ax2.set_ylabel('Trend')
+decomposition.seasonal.plot(ax=ax3)
+ax3.set_ylabel('Seasonal')
+decomposition.resid.plot(ax=ax4)
+ax4.set_ylabel('Residual')
+plt.tight_layout()
+plt.show()
+```
+
+## `statsmodels` Classical Decomposition -- Multiplicative Model
+
+Let's try the multiplicative model:
+
+```{python}
+#| fig-align: center
+# Apply classical decomposition
+decomposition = seasonal_decompose(ts, model='multiplicative')
+
+# Plot the decomposed components
+fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(8, 8))
+decomposition.observed.plot(ax=ax1)
+ax1.set_ylabel('Observed')
+decomposition.trend.plot(ax=ax2)
+ax2.set_ylabel('Trend')
+decomposition.seasonal.plot(ax=ax3)
+ax3.set_ylabel('Seasonal')
+decomposition.resid.plot(ax=ax4)
+ax4.set_ylabel('Residual')
+plt.tight_layout()
+plt.show()
+```
+
+
+## STL Decomposition
+
+The STL decomposition is more flexible and can handle the seasonality in the data
+better.
+
+Let's try the STL decomposition:
+
+```{python}
+#| fig-align: center 
+from statsmodels.tsa.seasonal import STL
+
+stl = STL(ts, period=12, robust=True)
+result = stl.fit()
+# result.plot()
+
+# Plot the decomposed components
+fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(8, 6))
+result.observed.plot(ax=ax1)
+ax1.set_ylabel('Observed')
+ax1.set_title('Air Passengers 1949-1960 (STL)')
+result.trend.plot(ax=ax2)
+ax2.set_ylabel('Trend')
+result.seasonal.plot(ax=ax3)
+ax3.set_ylabel('Seasonal')
+result.resid.plot(ax=ax4)
+ax4.set_ylabel('Residual')
+plt.tight_layout()
+plt.show()
+```
+
+
+
+# Stationarity and Differencing
+
+## Definition of stationarity
+
+A time series is said to be stationary if its statistical properties such as mean, variance, and autocorrelation are constant over time.
+
+**Types of Stationarity**:
+
+1. **Strict Stationarity**: The entire distribution of the time series remains unchanged over time.
+2. **Weak Stationarity**: Only the first two moments (mean and variance) are constant over time, and the covariance between two time points depends only on the time lag between them.
+
+## Importance of stationarity in time series analysis
+
+Stationarity is crucial in time series analysis because many statistical methods and models assume that the time series is stationary. Non-stationary data can lead to misleading results and poor forecasts.
+
+**Why Stationarity Matters**:
+
+1. **Model Assumptions**: Many time series models, such as ARIMA, require the data to be stationary to make accurate predictions.
+2. **Statistical Properties**: Stationary time series have consistent statistical properties over time, making it easier to analyze and interpret.
+3. **Forecasting**: Stationary data improves the reliability and accuracy of forecasts.
+
+## Techniques to achieve stationarity
+
+1. **Differencing**: Subtracting the previous observation from the current observation to remove trends and seasonality.
+2. **Transformation**: Applying mathematical transformations such as logarithms or square roots to stabilize the variance.
+3. **Decomposition**: Separating the time series into trend, seasonal, and residual components to analyze and adjust each part individually.
+4. **Smoothing**: Using techniques like moving averages to smooth out short-term fluctuations and highlight longer-term trends.
+
+
+## Tests for stationarity
+
+There are tests for stationarity such as listed below and available in
+`statsmodels`.
+
+- **ADF Test (Augmented Dickey-Fuller Test)**: A statistical test used to determine
+  if a time series is stationary. It tests the null hypothesis that a unit root[^unit_root] is
+  present in the time series.
+- **KPSS Test (Kwiatkowski-Phillips-Schmidt-Shin Test)**: Another test for
+  stationarity that tests the null hypothesis that the time series is stationary
+  around a deterministic trend.
+
+[^unit_root]: Unit root relates to stability in autoregressive models. AR models can be expressed as polynomial equations and the value of the roots of the polynomial determine the stability of the model after perturbation. Roots on the unit circle will indicate that perturbations will have a permanent effect, making the model non-stationary.
+
+## ADF Test Demonstration
+
+Let's apply the tests, starting with ADF:
+
+```{python}
+import pandas as pd
+from statsmodels.tsa.stattools import adfuller, kpss
+
+air_passengers = pd.read_csv(os.path.join('data', 'air_passengers_1949_1960.csv'))
+
+# Apply ADF and KPSS tests on the air passenger data
+
+# ADF Test
+result_adf = adfuller(air_passengers['Number of Passengers'])
+print('ADF Statistic:', result_adf[0])
+print('p-value:', result_adf[1])
+print('Critical Values:')
+for key, value in result_adf[4].items():
+    print('\t%s: %.3f' % (key, value))
+```
+
+
+### Interpretation:
+
+1. **ADF Statistic**: The ADF statistic is 0.815, which is greater than all the critical values at the 1%, 5%, and 10% significance levels.
+
+2. **p-value**: The p-value is 0.991, which is significantly higher than common significance levels (e.g., 0.01, 0.05, 0.10).
+
+3. **Critical Values**:
+   - 1%: -3.482
+   - 5%: -2.884
+   - 10%: -2.579
+
+### Conclusion:
+
+- **Fail to Reject the Null Hypothesis**: Since the ADF statistic (0.815) is greater than the critical values and the p-value (0.991) is much higher than typical significance levels, you fail to reject the null hypothesis. This suggests that the time series has a unit root and is non-stationary.
+
+- **Implication**: The time series data for the number of passengers is non-stationary, indicating that it may have a trend or other non-stationary components. To make the series stationary, you might consider differencing the data or applying other transformations, such as detrending or seasonal adjustment, before proceeding with further analysis or modeling.
+
+## KPSS Test Demonstration
+
+Let's apply the KPSS test.
+
+```{python}
+# KPSS Test
+result_kpss = kpss(air_passengers['Number of Passengers'], regression='c')
+print('\nKPSS Statistic:', result_kpss[0])
+print('p-value:', result_kpss[1])
+print('Critical Values:')
+for key, value in result_kpss[3].items():
+    print('\t%s: %.3f' % (key, value))
+
+```
+
+The KPSS (Kwiatkowski-Phillips-Schmidt-Shin) test is another test used to assess the stationarity of a time series, but it has a different null hypothesis compared to the ADF test.
+
+### KPSS Test Interpretation:
+
+1. **Null Hypothesis (\(H_0\))**: The null hypothesis of the KPSS test is that the time series is stationary around a deterministic trend (i.e., it does not have a unit root).
+
+2. **Alternative Hypothesis (\(H_1\))**: The alternative hypothesis is that the time series is not stationary (i.e., it has a unit root).
+
+### Given Results:
+
+- **KPSS Statistic**: 1.651
+- **p-value**: 0.01
+- **Critical Values**:
+  - 10%: 0.347
+  - 5%: 0.463
+  - 2.5%: 0.574
+  - 1%: 0.739
+
+### Conclusion:
+
+- **Reject the Null Hypothesis**: The KPSS statistic (1.651) is greater than all the critical values at the 10%, 5%, 2.5%, and 1% significance levels. This, along with the low p-value (0.01), suggests that you reject the null hypothesis of stationarity.
+
+- **Implication**: The time series is likely non-stationary according to the KPSS test. This aligns with the ADF test results, which also indicated non-stationarity.
+
+### Overall Interpretation:
+
+Both the ADF and KPSS tests suggest that the time series is non-stationary. This consistent result from both tests strengthens the conclusion that the series may need differencing or other transformations to achieve stationarity before further analysis or modeling.
+
+# Time Series Models
+
+In order to forecast future data values, we will now define a family of models
+and then apply one to our data.
+
+## Autoregressive (AR) models
+
+A type of time series model where the current value of the series is based on
+its previous values. 
+  
+The model is defined as:
+
+$$
+y_t = c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t
+$$
+
+where:
+
+- $y_t$ is the current value,
+- $c$ is a constant,
+- $\phi_1, \phi_2, \ldots, \phi_p$ are the coefficients,
+- $\epsilon_t$ is the white noise error term.
+
+**Key Points**:
+
+1. **Lag Order (p)**: The number of lagged observations included in the model.
+2. **Stationarity**: The series should be stationary for the AR model to be effective.
+3. **Parameter Estimation**: Methods like Yule-Walker equations or Maximum Likelihood Estimation (MLE) are used to estimate the parameters, $\phi_i$.
+
+## Moving Average (MA) models
+
+A type of time series model where the current value of the series is based on
+past forecast errors. The model is defined as:
+
+$$
+y_t = \mu + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \ldots + \theta_q \epsilon_{t-q}
+$$
+
+where:
+
+- $y_t$ is the current value,
+- $\mu$ is the mean of the series,
+- $\epsilon_t$ is the white noise error term,
+- $\theta_1, \theta_2, \ldots, \theta_q$ are the coefficients.
+
+**Key Points**:
+
+  1. **Lag Order (q)**: The number of lagged forecast errors included in the model.
+  2. **Stationarity**: The series should be stationary for the MA model to be effective.
+  3. **Parameter Estimation**: Methods like Maximum Likelihood Estimation (MLE) are used to estimate the parameters $\theta_i$.
+
+## ARIMA (Autoregressive Integrated Moving Average) models
+
+A type of time series model that combines Autoregressive (AR) and Moving Average
+(MA) models with differencing to make the series stationary.
+
+The model is defined as:
+
+$$
+y_t = c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \ldots + \theta_q \epsilon_{t-q}
+$$
+
+where:
+
+- $y_t$ is the current value,
+- $c$ is a constant,
+- $\phi_1, \phi_2, \ldots, \phi_p$ are the AR coefficients,
+- $\epsilon_t$ is the white noise error term,
+- $\theta_1, \theta_2, \ldots, \theta_q$ are the MA coefficients.
+
+**Key Points**:
+
+1. **Order (p, d, q)**: The parameters of the ARIMA model where $p$ is the number of lag observations, $d$ is the degree of differencing, and $q$ is the size of the moving average window.
+2. **Stationarity**: Differencing is used to make the series stationary.
+3. **Parameter Estimation**: Methods like Maximum Likelihood Estimation (MLE) are used to estimate the parameters.
+
+
+## Seasonal ARIMA (SARIMA) models
+
+A type of time series model that extends ARIMA to support seasonality. The model
+is defined as:
+
+$$
+y_t = c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \ldots + \theta_q \epsilon_{t-q} + \Phi_1 Y_{t-s} + \Phi_2 Y_{t-2s} + \ldots + \Phi_P Y_{t-Ps} + \Theta_1 E_{t-s} + \Theta_2 E_{t-2s} + \ldots + \Theta_Q E_{t-Qs}
+$$
+
+where:
+
+- $y_t$ is the current value,
+- $c$ is a constant,
+- $\phi_1, \phi_2, \ldots, \phi_p$ are the AR coefficients,
+- $\epsilon_t$ is the white noise error term,
+- $\theta_1, \theta_2, \ldots, \theta_q$ are the MA coefficients,
+- $\Phi_1, \Phi_2, \ldots, \Phi_P$ are the seasonal AR coefficients,
+- $Y_{t-s}, Y_{t-2s}, \ldots, Y_{t-Ps}$ are the seasonal lagged observations,
+- $\Theta_1, \Theta_2, \ldots, \Theta_Q$ are the seasonal MA coefficients,
+- $E_{t-s}, E_{t-2s}, \ldots, E_{t-Qs}$ are the seasonal lagged forecast errors.
+
+**Key Points**:
+
+1. **Order (p, d, q) x (P, D, Q, s)**: The parameters of the SARIMA model where $p, d, q$ are the non-seasonal parameters, $P, D, Q$ are the seasonal parameters, and $s$ is the length of the seasonal cycle.
+2. **Stationarity**: Differencing is used to make the series stationary.
+3. **Parameter Estimation**: Methods like Maximum Likelihood Estimation (MLE) are used to estimate the parameters.
+
+
+## ARIMA/SARIMA Example
+
+Let's look at a concrete example of ARIMA/SARIMA using the Air Passengers dataset.
+
+```{python}
+import pandas as pd
+import numpy as np
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+import matplotlib.pyplot as plt
+```
+
+We'll load the dataset and show the head.
+
+```{python}
+path = os.path.join('data', 'air_passengers_1949_1960.csv')
+data = pd.read_csv(path)
+data.head()
+```
+
+---
+
+Next, use pandas `date_range` method to create a new month column. We could have
+used date string conversion tools on the `Date` column alternatively.
+
+```{python}
+data['Month'] = pd.date_range(start='1949-01', periods=len(data), freq='ME')
+data.set_index('Month', inplace=True)
+
+data.head()
+```
+
+---
+
+As a next step, we'll log transform the data to stabilize the variance.
+
+```{python}
+# Log transform to stabilize variance
+data['Log_Passengers'] = np.log(data['Number of Passengers'])
+data.head()
+```
+
+---
+
+And finally, we'll perform a **classical additive seasonal decomposition** of the data as a point
+of comparison.
+
+```{python}
+# Seasonal decomposition
+decomposition = seasonal_decompose(data['Log_Passengers'], model='additive')
+decomposition.plot()
+plt.show()
+```
+
+## SARIMAX Model
+
+Now let's create an instance of a **SARIMAX** model -- <b>S</b>easonal 
+<b>A</b>utoregressive <b>I</b>ntegrated <b>M</b>oving <b>A</b>verage with 
+e<b>X</b>ogenous regressors.
+
+It extends the SARIMA model to support exogenous variables, although we aren't using any.
+
+```{python}
+#| code-fold: false
+# SARIMA model
+model = SARIMAX(data['Log_Passengers'], 
+                order=(1, 1, 1), 
+                seasonal_order=(1, 1, 1, 12), 
+                freq='ME')
+```
+
+
+The configuration is as follows:
+
+- We'll use the `Log_Passengers` as the time series, which has better variance properties.
+- `order=(1, 1, 1)` means we're using an ARIMA model with 1 autoregressive term, 1 differencing term, and 1 moving average term.
+- `seasonal_order=(1, 1, 1, 12)` means we're using a seasonal ARIMA model with 1 autoregressive term, 1 differencing term, 1 moving average term, and a seasonal cycle of 12 months.
+- The frequence is the month-end, or `ME`.
+
+---
+
+We'll fit the model which also prints the fit summary.
+
+```{python}
+results = model.fit()
+```
+
+
+---
+
+We'll print the summary and plot the diagnostics.
+
+```{python}
+# Summary and diagnostics
+print(results.summary())
+```
+
+---
+
+And let's plot some diagnostic information.
+
+```{python}
+results.plot_diagnostics(figsize=(12, 8))
+plt.show()
+```
+
+## Explanation of SARIMAX Diagnostics
+
+The `plot_diagnostics` function provides several diagnostic plots to evaluate the fit of the SARIMAX model. Here is an explanation of each panel:
+
+1. **Standardized Residuals**:
+   - This plot shows the residuals (differences between the observed and predicted values) standardized to have zero mean and unit variance.
+   - Ideally, the residuals should appear as white noise, meaning they should be randomly scattered around zero with no discernible pattern.
+
+2. **Histogram plus KDE**:
+   - This panel displays a histogram of the residuals along with a Kernel Density Estimate (KDE) to visualize the distribution.
+   - The histogram should resemble a normal distribution if the model is well-fitted. The KDE line helps to see the shape of the distribution more clearly.
+
+3. **Normal Q-Q Plot**:
+   - The Q-Q plot compares the quantiles of the residuals to the quantiles of a standard normal distribution.
+   - If the residuals are normally distributed, the points should lie approximately along the 45-degree line.
+
+4. **Correlogram (ACF Plot)**:
+   - This plot shows the autocorrelation function (ACF) of the residuals.
+   - The ACF plot helps to identify any remaining autocorrelation in the residuals. Ideally, the residuals should have no significant autocorrelation, indicating that the model has captured all the temporal dependencies.
+
+---
+
+Finally, let's make a forecast for 2 years out.
+
+```{python}
+
+# Forecasting
+forecast = results.get_forecast(steps=24)
+forecast_index = pd.date_range(data.index[-1] + pd.DateOffset(months=1), periods=24, freq='ME')
+forecast_values = np.exp(forecast.predicted_mean)  # Convert back from log
+confidence_intervals = np.exp(forecast.conf_int())
+
+# Plot
+plt.figure(figsize=(10, 6))
+plt.plot(data['Number of Passengers'], label='Observed')
+plt.plot(forecast_index, forecast_values, label='Forecast', color='red')
+plt.fill_between(forecast_index, confidence_intervals.iloc[:, 0], confidence_intervals.iloc[:, 1], color='pink', alpha=0.3)
+plt.legend()
+plt.show()
+```
+
+The light pink area shows the 95% confidence interval for the forecast.
+
+**Question**: what observations do you have about the prediction?
+
+
+# Model Evaluation and Forecasting
+
+## Criteria for model selection
+
+[AIC (Akaike Information Criterion)](https://otexts.com/fpp3/selecting-predictors.html#akaikes-information-criterion):
+A measure of the relative quality of a statistical model for a given set of data. It is defined as:
+
+$$
+\text{AIC} = T\log\left(\frac{\text{SSE}}{T}\right) + 2(k+2)
+$$
+
+where:
+
+- $\text{SSE}$ is the fit of the model as Sum of Squared Error
+- $T$ is the number of observations,
+- $k$ is the number of parameters in the model,
+
+[BIC (Bayesian Information Criterion)](https://otexts.com/fpp3/selecting-predictors.html#schwarzs-bayesian-information-criterion):
+Similar to AIC but includes a penalty term for the number of parameters in the model. It is defined as:
+
+$$
+\text{BIC} = T\log\left(\frac{\text{SSE}}{T}\right) + (k+2)\log(T)
+$$
+
+where:
+
+- $\text{SSE}$ is the fit of the model as Sum of Squared Error
+- $T$ is the number of observations,
+- $k$ is the number of parameters in the model,
+
+**Key Points**:
+
+1. **Model Comparison**: Both AIC and BIC are used to compare different models; the model with the lower AIC or BIC is preferred.
+2. **Penalty for Complexity**: BIC imposes a larger penalty for models with more parameters compared to AIC.
+3. **Trade-off**: There is a trade-off between goodness of fit and model complexity.
+
+## Cross-validation techniques for time series
+
+- **Time Series Cross-Validation**: Unlike traditional cross-validation, time series cross-validation respects the temporal order of the data. 
+
+Common techniques include:
+
+- **Rolling Forecast Origin**: The training set is expanded with each iteration, and the model is re-evaluated.
+- **Time Series Split**: The data is split into multiple training and test sets, ensuring that the training set always precedes the test set.
+- **Blocked Cross-Validation**: The data is divided into blocks, and each block is used as a test set while the preceding blocks are used for training.
+
+**Key Points**:
+
+1. **Respect Temporal Order**: Ensure that the training set always precedes the test set to avoid data leakage.
+2. **Multiple Techniques**: Various techniques like rolling forecast origin, time series split, and blocked cross-validation can be used.
+
+## Forecasting and confidence intervals
+
+- **Forecasting**: The process of making predictions about future values based on historical data. Common methods include:
+  - **ARIMA (AutoRegressive Integrated Moving Average)**: A popular time series forecasting method that combines autoregression, differencing, and moving average components.
+  - **Exponential Smoothing**: A technique that applies decreasing weights to past observations, giving more importance to recent data.
+- **Confidence Intervals**: A range of values that is likely to contain the true value of the forecast. It provides an estimate of the uncertainty associated with the forecast.
+  - **Calculation**: Confidence intervals are typically calculated using the standard error of the forecast and a critical value from the t-distribution or normal distribution.
+  - **Interpretation**: A 95% confidence interval means that there is a 95% chance that the true value will fall within the interval.
+
+
+# Recap and References
+
+
+## Recap
+
+We covered the following key points:
+
+1. **Components of Time Series**
+2. **Time Series Decomposition**
+3. **Stationarity and Differencing**
+4. **Model Selection and Evaluation**
+5. **Forecasting and Confidence Intervals**
+6. **Practical Examples**
+
+
+## References
+
+- [Wikipedia: Time Series Analysis](https://en.wikipedia.org/wiki/Time_series)
+- [Time Series Analysis](https://otexts.com/fpp3/)
+
+- [Complete Guide on Time Series Analysis in Python](https://www.kaggle.com/code/prashant111/complete-guide-on-time-series-analysis-in-python/notebook)
+- [Time Series Data Visualization in Python](https://www.geeksforgeeks.org/time-series-data-visualization-in-python/)
+
+## Bibliography
+
+::: {#refs}
+:::
