@@ -1028,7 +1028,7 @@ where:
 
 1. **Lag Order (p)**: The number of lagged observations included in the model.
 2. **Stationarity**: The series should be stationary for the AR model to be effective.
-3. **Parameter Estimation**: Methods like Yule-Walker equations or Maximum Likelihood Estimation (MLE) are used to estimate the parameters.
+3. **Parameter Estimation**: Methods like Yule-Walker equations or Maximum Likelihood Estimation (MLE) are used to estimate the parameters, $\phi_i$.
 
 ## Moving Average (MA) models
 
@@ -1050,7 +1050,7 @@ where:
 
   1. **Lag Order (q)**: The number of lagged forecast errors included in the model.
   2. **Stationarity**: The series should be stationary for the MA model to be effective.
-  3. **Parameter Estimation**: Methods like Maximum Likelihood Estimation (MLE) are used to estimate the parameters.
+  3. **Parameter Estimation**: Methods like Maximum Likelihood Estimation (MLE) are used to estimate the parameters $\theta_i$.
 
 ## ARIMA (Autoregressive Integrated Moving Average) models
 
