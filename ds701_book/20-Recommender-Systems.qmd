@@ -865,7 +865,7 @@ R.iloc[900:910, 1000:1010]
 ---
 
 We'll use code from the [Antidote Data Framework](https://github.com/rastegarpanah/antidote-data-framework) to do the matrix factorization and ALS. We have local copies 
-[recommender_MF.py](recommender_MF.py), [recommender_ALS.py](recommender_ALS.py)
+[recommender_MF.py](recommender_MF.py), [recommender_als.py](recommender_als.py)
 and [recommender_lmafit.py](recommender_lmafit.py) in our repository.
 
 ```{python}
