@@ -186,11 +186,13 @@ Let $\mathbf{u}, \mathbf{v}\in\mathbb{R}^{n}$ and $a\in\mathbb{R}$. The vector f
 
 ::: {.fragment}
 __Every norm defines a corresponding metric.__ 
-::::
+:::
 
 ::: {.fragment}
 In particular If $p()$ is a norm, then $d(\mathbf{x}, \mathbf{y}) = p(\mathbf{x}-\mathbf{y})$ is a metric.
 :::
+
+::::
 
 ::: {.content-visible when-profile="web"}
 ### $\ell_p$ norm
