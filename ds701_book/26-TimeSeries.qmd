@@ -4,14 +4,14 @@ jupyter: python3
 bibliography: references.bib
 ---
 
-## Introduction
+## Colab
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/26-TimeSeries.ipynb)
 
 
 # Introduction to Time Series
 
-## Definition and examples
+## Definition and Examples
 
 ```{python}
 #| echo: false
@@ -98,7 +98,7 @@ plt.show()
 - **Acyclic**: Long-term oscillations not of a fixed period. "Are there long term business cycles in the sales of a product?"
 - **Irregular/Noise**: Random variation. "Are there random variations in the daily temperature that are not explained by the trend or seasonality?"
 
-## Distinction between time series and other types of data
+## Distinction between Time series and Other Types of Data
 
 - **Time Series Data**: Data points collected or recorded at specific time intervals. Examples include stock prices, weather data, and sales figures.
 - **Cross-Sectional Data**: Data collected at a single point in time, representing a snapshot. Examples include survey results and census data.
@@ -420,10 +420,10 @@ For the next visualization, we will use the autocorrelation function (ACF).
 The autocorrelation function at lag $k$ is defined as:
 
 $$
-\rho_k = \frac{\sum_{t=k+1}^{T} (y_t - \bar{y})(y_{t-k} - \bar{y})}{\sum_{t=1}^{T} (y_t - \bar{y})^2}
+\rho_k = \frac{\sum_{t=k+1}^{T} (y_t - \bar{y})(y_{t-k} - \bar{y})}{\sum_{t=1}^{T} (y_t - \bar{y})^2},
 $$
 
-where:
+where
 
 - $y_t$ is the value of the time series at time $t$,
 - $\bar{y}$ is the mean of the time series,
@@ -553,7 +553,7 @@ There are two main ways to combine the components:
 
 ## Additive model
 
-- **Additive Model**: Assumes that the components of the time series (trend, seasonality, and noise) are added together. The model can be represented as:
+- **Additive Model**: Assumes that the components of the time series (trend, seasonality, and noise) are added together. The model can be represented as
   - $Y(t) = T(t) + S(t) + e(t)$
   - Where $Y(t)$ is the observed value, $T(t)$ is the trend component, $S(t)$ is the seasonal component, and $e(t)$ is the noise or error term.
 - **Example**:
@@ -574,9 +574,9 @@ We'll look at two approaches to decomposing the time series:
 - **Classical Decomposition**
 - **STL Decomposition**
 
-Both approaches support both additive and multiplicative models.
+Both approaches support additive and multiplicative models.
 
-## "Classical" Decomposition
+## Classical Decomposition
 
 - This technique involves breaking down a time series into its **trend**,
   **seasonal**, and **irregular** (or noise) components. 
@@ -589,7 +589,7 @@ Both approaches support both additive and multiplicative models.
 
 Let's take each step by step.
 
-## Estimate the trend component
+## Estimating the Trend
 
 First we'll estimate the trend component by applying a moving average using the
 Pandas `rolling` method.
@@ -607,7 +607,7 @@ plt.show()
 We're actually using a 11-month moving average because we want to center the
 average.
 
-## Remove the trend component
+## Removing the Trend
 
 Now we can subtract the trend component to get the detrended series.
 
@@ -621,7 +621,7 @@ plt.legend()
 plt.show()
 ```
 
-## Estimate the seasonal component
+## Estimating Seasonality
 
 Estimate the seasonal component by taking the mean of the detrended
 series for each month.
@@ -659,7 +659,7 @@ plt.show()
 
 Clearly, certain months have more variability than others.
 
-## Remove the seasonal component
+## Removing Seasonality
 
 Now we can subtract the seasonal component to get the irregular component.
 
@@ -722,7 +722,7 @@ plt.show()
 ```
 
 
-## Seasonal and Trend decomposition using Loess (STL)
+## Seasonality and Trend Decomposition (STL)
 
 - **STL** is a more flexible and robust method for decomposing time series data.
 - It uses locally weighted regression (Loess) to estimate the trend and seasonal components [@cleveland1990stl].
@@ -818,7 +818,7 @@ data = pd.read_csv(os.path.join('data', 'air_passengers_1949_1960.csv'), index_c
 ts = data['Number of Passengers']
 ```
 
-## `statsmodels` Classical Decomposition -- Additive Model
+## `statsmodels` Additive Model
 
 We'll apply the classical decomposition using the `statsmodels` 
 `seasonal_decompose` function with the additive model.
@@ -843,7 +843,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-## `statsmodels` Classical Decomposition -- Multiplicative Model
+## `statsmodels` Multiplicative Model
 
 Let's try the multiplicative model:
 
@@ -901,7 +901,7 @@ plt.show()
 
 # Stationarity and Differencing
 
-## Definition of stationarity
+## Definition of Stationarity
 
 A time series is said to be stationary if its statistical properties such as mean, variance, and autocorrelation are constant over time.
 
@@ -910,25 +910,24 @@ A time series is said to be stationary if its statistical properties such as mea
 1. **Strict Stationarity**: The entire distribution of the time series remains unchanged over time.
 2. **Weak Stationarity**: Only the first two moments (mean and variance) are constant over time, and the covariance between two time points depends only on the time lag between them.
 
-## Importance of stationarity in time series analysis
+## Importance of Stationarity
 
 Stationarity is crucial in time series analysis because many statistical methods and models assume that the time series is stationary. Non-stationary data can lead to misleading results and poor forecasts.
 
-**Why Stationarity Matters**:
+**Why Stationarity Matters**
 
 1. **Model Assumptions**: Many time series models, such as ARIMA, require the data to be stationary to make accurate predictions.
 2. **Statistical Properties**: Stationary time series have consistent statistical properties over time, making it easier to analyze and interpret.
 3. **Forecasting**: Stationary data improves the reliability and accuracy of forecasts.
 
-## Techniques to achieve stationarity
+## Techniques to Achieve Stationarity
 
 1. **Differencing**: Subtracting the previous observation from the current observation to remove trends and seasonality.
 2. **Transformation**: Applying mathematical transformations such as logarithms or square roots to stabilize the variance.
 3. **Decomposition**: Separating the time series into trend, seasonal, and residual components to analyze and adjust each part individually.
 4. **Smoothing**: Using techniques like moving averages to smooth out short-term fluctuations and highlight longer-term trends.
 
-
-## Tests for stationarity
+## Tests for Stationarity
 
 There are tests for stationarity such as listed below and available in
 `statsmodels`.
@@ -941,6 +940,8 @@ There are tests for stationarity such as listed below and available in
   around a deterministic trend.
 
 [^unit_root]: Unit root relates to stability in autoregressive models. AR models can be expressed as polynomial equations and the value of the roots of the polynomial determine the stability of the model after perturbation. Roots on the unit circle will indicate that perturbations will have a permanent effect, making the model non-stationary.
+
+::: {.content-visible when-profile="web"}
 
 ## ADF Test Demonstration
 
@@ -1024,6 +1025,8 @@ The KPSS (Kwiatkowski-Phillips-Schmidt-Shin) test is another test used to assess
 
 Both the ADF and KPSS tests suggest that the time series is non-stationary. This consistent result from both tests strengthens the conclusion that the series may need differencing or other transformations to achieve stationarity before further analysis or modeling.
 
+:::
+
 # Time Series Models
 
 In order to forecast future data values, we will now define a family of models
@@ -1034,18 +1037,20 @@ and then apply one to our data.
 A type of time series model where the current value of the series is based on
 its previous values. 
   
-The model is defined as:
+The model is defined as
 
 $$
-y_t = c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t
+y_t = c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t,
 $$
 
-where:
+where
 
 - $y_t$ is the current value,
 - $c$ is a constant,
 - $\phi_1, \phi_2, \ldots, \phi_p$ are the coefficients,
 - $\epsilon_t$ is the white noise error term.
+
+--- 
 
 **Key Points**:
 
@@ -1056,18 +1061,20 @@ where:
 ## Moving Average (MA) models
 
 A type of time series model where the current value of the series is based on
-past forecast errors. The model is defined as:
+past forecast errors. The model is defined as
 
 $$
-y_t = \mu + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \ldots + \theta_q \epsilon_{t-q}
+y_t = \mu + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \ldots + \theta_q \epsilon_{t-q},
 $$
 
-where:
+where
 
 - $y_t$ is the current value,
 - $\mu$ is the mean of the series,
 - $\epsilon_t$ is the white noise error term,
 - $\theta_1, \theta_2, \ldots, \theta_q$ are the coefficients.
+
+---
 
 **Key Points**:
 
@@ -1075,24 +1082,26 @@ where:
   2. **Stationarity**: The series should be stationary for the MA model to be effective.
   3. **Parameter Estimation**: Methods like Maximum Likelihood Estimation (MLE) are used to estimate the parameters $\theta_i$.
 
-## ARIMA (Autoregressive Integrated Moving Average) models
+## Autoregressive Integrated Moving Average (ARIMA) Models
 
 A type of time series model that combines Autoregressive (AR) and Moving Average
 (MA) models with differencing to make the series stationary.
 
-The model is defined as:
+The model is defined as
 
 $$
-y_t = c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \ldots + \theta_q \epsilon_{t-q}
+y_t = c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \ldots + \theta_q \epsilon_{t-q},
 $$
 
-where:
+where
 
 - $y_t$ is the current value,
 - $c$ is a constant,
 - $\phi_1, \phi_2, \ldots, \phi_p$ are the AR coefficients,
 - $\epsilon_t$ is the white noise error term,
 - $\theta_1, \theta_2, \ldots, \theta_q$ are the MA coefficients.
+
+---
 
 **Key Points**:
 
@@ -1101,16 +1110,21 @@ where:
 3. **Parameter Estimation**: Methods like Maximum Likelihood Estimation (MLE) are used to estimate the parameters.
 
 
-## Seasonal ARIMA (SARIMA) models
+## Seasonal ARIMA (SARIMA) Models
 
 A type of time series model that extends ARIMA to support seasonality. The model
-is defined as:
+is defined as
 
 $$
-y_t = c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \ldots + \theta_q \epsilon_{t-q} + \Phi_1 Y_{t-s} + \Phi_2 Y_{t-2s} + \ldots + \Phi_P Y_{t-Ps} + \Theta_1 E_{t-s} + \Theta_2 E_{t-2s} + \ldots + \Theta_Q E_{t-Qs}
+\begin{aligned} 
+y_t &= c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t \\ 
+&\quad + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \ldots + \theta_q \epsilon_{t-q} \\ 
+&\quad + \Phi_1 Y_{t-s} + \Phi_2 Y_{t-2s} + \ldots + \Phi_P Y_{t-Ps} \\ 
+&\quad + \Theta_1 E_{t-s} + \Theta_2 E_{t-2s} + \ldots + \Theta_Q E_{t-Qs} 
+\end{aligned} 
 $$
 
-where:
+where
 
 - $y_t$ is the current value,
 - $c$ is a constant,
@@ -1121,6 +1135,8 @@ where:
 - $Y_{t-s}, Y_{t-2s}, \ldots, Y_{t-Ps}$ are the seasonal lagged observations,
 - $\Theta_1, \Theta_2, \ldots, \Theta_Q$ are the seasonal MA coefficients,
 - $E_{t-s}, E_{t-2s}, \ldots, E_{t-Qs}$ are the seasonal lagged forecast errors.
+
+---
 
 **Key Points**:
 
@@ -1206,7 +1222,7 @@ The configuration is as follows:
 - We'll use the `Log_Passengers` as the time series, which has better variance properties.
 - `order=(1, 1, 1)` means we're using an ARIMA model with 1 autoregressive term, 1 differencing term, and 1 moving average term.
 - `seasonal_order=(1, 1, 1, 12)` means we're using a seasonal ARIMA model with 1 autoregressive term, 1 differencing term, 1 moving average term, and a seasonal cycle of 12 months.
-- The frequence is the month-end, or `ME`.
+- The frequency is the month-end, or `ME`.
 
 ---
 
@@ -1278,12 +1294,12 @@ plt.show()
 
 The light pink area shows the 95% confidence interval for the forecast.
 
-**Question**: what observations do you have about the prediction?
+**Question**: What observations do you have about the prediction?
 
 
 # Model Evaluation and Forecasting
 
-## Criteria for model selection
+## Criteria for Model Selection
 
 [AIC (Akaike Information Criterion)](https://otexts.com/fpp3/selecting-predictors.html#akaikes-information-criterion):
 A measure of the relative quality of a statistical model for a given set of data. It is defined as:
@@ -1292,11 +1308,13 @@ $$
 \text{AIC} = T\log\left(\frac{\text{SSE}}{T}\right) + 2(k+2)
 $$
 
-where:
+where
 
 - $\text{SSE}$ is the fit of the model as Sum of Squared Error
 - $T$ is the number of observations,
 - $k$ is the number of parameters in the model,
+
+---
 
 [BIC (Bayesian Information Criterion)](https://otexts.com/fpp3/selecting-predictors.html#schwarzs-bayesian-information-criterion):
 Similar to AIC but includes a penalty term for the number of parameters in the model. It is defined as:
@@ -1305,11 +1323,15 @@ $$
 \text{BIC} = T\log\left(\frac{\text{SSE}}{T}\right) + (k+2)\log(T)
 $$
 
-where:
+where
 
 - $\text{SSE}$ is the fit of the model as Sum of Squared Error
 - $T$ is the number of observations,
 - $k$ is the number of parameters in the model,
+
+---
+
+---
 
 **Key Points**:
 
@@ -1317,7 +1339,7 @@ where:
 2. **Penalty for Complexity**: BIC imposes a larger penalty for models with more parameters compared to AIC.
 3. **Trade-off**: There is a trade-off between goodness of fit and model complexity.
 
-## Cross-validation techniques for time series
+## Cross-Validation Techniques
 
 - **Time Series Cross-Validation**: Unlike traditional cross-validation, time series cross-validation respects the temporal order of the data. 
 
@@ -1332,29 +1354,24 @@ Common techniques include:
 1. **Respect Temporal Order**: Ensure that the training set always precedes the test set to avoid data leakage.
 2. **Multiple Techniques**: Various techniques like rolling forecast origin, time series split, and blocked cross-validation can be used.
 
-## Forecasting and confidence intervals
+## Forecasting and Confidence Intervals
 
-- **Forecasting**: The process of making predictions about future values based on historical data. Common methods include:
-  - **ARIMA (AutoRegressive Integrated Moving Average)**: A popular time series forecasting method that combines autoregression, differencing, and moving average components.
-  - **Exponential Smoothing**: A technique that applies decreasing weights to past observations, giving more importance to recent data.
-- **Confidence Intervals**: A range of values that is likely to contain the true value of the forecast. It provides an estimate of the uncertainty associated with the forecast.
+- **Forecasting**: The process of making predictions about future values based on historical data. We can use the previously introduced methods such as **ARIMA**, but you can also use **Exponential Smoothing**. This is a technique that applies decreasing weights to past observations, giving more importance to recent data. With exponenetial smoothing you are using a weighted average of past predictions to make a forecast.
+- **Confidence Intervals**: Provide an estimate of the uncertainty associated with the forecast.
   - **Calculation**: Confidence intervals are typically calculated using the standard error of the forecast and a critical value from the t-distribution or normal distribution.
   - **Interpretation**: A 95% confidence interval means that there is a 95% chance that the true value will fall within the interval.
 
-
 # Recap and References
-
 
 ## Recap
 
-We covered the following key points:
+We covered the following topics:
 
-1. **Components of Time Series**
-2. **Time Series Decomposition**
-3. **Stationarity and Differencing**
-4. **Model Selection and Evaluation**
-5. **Forecasting and Confidence Intervals**
-6. **Practical Examples**
+1. Components of Time Series
+2. Time Series Decomposition
+3. Stationarity and Differencing
+4. Model Selection and Evaluation
+5. Forecasting and Confidence Intervals
 
 
 ## References
