@@ -1255,15 +1255,15 @@ plt.show()
 
 The light pink area shows the 95% confidence interval for the forecast.
 
-**Questions**: what observations do you have about the prediction?
+**Question**: what observations do you have about the prediction?
 
 
 # Model Evaluation and Forecasting
 
 ## Criteria for model selection
 
-- **AIC (Akaike Information Criterion)**: A measure of the relative quality of a
-  statistical model for a given set of data. It is defined as:
+**AIC (Akaike Information Criterion)**: A measure of the relative quality of a
+statistical model for a given set of data. It is defined as:
 
 $$
 \text{AIC} = 2k - 2\ln(L)
@@ -1302,7 +1302,8 @@ Common techniques include:
 - **Time Series Split**: The data is split into multiple training and test sets, ensuring that the training set always precedes the test set.
 - **Blocked Cross-Validation**: The data is divided into blocks, and each block is used as a test set while the preceding blocks are used for training.
 
-## Key Points:
+**Key Points**:
+
 1. **Respect Temporal Order**: Ensure that the training set always precedes the test set to avoid data leakage.
 2. **Multiple Techniques**: Various techniques like rolling forecast origin, time series split, and blocked cross-validation can be used.
 
@@ -1315,11 +1316,6 @@ Common techniques include:
 - **Confidence Intervals**: A range of values that is likely to contain the true value of the forecast. It provides an estimate of the uncertainty associated with the forecast.
   - **Calculation**: Confidence intervals are typically calculated using the standard error of the forecast and a critical value from the t-distribution or normal distribution.
   - **Interpretation**: A 95% confidence interval means that there is a 95% chance that the true value will fall within the interval.
-  
-**Key Points:**
-
-1. **Forecasting Methods**: Various methods like ARIMA, exponential smoothing, and Prophet can be used for forecasting.
-2. **Uncertainty Estimation**: Confidence intervals provide an estimate of the uncertainty associated with the forecast.
 
 
 # Recap and References
@@ -1329,12 +1325,12 @@ Common techniques include:
 
 We covered the following key points:
 
-1. **Components of Time Series**:
-2. **Time Series Decomposition**:
-3. **Stationarity and Differencing**:
-4. **Model Selection and Evaluation**:
-5. **Forecasting and Confidence Intervals**:
-6. **Practical Examples**:
+1. **Components of Time Series**
+2. **Time Series Decomposition**
+3. **Stationarity and Differencing**
+4. **Model Selection and Evaluation**
+5. **Forecasting and Confidence Intervals**
+6. **Practical Examples**
 
 
 ## References
