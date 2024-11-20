@@ -46,6 +46,10 @@ import os
 # For this example, we will use a sample dataset from NOAA (National Oceanic and Atmospheric Administration)
 # The dataset contains daily weather observations from the Global Historical Climatology Network (GHCN)
 
+# Check if the 'data' directory exists, and if not, create it
+if not os.path.exists('data'):
+    os.makedirs('data')
+
 if not os.path.exists(os.path.join('data', 'weather_data_filtered_2022.csv')):
   # Load the dataset into a dataframe
   url = 'https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/2022.csv.gz'
@@ -233,6 +237,22 @@ various characteristics.
 We'll show a few examples of time series plots and include the code to generate them.
 
 ## Air Passengers Dataset
+
+```{python}
+#| echo: false
+import os
+
+# Check if the 'data' directory exists, and if not, create it
+if not os.path.exists('data'):
+    os.makedirs('data')
+
+# Check if the 'air_passengers_1949_1960.csv' file exists, and if not, download it
+if not os.path.exists(os.path.join('data', 'air_passengers_1949_1960.csv')):
+    url = 'https://raw.githubusercontent.com/tools4ds/DS701-Course-Notes/refs/heads/main/ds701_book/data/air_passengers_1949_1960.csv'
+    air_passengers_data = pd.read_csv(url)
+    air_passengers_data.to_csv(os.path.join('data', 'air_passengers_1949_1960.csv'), index=False)
+    print("Air passengers data has been downloaded and saved to 'data/air_passengers_1949_1960.csv'")
+```
 
 We're going to use a dataset of air passengers per month from 1949 to 1960.
 
