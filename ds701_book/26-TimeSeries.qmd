@@ -1166,7 +1166,7 @@ Now let's create an instance of a **SARIMAX** model -- <b>S</b>easonal
 <b>A</b>utoregressive <b>I</b>ntegrated <b>M</b>oving <b>A</b>verage with 
 e<b>X</b>ogenous regressors.
 
-It extends the SARIMA model to support exogenous variables.
+It extends the SARIMA model to support exogenous variables, although we aren't using any.
 
 ```{python}
 #| code-fold: false
@@ -1262,29 +1262,31 @@ The light pink area shows the 95% confidence interval for the forecast.
 
 ## Criteria for model selection
 
-**AIC (Akaike Information Criterion)**: A measure of the relative quality of a
-statistical model for a given set of data. It is defined as:
+[AIC (Akaike Information Criterion)](https://otexts.com/fpp3/selecting-predictors.html#akaikes-information-criterion):
+A measure of the relative quality of a statistical model for a given set of data. It is defined as:
 
 $$
-\text{AIC} = 2k - 2\ln(L)
-$$
-
-where:
-
-- $k$ is the number of parameters in the model,
-- $L$ is the maximum value of the likelihood function for the model.
-
-**BIC (Bayesian Information Criterion)**: Similar to AIC but includes a penalty term for the number of parameters in the model. It is defined as:
-
-$$
-\text{BIC} = k\ln(n) - 2\ln(L)
+\text{AIC} = T\log\left(\frac{\text{SSE}}{T}\right) + 2(k+2)
 $$
 
 where:
 
+- $\text{SSE}$ is the fit of the model as Sum of Squared Error
+- $T$ is the number of observations,
 - $k$ is the number of parameters in the model,
-- $n$ is the number of data points,
-- $L$ is the maximum value of the likelihood function for the model.
+
+[BIC (Bayesian Information Criterion)](https://otexts.com/fpp3/selecting-predictors.html#schwarzs-bayesian-information-criterion):
+Similar to AIC but includes a penalty term for the number of parameters in the model. It is defined as:
+
+$$
+\text{BIC} = T\log\left(\frac{\text{SSE}}{T}\right) + (k+2)\log(T)
+$$
+
+where:
+
+- $\text{SSE}$ is the fit of the model as Sum of Squared Error
+- $T$ is the number of observations,
+- $k$ is the number of parameters in the model,
 
 **Key Points**:
 
@@ -1312,7 +1314,6 @@ Common techniques include:
 - **Forecasting**: The process of making predictions about future values based on historical data. Common methods include:
   - **ARIMA (AutoRegressive Integrated Moving Average)**: A popular time series forecasting method that combines autoregression, differencing, and moving average components.
   - **Exponential Smoothing**: A technique that applies decreasing weights to past observations, giving more importance to recent data.
-  - **Prophet**: A forecasting tool developed by Facebook that handles seasonality, holidays, and missing data.
 - **Confidence Intervals**: A range of values that is likely to contain the true value of the forecast. It provides an estimate of the uncertainty associated with the forecast.
   - **Calculation**: Confidence intervals are typically calculated using the standard error of the forecast and a critical value from the t-distribution or normal distribution.
   - **Interpretation**: A 95% confidence interval means that there is a 95% chance that the true value will fall within the interval.
