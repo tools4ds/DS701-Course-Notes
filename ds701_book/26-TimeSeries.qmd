@@ -400,10 +400,10 @@ For the next visualization, we will use the autocorrelation function (ACF).
 The autocorrelation function at lag $k$ is defined as:
 
 $$
-\rho_k = \frac{\sum_{t=k+1}^{T} (y_t - \bar{y})(y_{t-k} - \bar{y})}{\sum_{t=1}^{T} (y_t - \bar{y})^2}
+\rho_k = \frac{\sum_{t=k+1}^{T} (y_t - \bar{y})(y_{t-k} - \bar{y})}{\sum_{t=1}^{T} (y_t - \bar{y})^2},
 $$
 
-where:
+where
 
 - $y_t$ is the value of the time series at time $t$,
 - $\bar{y}$ is the mean of the time series,
@@ -554,7 +554,7 @@ We'll look at two approaches to decomposing the time series:
 - **Classical Decomposition**
 - **STL Decomposition**
 
-Both approaches support both additive and multiplicative models.
+Both approaches support additive and multiplicative models.
 
 ## Classical Decomposition
 
@@ -894,7 +894,7 @@ A time series is said to be stationary if its statistical properties such as mea
 
 Stationarity is crucial in time series analysis because many statistical methods and models assume that the time series is stationary. Non-stationary data can lead to misleading results and poor forecasts.
 
-**Why Stationarity Matters**:
+**Why Stationarity Matters**
 
 1. **Model Assumptions**: Many time series models, such as ARIMA, require the data to be stationary to make accurate predictions.
 2. **Statistical Properties**: Stationary time series have consistent statistical properties over time, making it easier to analyze and interpret.
@@ -1096,7 +1096,12 @@ A type of time series model that extends ARIMA to support seasonality. The model
 is defined as
 
 $$
-y_t = c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \ldots + \theta_q \epsilon_{t-q} + \Phi_1 Y_{t-s} + \Phi_2 Y_{t-2s} + \ldots + \Phi_P Y_{t-Ps} + \Theta_1 E_{t-s} + \Theta_2 E_{t-2s} + \ldots + \Theta_Q E_{t-Qs},
+\begin{aligned} 
+y_t &= c + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \ldots + \phi_p y_{t-p} + \epsilon_t \\ 
+&\quad + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \ldots + \theta_q \epsilon_{t-q} \\ 
+&\quad + \Phi_1 Y_{t-s} + \Phi_2 Y_{t-2s} + \ldots + \Phi_P Y_{t-Ps} \\ 
+&\quad + \Theta_1 E_{t-s} + \Theta_2 E_{t-2s} + \ldots + \Theta_Q E_{t-Qs} 
+\end{aligned} 
 $$
 
 where
@@ -1197,7 +1202,7 @@ The configuration is as follows:
 - We'll use the `Log_Passengers` as the time series, which has better variance properties.
 - `order=(1, 1, 1)` means we're using an ARIMA model with 1 autoregressive term, 1 differencing term, and 1 moving average term.
 - `seasonal_order=(1, 1, 1, 12)` means we're using a seasonal ARIMA model with 1 autoregressive term, 1 differencing term, 1 moving average term, and a seasonal cycle of 12 months.
-- The frequence is the month-end, or `ME`.
+- The frequency is the month-end, or `ME`.
 
 ---
 
@@ -1269,7 +1274,7 @@ plt.show()
 
 The light pink area shows the 95% confidence interval for the forecast.
 
-**Question**: what observations do you have about the prediction?
+**Question**: What observations do you have about the prediction?
 
 
 # Model Evaluation and Forecasting
@@ -1289,6 +1294,8 @@ where
 - $T$ is the number of observations,
 - $k$ is the number of parameters in the model,
 
+---
+
 [BIC (Bayesian Information Criterion)](https://otexts.com/fpp3/selecting-predictors.html#schwarzs-bayesian-information-criterion):
 Similar to AIC but includes a penalty term for the number of parameters in the model. It is defined as:
 
@@ -1301,6 +1308,8 @@ where
 - $\text{SSE}$ is the fit of the model as Sum of Squared Error
 - $T$ is the number of observations,
 - $k$ is the number of parameters in the model,
+
+---
 
 **Key Points**:
 
