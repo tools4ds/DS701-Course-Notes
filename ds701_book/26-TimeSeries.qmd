@@ -46,7 +46,7 @@ import os
 # For this example, we will use a sample dataset from NOAA (National Oceanic and Atmospheric Administration)
 # The dataset contains daily weather observations from the Global Historical Climatology Network (GHCN)
 
-if not os.path.exists('weather_data_filtered_2022.csv'):
+if not os.path.exists(os.path.join('data', 'weather_data_filtered_2022.csv')):
   # Load the dataset into a dataframe
   url = 'https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/2022.csv.gz'
   column_names = ['ID', 'Date', 'Element', 'Data_Value', 'M_Flag', 'Q_Flag', 'S_Flag', 'Obs_Time']
@@ -58,8 +58,8 @@ if not os.path.exists('weather_data_filtered_2022.csv'):
   weather_data_filtered = weather_data[(weather_data['ID'] == station_id) & (weather_data['Element'] == element)]
   # Convert the 'Date' column to datetime format
   weather_data_filtered.loc[:, 'Date'] = pd.to_datetime(weather_data_filtered['Date'], format='%Y%m%d')
-  weather_data_filtered.to_csv('weather_data_filtered_2022.csv', index=False)
-  print("Filtered weather data has been written to 'weather_data_filtered_2022.csv'")
+  weather_data_filtered.to_csv(os.path.join('data', 'weather_data_filtered_2022.csv'), index=False)
+  print("Filtered weather data has been written to 'data/weather_data_filtered_2022.csv'")
 ```
 
 ```{python}
@@ -69,7 +69,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Read the filtered weather data from the CSV file into a dataframe
-weather_data_filtered = pd.read_csv('weather_data_filtered_2022.csv', parse_dates=['Date'])
+weather_data_filtered = pd.read_csv(os.path.join('data', 'weather_data_filtered_2022.csv'), parse_dates=['Date'])
 
 # Plot the daily maximum temperature
 plt.figure(figsize=(10, 3))
@@ -237,7 +237,7 @@ We'll show a few examples of time series plots and include the code to generate 
 We're going to use a dataset of air passengers per month from 1949 to 1960.
 
 ```{python}
-path = './air_passengers_1949_1960.csv'
+path = os.path.join('data', 'air_passengers_1949_1960.csv')
 air_passengers = pd.read_csv(path, index_col='Date', parse_dates=True)
 air_passengers.head()
 ```
@@ -385,7 +385,81 @@ plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 plt.show()
 ```
 
----
+
+
+## Autocorrelation Function
+
+For the next visualization, we will use the autocorrelation function (ACF).
+
+* The autocorrelation function (ACF) measures the correlation between a time series and its lagged values. 
+* It helps to identify the extent to which current values of the series are related to its past values. 
+* The ACF is useful for identifying patterns such as seasonality and for determining the appropriate parameters for time series models like ARIMA.
+
+## ACF Definition
+
+The autocorrelation function at lag $k$ is defined as:
+
+$$
+\rho_k = \frac{\sum_{t=k+1}^{T} (y_t - \bar{y})(y_{t-k} - \bar{y})}{\sum_{t=1}^{T} (y_t - \bar{y})^2}
+$$
+
+where:
+
+- $y_t$ is the value of the time series at time $t$,
+- $\bar{y}$ is the mean of the time series,
+- $T$ is the total number of observations,
+- $k$ is the lag.
+
+**Interpretation:**
+
+- **Peaks in Autocorrelation**: Indicate that there are cyclic components.
+- **No Autocorrelation**: Indicates that the values of the series are independent of each other.
+
+## ACF Example in Python
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define a function with noise added
+def interesting_function(t):
+    return np.sin(t) + 0.5 * np.random.normal(size=len(t))
+
+# Generate time values
+t = np.linspace(0, 10, 500)
+
+# Generate the function values
+function_values = interesting_function(t)
+
+# Shift the function values
+shift = 50
+function_values_shifted = np.roll(function_values, shift)
+
+# Plot the function and its shifted version
+plt.figure(figsize=(10, 4))
+plt.plot(t, function_values, label='Original Function')
+plt.plot(t, function_values_shifted, label='Shifted Function', linestyle='dashed')
+plt.xlabel('Time')
+plt.ylabel('Amplitude')
+plt.title('Original Function and Shifted Function with Noise')
+plt.legend()
+plt.show()
+
+# Compute the autocorrelation
+autocorrelation = np.correlate(function_values, function_values_shifted, mode='full')
+lags = np.arange(-len(function_values) + 1, len(function_values))
+
+# Plot the autocorrelation
+plt.figure(figsize=(10, 4))
+plt.plot(lags, autocorrelation)
+plt.xlabel('Lag')
+plt.ylabel('Autocorrelation')
+plt.title('Autocorrelation of Function with Noise')
+plt.show()
+
+```
+
+## ACF of Air Passengers
 
 An interesting perspective is to plot the autocorrelation to see if there are any
 significant lags in the data.
@@ -407,7 +481,6 @@ significant when it is outside the confidence interval, e.g., the peak at 12.
 
 Although we can see peaks at lags 24, 36, and 48, they are not statistically significant.
 
-> We'll talk more about autocorrelation when we discuss stationarity.
 
 # Components of Time Series
 
@@ -449,17 +522,39 @@ First we'll define the components and then look at how we find them.
 
 Let's look at _how_ we can decompose the time series into its components.
 
-## Additive vs. multiplicative models
+## Combination of components
+
+We've identified the components of the time series. Now we need to combine them.
+
+There are two main ways to combine the components:
+
+- **Additive model**
+- **Multiplicative model**
+
+## Additive model
 
 - **Additive Model**: Assumes that the components of the time series (trend, seasonality, and noise) are added together. The model can be represented as:
   - $Y(t) = T(t) + S(t) + e(t)$
   - Where $Y(t)$ is the observed value, $T(t)$ is the trend component, $S(t)$ is the seasonal component, and $e(t)$ is the noise or error term.
+- **Example**:
+  - Monthly sales data where the seasonal effect is constant over time.
+
+## Multiplicative model
+
 - **Multiplicative Model**: Assumes that the components of the time series are multiplied together. The model can be represented as:
   - $Y(t) = T(t) \times S(t) \times e(t)$
-  - Where $Y(t)$, $T(t)$ and $S(t)$ are the same as above.
-- **Examples**:
-  - Additive: Monthly sales data where the seasonal effect is constant over time.
-  - Multiplicative: Monthly sales data where the seasonal effect increases or decreases proportionally with the trend.
+  - Where $Y(t)$, $T(t)$ and $S(t)$ are the trend, seasonal, and noise components respectively.
+- **Examples**
+  - Monthly sales data where the seasonal effect increases or decreases proportionally with the trend.
+
+## Decomposition Approaches
+
+We'll look at two approaches to decomposing the time series:
+
+- **Classical Decomposition**
+- **STL Decomposition**
+
+Both approaches support both additive and multiplicative models.
 
 ## "Classical" Decomposition
 
@@ -616,7 +711,66 @@ plt.show()
   - Can deal with missing values and outliers.
   - Provides smooth and adaptable trend and seasonal components.
 
+> See [Course Notes](#locally-estimated-scatterplot-smoothing----loessgpt4o) for a more detailed description of Loess.
+
 See also [@hyndman2021forecasting].
+
+::: {.content-visible when-profile="web"}
+
+## Locally Estimated Scatterplot Smoothing -- Loess[^gpt4o]
+
+[^gpt4o]: gpt-4o, personal communication, Nov 2024
+
+**Loess**, which stands for "Locally Estimated Scatterplot Smoothing," is a non-parametric method used to estimate non-linear relationships in data. It is particularly useful for smoothing scatterplots and is a type of local regression.
+
+### Key Features of Loess:
+
+1. **Local Fitting**: Loess fits simple models to localized subsets of the data to build up a function that describes the deterministic part of the variation in the data, point by point.
+
+2. **Weighted Least Squares**: It uses weighted least squares to fit a polynomial surface to the data. The weights decrease with distance from the point of interest, giving more influence to points near the target point.
+
+3. **Flexibility**: Loess is flexible and can model complex relationships without assuming a specific global form for the data. It can adapt to various shapes and patterns in the data.
+
+4. **Smoothing Parameter**: The degree of smoothing is controlled by a parameter, often denoted as $\alpha$ or the span. This parameter determines the proportion of data points used in each local fit. A smaller span results in a curve that follows the data more closely, while a larger span results in a smoother curve.
+
+5. **Polynomial Degree**: Loess can fit either linear or quadratic polynomials to the data. The choice of polynomial degree affects the smoothness and flexibility of the fit.
+
+### How Loess Works:
+
+- **Step 1**: For each point in the dataset, a neighborhood of points is selected based on the smoothing parameter.
+- **Step 2**: A weighted least squares regression is performed on the points in the neighborhood, with weights decreasing with distance from the target point.
+- **Step 3**: The fitted value at the target point is computed from the local regression model.
+- **Step 4**: This process is repeated for each point in the dataset, resulting in a smooth curve that captures the underlying trend.
+
+### Applications:
+
+Loess is widely used in exploratory data analysis to visualize trends and patterns in data. It is particularly useful when the relationship between variables is complex and not well-represented by a simple linear or polynomial model.
+
+### Example in Python:
+
+In Python, the `statsmodels` library provides a function for performing Loess smoothing:
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.nonparametric.smoothers_lowess import lowess
+
+# Example data
+x = np.linspace(0, 10, 100)
+y = np.sin(x) + np.random.normal(0, 0.1, 100)
+
+# Apply Loess smoothing
+smoothed = lowess(y, x, frac=0.2)
+
+# Plot
+plt.scatter(x, y, label='Data', alpha=0.5)
+plt.plot(smoothed[:, 0], smoothed[:, 1], color='red', label='Loess Smoothed')
+plt.legend()
+plt.show()
+```
+
+In this example, `frac` is the smoothing parameter that controls the amount of smoothing applied to the data.
+:::
 
 ## Practical example using Python
 
@@ -640,7 +794,7 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa.seasonal import seasonal_decompose
 
 # Load a sample time series dataset
-data = pd.read_csv('air_passengers_1949_1960.csv', index_col='Date', parse_dates=True)
+data = pd.read_csv(os.path.join('data', 'air_passengers_1949_1960.csv'), index_col='Date', parse_dates=True)
 ts = data['Number of Passengers']
 ```
 
@@ -753,19 +907,102 @@ Stationarity is crucial in time series analysis because many statistical methods
 3. **Decomposition**: Separating the time series into trend, seasonal, and residual components to analyze and adjust each part individually.
 4. **Smoothing**: Using techniques like moving averages to smooth out short-term fluctuations and highlight longer-term trends.
 
+
 ## Tests for stationarity
 
-- **ADF Test (Augmented Dickey-Fuller Test)**: A statistical test used to determine if a time series is stationary. It tests the null hypothesis that a unit root is present in the time series.
-- **KPSS Test (Kwiatkowski-Phillips-Schmidt-Shin Test)**: Another test for stationarity that tests the null hypothesis that the time series is stationary around a deterministic trend.
-- **PP Test (Phillips-Perron Test)**: Similar to the ADF test but uses a non-parametric method to account for serial correlation in the error terms.
+There are tests for stationarity such as listed below and available in
+`statsmodels`.
 
-## Demonstration of stationarity tests using Python
+- **ADF Test (Augmented Dickey-Fuller Test)**: A statistical test used to determine
+  if a time series is stationary. It tests the null hypothesis that a unit root[^unit_root] is
+  present in the time series.
+- **KPSS Test (Kwiatkowski-Phillips-Schmidt-Shin Test)**: Another test for
+  stationarity that tests the null hypothesis that the time series is stationary
+  around a deterministic trend.
 
-```{.python}
-from statsmodels.tsa.stattools import adfuller, kpss, pp_test
+[^unit_root]: Unit root relates to stability in autoregressive models. AR models can be expressed as polynomial equations and the value of the roots of the polynomial determine the stability of the model after perturbation. Roots on the unit circle will indicate that perturbations will have a permanent effect, making the model non-stationary.
+
+## ADF Test Demonstration
+
+Let's apply the tests, starting with ADF:
+
+```{python}
+import pandas as pd
+from statsmodels.tsa.stattools import adfuller, kpss
+
+air_passengers = pd.read_csv(os.path.join('data', 'air_passengers_1949_1960.csv'))
+
+# Apply ADF and KPSS tests on the air passenger data
+
+# ADF Test
+result_adf = adfuller(air_passengers['Number of Passengers'])
+print('ADF Statistic:', result_adf[0])
+print('p-value:', result_adf[1])
+print('Critical Values:')
+for key, value in result_adf[4].items():
+    print('\t%s: %.3f' % (key, value))
 ```
 
-TODO: Add code to demonstrate the stationarity tests.
+
+### Interpretation:
+
+1. **ADF Statistic**: The ADF statistic is 0.815, which is greater than all the critical values at the 1%, 5%, and 10% significance levels.
+
+2. **p-value**: The p-value is 0.991, which is significantly higher than common significance levels (e.g., 0.01, 0.05, 0.10).
+
+3. **Critical Values**:
+   - 1%: -3.482
+   - 5%: -2.884
+   - 10%: -2.579
+
+### Conclusion:
+
+- **Fail to Reject the Null Hypothesis**: Since the ADF statistic (0.815) is greater than the critical values and the p-value (0.991) is much higher than typical significance levels, you fail to reject the null hypothesis. This suggests that the time series has a unit root and is non-stationary.
+
+- **Implication**: The time series data for the number of passengers is non-stationary, indicating that it may have a trend or other non-stationary components. To make the series stationary, you might consider differencing the data or applying other transformations, such as detrending or seasonal adjustment, before proceeding with further analysis or modeling.
+
+## KPSS Test Demonstration
+
+Let's apply the KPSS test.
+
+```{python}
+# KPSS Test
+result_kpss = kpss(air_passengers['Number of Passengers'], regression='c')
+print('\nKPSS Statistic:', result_kpss[0])
+print('p-value:', result_kpss[1])
+print('Critical Values:')
+for key, value in result_kpss[3].items():
+    print('\t%s: %.3f' % (key, value))
+
+```
+
+The KPSS (Kwiatkowski-Phillips-Schmidt-Shin) test is another test used to assess the stationarity of a time series, but it has a different null hypothesis compared to the ADF test.
+
+### KPSS Test Interpretation:
+
+1. **Null Hypothesis (\(H_0\))**: The null hypothesis of the KPSS test is that the time series is stationary around a deterministic trend (i.e., it does not have a unit root).
+
+2. **Alternative Hypothesis (\(H_1\))**: The alternative hypothesis is that the time series is not stationary (i.e., it has a unit root).
+
+### Given Results:
+
+- **KPSS Statistic**: 1.651
+- **p-value**: 0.01
+- **Critical Values**:
+  - 10%: 0.347
+  - 5%: 0.463
+  - 2.5%: 0.574
+  - 1%: 0.739
+
+### Conclusion:
+
+- **Reject the Null Hypothesis**: The KPSS statistic (1.651) is greater than all the critical values at the 10%, 5%, 2.5%, and 1% significance levels. This, along with the low p-value (0.01), suggests that you reject the null hypothesis of stationarity.
+
+- **Implication**: The time series is likely non-stationary according to the KPSS test. This aligns with the ADF test results, which also indicated non-stationarity.
+
+### Overall Interpretation:
+
+Both the ADF and KPSS tests suggest that the time series is non-stationary. This consistent result from both tests strengthens the conclusion that the series may need differencing or other transformations to achieve stationarity before further analysis or modeling.
 
 # Time Series Models
 
@@ -884,7 +1121,7 @@ import matplotlib.pyplot as plt
 We'll load the dataset and show the head.
 
 ```{python}
-path = 'air_passengers_1949_1960.csv'
+path = os.path.join('data', 'air_passengers_1949_1960.csv')
 data = pd.read_csv(path)
 data.head()
 ```
