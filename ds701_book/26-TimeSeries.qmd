@@ -1311,6 +1311,8 @@ where
 
 ---
 
+---
+
 **Key Points**:
 
 1. **Model Comparison**: Both AIC and BIC are used to compare different models; the model with the lower AIC or BIC is preferred.
