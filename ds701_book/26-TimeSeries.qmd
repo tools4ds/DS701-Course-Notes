@@ -38,13 +38,10 @@ plt = aapl_close_px.plot(label='AAPL', figsize=(10 ,3), ylabel='Price', title='A
 
 ```{python}
 #| echo: false
+#| fig-align: center
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
-
-# Download a meteorology dataset example
-# For this example, we will use a sample dataset from NOAA (National Oceanic and Atmospheric Administration)
-# The dataset contains daily weather observations from the Global Historical Climatology Network (GHCN)
 
 # Check if the 'data' directory exists, and if not, create it
 if not os.path.exists('data'):
@@ -52,28 +49,11 @@ if not os.path.exists('data'):
 
 if not os.path.exists(os.path.join('data', 'weather_data_filtered_2022.csv')):
   # Load the dataset into a dataframe
-  url = 'https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/2022.csv.gz'
-  column_names = ['ID', 'Date', 'Element', 'Data_Value', 'M_Flag', 'Q_Flag', 'S_Flag', 'Obs_Time']
-  weather_data = pd.read_csv(url, compression='gzip', header=None, names=column_names)
-
-  # Filter the dataset for a specific weather station and element (e.g., daily maximum temperature)
-  station_id = 'USW00094728'  # Example station ID (New York Central Park)
-  element = 'TMAX'  # Daily maximum temperature
-  weather_data_filtered = weather_data[(weather_data['ID'] == station_id) & (weather_data['Element'] == element)]
-  # Convert the 'Date' column to datetime format
-  weather_data_filtered.loc[:, 'Date'] = pd.to_datetime(weather_data_filtered['Date'], format='%Y%m%d')
-  weather_data_filtered.to_csv(os.path.join('data', 'weather_data_filtered_2022.csv'), index=False)
-  print("Filtered weather data has been written to 'data/weather_data_filtered_2022.csv'")
-```
-
-```{python}
-#| echo: false
-#| fig-align: center
-import pandas as pd
-import matplotlib.pyplot as plt
-
-# Read the filtered weather data from the CSV file into a dataframe
-weather_data_filtered = pd.read_csv(os.path.join('data', 'weather_data_filtered_2022.csv'), parse_dates=['Date'])
+  url = 'https://raw.githubusercontent.com/tools4ds/DS701-Course-Notes/refs/heads/main/ds701_book/data/weather_data_filtered_2022.csv'
+  weather_data_filtered = pd.read_csv(url)
+else:
+  # Read the filtered weather data from the CSV file into a dataframe
+  weather_data_filtered = pd.read_csv(os.path.join('data', 'weather_data_filtered_2022.csv'), parse_dates=['Date'])
 
 # Plot the daily maximum temperature
 plt.figure(figsize=(10, 3))
