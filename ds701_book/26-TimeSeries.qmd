@@ -1006,6 +1006,9 @@ Both the ADF and KPSS tests suggest that the time series is non-stationary. This
 
 # Time Series Models
 
+In order to forecast future data values, we will now define a family of models
+and then apply one to our data.
+
 ## Autoregressive (AR) models
 
 A type of time series model where the current value of the series is based on
