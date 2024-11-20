@@ -27,7 +27,7 @@ plt = aapl_close_px.plot(label='AAPL', figsize=(10 ,3), ylabel='Price', title='A
 ```
 
 - A **time series** is a series of data points or observations recorded at different
-  or regular time intervals, e.g. hourly, daily, monthly, quarterly, yearly, etc.
+  or regular time intervals, e.g., hourly, daily, monthly, quarterly, yearly, etc.
 - **Time Series Analysis** is the process of analyzing time series data to extract
   meaningful statistics and other characteristics of the data such as trends,
   cycles, and seasonal patterns.
@@ -403,7 +403,7 @@ plt.show()
 ```
 
 The blue shaded area is the 95% confidence interval. The autocorrelation is
-significant when it is outside the confidence interval, e.g. the peak at 12. 
+significant when it is outside the confidence interval, e.g., the peak at 12. 
 
 Although we can see peaks at lags 24, 36, and 48, they are not statistically significant.
 
@@ -437,7 +437,7 @@ First we'll define the components and then look at how we find them.
   - Business cycles with periods of expansion and contraction.
   - Agricultural cycles influenced by factors such as weather and market conditions.
 
-## Irregular/Noise: Random variation
+## Irregular/Noise
 
 - **Irregular/Noise**: Refers to the random variation in the data that cannot be attributed to trend, seasonality, or cyclic patterns. It is the residual variation after accounting for other components.
 - **Examples**: 
