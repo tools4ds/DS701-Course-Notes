@@ -1201,9 +1201,9 @@ We'll print the summary and plot the diagnostics.
 print(results.summary())
 ```
 
----
-
 :::
+
+---
 
 And let's plot some diagnostic information.
 
@@ -1289,8 +1289,6 @@ where
 - $\text{SSE}$ is the fit of the model as Sum of Squared Error
 - $T$ is the number of observations,
 - $k$ is the number of parameters in the model,
-
----
 
 ---
 
