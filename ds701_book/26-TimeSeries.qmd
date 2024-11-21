@@ -64,8 +64,8 @@ plt.title('Daily Maximum Temperature in 2022 - New York Central Park')
 plt.show()
 ```
 
-- **Finance**: Time series analysis is used for stock price prediction, risk management, and economic forecasting.
-- **Economics**: It helps in understanding economic indicators, GDP growth, and inflation rates.
+- **Finance**: Time series analysis is used for stock price prediction, risk management, etc.
+- **Economics**: It helps in understanding and forecasting economic indicators, GDP growth, and inflation rates.
 - **Meteorology**: Time series data is crucial for weather forecasting, climate change studies, and analyzing seasonal patterns.
 - **Healthcare**: Time series analysis is used for analyzing patient data, monitoring disease outbreaks, and predicting patient outcomes.
 - **Marketing**: Time series analysis is used for analyzing sales data, customer behavior, and predicting future trends.
@@ -97,7 +97,9 @@ We'll look at two main aspects of time series analysis:
 **Note**:
 
 In the course notes version of this chapter, there's a section on time and date
-manipulation using the `datetime` library and the `pandas` library.
+manipulation using the `datetime` library and the `pandas` library which is
+a summary of the [Time Series](https://wesmckinney.com/book/time-series) chapter
+of the book [Python for Data Analysis, 3rd Ed.](https://wesmckinney.com/book).
 :::
 
 ::: {.content-visible when-profile="web"}
@@ -385,6 +387,28 @@ plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 plt.show()
 ```
 
+## Lag Plot
+
+Lag plots are scatter plots of the data shifted by a certain lag against the
+original data.
+
+```{python}
+#| fig-align: center
+from pandas.plotting import lag_plot
+
+fig, axes = plt.subplots(3, 4, figsize=(15, 10))
+fig.suptitle('Lag Plots of Air Passengers')
+
+for lag in range(1, 13):
+    ax = axes[(lag-1) // 4, (lag-1) % 4]
+    lag_plot(air_passengers['Number of Passengers'], lag=lag, ax=ax)
+    ax.set_title(f'Lag {lag}')
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.show()
+```
+
+**Question**: What do you observe about the lag plots?
 
 
 ## Autocorrelation Function
@@ -414,50 +438,6 @@ where
 
 - **Peaks in Autocorrelation**: Indicate that there are cyclic components.
 - **No Autocorrelation**: Indicates that the values of the series are independent of each other.
-
-## ACF Example in Python
-
-```{python}
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Define a function with noise added
-def interesting_function(t):
-    return np.sin(t) + 0.5 * np.random.normal(size=len(t))
-
-# Generate time values
-t = np.linspace(0, 10, 500)
-
-# Generate the function values
-function_values = interesting_function(t)
-
-# Shift the function values
-shift = 50
-function_values_shifted = np.roll(function_values, shift)
-
-# Plot the function and its shifted version
-plt.figure(figsize=(10, 4))
-plt.plot(t, function_values, label='Original Function')
-plt.plot(t, function_values_shifted, label='Shifted Function', linestyle='dashed')
-plt.xlabel('Time')
-plt.ylabel('Amplitude')
-plt.title('Original Function and Shifted Function with Noise')
-plt.legend()
-plt.show()
-
-# Compute the autocorrelation
-autocorrelation = np.correlate(function_values, function_values_shifted, mode='full')
-lags = np.arange(-len(function_values) + 1, len(function_values))
-
-# Plot the autocorrelation
-plt.figure(figsize=(10, 4))
-plt.plot(lags, autocorrelation)
-plt.xlabel('Lag')
-plt.ylabel('Autocorrelation')
-plt.title('Autocorrelation of Function with Noise')
-plt.show()
-
-```
 
 ## ACF of Air Passengers
 
@@ -524,9 +504,9 @@ Let's look at _how_ we can decompose the time series into its components.
 
 ## Combination of components
 
-We've identified the components of the time series. Now we need to combine them.
+We've identified the components of the time series: trend, seasonality, noise...
 
-There are two main ways to combine the components:
+There are two main ways to think about how these components combine:
 
 - **Additive model**
 - **Multiplicative model**
@@ -668,29 +648,36 @@ random?
 
 ---
 
-Finally, we can put the detrended, seasonal, and irregular plots together.
+Finally, we can put the trend, detrended, seasonal, and irregular plots together.
 
 ```{python}
 #| fig-align: center
 # Plot detrended, seasonal, and irregular components
 plt.figure(figsize=(8, 6))
 
+# Plot the trend series
+plt.subplot(4, 1, 1)
+ts.rolling(window=11, center=True).mean().plot(label='Trend', color='black')
+plt.ylabel('Trend')
+plt.title('Trend Component')
+plt.legend()
+
 # Plot detrended series
-plt.subplot(3, 1, 1)
+plt.subplot(4, 1, 2)
 detrended_ts.plot(label='Detrended', color='blue')
 plt.ylabel('Detrended')
 plt.title('Detrended Component')
 plt.legend()
 
 # Plot seasonal series
-plt.subplot(3, 1, 2)
+plt.subplot(4, 1, 3)
 seasonal_ts.plot(label='Seasonal', color='green')
 plt.ylabel('Seasonal')
 plt.title('Seasonal Component')
 plt.legend()
 
 # Plot irregular series
-plt.subplot(3, 1, 3)
+plt.subplot(4, 1, 4)
 irregular_ts.plot(label='Irregular', color='red')
 plt.ylabel('Irregular')
 plt.title('Irregular Component')
@@ -772,9 +759,10 @@ plt.show()
 In this example, `frac` is the smoothing parameter that controls the amount of smoothing applied to the data.
 :::
 
-## Practical example using Python
+## Practical example using `statsmodels`
 
-Let's demonstrate a practical example of time series decomposition using Python.
+Let's demonstrate a practical example of time series decomposition using
+`statsmodels` routines `seasonal_decompose` and `STL`.
 
 **Steps**:
 
@@ -823,6 +811,8 @@ plt.tight_layout()
 plt.show()
 ```
 
+Does this look similar to the classical decomposition we did earlier?
+
 ## `statsmodels` Multiplicative Model
 
 Let's try the multiplicative model:
@@ -846,6 +836,8 @@ plt.tight_layout()
 plt.show()
 ```
 
+**Question**: What differences do you see between multiplicative and additive models?
+What can you infer from that?
 
 ## STL Decomposition
 
@@ -918,6 +910,9 @@ There are tests for stationarity such as listed below and available in
 - **KPSS Test (Kwiatkowski-Phillips-Schmidt-Shin Test)**: Another test for
   stationarity that tests the null hypothesis that the time series is stationary
   around a deterministic trend.
+
+The course notes have examples of both of these tests applied to the Air
+Passengers dataset.
 
 [^unit_root]: Unit root relates to stability in autoregressive models. AR models can be expressed as polynomial equations and the value of the roots of the polynomial determine the stability of the model after perturbation. Roots on the unit circle will indicate that perturbations will have a permanent effect, making the model non-stationary.
 
@@ -1030,8 +1025,6 @@ where
 - $\phi_1, \phi_2, \ldots, \phi_p$ are the coefficients,
 - $\epsilon_t$ is the white noise error term.
 
---- 
-
 **Key Points**:
 
 1. **Lag Order (p)**: The number of lagged observations included in the model.
@@ -1051,10 +1044,8 @@ where
 
 - $y_t$ is the current value,
 - $\mu$ is the mean of the series,
-- $\epsilon_t$ is the white noise error term,
+- $\epsilon_t$ is the white noise error term, e.g. the residuals
 - $\theta_1, \theta_2, \ldots, \theta_q$ are the coefficients.
-
----
 
 **Key Points**:
 
@@ -1080,8 +1071,6 @@ where
 - $\phi_1, \phi_2, \ldots, \phi_p$ are the AR coefficients,
 - $\epsilon_t$ is the white noise error term,
 - $\theta_1, \theta_2, \ldots, \theta_q$ are the MA coefficients.
-
----
 
 **Key Points**:
 
@@ -1116,8 +1105,6 @@ where
 - $\Theta_1, \Theta_2, \ldots, \Theta_Q$ are the seasonal MA coefficients,
 - $E_{t-s}, E_{t-2s}, \ldots, E_{t-Qs}$ are the seasonal lagged forecast errors.
 
----
-
 **Key Points**:
 
 1. **Order (p, d, q) x (P, D, Q, s)**: The parameters of the SARIMA model where $p, d, q$ are the non-seasonal parameters, $P, D, Q$ are the seasonal parameters, and $s$ is the length of the seasonal cycle.
@@ -1125,17 +1112,17 @@ where
 3. **Parameter Estimation**: Methods like Maximum Likelihood Estimation (MLE) are used to estimate the parameters.
 
 
-## ARIMA/SARIMA Example
+## SARIMA Model Forecast
 
-Let's look at a concrete example of ARIMA/SARIMA using the Air Passengers dataset.
+Let's demonstrate forecasting with a SARIMA model.
 
 ```{python}
 import pandas as pd
 import numpy as np
-from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 import matplotlib.pyplot as plt
 ```
+
 
 We'll load the dataset and show the head.
 
@@ -1169,18 +1156,6 @@ data.head()
 
 ---
 
-And finally, we'll perform a **classical additive seasonal decomposition** of the data as a point
-of comparison.
-
-```{python}
-# Seasonal decomposition
-decomposition = seasonal_decompose(data['Log_Passengers'], model='additive')
-decomposition.plot()
-plt.show()
-```
-
-## SARIMAX Model
-
 Now let's create an instance of a **SARIMAX** model -- <b>S</b>easonal 
 <b>A</b>utoregressive <b>I</b>ntegrated <b>M</b>oving <b>A</b>verage with 
 e<b>X</b>ogenous regressors.
@@ -1213,6 +1188,10 @@ results = model.fit()
 ```
 
 
+In the Course Notes version, there are also model results summaries.
+
+::: {.content-visible when-profile="web"}
+
 ---
 
 We'll print the summary and plot the diagnostics.
@@ -1223,6 +1202,8 @@ print(results.summary())
 ```
 
 ---
+
+:::
 
 And let's plot some diagnostic information.
 
