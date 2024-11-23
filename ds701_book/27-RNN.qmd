@@ -4,6 +4,7 @@ jupyter: python3
 ---
 
 # RNN Theory
+
 ```{python}
 #| echo: false
 import pandas as pd
@@ -15,7 +16,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 ```
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/26-RNN.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/27-RNN.ipynb)
 
 We introduce recurrent neural networks (RNNs) which is a neural network architecture used for machine learning on sequential data.
 
@@ -83,12 +84,27 @@ Depending on the application there many be varying number of outputs $y_t$.
 
 ## Loss Calculation for Sequential Data
 
+For each prediction in the sequence $y_t$ and corresponding true value $\hat{y}_t$  we calculate the the cross-entropy loss $\mathcal{L}_t(\hat{y}_t, y_t) = -\hat{y}_t\log(y_t)$. The total loss is the sum of all the individual losses, $\mathcal{L} = \sum_t \mathcal{L}_t$. This is illustrated in the figure below.
+
+If we were predicting continious value we would use a mean-square error loss.
+
+![](drawio/RNN-Loss.png)
+
+
 ## Vanishing Gradients
+
+The key idea of RNNs is that earlier items in the sequence  influence the more recent outputs. This is highlighted in blue in the figure below.
+
+However, for longer sequences the influence can be significantly reduced. This is illustrated in red in the figure below.
+
+Due to the potential for long sequences of data, during training you are likely to encounter small gradients. As a result, RNNs are prone to vanishing gradients.
+
+![](drawio/VanishingGradient.png)
 
 ## RNN Limitations
 
-- **Vanishing and Exploding Gradients**:
-  - During training, gradients can become very small (vanish) or very large (explode), making it difficult for the network to learn long-term dependencies.
+- **Vanishing Gradients**:
+  - During training, gradients can become very small (vanish), making it difficult for the network to learn long-term dependencies.
 
 - **Long-Term Dependencies**:
   - RNNs struggle to capture dependencies that are far apart in the sequence, leading to poor performance on tasks requiring long-term memory.
@@ -98,8 +114,6 @@ Depending on the application there many be varying number of outputs $y_t$.
 
 - **Limited Context**:
   - Standard RNNs have a limited ability to remember context over long sequences, which can affect their performance on complex tasks.
-
-
 
 ## Addressing RNN Limitations
 
@@ -272,7 +286,176 @@ $$
 - **Limited Long-term Dependencies**: GRUs might struggle with very long-term dependencies in sequential data compared to LSTMs.
 - **Less Flexibility**: GRUs offer less flexibility in terms of controlling the flow of information through the network.
 
-# RNN Example
+# RNN Examples
+
+## Appliance Energy Prediction
+
+In this example we will use a [dataset](https://archive.ics.uci.edu/dataset/374/appliances+energy+prediction) containing the energy usage in Watt hours (Wh) of appliances in a low energy building.
+
+In addition to the appliance energy information, the dataset includes the house temperature and humidity conditions. We will build an LSTM model that predicts the energy usage of the appliances.
+
+## Load the Data
+
+The code cells below load the dataset.
+
+```{python}
+#| code-fold: false
+import os
+
+file_path = 'energydata_complete.csv'
+url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00374/energydata_complete.csv"
+
+if os.path.exists(file_path):
+    data = pd.read_csv(file_path)
+else:
+    data = pd.read_csv(url)
+    data.to_csv(file_path, index=False)
+
+data.head()
+```
+
+## Resample Data
+
+We're interested in the `Appliances` column, which is the energy use of the appliances in Wh. 
+
+First, we'll resample the data to hourly resolution and fill missing values using the forward fill method.
+
+```{python}
+data['date'] = pd.to_datetime(data['date'])
+data.set_index('date', inplace=True)
+
+data = data['Appliances'].resample('h').mean().ffill() # Resample and fill missing
+
+data.head()
+```
+
+## Preparing the Data
+
+We create train-test splits and scale the data accordingly. 
+
+In addition, we create our own dataset class. In this class we create lagged sequences of the energy usage data. The amount of lag, or look-back sequence length, is set to 24.
+
+```{python}
+train_size = int(len(data) * 0.8)
+test_size = len(data) - train_size
+
+train_data = data[:train_size]
+test_data = data[train_size:]
+
+# Normalize data
+scaler = MinMaxScaler()
+train_data_scaled = scaler.fit_transform(train_data.values.reshape(-1, 1))
+test_data_scaled = scaler.transform(test_data.values.reshape(-1, 1))
+
+# Prepare data for LSTM
+class TimeSeriesDataset(Dataset):
+    def __init__(self, data, seq_length):
+        self.data = data
+        self.seq_length = seq_length
+
+    def __len__(self):
+        return len(self.data) - self.seq_length
+
+    def __getitem__(self, index):
+        X = self.data[index:index + self.seq_length]
+        y = self.data[index + self.seq_length]
+        return torch.tensor(X, dtype=torch.float32), torch.tensor(y, dtype=torch.float32)
+
+seq_length = 24
+train_dataset = TimeSeriesDataset(train_data_scaled, seq_length)
+test_dataset = TimeSeriesDataset(test_data_scaled, seq_length)
+
+# Create DataLoader
+train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
+```
+
+## LSTM Architecture
+
+We define our LSTM architecture in the code cell below.
+
+```{python}
+#| code-fold: false
+# Define the LSTM model
+class LSTMModel(nn.Module):
+    def __init__(self, input_size=1, hidden_size=16, output_size=1):
+        super(LSTMModel, self).__init__()
+        self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)
+        self.fc = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x):
+        x, _ = self.lstm(x)
+        x = self.fc(x[:, -1, :])  # Use the output of the last time step
+        return x
+
+model = LSTMModel()
+print(model)
+```
+
+## Loss and Training
+
+We use a mean-square error loss function and the Adams optimizer. We train the model for 20 epochs. We display the decrease in the loss during training.
+
+```{python}
+# Set criterion and optimizer
+criterion = nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+epochs = 20
+train_losses = []
+for epoch in range(epochs):
+    model.train()
+    train_loss = 0.0
+    for X, y in train_loader:
+
+      optimizer.zero_grad()
+      outputs = model(X)
+      loss = criterion(outputs, y)
+      loss.backward()
+      optimizer.step()
+
+      train_loss += loss.item()
+    train_losses.append(train_loss)
+
+# Plot the training losses over epochs
+plt.figure(figsize=(10, 5))
+plt.plot(range(1, epochs + 1), train_losses, marker='o', linestyle='-', color='b')
+plt.title('Training Loss over Epochs')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.xticks(range(1, epochs + 1))  # Set x-tick marks to be integers
+plt.grid(True)
+plt.show()
+```
+
+## Evaluation
+
+Let's evaluate the model's performance.
+
+```{python}
+# Evaluate the model
+model.eval()
+predictions = []
+trues = []
+with torch.no_grad():
+    for X, y in test_loader:
+        preds = model(X)
+        predictions.extend(preds.numpy())
+        trues.extend(y.numpy())
+
+# Rescale predictions and true to original scale
+predictions_rescaled = scaler.inverse_transform(predictions)
+true_rescaled = scaler.inverse_transform(trues)
+
+# Plot results
+plt.figure(figsize=(10, 6))
+plt.plot(true_rescaled, label='True Values')
+plt.plot(predictions_rescaled, label='Predicted Values', alpha=0.7)
+plt.legend()
+plt.show()
+```
+
+## Music Generation
 
 ## Music Generation
 
@@ -307,7 +490,10 @@ The [Maestro](https://magenta.tensorflow.org/datasets/maestro#v300) dataset is a
 
 ```{python}
 #| code-fold: false
-midi_files = ['music/music_sample.midi']
+midi_files = [
+    'music/music_sample_1.mid',
+    'music/music_sample_2.mid',
+    'music/music_sample_3.mid']
 all_notes = []
 for midi_file in midi_files:
   notes = midi_to_notes(midi_file)
@@ -321,7 +507,7 @@ Convert the note sequences into a format suitable for training the LSTM model. T
 
 ```{python}
 #| code-fold: false
-sequence_length = 100  # Length of each input sequence
+sequence_length = 48  # Length of each input sequence
 X = []
 y = []
 
@@ -364,7 +550,7 @@ class MusicLSTM(nn.Module):
 
 # Example usage
 input_dim = X.shape[2]  # Number of features (e.g., pitch, velocity)
-hidden_dim = 32
+hidden_dim = 20
 num_layers = 2
 output_dim = X.shape[2]
 model = MusicLSTM(input_dim, hidden_dim, num_layers, output_dim)
@@ -373,14 +559,14 @@ model = MusicLSTM(input_dim, hidden_dim, num_layers, output_dim)
 
 ## Training
 
-We will train our model for 3 epochs.
+We will train our model for 10 epochs.
 
 ```{python}
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 num_epochs = 100
-batch_size = 32
+batch_size = 8
 for epoch in range(num_epochs):
     for i in range(0, len(X), batch_size):
         inputs = torch.tensor(X[i:i+batch_size], dtype=torch.float32)
@@ -392,8 +578,6 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-    
-    print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
 ```
 
 ## Generate
@@ -412,16 +596,16 @@ def generate_music(model, start_sequence, length):
     return generated
 
 # Example usage
-start_sequence = X[0]  # Starting sequence for generation
-generated_music = generate_music(model, start_sequence, 500)  # Generate 500 notes
+start_sequence = X[10]  # Starting sequence for generation
+generated_music = generate_music(model, start_sequence, 100)  # Generate 100 notes
+print(generated_music.shape)
 ```
 
 ## Download the Song
 
-We can generate an output midi file to play. The song is somewhat similar to the original piece. We could probably create
+We can generate an output midi file to play. The song is somewhat similar to the original piece. We could probably create a better song through more training and a larger training set.
 
 ```{python}
-#| echo: false
 def notes_to_midi(notes, output_file):
     midi = pretty_midi.PrettyMIDI()
     instrument = pretty_midi.Instrument(program=0)
@@ -438,15 +622,14 @@ def notes_to_midi(notes, output_file):
     midi.write(output_file)
 
 # Uncomment this line to write the follow
-# notes_to_midi(generated_music, 'generated_music.midi')
-``` 
-
+#notes_to_midi(generated_music, 'generated_music.midi')
+```
 
 ## Recap
 
 We discussed the basic RNN architecture. We then discussed the LSTM and GRU modifications. These modifications allowed the RNNs to handle long-term dependencies.
 
-We then considered an example application of music generation. We generated a piano solo that sounded *interesting*.
+We then considered two example applications. One of energy consumption prediction and one of of music generation. We generated a piano solo that sounded *interesting*.
 
 One computational bottleneck of RNNs is that they only allow for sequential computation. This was a major bottleneck for applications involving natural language processing. This motivated the development of more advanced language processing architectures, in particular, the transformer, which is the basis for modern large language models (LLMs).
 
