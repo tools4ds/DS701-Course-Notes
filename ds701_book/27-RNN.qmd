@@ -3,10 +3,16 @@ title: 'Recurrent Neural Networks'
 jupyter: python3
 ---
 
-# RNNs
+# RNN Theory
 ```{python}
 #| echo: false
+import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, Dataset
 ```
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/26-RNN.ipynb)
@@ -22,50 +28,11 @@ We introduce recurrent neural networks (RNNs) which is a neural network architec
 - Unlike traditional neural networks, RNNs have connections that form directed cycles, allowing information to persist.
 :::
 ::: {.column width="50%"}
-```{python}
-#| fig-align: center
-#| echo: false
-import matplotlib.pyplot as plt
-import networkx as nx
-
-# Create a directed graph
-G = nx.DiGraph()
-
-# Add nodes with labels
-nodes = {
-    'x1': 'x_1', 'x2': 'x_2', 'x3': 'x_3',
-    'h1': 'h_1', 'h2': 'h_2', 'h3': 'h_3',
-    'y1': 'y_1', 'y2': 'y_2', 'y3': 'y_3'
-}
-G.add_nodes_from(nodes.keys())
-
-# Add edges
-edges = [
-    ('x1', 'h1'), ('x2', 'h2'), ('x3', 'h3'),
-    ('h1', 'h2'), ('h2', 'h3'),
-    ('h1', 'y1'), ('h2', 'y2'), ('h3', 'y3')
-]
-G.add_edges_from(edges)
-
-# Define node positions
-pos = {
-    'x1': (0, 0), 'x2': (1, 0), 'x3': (2, 0),
-    'h1': (0, 0.25), 'h2': (1, 0.25), 'h3': (2, 0.25),
-    'y1': (0, .5), 'y2': (1, .5), 'y3': (2, .5)
-}
-
-# Draw the graph
-plt.figure(figsize=(6, 3))
-nx.draw(G, pos, with_labels=True, labels=nodes, node_size=1000, node_color='lightblue', font_size=10, font_weight='bold', arrowsize=20)
-plt.title('Simple RNN Diagram')
-plt.show()
-```
+![](drawio/RNN.png)
 :::
 ::::
 
-The above figure shows an unrolled RNN architecture. The input $x_i$ feed into an $h_i$ layer, which produces sequential output $y_i$. The information from $h_i$ is passed to $h_{i+1}$ so that previous information about $x_i$ propagates forward in the architecture.
-
-
+The above figure shows an RNN architecture. The block $A$ can be viewed as a chunk of the RNN. $A$ accepts as input $x_t$ and outputs a value $y_t$. The loop with the hidden state from $h_{t-1}$ illustrates how information passes from one step of the network to the next.
 
 ## Why Use RNNs?
 
@@ -81,56 +48,13 @@ The above figure shows an unrolled RNN architecture. The input $x_i$ feed into a
 
 ## Outline
 
-1. RNN Architecture
+1. Basic RNN Architecture
 1. LSTM (Long Short-Term Memory) and GRU (Gated Recurrent Units)
-1. Stock Prediction
+1. Examples
 
 ## RNN Architecture
 
-```{python}
-#| fig-align: center
-#| echo: false
-import matplotlib.pyplot as plt
-import networkx as nx
-
-# Create a directed graph
-G = nx.DiGraph()
-
-# Add nodes with labels
-nodes = {
-    'x1': 'x_1', 'x2': 'x_2',
-    'h0': 'h_0', 'h1': 'h_1', 'h2': 'h_2',
-    'y1': 'y_1', 'y2': 'y_2',
-    'xt': 'x_t', 'yt': 'y_t', 'ht': 'h_t'
-}
-G.add_nodes_from(nodes.keys())
-
-# Add edges
-edges = [
-    ('x1', 'h1'), ('x2', 'h2'),
-    ('h0', 'h1'), ('h1', 'h2'),
-    ('h1', 'y1'), ('h2', 'y2'),
-    ('xt', 'ht'), ('ht', 'yt')
-]
-G.add_edges_from(edges)
-
-# Define node positions with y's on top and x's on the bottom
-pos = {
-    'x1': (1, 0), 'x2': (2, 0),
-    'h0': (0.5, 1), 'h1': (1, 1), 'h2': (2, 1),
-    'y1': (1, 2), 'y2': (2, 2),
-    'xt': (3, 0), 'ht': (3, 1), 'yt': (3, 2)
-}
-
-# Draw the graph
-plt.figure(figsize=(10, 5))
-nx.draw(G, pos, with_labels=True, labels=nodes, node_size=2000, node_color='lightblue', font_size=10, font_weight='bold', arrowsize=20)
-
-# Add ellipsis and arrow to x_t and h_t
-plt.text(2.5, 1, r'$\cdots$', fontsize=20)
-
-plt.show()
-```
+![](drawio/RNN-Full.png)
 
 ## Forward Propagation
 
@@ -139,11 +63,7 @@ The forward pass in the RNN architecture is given by the following operations
 1. $h_t = g_h(W_{hh} h_{t-1} + W_{hx} x_t + b_h)$
 1. $y_t = g_y(W_{yh} h_t + b_y)$
 
-The vector $x_t$ is the $t$-th element of the input sequence. The vector $h_t$ is the hidden state at the $t$-th point of the sequence. The vector $y_t$ is the $t$-th output of the sequence. The functions $g_h$ and $g_y$ are nonlinear activation functions. The weight matrices $W_{hh}$, $W_{hx}$, $W_{yh}$, and biases $b_h$, $b_y$ are trainable parameters.
-
-## Rolled and Unrolled
-
-![[Source](https://colah.github.io/posts/2015-08-Understanding-LSTMs/)](figs/RNN-unrolled.png){fig-align="center"}
+The vector $x_t$ is the $t$-th element of the input sequence. The vector $h_t$ is the hidden state at the $t$-th point of the sequence. The vector $y_t$ is the $t$-th output of the sequence. The functions $g_h$ and $g_y$ are nonlinear activation functions. The weight matrices $W_{hh}$, $W_{hx}$, $W_{yh}$, and biases $b_h$, $b_y$ are trainable parameters. Note that we must define the vector $h_0$. A common choice is $h_0 = 0$.
 
 ## Model Types
 
@@ -161,6 +81,9 @@ Depending on the application there many be varying number of outputs $y_t$.
 :::
 ::::
 
+## Loss Calculation for Sequential Data
+
+## Vanishing Gradients
 
 ## RNN Limitations
 
@@ -176,6 +99,8 @@ Depending on the application there many be varying number of outputs $y_t$.
 - **Limited Context**:
   - Standard RNNs have a limited ability to remember context over long sequences, which can affect their performance on complex tasks.
 
+
+
 ## Addressing RNN Limitations
 
 Some proposed solutions for mitigating the previous issues are
@@ -187,13 +112,343 @@ These are more advanced variants of RNNs designed to address some of these limit
 
 ## LSTM
 
+Below is an illustration of the LSTM architecture.
+
+![](drawio/LSTM.png)
+
+---
+
+The new components are:
+
+- The input cell state $c_{t-1}$ and output cell state $c_{t}$.
+- Yellow blocks consisting of neural network layers with sigmoid $\sigma$ or tanh activation functions.
+- Red circles indicating point-wise operations.
+
+
+## Cell State
+
+:::: {.columns}
+::: {.column width="50%"}
+
+The cell state $c_{t-1}$ is the input to the LSTM block.
+
+This value then moves through the LSTM block.
+
+It is modified by either a multiplication or addition interaction. 
+
+After these operations, the modified input state becomes $c_{t}$ and is sent to the next LSTM block.
+
+:::
+::: {.column width="50%"}
+![](drawio/CellState.png)
+:::
+::::
+
+## Forget Gate Layer
+
+:::: {.columns}
+::: {.column width="50%"}
+The forget layer computes a value 
+
+$$
+f_t = \sigma(W_f[h_{t-1}, x_t] + b_f),
+$$
+
+where $\sigma$ is the sigmoid function.
+
+The output $f_t$ is a vector of numbers between 0 and 1. These values multiply the corresponding vector values in $C_{t-1}$.
+
+A value of 0 says throw that component of $C_{t-1}$ away. A value of 1 says keep that component of $C_{t-1}$.
+
+This operation tells us which *old* information in the cell state we should keep or remove.
+
+:::
+::: {.column width="50%"}
+![](drawio/ForgetLayer.png)
+:::
+::::
+
+## Input Gate Layer
+
+:::: {.columns}
+::: {.column width="50%"}
+The input gate layer computes values
+
+$$
+\begin{align}
+i_t &= \sigma(W_i[h_{t-1}, x_t] + b_i), \\
+\tilde{c}_{t} &= \operatorname{tanh}(W_c[h_t-1, x_t] + b_c).
+\end{align}
+$$
+
+The value that is added to the cell state $c_{t-1}$ is $i_t \cdot \tilde{c}_t$.
+
+This value tells us what *new* information to add to the cell state.
+
+At this stage of the process, the cell state now has the formula
+
+$$
+c_t = f_t \cdot c_{t-1} + i_t \cdot \tilde{c}_t.
+$$
+
+:::
+::: {.column width="50%"}
+![](drawio/InputGateLayer.png)
+:::
+::::
+
+## Output Layer
+
+:::: {.columns}
+::: {.column width="50%"}
+The output gate layer computes values
+
+$$
+\begin{align}
+o_t &= \sigma(W_o[h_{t-1}, x_t] + b_o), \\
+\tilde{c}_{t} &=o_t * \operatorname{tanh}(c_t).
+\end{align}
+$$
+
+The vector $o_t$ from the sigmoid layer tells us what parts of the cell state we use for output. The output is a filtered version of the hyperbolic tangent of cell state $c_t$. 
+
+The output of the block is $y_t$. It is the same as the hidden state $h_t$ that is sent to the $t+1$ LSTM block.
+
+This value tells us what *new* information to add to the cell state.
+
+:::
+::: {.column width="50%"}
+![](drawio/OutputLayer.png)
+:::
+::::
+
+
+## Advantages of LSTMs
+
+- **Long-term Dependencies**: LSTMs can capture long-term dependencies in sequential data, making them effective for tasks like language modeling and time series prediction.
+- **Avoiding Vanishing Gradient**: The architecture of LSTMs helps mitigate the vanishing gradient problem, which is common in traditional RNNs.
+- **Flexibility**: LSTMs can handle variable-length sequences and are versatile for different types of sequential data.
+- **Memory**: They have a memory cell that can maintain information over long periods, which is crucial for tasks requiring context retention.
+
+## Disadvantages of LSTMs
+
+- **Complexity**: LSTMs are more complex than simpler models like traditional RNNs, leading to longer training times and higher computational costs.
+- **Overfitting**: Due to their complexity, LSTMs are prone to overfitting, especially with small datasets.
+- **Resource Intensive**: They require more computational resources and memory, which can be a limitation for large-scale applications.
+- **Hyperparameter Tuning**: LSTMs have many hyperparameters that need careful tuning, which can be time-consuming and challenging.
+
 ## GRU
 
-# Coding Example
+A variant of the LSTM architecture is the Gated Recurrence Unit.
 
-## Stock Prices
+:::: {.columns}
+::: {.column width="50%"}
+It combines the forget and input gates into a single update gate. It also combines the cell-state and hidden state. The operations that are now performed are given below:
+
+$$
+\begin{align}
+z_t &= \sigma(W_z[h_{t-1}, x_t] + b_z),\\
+r_t &= \sigma(W_r[h_{t-1}, x_t] + b_r), \\
+\tilde{h}_t &= \sigma(W_{\tilde{h}}[h_{t-1}, x_t] + b_{\tilde{h}}), \\
+h_t &= (1- z_t)\cdot h_{t-1} + z_t\cdot \tilde{h}_t.
+\end{align}
+$$
+:::
+::: {.column width="50%"}
+![](drawio/GRU.png)
+:::
+::::
+
+## Advantages of GRUs
+
+- **Simpler Architecture**: GRUs have a simpler architecture compared to LSTMs, with fewer gates, making them easier to implement and train.
+- **Faster Training**: Due to their simpler structure, GRUs often train faster and require less computational power than LSTMs.
+- **Effective Performance**: GRUs can perform comparably to LSTMs on many tasks, especially when dealing with shorter sequences.
+- **Less Prone to Overfitting**: With fewer parameters, GRUs are generally less prone to overfitting compared to LSTMs.
+
+## Disadvantages of GRUs
+
+- **Less Expressive Power**: The simpler architecture of GRUs might not capture complex patterns in data as effectively as LSTMs.
+- **Limited Long-term Dependencies**: GRUs might struggle with very long-term dependencies in sequential data compared to LSTMs.
+- **Less Flexibility**: GRUs offer less flexibility in terms of controlling the flow of information through the network.
+
+# RNN Example
+
+## Music Generation
+
+The goal is to create an LSTM architecture to create a piece of music. We will train the LSTM on some example snippets of music. The trained model will then be able to generate a new piece of music.
+
+We will first need to write some helper functions to get this to work.
+
+## MIDI Data
+
+We will use the package [pretty_midi](https://github.com/craffel/pretty-midi). This package will allow us to convert MIDI (Musical Instrument Digital Interface) files into NumPy arrays. MIDI files are a common format for music data. They contain information about the notes, timing, and instruments used in a piece of music. We can then use the NumPy arrays to train our LSTM.
+
+Below is the code that will convert our MIDI file to a NumPy array.
+
+```{python}
+#| code-fold: false
+import pretty_midi
+import numpy as np
+
+def midi_to_notes(midi_file):
+    midi_data = pretty_midi.PrettyMIDI(midi_file)
+    notes = []
+    for instrument in midi_data.instruments:
+        if not instrument.is_drum:
+            for note in instrument.notes:
+                notes.append([note.start, note.end, note.pitch, note.velocity])
+    return np.array(notes)
+```
+
+## Maestro dataset
+
+The [Maestro](https://magenta.tensorflow.org/datasets/maestro#v300) dataset is a dataset composed of about 200 hours of virtuosic piano performances. I took a small sample from one of these files to train our LSTM and generate some new music.
+
+```{python}
+#| code-fold: false
+midi_files = ['music/music_sample.midi']
+all_notes = []
+for midi_file in midi_files:
+  notes = midi_to_notes(midi_file)
+  all_notes.append(notes)
+all_notes = np.concatenate(all_notes)
+```
+
+## Sequences of Notes
+
+Convert the note sequences into a format suitable for training the LSTM model. This means we create sequences of notes and corresponding targets.
+
+```{python}
+#| code-fold: false
+sequence_length = 100  # Length of each input sequence
+X = []
+y = []
+
+for i in range(len(all_notes) - sequence_length):
+    X.append(all_notes[i:i+sequence_length])
+    y.append(all_notes[i+sequence_length])
+
+X = np.array(X)
+y = np.array(y)
+print("Shape of X", X.shape)
+print("Shape of y", y.shape)
+```
+
+## LSTM Architecture
+
+We now create the LSTM architecture.
+
+
+```{python}
+#| code-fold: false
+import torch
+import torch.nn as nn
+
+class MusicLSTM(nn.Module):
+    def __init__(self, input_dim, hidden_dim, num_layers, output_dim):
+        super(MusicLSTM, self).__init__()
+        self.hidden_dim = hidden_dim
+        self.num_layers = num_layers
+        
+        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True)
+        self.fc = nn.Linear(hidden_dim, output_dim)
+    
+    def forward(self, x):
+        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_dim).to(x.device)
+        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_dim).to(x.device)
+        
+        out, _ = self.lstm(x, (h0, c0))
+        out = self.fc(out[:, -1, :])
+        return out
+
+# Example usage
+input_dim = X.shape[2]  # Number of features (e.g., pitch, velocity)
+hidden_dim = 32
+num_layers = 2
+output_dim = X.shape[2]
+model = MusicLSTM(input_dim, hidden_dim, num_layers, output_dim)
+```
+
+
+## Training
+
+We will train our model for 3 epochs.
+
+```{python}
+criterion = nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+num_epochs = 100
+batch_size = 32
+for epoch in range(num_epochs):
+    for i in range(0, len(X), batch_size):
+        inputs = torch.tensor(X[i:i+batch_size], dtype=torch.float32)
+        targets = torch.tensor(y[i:i+batch_size], dtype=torch.float32)
+        
+        outputs = model(inputs)
+        loss = criterion(outputs, targets)
+        
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+    
+    print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
+```
+
+## Generate
+
+We next write a function that will help us generate a new piece of music.
+
+```{python}
+#| code-fold: false
+def generate_music(model, start_sequence, length):
+    model.eval()
+    generated = start_sequence
+    for _ in range(length):
+        input_seq = torch.tensor(generated[-sequence_length:], dtype=torch.float32).unsqueeze(0)
+        next_note = model(input_seq).detach().numpy()
+        generated = np.vstack((generated, next_note))
+    return generated
+
+# Example usage
+start_sequence = X[0]  # Starting sequence for generation
+generated_music = generate_music(model, start_sequence, 500)  # Generate 500 notes
+```
+
+## Download the Song
+
+We can generate an output midi file to play. The song is somewhat similar to the original piece. We could probably create
+
+```{python}
+#| echo: false
+def notes_to_midi(notes, output_file):
+    midi = pretty_midi.PrettyMIDI()
+    instrument = pretty_midi.Instrument(program=0)
+    for note in notes:
+        start, end, pitch, velocity = note
+        midi_note = pretty_midi.Note(
+            velocity=int(velocity),
+            pitch=int(pitch),
+            start=float(start),
+            end=float(end)
+        )
+        instrument.notes.append(midi_note)
+    midi.instruments.append(instrument)
+    midi.write(output_file)
+
+# Uncomment this line to write the follow
+# notes_to_midi(generated_music, 'generated_music.midi')
+``` 
+
 
 ## Recap
+
+We discussed the basic RNN architecture. We then discussed the LSTM and GRU modifications. These modifications allowed the RNNs to handle long-term dependencies.
+
+We then considered an example application of music generation. We generated a piano solo that sounded *interesting*.
+
+One computational bottleneck of RNNs is that they only allow for sequential computation. This was a major bottleneck for applications involving natural language processing. This motivated the development of more advanced language processing architectures, in particular, the transformer, which is the basis for modern large language models (LLMs).
 
 ## References
 
