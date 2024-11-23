@@ -30,7 +30,6 @@ project:
     - 23-NN-I-Gradient-Descent.qmd
     - 24-NN-II-Backprop.qmd
     - 25-NN-III-CNNs.qmd
-    # For now commenting out 20 because of reliance on 1.2GB train.csv
     - 20-Recommender-Systems.qmd
     - 21-Networks-I.qmd
     - 22-Networks-II-Centrality-Clustering.qmd
@@ -91,7 +90,6 @@ website:
         - 25-NN-III-CNNs.qmd
     - section: "Selected Topics"
       contents:
-      # For now commenting out 20 because of reliance on 1.2GB train.csv
         - 21-Networks-I.qmd
         - 22-Networks-II-Centrality-Clustering.qmd
         - 20-Recommender-Systems.qmd
