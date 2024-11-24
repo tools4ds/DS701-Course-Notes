@@ -14,6 +14,7 @@ from sklearn.preprocessing import MinMaxScaler
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
+from IPython.display import Image
 ```
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/27-RNN.ipynb)
@@ -33,7 +34,7 @@ We introduce recurrent neural networks (RNNs) which is a neural network architec
 :::
 ::::
 
-The above figure shows an RNN architecture. The block $A$ can be viewed as a chunk of the RNN. $A$ accepts as input $x_t$ and outputs a value $y_t$. The loop with the hidden state from $h_{t-1}$ illustrates how information passes from one step of the network to the next.
+The above figure shows an RNN architecture. The block $A$ can be viewed as a chunk of the RNN. $A$ accepts as input $x_t$ and outputs a value $\hat{y}_t$. The loop with the hidden state from $h_{t-1}$ illustrates how information passes from one step of the network to the next.
 
 ## Why Use RNNs?
 
@@ -62,13 +63,19 @@ The above figure shows an RNN architecture. The block $A$ can be viewed as a chu
 The forward pass in the RNN architecture is given by the following operations
 
 1. $h_t = g_h(W_{hh} h_{t-1} + W_{hx} x_t + b_h)$
-1. $y_t = g_y(W_{yh} h_t + b_y)$
+1. $\hat{y}_t = g_y(W_{yh} h_t + b_y)$
 
-The vector $x_t$ is the $t$-th element of the input sequence. The vector $h_t$ is the hidden state at the $t$-th point of the sequence. The vector $y_t$ is the $t$-th output of the sequence. The functions $g_h$ and $g_y$ are nonlinear activation functions. The weight matrices $W_{hh}$, $W_{hx}$, $W_{yh}$, and biases $b_h$, $b_y$ are trainable parameters. Note that we must define the vector $h_0$. A common choice is $h_0 = 0$.
+The vector $x_t$ is the $t$-th element of the input sequence. The vector $h_t$ is the hidden state at the $t$-th point of the sequence. The dimension of $h_t$ is a hyperparameter of the RNN. 
+
+The vector $\hat{y}_t$ is the $t$-th output of the sequence. The functions $g_h$ and $g_y$ are nonlinear activation functions. 
+
+The weight matrices $W_{hh}$, $W_{hx}$, $W_{yh}$, and biases $b_h$, $b_y$ are trainable parameters **that are reused in each time step**. Note that we must define the vector $h_0$. A common choice is $h_0 = 0$.
+
+
 
 ## Model Types
 
-Depending on the application there many be varying number of outputs $y_t$.
+Depending on the application there many be varying number of outputs $\hat{y}_t$. The figure below illustrates how the architecture can change.
 
 :::: {.columns}
 ::: {.column width="60%"}
@@ -76,17 +83,25 @@ Depending on the application there many be varying number of outputs $y_t$.
 :::
 ::: {.column width="40%"}
 1. One-to-one, is a regular feed forward neural network.
-1. One-to-many, e.g., be used for image captioning (1 image and output a sequence of words).
+1. One-to-many, e.g., image captioning (1 image and output a sequence of words).
 1. Many-to-one, e.g., sentiment analysis from a sequence of words or stock price prediction.
 1. Many-to-many, e.g., machine translation or video frame-by-frame action classification.
 :::
 ::::
 
+Our subsequent illustrations of RNNs all display many-to-many architectures.
+
+## Stacked RNNs
+
+It is also possible to stack multiple RNNs on top of each other. This is illustrated in the figure below.
+
+![](drawio/StackedRNN.png)
+
 ## Loss Calculation for Sequential Data
 
-For each prediction in the sequence $y_t$ and corresponding true value $\hat{y}_t$  we calculate the the cross-entropy loss $\mathcal{L}_t(\hat{y}_t, y_t) = -\hat{y}_t\log(y_t)$. The total loss is the sum of all the individual losses, $\mathcal{L} = \sum_t \mathcal{L}_t$. This is illustrated in the figure below.
+For each prediction in the sequence $\hat{y}_t$ and corresponding true value $y_t$  we calculate the the cross-entropy loss $\mathcal{L}_t(y_t, \hat{y}_t) = -y_t\log(\hat{y}_t)$. The total loss is the sum of all the individual losses, $\mathcal{L} = \sum_t \mathcal{L}_t$. This is illustrated in the figure below.
 
-If we were predicting continious value we would use a mean-square error loss.
+If we were predicting continuous value we would use a mean-square error loss.
 
 ![](drawio/RNN-Loss.png)
 
@@ -114,6 +129,9 @@ Due to the potential for long sequences of data, during training you are likely 
 
 - **Limited Context**:
   - Standard RNNs have a limited ability to remember context over long sequences, which can affect their performance on complex tasks.
+
+- **Bottleneck Problem**:
+  - The hidden state is all that carries forward history and it can be a bottleneck in how expressive it can be.    
 
 ## Addressing RNN Limitations
 
@@ -148,9 +166,9 @@ The cell state $c_{t-1}$ is the input to the LSTM block.
 
 This value then moves through the LSTM block.
 
-It is modified by either a multiplication or addition interaction. 
+It is modified by either a multiplication or addition interaction.
 
-After these operations, the modified input state becomes $c_{t}$ and is sent to the next LSTM block.
+After these operations, the modified cell state is $c_{t}$ is sent to the next LSTM block. In addition, $c_t$ is added to the hidden state after tanh activation.
 
 :::
 ::: {.column width="50%"}
@@ -168,7 +186,7 @@ $$
 f_t = \sigma(W_f[h_{t-1}, x_t] + b_f),
 $$
 
-where $\sigma$ is the sigmoid function.
+where $\sigma(x) = \frac{1}{1 + e^{-x}}$ is the sigmoid function.
 
 The output $f_t$ is a vector of numbers between 0 and 1. These values multiply the corresponding vector values in $C_{t-1}$.
 
@@ -220,21 +238,27 @@ The output gate layer computes values
 $$
 \begin{align}
 o_t &= \sigma(W_o[h_{t-1}, x_t] + b_o), \\
-\tilde{c}_{t} &=o_t * \operatorname{tanh}(c_t).
+h_{t} &=o_t * \operatorname{tanh}(c_t).
 \end{align}
 $$
 
 The vector $o_t$ from the sigmoid layer tells us what parts of the cell state we use for output. The output is a filtered version of the hyperbolic tangent of cell state $c_t$. 
 
-The output of the block is $y_t$. It is the same as the hidden state $h_t$ that is sent to the $t+1$ LSTM block.
-
-This value tells us what *new* information to add to the cell state.
+The output of the block is $\hat{y}_t$. It is the same as the hidden state $h_t$ that is sent to the $t+1$ LSTM block.
 
 :::
 ::: {.column width="50%"}
 ![](drawio/OutputLayer.png)
 :::
 ::::
+
+## Weight Summary
+
+For the LSTM architecture, we have the following sets of weights
+
+- $$W_f$ and $b_f$ (forget layer),
+- $W_i, W_c$ and $b_i, b_c$ (input gate layer),
+- $W_o$ and $b_0$ (output layer).
 
 
 ## Advantages of LSTMs
@@ -392,9 +416,31 @@ model = LSTMModel()
 print(model)
 ```
 
+<!-- 
+## LSTM Architecture Visualized
+
+```{python}
+from torchview import draw_graph
+# Create a dummy input tensor with the shape (batch_size, sequence_length, input_size)
+dummy_input = torch.randn(1, 10, 1)
+
+# Perform a forward pass to create the computation graph
+output = model(dummy_input)
+
+# Generate and save the visualization of the model
+# Generate the visualization of the model
+model_graph = draw_graph(model, input_size=(1, 10, 1), depth=2, hide_inner_tensors=True)
+
+# Display the graph
+model_graph.visual_graph
+
+Image(filename='LSTMModel.png')
+``` 
+-->
+
 ## Loss and Training
 
-We use a mean-square error loss function and the Adams optimizer. We train the model for 20 epochs. We display the decrease in the loss during training.
+We use a mean-square error loss function and the Adams optimizer. We train the model for 20 epochs. We display the decrease in the loss during training. Based on the plot, did the optimizer converge?
 
 ```{python}
 # Set criterion and optimizer
@@ -430,7 +476,9 @@ plt.show()
 
 ## Evaluation
 
-Let's evaluate the model's performance.
+We'll evaluate the model's performance by plotting the predicted values from the test set on top of the actual test set values. 
+
+How did the model perform? Are there any obvious problems?
 
 ```{python}
 # Evaluate the model
@@ -467,7 +515,7 @@ We will first need to write some helper functions to get this to work.
 
 We will use the package [pretty_midi](https://github.com/craffel/pretty-midi). This package will allow us to convert MIDI (Musical Instrument Digital Interface) files into NumPy arrays. MIDI files are a common format for music data. They contain information about the notes, timing, and instruments used in a piece of music. We can then use the NumPy arrays to train our LSTM.
 
-Below is the code that will convert our MIDI file to a NumPy array.
+Below is the code that will convert our MIDI file to a NumPy array. The output is an array of the start time of the note, the end time of the note, the note pitch, and the note velocity.
 
 ```{python}
 #| code-fold: false
@@ -486,7 +534,7 @@ def midi_to_notes(midi_file):
 
 ## Maestro dataset
 
-The [Maestro](https://magenta.tensorflow.org/datasets/maestro#v300) dataset is a dataset composed of about 200 hours of virtuosic piano performances. I took a small sample from one of these files to train our LSTM and generate some new music.
+The [Maestro](https://magenta.tensorflow.org/datasets/maestro#v300) dataset is a dataset composed of about 200 hours of virtuosic piano performances. I took a few small samples from some of these files to train our LSTM and generate some new music.
 
 ```{python}
 #| code-fold: false
@@ -539,7 +587,13 @@ if not os.path.exists(os.path.join('music', 'music_sample_3.wav')):
 
 ## Sequences of Notes
 
-Convert the note sequences into a format suitable for training the LSTM model. This means we create sequences of notes and corresponding targets.
+We will convert the note sequences into a format suitable for training the LSTM model. An example of the split is shown below.
+
+![](drawio/TrainTestPrep.png)
+
+
+This means we create sequences of notes and corresponding targets.
+
 
 ```{python}
 #| code-fold: false
@@ -595,7 +649,7 @@ model = MusicLSTM(input_dim, hidden_dim, num_layers, output_dim)
 
 ## Training
 
-We will train our model for 10 epochs.
+We will train our model for 100 epochs.
 
 ```{python}
 criterion = nn.MSELoss()
@@ -603,7 +657,10 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 num_epochs = 100
 batch_size = 8
+train_losses = []
 for epoch in range(num_epochs):
+    model.train()
+    train_loss = 0.0
     for i in range(0, len(X), batch_size):
         inputs = torch.tensor(X[i:i+batch_size], dtype=torch.float32)
         targets = torch.tensor(y[i:i+batch_size], dtype=torch.float32)
@@ -614,6 +671,15 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        train_loss += loss.item()
+    train_losses.append(train_loss)
+# Plot the training losses over epochs
+plt.figure(figsize=(10, 5))
+plt.plot(range(1, num_epochs + 1), train_losses, marker='o', linestyle='-', color='b')
+plt.title('Training Loss over Epochs')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.show()
 ```
 
 ## Generate
@@ -639,7 +705,7 @@ print(generated_music.shape)
 
 ## Download the Song
 
-We can generate an output midi file to play. The song is somewhat similar to the original piece. We could probably create a better song through more training and a larger training set.
+We can generate an output midi file to play. The generated song is not very good. We could probably create a better song through an improved model, more training, and a larger training set.
 
 ```{python}
 def notes_to_midi(notes, output_file):
