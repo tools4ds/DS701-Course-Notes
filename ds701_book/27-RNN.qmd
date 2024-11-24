@@ -502,6 +502,7 @@ plt.legend()
 plt.show()
 ```
 
+<!-- 
 ## Music Generation
 
 The goal is to create an LSTM architecture to create a piece of music. We will train the LSTM on some example snippets of music. The trained model will then be able to generate a new piece of music.
@@ -742,13 +743,66 @@ if not os.path.exists(os.path.join('music', 'generated_music.wav')):
     midi_to_wav(os.path.join('music', 'generated_music.midi'))
 ```
 
-<audio src="music/generated_music.wav" controls></audio>
+<audio src="music/generated_music.wav" controls></audio> 
+-->
+
+## Other Applications
+
+Andrej Karpathy has an excellent blog post titled [The Unreasonable EffectiveNess of Recurrent Neural Networks](https://karpathy.github.io/2015/05/21/rnn-effectiveness/). We will describe some of the applications below.
+
+## Shakespeare
+
+:::: {.columns}
+::: {.column width="50%"}
+Using the a 3-layer RNN with 512 hidded nodes on each layer, Karpathy trained a model on the complete works of Shakespeare. With this model he was able to generate texts similar to what is seen on the left.
+
+Observe that there are some typos and the syntax is not perfect, but overall the style appears Shakespearean.
+
+:::
+::: {.column width="5-%"}
+![](figs/ShakespeareText.png)
+:::
+::::
+
+## Wikipedia
+
+:::: {.columns}
+::: {.column width="30%"}
+Using a 100MB [dataset](http://prize.hutter1.net) of raw Wikipedia data, Karpathy trained RNNs which generated Wikipedia content. An example of the generated markdown is shown to the right.
+
+The text is nonsense, but is structured like a Wikipedia post.
+Interestingly, the model *hallucinated* and fabricated a url that does not exist.
+:::
+::: {.column width="70%"}
+![](figs/WikipediaContent.png)
+:::
+::::
+
+
+## Baby Names
+
+:::: {.columns}
+::: {.column width="30%"}
+Using a list of 8000 baby names from this [link](http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/areas/nlp/corpora/names/), Karpathy trained an RNN to predict baby names.
+
+To the right is a list of generated names not on the lists. More of the names can be found [here](https://cs.stanford.edu/people/karpathy/namesGenUnique.txt).
+
+Some interesting additional names the model generated were
+`Baby, Char, Mars, Hi, and With`.
+:::
+::: {.column width="70%"}
+![](figs/BabyNames.png)
+:::
+::::
+
 
 ## Recap
 
 We discussed the basic RNN architecture. We then discussed the LSTM and GRU modifications. These modifications allowed the RNNs to handle long-term dependencies.
 
-We then considered two example applications. One of energy consumption prediction and one of of music generation. We generated a piano solo that sounded *interesting*.
+We then considered an example application of energy consumption prediction.
+
+We also discussed the unreasonable effectiveness of RNNs.
 
 ## What's Next?
 
