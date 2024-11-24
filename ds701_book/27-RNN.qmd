@@ -1,6 +1,7 @@
 ---
 title: 'Recurrent Neural Networks'
 jupyter: python3
+bibliography: references.bib
 ---
 
 # RNN Theory
@@ -70,8 +71,6 @@ The vector $x_t$ is the $t$-th element of the input sequence. The vector $h_t$ i
 The vector $\hat{y}_t$ is the $t$-th output of the sequence. The functions $g_h$ and $g_y$ are nonlinear activation functions. 
 
 The weight matrices $W_{hh}$, $W_{hx}$, $W_{yh}$, and biases $b_h$, $b_y$ are trainable parameters **that are reused in each time step**. Note that we must define the vector $h_0$. A common choice is $h_0 = 0$.
-
-
 
 ## Model Types
 
@@ -751,7 +750,17 @@ We discussed the basic RNN architecture. We then discussed the LSTM and GRU modi
 
 We then considered two example applications. One of energy consumption prediction and one of of music generation. We generated a piano solo that sounded *interesting*.
 
-One computational bottleneck of RNNs is that they only allow for sequential computation. This was a major bottleneck for applications involving natural language processing. This motivated the development of more advanced language processing architectures, in particular, the transformer, which is the basis for modern large language models (LLMs).
+## What's Next?
+
+As we saw, the RNN architecture has evolved to include LSTMs and GRUs. However, the RNN architecture also evolved to add attention. This was introduced by @bahdanau2014neural. 
+
+Attention in language models is a mechanism that allows the model to focus on relevant parts of the input sequence by assigning different weights to different words, enabling it to capture long-range dependencies and context more effectively.
+
+In addition, recall that RNNs are only able to process data sequentially. For large scale natural language processing applications, this is a major computational bottleneck. This motivated the development of more advanced neural network architectures that could process sequential data in parallel and utilize attention. 
+
+The transformer architecture was introduced by @vaswani2017attention and combines both of these desirable features.
+
+Transformers form the basis for modern large language models (LLMs) and we will discuss them in our NLP lectures.
 
 ## References
 
