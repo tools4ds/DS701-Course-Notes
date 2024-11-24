@@ -505,8 +505,6 @@ plt.show()
 
 ## Music Generation
 
-## Music Generation
-
 The goal is to create an LSTM architecture to create a piece of music. We will train the LSTM on some example snippets of music. The trained model will then be able to generate a new piece of music.
 
 We will first need to write some helper functions to get this to work.
