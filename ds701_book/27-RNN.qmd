@@ -554,7 +554,7 @@ import subprocess
 
 def midi_to_mp3(midi_file, mp3_file):
     # Use the 'timidity' tool to convert MIDI to WAV
-    wav_file = midi_file.replace('.midi', '.wav')
+    wav_file = midi_file.replace('.mid', '.wav')
     subprocess.run(['timidity', midi_file, '-Ow', '-o', wav_file])
     
     # Use the 'ffmpeg' tool to convert WAV to MP3
@@ -562,7 +562,8 @@ def midi_to_mp3(midi_file, mp3_file):
 
 def midi_to_wav(midi_file):
     # Use the 'timidity' tool to convert MIDI to WAV
-    wav_file = midi_file.replace('.midi', '.wav')
+    wav_file = midi_file.replace('.mid', '.wav')
+    print(wav_file)
     print(f"Converting {midi_file} to {wav_file}")
     subprocess.run(['timidity', midi_file, '-Ow', '-o', wav_file])
     
@@ -571,7 +572,7 @@ def midi_to_wav(midi_file):
 #midi_to_mp3('music/music_sample_1.mid', 'music/music_sample_1.mp3')
 #midi_to_mp3('music/music_sample_2.mid', 'music/music_sample_2.mp3')
 #midi_to_mp3('music/music_sample_3.mid', 'music/music_sample_3.mp3')
-
+print(os.path.exists(os.path.join('music', 'music_sample_1.mid')))
 if not os.path.exists(os.path.join('music', 'music_sample_1.wav')):
     midi_to_wav(os.path.join('music', 'music_sample_1.mid'))
 if not os.path.exists(os.path.join('music', 'music_sample_2.wav')):
