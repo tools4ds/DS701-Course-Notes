@@ -491,15 +491,51 @@ The [Maestro](https://magenta.tensorflow.org/datasets/maestro#v300) dataset is a
 ```{python}
 #| code-fold: false
 midi_files = [
-    'music/music_sample_1.mid',
-    'music/music_sample_2.mid',
-    'music/music_sample_3.mid']
+    os.path.join('music', 'music_sample_1.mid'),
+    os.path.join('music', 'music_sample_2.mid'),
+    os.path.join('music', 'music_sample_3.mid')]
 all_notes = []
 for midi_file in midi_files:
   notes = midi_to_notes(midi_file)
   all_notes.append(notes)
 all_notes = np.concatenate(all_notes)
 ```
+
+```{python}
+import subprocess
+
+def midi_to_mp3(midi_file, mp3_file):
+    # Use the 'timidity' tool to convert MIDI to WAV
+    wav_file = midi_file.replace('.midi', '.wav')
+    subprocess.run(['timidity', midi_file, '-Ow', '-o', wav_file])
+    
+    # Use the 'ffmpeg' tool to convert WAV to MP3
+    subprocess.run(['ffmpeg', '-i', wav_file, mp3_file])
+
+def midi_to_wav(midi_file):
+    # Use the 'timidity' tool to convert MIDI to WAV
+    wav_file = midi_file.replace('.midi', '.wav')
+    print(f"Converting {midi_file} to {wav_file}")
+    subprocess.run(['timidity', midi_file, '-Ow', '-o', wav_file])
+    
+
+# Convert the generated MIDI file to MP3
+#midi_to_mp3('music/music_sample_1.mid', 'music/music_sample_1.mp3')
+#midi_to_mp3('music/music_sample_2.mid', 'music/music_sample_2.mp3')
+#midi_to_mp3('music/music_sample_3.mid', 'music/music_sample_3.mp3')
+
+if not os.path.exists(os.path.join('music', 'music_sample_1.wav')):
+    midi_to_wav(os.path.join('music', 'music_sample_1.mid'))
+if not os.path.exists(os.path.join('music', 'music_sample_2.wav')):
+    midi_to_wav(os.path.join('music', 'music_sample_2.mid'))
+if not os.path.exists(os.path.join('music', 'music_sample_3.wav')):
+    midi_to_wav(os.path.join('music', 'music_sample_3.mid'))
+```
+
+<audio src="music/music_sample_1.wav" controls></audio>
+<audio src="music/music_sample_2.wav" controls></audio>
+<audio src="music/music_sample_3.wav" controls></audio>
+
 
 ## Sequences of Notes
 
@@ -621,9 +657,28 @@ def notes_to_midi(notes, output_file):
     midi.instruments.append(instrument)
     midi.write(output_file)
 
-# Uncomment this line to write the follow
-#notes_to_midi(generated_music, 'generated_music.midi')
+# Uncomment this line to write the following generated music to a MIDI file
+notes_to_midi(generated_music, os.path.join('music', 'generated_music.midi'))
 ```
+
+## Play the Generated Song
+
+Now let's play the generated song.
+
+```{python}
+import subprocess
+
+def midi_to_wav(midi_file):
+    # Use the 'timidity' tool to convert MIDI to WAV
+    wav_file = midi_file.replace('.midi', '.wav')
+    print(f"Converting {midi_file} to {wav_file}")
+    subprocess.run(['timidity', midi_file, '-Ow', '-o', wav_file])
+ 
+if not os.path.exists(os.path.join('music', 'generated_music.wav')):
+    midi_to_wav(os.path.join('music', 'generated_music.midi'))
+```
+
+<audio src="music/generated_music.wav" controls></audio>
 
 ## Recap
 

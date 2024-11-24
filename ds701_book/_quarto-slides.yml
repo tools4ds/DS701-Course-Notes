@@ -38,6 +38,13 @@ resources:
   - figs/NN-figs/conv-demo/index.html
   - figs/NN-figs/conv-demo/utils.js
   - figs/NN-figs/conv-demo/external/d3.min.js
+  - music/music_sample_1.wav
+  - music/music_sample_2.wav
+  - music/music_sample_3.wav
+  - music/generated_music.wav
+  - music/music_sample_1.midi
+  - music/music_sample_2.midi
+  - music/music_sample_3.midi
 
 format:
   revealjs:
