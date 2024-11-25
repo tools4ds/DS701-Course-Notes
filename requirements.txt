@@ -50,3 +50,4 @@ kagglehub
 
 #27-RNN
 pretty_midi
+torchview
