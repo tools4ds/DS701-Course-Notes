@@ -255,7 +255,7 @@ The output of the block is $\hat{y}_t$. It is the same as the hidden state $h_t$
 
 For the LSTM architecture, we have the following sets of weights
 
-- $$W_f$ and $b_f$ (forget layer),
+- $W_f$ and $b_f$ (forget layer),
 - $W_i, W_c$ and $b_i, b_c$ (input gate layer),
 - $W_o$ and $b_0$ (output layer).
 
