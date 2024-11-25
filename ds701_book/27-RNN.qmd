@@ -35,7 +35,7 @@ We introduce recurrent neural networks (RNNs) which is a neural network architec
 :::
 ::::
 
-The above figure shows an RNN architecture. The block $A$ can be viewed as a chunk of the RNN. $A$ accepts as input $x_t$ and outputs a value $\hat{y}_t$. The loop with the hidden state from $h_{t-1}$ illustrates how information passes from one step of the network to the next.
+The above figure shows an RNN architecture. The block $A$ can be viewed as a chunk of the RNN. $A$ accepts as input $x_t$ and outputs a value $\hat{y}_t$. The loop with the hidden state $h_{t-1}$ illustrates how information passes from one step of the network to the next.
 
 ## Why Use RNNs?
 
@@ -187,9 +187,9 @@ $$
 
 where $\sigma(x) = \frac{1}{1 + e^{-x}}$ is the sigmoid function.
 
-The output $f_t$ is a vector of numbers between 0 and 1. These values multiply the corresponding vector values in $C_{t-1}$.
+The output $f_t$ is a vector of numbers between 0 and 1. These values multiply the corresponding vector values in $c_{t-1}$.
 
-A value of 0 says throw that component of $C_{t-1}$ away. A value of 1 says keep that component of $C_{t-1}$.
+A value of 0 says throw that component of $c_{t-1}$ away. A value of 1 says keep that component of $c_{t-1}$.
 
 This operation tells us which *old* information in the cell state we should keep or remove.
 
