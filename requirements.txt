@@ -47,3 +47,6 @@ torchvision
 
 # 26-TimeSeries
 kagglehub
+
+#27-RNN
+pretty_midi
