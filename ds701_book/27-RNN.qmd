@@ -515,7 +515,7 @@ We will use the package [pretty_midi](https://github.com/craffel/pretty-midi). T
 
 Below is the code that will convert our MIDI file to a NumPy array. The output is an array of the start time of the note, the end time of the note, the note pitch, and the note velocity.
 
-```{python}
+```{.python}
 #| code-fold: false
 import pretty_midi
 import numpy as np
@@ -534,7 +534,7 @@ def midi_to_notes(midi_file):
 
 The [Maestro](https://magenta.tensorflow.org/datasets/maestro#v300) dataset is a dataset composed of about 200 hours of virtuosic piano performances. I took a few small samples from some of these files to train our LSTM and generate some new music.
 
-```{python}
+```{.python}
 #| code-fold: false
 midi_files = [
     os.path.join('music', 'music_sample_1.mid'),
@@ -547,7 +547,7 @@ for midi_file in midi_files:
 all_notes = np.concatenate(all_notes)
 ```
 
-```{python}
+```{.python}
 import subprocess
 
 def midi_to_mp3(midi_file, mp3_file):
@@ -594,7 +594,7 @@ We will convert the note sequences into a format suitable for training the LSTM 
 This means we create sequences of notes and corresponding targets.
 
 
-```{python}
+```{.python}
 #| code-fold: false
 sequence_length = 48  # Length of each input sequence
 X = []
@@ -615,7 +615,7 @@ print("Shape of y", y.shape)
 We now create the LSTM architecture.
 
 
-```{python}
+```{.python}
 #| code-fold: false
 import torch
 import torch.nn as nn
@@ -650,7 +650,7 @@ model = MusicLSTM(input_dim, hidden_dim, num_layers, output_dim)
 
 We will train our model for 100 epochs.
 
-```{python}
+```{.python}
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
@@ -685,7 +685,7 @@ plt.show()
 
 We next write a function that will help us generate a new piece of music.
 
-```{python}
+```{.python}
 #| code-fold: false
 def generate_music(model, start_sequence, length):
     model.eval()
@@ -706,7 +706,7 @@ print(generated_music.shape)
 
 We can generate an output midi file to play. The generated song is not very good. We could probably create a better song through an improved model, more training, and a larger training set.
 
-```{python}
+```{.python}
 def notes_to_midi(notes, output_file):
     midi = pretty_midi.PrettyMIDI()
     instrument = pretty_midi.Instrument(program=0)
@@ -730,7 +730,7 @@ notes_to_midi(generated_music, os.path.join('music', 'generated_music.midi'))
 
 Now let's play the generated song.
 
-```{python}
+```{.python}
 import subprocess
 
 def midi_to_wav(midi_file):
