@@ -418,7 +418,7 @@ print(model)
 <!-- 
 ## LSTM Architecture Visualized
 
-```{python}
+```{.python}
 from torchview import draw_graph
 # Create a dummy input tensor with the shape (batch_size, sequence_length, input_size)
 dummy_input = torch.randn(1, 10, 1)
