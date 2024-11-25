@@ -139,7 +139,7 @@ Some proposed solutions for mitigating the previous issues are
 - **LSTM (Long Short-Term Memory)**
 - **GRU (Gated Recurrent Units)** 
 
-These are more advanced variants of RNNs designed to address some of these limitations by improving the ability to capture long-term dependencies and mitigating gradient issues.
+These are more advanced variants of RNNs designed to address some of these limitations by improving the ability to capture long-term dependencies and addressing gradient issues.
 
 ## LSTM
 
@@ -748,13 +748,13 @@ if not os.path.exists(os.path.join('music', 'generated_music.wav')):
 
 ## Other Applications
 
-Andrej Karpathy has an excellent blog post titled [The Unreasonable EffectiveNess of Recurrent Neural Networks](https://karpathy.github.io/2015/05/21/rnn-effectiveness/). We will describe some of the applications below.
+Andrej Karpathy has an excellent blog post titled [The Unreasonable Effectiveness of Recurrent Neural Networks](https://karpathy.github.io/2015/05/21/rnn-effectiveness/). We will describe some of the applications below.
 
 ## Shakespeare
 
 :::: {.columns}
 ::: {.column width="50%"}
-Using the a 3-layer RNN with 512 hidded nodes on each layer, Karpathy trained a model on the complete works of Shakespeare. With this model he was able to generate texts similar to what is seen on the left.
+Using the a 3-layer RNN with 512 hidden nodes on each layer, Karpathy trained a model on the complete works of Shakespeare. With this model he was able to generate texts similar to what is seen on the left.
 
 Observe that there are some typos and the syntax is not perfect, but overall the style appears Shakespearean.
 
