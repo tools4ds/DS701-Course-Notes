@@ -26,6 +26,7 @@ qmd_files=(
   "21-Networks-I.qmd"
   "22-Networks-II-Centrality-Clustering.qmd"
   "26-TimeSeries.qmd"
+  "27-RNN.qmd"
 )
 
 # Check if jupyter_notebooks directory exists, if not, create it
