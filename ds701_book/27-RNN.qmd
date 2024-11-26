@@ -31,11 +31,11 @@ We introduce recurrent neural networks (RNNs) which is a neural network architec
 - Unlike traditional neural networks, RNNs have connections that form directed cycles, allowing information to persist.
 :::
 ::: {.column width="50%"}
-![](drawio/RNN.png)
+![](drawio/RNN.png){.lightbox}
 :::
 ::::
 
-The above figure shows an RNN architecture. The block $A$ can be viewed as a chunk of the RNN. $A$ accepts as input $x_t$ and outputs a value $\hat{y}_t$. The loop with the hidden state $h_{t-1}$ illustrates how information passes from one step of the network to the next.
+The above figure shows an RNN architecture. The block $A$ can be viewed as one stage of the RNN. $A$ accepts as input $x_t$ and outputs a value $\hat{y}_t$. The loop with the hidden state $h_{t-1}$ illustrates how information passes from one step of the network to the next.
 
 ## Why Use RNNs?
 
@@ -57,7 +57,7 @@ The above figure shows an RNN architecture. The block $A$ can be viewed as a chu
 
 ## RNN Architecture
 
-![](drawio/RNN-Full.png)
+![](drawio/RNN-Full.png){.lightbox}
 
 ## Forward Propagation
 
@@ -72,13 +72,17 @@ The vector $\hat{y}_t$ is the $t$-th output of the sequence. The functions $g_h$
 
 The weight matrices $W_{hh}$, $W_{hx}$, $W_{yh}$, and biases $b_h$, $b_y$ are trainable parameters **that are reused in each time step**. Note that we must define the vector $h_0$. A common choice is $h_0 = 0$.
 
+## RNN Cell 
+
+![](drawio/LSTM-internal.png){.lightbox fig-align="center"}
+
 ## Model Types
 
 Depending on the application there many be varying number of outputs $\hat{y}_t$. The figure below illustrates how the architecture can change.
 
 :::: {.columns}
 ::: {.column width="60%"}
-![](figs/RNNConfigurations.png)
+![](figs/RNNConfigurations.png){.lightbox}
 :::
 ::: {.column width="40%"}
 1. One-to-one, is a regular feed forward neural network.
@@ -92,18 +96,43 @@ Our subsequent illustrations of RNNs all display many-to-many architectures.
 
 ## Stacked RNNs
 
+:::: {.columns}
+::: {.column width="50%"}
+
+![](drawio/StackedRNN.png){.lightbox}
+
+:::
+::: {.column width="50%"}
+
 It is also possible to stack multiple RNNs on top of each other. This is illustrated in the figure below.
 
-![](drawio/StackedRNN.png)
+Each layer has its own set of weights and biases.
+:::
+::::
 
 ## Loss Calculation for Sequential Data
 
-For each prediction in the sequence $\hat{y}_t$ and corresponding true value $y_t$  we calculate the the cross-entropy loss $\mathcal{L}_t(y_t, \hat{y}_t) = -y_t\log(\hat{y}_t)$. The total loss is the sum of all the individual losses, $\mathcal{L} = \sum_t \mathcal{L}_t$. This is illustrated in the figure below.
+:::: {.columns}
+::: {.column width="50%"}
 
-If we were predicting continuous value we would use a mean-square error loss.
+![](drawio/RNN-Loss2.png){.lightbox}
+ 
+:::
+::: {.column width="50%"}
 
-![](drawio/RNN-Loss.png)
+For each prediction in the sequence $\hat{y}_t$ and corresponding true value $y_t$
+we calculate the loss $\mathcal{L}_t(y_t, \hat{y}_t)$. 
 
+The total loss is the sum of all the individual losses, 
+$\mathcal{L} = \sum_t \mathcal{L}_t$. This is illustrated in the figure above.
+
+For categorical data we use cross-entropy loss 
+$\mathcal{L}_t(y_t, \hat{y}_t) = -y_t\log(\hat{y}_t)$. 
+
+For continuous data we would use a mean-square error loss.
+
+:::
+::::
 
 ## Vanishing Gradients
 
@@ -113,7 +142,7 @@ However, for longer sequences the influence can be significantly reduced. This i
 
 Due to the potential for long sequences of data, during training you are likely to encounter small gradients. As a result, RNNs are prone to vanishing gradients.
 
-![](drawio/VanishingGradient.png)
+![](drawio/VanishingGradient.png){.lightbox}
 
 ## RNN Limitations
 
@@ -145,7 +174,7 @@ These are more advanced variants of RNNs designed to address some of these limit
 
 Below is an illustration of the LSTM architecture.
 
-![](drawio/LSTM.png)
+![](drawio/LSTM.png){.lightbox}
 
 ---
 
@@ -171,7 +200,7 @@ After these operations, the modified cell state is $c_{t}$ is sent to the next L
 
 :::
 ::: {.column width="50%"}
-![](drawio/CellState.png)
+![](drawio/CellState.png){.lightbox}
 :::
 ::::
 
@@ -195,7 +224,7 @@ This operation tells us which *old* information in the cell state we should keep
 
 :::
 ::: {.column width="50%"}
-![](drawio/ForgetLayer.png)
+![](drawio/ForgetLayer.png){.lightbox}
 :::
 ::::
 
@@ -224,7 +253,7 @@ $$
 
 :::
 ::: {.column width="50%"}
-![](drawio/InputGateLayer.png)
+![](drawio/InputGateLayer.png){.lightbox}
 :::
 ::::
 
@@ -247,7 +276,7 @@ The output of the block is $\hat{y}_t$. It is the same as the hidden state $h_t$
 
 :::
 ::: {.column width="50%"}
-![](drawio/OutputLayer.png)
+![](drawio/OutputLayer.png){.lightbox}
 :::
 ::::
 
@@ -273,6 +302,8 @@ For the LSTM architecture, we have the following sets of weights
 - **Overfitting**: Due to their complexity, LSTMs are prone to overfitting, especially with small datasets.
 - **Resource Intensive**: They require more computational resources and memory, which can be a limitation for large-scale applications.
 - **Hyperparameter Tuning**: LSTMs have many hyperparameters that need careful tuning, which can be time-consuming and challenging.
+- **Bottleneck Problem**: The hidden and cell states are all that carries forward history and they can be a bottleneck in how expressive it can be.    
+
 
 ## GRU
 
@@ -292,7 +323,7 @@ h_t &= (1- z_t)\cdot h_{t-1} + z_t\cdot \tilde{h}_t.
 $$
 :::
 ::: {.column width="50%"}
-![](drawio/GRU.png)
+![](drawio/GRU.png){.lightbox}
 :::
 ::::
 
@@ -308,12 +339,15 @@ $$
 - **Less Expressive Power**: The simpler architecture of GRUs might not capture complex patterns in data as effectively as LSTMs.
 - **Limited Long-term Dependencies**: GRUs might struggle with very long-term dependencies in sequential data compared to LSTMs.
 - **Less Flexibility**: GRUs offer less flexibility in terms of controlling the flow of information through the network.
+- **Bottleneck Problem**: Like vanilaa RNNs, the hidden state is all that carries forward history and can be a bottleneck in how expressive it can be. 
 
 # RNN Examples
 
 ## Appliance Energy Prediction
 
 In this example we will use a [dataset](https://archive.ics.uci.edu/dataset/374/appliances+energy+prediction) containing the energy usage in Watt hours (Wh) of appliances in a low energy building.
+
+Another example of Time Series Analysis.
 
 In addition to the appliance energy information, the dataset includes the house temperature and humidity conditions. We will build an LSTM model that predicts the energy usage of the appliances.
 
@@ -754,13 +788,13 @@ Andrej Karpathy has an excellent blog post titled [The Unreasonable Effectivenes
 
 :::: {.columns}
 ::: {.column width="50%"}
-Using the a 3-layer RNN with 512 hidden nodes on each layer, Karpathy trained a model on the complete works of Shakespeare. With this model he was able to generate texts similar to what is seen on the left.
+Using the a 3-layer RNN with 512 hidden nodes on each layer, Karpathy trained a model on the complete works of Shakespeare. With this model he was able to generate texts similar to what is seen on the right.
 
 Observe that there are some typos and the syntax is not perfect, but overall the style appears Shakespearean.
 
 :::
 ::: {.column width="5-%"}
-![](figs/ShakespeareText.png)
+![](figs/ShakespeareText.png){.lightbox}
 :::
 ::::
 
@@ -774,7 +808,7 @@ The text is nonsense, but is structured like a Wikipedia post.
 Interestingly, the model *hallucinated* and fabricated a url that does not exist.
 :::
 ::: {.column width="70%"}
-![](figs/WikipediaContent.png)
+![](figs/WikipediaContent.png){.lightbox}
 :::
 ::::
 
@@ -791,7 +825,7 @@ Some interesting additional names the model generated were
 `Baby, Char, Mars, Hi, and With`.
 :::
 ::: {.column width="70%"}
-![](figs/BabyNames.png)
+![](figs/BabyNames.png){.lightbox}
 :::
 ::::
 
