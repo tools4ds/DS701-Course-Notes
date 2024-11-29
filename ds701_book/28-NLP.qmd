@@ -1,0 +1,755 @@
+---
+title: 'Natural Language Processing'
+jupyter: python3
+bibliography: references.bib
+---
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/27-RNN.ipynb)
+
+Natural language processing (NLP) is a subfield of artificial intelligence that allows computers to understand, process, and manipulate human language.
+
+# History of NLP
+
+- The Dawn of NLP (1950-1970s)
+- The Statistical Revolution (1980s-200s)
+- The Deep Learning Era (2000s-present)
+
+## The Dawn of NLP
+
+NLP has its origin ins the 1950s. Two important figures in the development of computational NLP.
+
+:::: {.columns}
+::: {.column width="60%"}
+- **Alan Turing**. British mathematician, logician, and computer scientist. Considered the father of modern computer science.
+  - *Computing Machinery and Intelligence*. Turing proposed a criterion for determining a machine's intelligence. 
+  - This criterion is know as the **Turing Test**. 
+  - This test involves the interpretation and generation of natural language by a computer.
+:::
+::: {.column width="40%"}
+![](figs/AlanTuring.png){fig-align="center"}
+:::
+::::
+
+---
+
+## Turing Test
+
+:::: {.columns}
+::: {.column width="50%"}
+- An interrogator communicates with a computer and a human. 
+- The computer and human attempt to convince the interrogator that they are human. 
+- If the interrogator cannot determine who is human, the computer wins the test. 
+:::
+::: {.column width=50"%"}
+![](figs/TuringTestDiagram.png)
+:::
+::::
+
+---
+
+:::: {.columns}
+::: {.column width="50%"}
+- **Noam Chomsky**. Is an American professor and public intellectual known for his work in linguistics, political activism and social criticism. He worked at MIT (retiring in 2002).
+  - His book, *Syntactic Structures*, revolutionized the scientific study of language.
+  - He proposed a mathematical theory of language that introduces a generative model which enumerates the sentences in a language.
+  - This work helped lay the foundation for modern NLP techniques.
+:::
+::: {.column width="50%"}
+![](figs/NoamChomsky.png){fig-align="center"}
+:::
+::::
+
+## Rule-Based Systems
+
+The NLP research of the 1950's focused on rules-based systems. Linguists would craft large sets of rules to capture the grammatical syntax and vocabulary of specific languages.
+
+Though important at the time, these systems were quite limited. They weren't able to capture the nuances and many exceptions in languages. They were poor at capturing slang.
+
+The creation and maintenance of such rule based systems for every language was not scalable.
+
+These systems focused predominantly on syntax and vocabulary. They were not able to capture the deeper meaning and context of the texts they were analyzing.
+
+
+## The Statistical Revolution
+
+Due to the limitations or rule-based systems coupled with a steady increase in computational power and large collections of data, this period of time saw the advent of machine learning algorithms applied to language processing.
+
+In contrast to rule-based systems, these statistical models learned patterns from data. This allowed them to better handle the variations and complexities of natural language. IBM research developed a set of important machine translation models, called the [IBM alignment models](http://www2.statmt.org/survey/Topic/IBMModels).  
+
+The concepts of Recurrent Neural Networks were introduced in 1986 in the paper, "Learning Representations by Back-Propagating Errors," by David Rumelhart, Geoffrey Hinton, and Ronald J. Williams.
+
+In addition, the use of n-gram models became more formalized and widely adopted. An n-gram language model predicts the probability of a word based on the previous n-1 words in a sequence, making it a fundamental tool in natural language processing for tasks like text prediction and speech recognition.
+
+## The Deep Learning Era
+
+The 2000s ushered in the era of deep learning. This is when we saw the application of neural networks to NLP.
+
+Here are some of the notable developments.
+
+- **@bengio2000neural**. Used feed-forward neural networks as a language model. Significantly outperformed n-gram models.
+- **@sutskever2014sequence** Used LSTMs with an encoder-decoder architecture which produced (at the time) state-of-the-art results for machine translation.
+- **@bahdanau2014neural** Proposed the concept of attention in RNNs. Attention is a mechanism that allows models to focus on specific parts of the input sequence when generating each part of the output sequence, improving the handling of long-range dependencies and context.
+- **@vaswani2017attention** Introduce the Transformer architecture. This allows for parallelization of sequential data with attention. Transformers become the basis for LLMs.
+
+# Theory
+
+We cover
+
+- numerical representation of words
+  - Tokenization
+  - Sparse representations
+  - Word embeddings
+- Transformer models and attention
+
+## Numerical Representations of Words
+
+Machine learning models for NLP are not able to process text in the form of characters and strings. Characters and strings must be converted to numbers in order to train our language models.
+
+There are a number of ways to do this. These include
+
+- sparse representations, like one-hot encodings and TF-IDF encodings
+- word embeddings.
+
+However, prior to creating a numerical representation of text, we need to **tokenize** the text.
+
+## Tokenization
+
+Tokenization is the process of splitting raw text into smaller pieces, called (drum-roll please), *tokens*. Tokens can be individual characters, words, or sentences.
+
+Examples of character and word tokenization are shown for the following raw text
+
+```Show me the money```
+
+Character tokenization:
+
+```['S', 'h', 'o', 'w', 'm', 'e', 't', 'h', 'e', 'm', 'o', 'n', 'e', 'y']```.
+
+Word tokenization:
+
+```['Show', 'me', 'the', 'money'] ```
+
+---
+
+This code block demonstrates both of these tokenization techniques.
+
+```{python}
+#| code-fold: false
+# Character and word tokenization
+
+sentence = "Show me the money"
+word_tokens = sentence.split()
+print(word_tokens)
+character_tokens = [char for char in sentence if char != ' ']
+print(character_tokens)
+```
+
+---
+
+There are advantages and disadvantages to different tokenization methods. We showed two very simple strategies. However, there are other strategies, such as subword and sentence tokenization. With tokenization, our goal is to not lose meaning with the tokens. With character based tokenization, especially for English (non-character based languages) we certainly lose meaning. 
+
+Here is a demo of how to tokenize using the [transformers](https://huggingface.co/docs/transformers/en/index) package from Huggingface.
+
+```{python}
+#| code-fold: false
+from transformers import AutoTokenizer, logging
+
+logging.set_verbosity_warning()
+
+tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
+tokens = tokenizer.tokenize(sentence)
+print(tokens)
+
+# Try a more advanced sentence
+sentence2 = "Let's try to see if we can get this transformer to tokenize."
+tokens2 = tokenizer.tokenize(sentence2)
+print(tokens2)
+```
+
+## Tokens and Token IDs
+
+Associated to each token is a unique token ID. The total number of unique tokens that a model can recognize and process is the *vocabulary size*. The *vocabulary* is the collection of all the unique tokens (i.e., all the unique tokens).
+
+The tokens (and token ids) alone hold no (semantic) information. What is needed is a numerical representation that *encodes* this information. 
+
+There are different ways to achieve this. One encoding technique that we already considered is one-hot encodings. Another more powerful encoding method, is the creation of word embeddings.
+
+## Sparse Representations
+
+We have previously considered the following sparse representations of textual data.
+
+### One-Hot Encoding
+- Each word is represented as a vector of zeros and a single one.
+- Simple but inefficient for large vocabularies.
+
+**Example**
+
+Given the words cat, dog, and emu here are sample one-hot encodings
+
+$$
+\begin{align*}
+\text{cat} &= [1, 0, 0]^{T}, \\
+\text{dog} &= [0, 1, 0]^{T}, \\
+\text{emu} &= [0, 0, 1]^{T}. \\
+\end{align*}
+$$
+
+---
+
+### Bag of Words (BoW)
+- Represents text as a collection of word counts.
+- Ignores grammar and word order.
+
+**Example**
+
+Suppose we have the following sentences
+
+1. The cat sat on the mat.
+1. The dog sat on the log.
+1. The emu sat on the mat.
+
+| Sentence                              | the | cat | sat | on | mat | dog | log | emu |
+|---------------------------------------|-----|-----|-----|----|-----|-----|-----|----------|
+| "The cat sat on the mat."             |  2  |  1  |  1  | 1  |  1  |  0  |  0  |    0     |
+| "The dog sat on the log."             |  2  |  0  |  1  | 1  |  0  |  1  |  1  |    0     |
+| "The emu sat on the mat."        |  2  |  0  |  1  | 1  |  1  |  0  |  0  |    1     |
+
+---
+
+### TF-IDF (Term Frequency-Inverse Document Frequency)
+- Adjusts word frequency by its importance across documents.
+- Highlights unique words in a document.
+
+**Example**
+
+The TF-IDF representations corresponding to the previous sentences.
+
+|       | cat       | dog       | log       | mat       | on        | emu  | sat       | the       |
+|-------|-----------|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
+| Sentence 1 | 0.4698    | 0.0000    | 0.0000    | 0.4698    | 0.3546    | 0.0000    | 0.3546    | 0.7093    |
+| Sentence 2 | 0.0000    | 0.4698    | 0.4698    | 0.0000    | 0.3546    | 0.0000    | 0.3546    | 0.7093    |
+| Sentence 3 | 0.0000    | 0.0000    | 0.0000    | 0.4698    | 0.3546    | 0.4698    | 0.3546    | 0.7093    |
+
+## Word Embeddings
+
+Word embeddings represent word as dense vectors in high-dimensional spaces.
+
+The individual values of the vector may be difficult to interpret, but the overall pattern is that words with similar meanings are close to each other, in the sense that their vectors have small angles with each other.
+
+The similarity of two word embeddings is the cosine of the angle between the two vectors. Recall that for two vectors $v_1, v_2\in\mathbb{R}^{n}$, the formula for the cosine of the angle between them is
+
+$$ 
+\cos{(\theta)} = \frac{v_1 \cdot v_2}{\Vert v_1 \Vert_2 \Vert v_2 \Vert_2}.
+$$
+
+Word embeddings can be static or contextual. A static embedding is when each word has a single embedding, e.g., Word2Vec. A contextual embedding (used by more complex language model embedding algorithms) allows the embedding for a word to change depending on its context in a sentence.
+
+## Language Models
+
+A language model is a statistical tool that predicts the probability of a sequence of words. It helps in understanding and generating human language by learning patterns and structures from large text corpora.
+
+Here is a 
+
+1. **N-gram Models**:
+   - Predict the next word based on the previous  $n-1$ words.
+   - Simple and effective for many tasks but limited by fixed context size.
+
+1. **Neural Language Models**:
+   - Use neural networks to capture more complex patterns.
+   - Examples include *RNNs*, *LSTMs*, and **Transformers**.
+
+We previously covered [RNNs and LSTMs](#27-RNN.qmd).
+
+We'll discuss N-grams briefly followed by a deep dive on Transformers.
+
+## N-gram models
+
+- **Definition**: An n-gram model is a type of probabilistic language model used in natural language processing.
+- **Purpose**: It predicts the next item in a sequence based on the previous \( n-1 \) items.
+- **Types**:
+  - **Unigram**: Considers each word independently.
+  - **Bigram**: Considers pairs of consecutive words.
+  - **Trigram**: Considers triples of consecutive words.
+
+## How N-gram Models Work
+
+- **Example**: Let's consider a bigram model.
+- **Training Data**: "I love machine learning. Machine learning is fun."
+- **Bigrams**: 
+  - "I love"
+  - "love machine"
+  - "machine learning"
+  - "learning Machine"
+  - "Machine learning"
+  - "learning is"
+  - "is fun"
+
+- **Probability Calculation**:
+  - P("learning" | "machine") = Count("machine learning") / Count("machine")
+
+
+## Example of N-gram Model in Action
+
+- **Sentence Completion**:
+  - Given the sequence "machine learning", predict the next word.
+  - Using the bigram model:
+    - P("is" | "learning") = Count("learning is") / Count("learning")
+    - P("fun" | "learning") = Count("learning fun") / Count("learning")
+
+- **Prediction**:
+  - If "learning is" appears more frequently than "learning fun" in the training data, the model predicts "is" as the next word.
+
+## Transformers
+
+Transformers are a deep learning model for processing sequential (text) data @vaswani2017attention.
+
+- Rely on a mechanism called *Attention*.
+- Revolutionized the field of natural language processing (NLP) and artificial intelligence (AI).
+- The model is easy to scale across GPUs.
+- The building blocks for large language models (LLMs) such as:
+  - ChatGPT (OpenAI),
+  - LLama (Meta),
+  - BERT (Google),
+  - Megatron (NVIDIA).
+
+To introduce the Transformer architecture we will consider machine translation. This is an application of sequence-to-sequence modeling. 
+
+## Transformer Architecture
+
+![](drawio/Transformer.png){fig-align="center"}
+
+---
+
+![](drawio/Transformer_Enc_Dec.png){fig-align="center"}
+
+---
+
+![](drawio/TransformerOriginal.png){fig-align="center"}
+
+## Encoder-Decoder Blocks
+
+### Encoder
+- **Function**: Processes input data (e.g., text) and converts it into a set of continuous representations.
+
+### Decoder
+- **Function**: Generates output sequences (e.g., translated text) from the encoded representations.
+
+The encoder and decoder work together to transform input sequences into meaningful output sequences.
+
+## Encoder Input 
+
+The input to the encoder are word embeddings.
+
+:::: {.columns}
+::: {.column width="70%"}
+
+- Words are embedded into a n-dimensional space, To establish the order of the words, we use positional encodings. .
+- The length $n$ of the vector is the *embedding dimension*.
+- Let $m$ denote the number of words in a sentence.
+
+:::
+::: {.column width="30%"}
+![](drawio/InputVectors.png)
+:::
+::::
+
+## Positional Encodings
+
+To establish the order of the words, we use positional encodings. 
+
+:::: {.columns}
+::: {.column width="70%"}
+- This is achieved by adding a vector $\mathbf{t}^{(i)}$ to the word embedding To establish the order of the words, we use positional encodings. 
+- The positionally encoded word embeddings are the inputs to the transformer.
+:::
+::: {.column width="30%"}
+![](drawio/PositionalEncodings.png)
+:::
+::::
+
+## Generating Position Vectors
+
+The authors of @vaswani2017attention proposed the following function for positional encodings
+$$
+\mathbf{t}_{j}^{(i)} = 
+\begin{cases} 
+\sin{\left(\frac{i}{10000^{2j/n}}\right)} & \text{for~$j$~even}, \\ 
+\cos{\left(\frac{i}{10000^{2j/n}}\right)} & \text{for~$j$~odd}. \\
+\end{cases}
+$$
+
+---
+
+Here is sample code to generate an illustration of the positional encodings.
+
+```{python}
+#| fig-align: center
+import numpy as np
+import matplotlib.pyplot as plt
+
+def get_angles(pos, i, d_model):
+  angle_rates = 1 / np.power(10000, (2 * (i//2)) / np.float32(d_model))
+  return pos * angle_rates
+
+def positional_encoding(position, d_model):
+  angle_rads = get_angles(np.arange(position)[:, np.newaxis],
+                          np.arange(d_model)[np.newaxis, :],
+                          d_model)
+  
+  # apply sin to even indices in the array; 2i
+  angle_rads[:, 0::2] = np.sin(angle_rads[:, 0::2])
+  
+  # apply cos to odd indices in the array; 2i+1
+  angle_rads[:, 1::2] = np.cos(angle_rads[:, 1::2])
+    
+  pos_encoding = angle_rads[np.newaxis, ...]
+    
+  return pos_encoding
+
+
+tokens = 10
+dimensions = 64
+
+pos_encoding = positional_encoding(tokens, dimensions)
+
+plt.figure(figsize=(7, 5))
+plt.pcolormesh(pos_encoding[0], cmap='viridis')
+plt.xlabel('Embedding Dimensions', fontsize=16)
+plt.xlim((0, dimensions))
+plt.ylim((tokens, 0))
+plt.ylabel('Token Position', fontsize=16)
+plt.colorbar()
+plt.show()
+
+```
+
+## From Inputs to the Encoder
+
+The positionally encoded vectors are transposed and stacked to form an input matrix. This input matrix is fed into the bottom of the encoder block.
+
+:::: {.columns}
+::: {.column width="70%"}
+The number of rows $m$ is the number of words in the sentence an the number of columns $n$ is the embedding dimension.
+$$
+X =
+\begin{bmatrix}
+& & {\mathbf{x}^{(1)}}^{T} &  & \\
+& & {\mathbf{x}^{(2)}}^{T} & &\\
+& & \vdots & & \\
+& & {\mathbf{x}^{(m)}}^{T} & & \\
+\end{bmatrix}
+\in\mathbb{R}^{m\times n}.
+$$
+:::
+::: {.column width="30%"}
+![](drawio/Encoder.png)
+:::
+::::
+
+## Attention
+
+Attention in language models is a mechanism that allows the model to focus on relevant parts of the input sequence by assigning different weights to different words, enabling it to capture long-range dependencies and context more effectively.
+
+Attention is needed in order to understand sentences such as, 
+
+```
+The elephant didn't cross the river because it was tired.
+```
+
+Attention allows a language model to understand correctly that *it* refer to the elephant and not the river.
+
+## Queries, Keys, and Values
+
+The building blocks of the attention mechanism are query $\mathbf{q}$, key $\mathbf{k}$, and value $\mathbf{v}$ vectors.
+
+The query and key vectors $\mathbf{k}, \mathbf{q}\in\mathbb{R}^{d}$ and the value vector $\mathbf{v}\in\mathbb{R}^{n}$.
+
+At a high level
+
+- query vectors determine which parts of the input to focus on, 
+- key vectors represent the input features, and 
+- value vectors contain the actual data to be attended to.
+
+---
+
+:::: {.columns}
+::: {.column width="60%"}
+To compute the query, key, and value vectors, compute
+Each $\mathbf{q}^{(i)}$, $\mathbf{k}^{(i)}$, and $\mathbf{v}^{(i)}$ is associated with $\mathbf{x}^{(i)}$.
+$$
+\begin{align*}
+\mathbf{q}^{(i)} &= {\mathbf{x}^{(i)}}^{T}W^{Q}, \\
+\mathbf{k}^{(i)} &= {\mathbf{x}^{(i)}}^{T}W^{K}, \\
+\mathbf{v}^{(i)} &= {\mathbf{x}^{(i)}}^{T}W^{V}. \\
+\end{align*}
+$$
+
+where $W^{Q}, W^{K}\in\mathbb{R}^{n\times d}$ and $W^{V}\in\mathbb{R}^{n\times n}$ are trainable matrices of weights.
+:::
+::: {.column width="40%"}
+![](drawio/QueriesKeysValues.png)
+:::
+::::
+
+---
+
+:::: {.columns}
+::: {.column width="60%"}
+This operation can be vectorized to compute
+$$
+\begin{align*}
+Q &= XW^{Q}, \\
+K &= XW^{K}, \\
+V &= XW^{V}, \\
+\end{align*}
+$$
+:::
+::: {.column width="40%"}
+![](drawio/VectorizedQKV.png)
+:::
+::::
+
+
+
+## Computing Attention
+
+Given a query, key, and value vector, we compute attention in the following sequence of operations
+
+:::: {.columns}
+::: {.column width="60%"}
+1. Compute $\mathbf{q}^{(i)}\cdot \mathbf{k}^{(j)} = s_{i,j}$ for each $j$.
+1. Compute $s_{i,j}=s_{i,j}/\sqrt{d}$.
+1. Compute $\tilde{s}_{i,:} = \operatorname{softmax}(s_{i,:})$.
+1. Compute $\mathbf{\tilde{v}}^{(j)}=\tilde{s}_{i, j} \mathbf{v}^{(j)}$ for each $j$.
+1. Compute $\mathbf{z}^{(i)} = \sum_{j} \mathbf{\tilde{v}}^{(j)}$.
+:::
+::: {.column width="40%"}
+![](drawio/ComputingAttention.png)
+:::
+::::
+
+::: aside
+Let $\mathbf{s}\in\mathbb{R}^{n}$, recall $softmax(\mathbf{s})_i = \frac{e^{s_i}}{\sum e^{s_{j}}}$.
+:::
+
+## Vectorized Attention
+
+Attention can be easily vectorized. The procedure is then
+
+:::: {.columns}
+::: {.column width="60%"}
+1. Compute $QK^T = S$.
+1. Compute $S=\frac{1}{\sqrt{d}}S$.
+1. Compute the softmax across rows $\tilde{S} = \operatorname{softmax}(S)$.
+1. Compute $Z = \tilde{S}V$.
+:::
+::: {.column width="40%"}
+![](drawio/ComputingVectorizedAttention.png)
+:::
+::::
+
+## Attention Visualized
+
+:::: {.columns}
+::: {.column width="60%"}
+Recall the original sentence to be translated, "The elephant did not cross the river because it was tired."
+
+A hypothetical visualization would demonstrate the links of the original sentence to the word *it*.
+
+The darker the color, the more this word **attends** to the word *it*.
+
+:::
+::: {.column width="40%"}
+![](drawio/VisualizedAttention.png)
+:::
+::::
+
+## Attention Summary
+
+1. Compute an attention score matrix $S_{ij} = \mathbf{q}^{(i)}\cdot \mathbf{k}^{(j)}/\sqrt{d}$.
+1. The softmax function is applied to each row of the matrix $S$.
+1. For a given row, the values in the columns of this matrix are the weights of the linear combination of the values vectors $\mathbf{v}^{(i)}$. 
+1. These weights tell us how much (or how little) each value vector contributes in the output $\mathbf{z}^{(i)}$.
+1. When there is only one set of $W^{Q}, W^{K},$ and $W^{V}$ matrices this process is called self-attention.
+
+## Layer Normalization
+
+:::: {.columns}
+::: {.column width="60%"}
+- Training with features on different scales takes longer.
+- The potential cause of exploding gradients.
+- Layer normalization ensures all values along the embedding dimension have the same distribution.
+- Layer normalization is calculated by a modified Z-score equation.
+:::
+::: {.column width="40%"}
+![](drawio/LayerNormalization.png)
+:::
+::::
+
+
+::: aside
+Proposed in @ba2016layernormalization.
+:::
+
+---
+
+- Sum $\mathbf{x}+\mathbf{z}= \mathbf{u}$.
+- Compute mean $\mu$ and the variance $\sigma^{2}$ of $\mathbf{u}$.
+- Compute
+$$
+\bar{\mathbf{u}} = \frac{\mathbf{u}-\mu}{\sqrt{\sigma^{2}+\varepsilon}} \odot \boldsymbol{\gamma} + \boldsymbol{\beta}.
+$$
+- $\varepsilon$ is a small number.
+- $\boldsymbol{\gamma}, \boldsymbol{\beta}$ are trainable parameter vectors of length $n$.
+- The notation $\odot$ indicates entry-wise multiplication.
+- Layer normalization can be vectorized to produce $\bar{U}$.
+
+## Feed-Forward Neural Network (FFNN)
+
+- The vectorized output of the layer normalization layer is $\bar{U}$.
+- The tensor $\bar{U}$ is the input to the neural network.
+- There is 1 hidden layer.
+- $FFNN(\bar{U}) = W_2\operatorname{max}(0, W_1\bar{U} + b_1) + b_2$.
+- The nonlinearity introduced by activation function of this layer allows the model to further differentiate the attention of each word.
+
+## Encoder Output
+
+- A 2nd layer normalization is applied to the output of the FFNN.
+- There is a residual connection to the output of the 1st layer normalization layer.
+- The output from the 2nd layer normalization is the output of the encoder.
+- At this stage, attention has been incorporated into the output.
+- The output is then sent to the decoder blocks.
+
+## Decoder Blocks
+
+The architecture of a decoder block is nearly identical to than of an encoder block. 
+
+The decoder blocks consists of
+
+- self-attention layer
+- layer normalization
+- feed-forward neural network
+- layer normalization
+
+---
+
+The major differences in the decoder
+
+1. Attends to the input of the encoder with *cross attention*.
+1. The self-attention layer only attends to earlier positions (not future) in the output sequence.
+
+The final output of the decoder blocks is a linear layer followed by a softmax layer.
+
+The softmax layer outputs the probability of a potential word being generated. The word with the maximum probability is chosen.
+
+## 3 Types of Transformer Models
+
+1. **Encoder** – transforms text embeddings into representations that support variety of tasks (e.g., sentiment analysis, classification)
+ Model Example: BERT
+
+1. **Decoder** – predicts the next token to continue the input text (e.g., ChatGPT, AI assistants)
+ Model Example: GPT4, GPT4
+
+1. **Encoder-Decoder** – used in sequence-to-sequence tasks, where one text string is converted to another (e.g., machine translation)
+
+## Encoder Model Example: BERT (2019)
+
+### Bidirection Encoder Representations from Transformers
+
+- Hyperparameters
+  - 30,000 token vocabulary
+  - 1024-dimensional word embeddings
+  - 24x transformer layers
+  - 16 heads in self-attention mechanism
+  - 4096 hidden units in middle of MLP
+- ~340 million parameters
+- Pre-trained in a self-supervised manner
+- Can be adapted to task with one additional layer and fine-tuned
+
+::: aside
+Proposed in @devlin2019bert.
+:::
+
+## Decoder Model Example: GPT3 (2020)
+
+### Generative Pre-trained Transformer
+
+- One purpose: generate the next token in a sequence
+- This is an autoregressive model
+- Factors the probability of a sentence of tokens $t_1, t_2, \ldots t_N$ as
+$$
+P(t_1, t_2, \ldots, t_N) = P(t_1)\prod_{n=2}^{N}
+P(t_n | t_1, t_2, \ldots t_{n-1})
+$$
+
+::: aside
+Proposed in @brown2020language.
+:::
+
+# Applications
+
+We will now build our own code to translate English sentences to Dutch sentences.
+
+## Overview
+
+We will use the following Python packages to achieve this
+
+- Pytorch
+- Datasets
+- Transformers
+
+You will need to execute this code on a computer with a GPU.
+
+## Data
+
+## AutoMOdelForSeq2SeqLM
+
+## Training
+
+## Evaluation
+
+## Inference
+
+# Review
+
+## NLP Recap
+
+In this sequence of lectures we covered 
+
+- historical roots of natural language processing
+- the Transformer architecture
+- example language translation
+
+## DS701 Recap 
+
+In this course we introduced you to the Tools for Data Science. 
+
+We covered:
+
+- Important Python packages like Pandas, Scikit-Learn, Torch, statsmodel, and others.
+- Mathematical foundations of data science, including linear algebra, probability and statistics, and optimization
+- Unsupervised learning
+  - Clustering
+  - Dimensionality reduction
+- Supervised learning
+  - Classification
+  - Regression
+- Neural Networks and NLP
+  - CNNs, RNNs, Transformers
+- Graphs
+- Recommender systems
+
+
+## Course Evaluations
+
+Please be sure to fill out the course evaluations. They can be found at the following links:
+
+:::: {.columns}
+::: {.column width="50%"}
+### Section A1
+:::
+::: {.column width="50%"}
+### Section C1
+:::
+::::
+
+## References
