@@ -40,7 +40,7 @@ gdown
 networkx
 ffmpeg
 
-#24-NN-II-Backprop
+# 24-NN-II-Backprop
 graphviz
 torch
 torchvision
@@ -48,6 +48,8 @@ torchvision
 # 26-TimeSeries
 kagglehub
 
-#27-RNN
+# 27-RNN
 pretty_midi
-torchview
+
+# 28-NLP
+transformers
