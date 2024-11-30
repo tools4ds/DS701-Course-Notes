@@ -623,6 +623,8 @@ $$
 
 The architecture of a decoder block is nearly identical to than of an encoder block. 
 
+:::: {.columns}
+::: {.column width="60%"}
 The decoder blocks consists of
 
 - self-attention layer
@@ -630,16 +632,33 @@ The decoder blocks consists of
 - feed-forward neural network
 - layer normalization
 
----
+:::
+::: {.column width="50%"}
+![](drawio/Decoder.png)
+:::
+::::
 
 The major differences in the decoder
 
-1. Attends to the input of the encoder with *cross attention*.
+1. An encoder-decoder attention layer. This layer attends to the output of the encoder with *cross attention*.
 1. The self-attention layer only attends to earlier positions (not future) in the output sequence.
+
+## Decoder Output
 
 The final output of the decoder blocks is a linear layer followed by a softmax layer.
 
-The softmax layer outputs the probability of a potential word being generated. The word with the maximum probability is chosen.
+:::: {.columns}
+::: {.column width="60%"}
+The linear layer outputs a vector that is fed into a softmax layer.
+
+The softmax layer outputs the probability of a potential word being generated. 
+
+The word with the maximum probability is chosen and output by the model.
+:::
+::: {.column width="40%"}
+![](drawio/DecoderOutput.png)
+:::
+::::
 
 ## 3 Types of Transformer Models
 
@@ -749,6 +768,9 @@ Please be sure to fill out the course evaluations. They can be found at the foll
 :::
 ::: {.column width="50%"}
 ### Section C1
+
+Follow this [link](https://go.blueja.io/LLmzBnmznEuK22KOgKjfnA) to submit a course evaluation for Section C1.
+
 :::
 ::::
 
