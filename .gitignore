@@ -9,3 +9,7 @@ ENV/
 
 # Ignore VSCode directory
 .vscode/
+
+# Ignore drawio temp files
+*.bkp
+*.dtmp
