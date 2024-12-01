@@ -633,7 +633,7 @@ The decoder blocks consists of
 - layer normalization
 
 :::
-::: {.column width="50%"}
+::: {.column width="40%"}
 ![](drawio/Decoder.png)
 :::
 ::::
@@ -688,21 +688,59 @@ The word with the maximum probability is chosen and output by the model.
 Proposed in @devlin2019bert.
 :::
 
+## Encoder Pre-Training
+
+![](figs/EncoderPretraining.png){fig-align="center"}
+
+- A small percentage of input embedding replaced with a generic <mask> token
+- Predict missing token from output embeddings
+- Added linear layer and softmax to generate probabilities over vocabulary
+- Trained on BooksCorpus (800M words) and English Wikipedia (2.5B words)
+
+
+## Encoder Fine-Tuning
+
+[](figs/EncoderFinetuning.png){fig-align="center"}
+
+- Extra layer(s) appended to convert output vectors to desired output format
+- 3rd Example: Text span prediction -- predict start and end location of answer to a question in passage of Wikipedia, see this [link(]https://rajpurkar.github.io/SQuAD-explorer/)
+
+
 ## Decoder Model Example: GPT3 (2020)
 
 ### Generative Pre-trained Transformer
 
-- One purpose: generate the next token in a sequence
-- This is an autoregressive model
+- One purpose: generate the next token in a sequence.
+- This is an autoregressive model.
 - Factors the probability of a sentence of tokens $t_1, t_2, \ldots t_N$ as
 $$
 P(t_1, t_2, \ldots, t_N) = P(t_1)\prod_{n=2}^{N}
-P(t_n | t_1, t_2, \ldots t_{n-1})
+P(t_n | t_1, t_2, \ldots t_{n-1}).
 $$
 
 ::: aside
 Proposed in @brown2020language.
 :::
+
+## Decoder: Masked Self-Attention
+
+![](figs/DecoderMaskedAttention.png)
+
+- During training we want to maximize the log probability of the input text under the autoregressive model.
+- We want to make sure the model doesn’t “cheat” during training by looking ahead at the next token.
+- Therefore, we mask the self attention weights corresponding to current and right context to negative infinity.
+
+
+## Decoder: Text Generation
+
+![](figs/DecoderTextGen.png)
+
+- Prompt with token string “<start> It takes great”
+- Generate next token for the sequence by 
+  - picking most likely token
+  - sample from the probability distribution
+  - beam search – select the most likely sentence rather than picking in a greedy fashion
+
 
 # Applications
 
@@ -720,7 +758,7 @@ You will need to execute this code on a computer with a GPU.
 
 ## Data
 
-## AutoMOdelForSeq2SeqLM
+## AutoModelForSeq2SeqLM
 
 ## Training
 
