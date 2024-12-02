@@ -11,7 +11,7 @@ Natural language processing (NLP) is a subfield of artificial intelligence that 
 # History of NLP
 
 - The Dawn of NLP (1950-1970s)
-- The Statistical Revolution (1980s-200s)
+- The Statistical Revolution (1980s-2000s)
 - The Deep Learning Era (2000s-present)
 
 ## The Dawn of NLP
@@ -91,15 +91,18 @@ Here are some of the notable developments.
 - **@bahdanau2014neural** Proposed the concept of attention in RNNs. Attention is a mechanism that allows models to focus on specific parts of the input sequence when generating each part of the output sequence, improving the handling of long-range dependencies and context.
 - **@vaswani2017attention** Introduce the Transformer architecture. This allows for parallelization of sequential data with attention. Transformers become the basis for LLMs.
 
-# Theory
+# Lecture Outline
 
-We cover
+For the rest of this lecture we will cover:
 
-- numerical representation of words
-  - Tokenization
-  - Sparse representations
-  - Word embeddings
-- Transformer models and attention
+- Numerical representations of words
+- Language models
+  - N-gram models
+  - Transformers
+- Transformer Architectures
+
+
+# Numerical Representation of Words
 
 ## Numerical Representations of Words
 
@@ -243,6 +246,9 @@ $$
 
 Word embeddings can be static or contextual. A static embedding is when each word has a single embedding, e.g., Word2Vec. A contextual embedding (used by more complex language model embedding algorithms) allows the embedding for a word to change depending on its context in a sentence.
 
+# Language Models
+
+
 ## Language Models
 
 A language model is a statistical tool that predicts the probability of a sequence of words. It helps in understanding and generating human language by learning patterns and structures from large text corpora.
@@ -260,6 +266,9 @@ Here is a
 We previously covered [RNNs and LSTMs](#27-RNN.qmd).
 
 We'll discuss N-grams briefly followed by a deep dive on Transformers.
+
+# N-gram Models
+
 
 ## N-gram models
 
@@ -297,6 +306,9 @@ We'll discuss N-grams briefly followed by a deep dive on Transformers.
 
 - **Prediction**:
   - If "learning is" appears more frequently than "learning fun" in the training data, the model predicts "is" as the next word.
+
+# Transformers
+
 
 ## Transformers
 
@@ -445,6 +457,9 @@ $$
 :::
 ::::
 
+# Attention
+
+
 ## Attention
 
 Attention in language models is a mechanism that allows the model to focus on relevant parts of the input sequence by assigning different weights to different words, enabling it to capture long-range dependencies and context more effectively.
@@ -570,6 +585,8 @@ The darker the color, the more this word **attends** to the word *it*.
 1. These weights tell us how much (or how little) each value vector contributes in the output $\mathbf{z}^{(i)}$.
 1. When there is only one set of $W^{Q}, W^{K},$ and $W^{V}$ matrices this process is called self-attention.
 
+# Layer Normalization and Feed-Forward Neural Network
+
 ## Layer Normalization
 
 :::: {.columns}
@@ -657,6 +674,8 @@ The word with the maximum probability is chosen and output by the model.
 ![](drawio/DecoderOutput.png)
 :::
 ::::
+
+# Transformer Architectures
 
 ## 3 Types of Transformer Models
 
@@ -774,6 +793,9 @@ In this sequence of lectures we covered
 - the Transformer architecture
 - example language translation -->
 
+# Course Recap, Evaluations, and References
+
+
 ## DS701 Recap 
 
 In this course we introduced you to the Tools for Data Science. 
@@ -801,6 +823,11 @@ Please be sure to fill out the course evaluations. They can be found at the foll
 :::: {.columns}
 ::: {.column width="50%"}
 ### Section A1
+
+Follow this _link tbd_ to submit a course evaluation for Section A1.
+
+Follow this _link tbd_ to submit a course evaluation for discussion section A2.
+
 :::
 ::: {.column width="50%"}
 ### Section C1
