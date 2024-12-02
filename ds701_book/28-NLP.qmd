@@ -700,8 +700,8 @@ Proposed in @devlin2019bert.
 
 [](figs/EncoderFinetuning.png){fig-align="center"}
 
-- Extra layer(s) appended to convert output vectors to desired output format
-- 3rd Example: Text span prediction -- predict start and end location of answer to a question in passage of Wikipedia, see this [link(]https://rajpurkar.github.io/SQuAD-explorer/)
+- Extra layer(s) appended to convert output vectors to desired output format.
+- 3rd Example: Text span prediction -- predict start and end location of answer to a question in passage of Wikipedia, see this [link](https://rajpurkar.github.io/SQuAD-explorer/).
 
 
 ## Decoder Model Example: GPT3 (2020)
