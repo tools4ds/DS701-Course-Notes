@@ -231,7 +231,7 @@ The TF-IDF representations corresponding to the previous sentences.
 
 ## Word Embeddings
 
-Word embeddings represent word as dense vectors in high-dimensional spaces.
+Word embeddings represent words as dense vectors in high-dimensional spaces.
 
 The individual values of the vector may be difficult to interpret, but the overall pattern is that words with similar meanings are close to each other, in the sense that their vectors have small angles with each other.
 
@@ -358,7 +358,7 @@ To establish the order of the words, we use positional encodings.
 
 :::: {.columns}
 ::: {.column width="70%"}
-- This is achieved by adding a vector $\mathbf{t}^{(i)}$ to the word embedding To establish the order of the words, we use positional encodings. 
+- This is achieved by adding a vector $\mathbf{t}^{(i)}$ to the word embedding $\mathbf{x}^{(i)}$.
 - The positionally encoded word embeddings are the inputs to the transformer.
 :::
 ::: {.column width="30%"}
