@@ -670,7 +670,7 @@ The word with the maximum probability is chosen and output by the model.
 
 ## Encoder Model Example: BERT (2019)
 
-### Bidirection Encoder Representations from Transformers
+### Bidirectional Encoder Representations from Transformers
 
 - Hyperparameters
   - 30,000 token vocabulary
