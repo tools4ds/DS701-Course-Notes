@@ -824,9 +824,9 @@ Please be sure to fill out the course evaluations. They can be found at the foll
 ::: {.column width="50%"}
 ### Section A1
 
-Follow this _link tbd_ to submit a course evaluation for Section A1.
+Follow this [link](https://go.blueja.io/tggejlP2zUuNRiyt28XZjQ) to submit a course evaluation for lecture section A1.
 
-Follow this _link tbd_ to submit a course evaluation for discussion section A2.
+Follow this [link](https://go.blueja.io/qOvwpG0d60CCqxXt0g-Pgg) to submit a course evaluation for discussion section A2.
 
 :::
 ::: {.column width="50%"}
