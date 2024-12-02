@@ -167,7 +167,7 @@ print(tokens2)
 
 ## Tokens and Token IDs
 
-Associated to each token is a unique token ID. The total number of unique tokens that a model can recognize and process is the *vocabulary size*. The *vocabulary* is the collection of all the unique tokens (i.e., all the unique tokens).
+Associated to each token is a unique token ID. The total number of unique tokens that a model can recognize and process is the *vocabulary size*. The *vocabulary* is the collection of all the unique tokens.
 
 The tokens (and token ids) alone hold no (semantic) information. What is needed is a numerical representation that *encodes* this information. 
 
@@ -741,7 +741,7 @@ Proposed in @brown2020language.
   - sample from the probability distribution
   - beam search – select the most likely sentence rather than picking in a greedy fashion
 
-
+<!-- 
 # Applications
 
 We will now build our own code to translate English sentences to Dutch sentences.
@@ -774,7 +774,7 @@ In this sequence of lectures we covered
 
 - historical roots of natural language processing
 - the Transformer architecture
-- example language translation
+- example language translation -->
 
 ## DS701 Recap 
 
