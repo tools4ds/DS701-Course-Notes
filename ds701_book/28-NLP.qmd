@@ -455,7 +455,7 @@ Attention is needed in order to understand sentences such as,
 The elephant didn't cross the river because it was tired.
 ```
 
-Attention allows a language model to understand correctly that *it* refer to the elephant and not the river.
+Attention allows a language model to understand correctly that *it* refers to the elephant and not the river.
 
 ## Queries, Keys, and Values
 
