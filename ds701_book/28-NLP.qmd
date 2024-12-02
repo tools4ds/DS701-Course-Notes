@@ -473,13 +473,12 @@ At a high level
 
 :::: {.columns}
 ::: {.column width="60%"}
-To compute the query, key, and value vectors, compute
-Each $\mathbf{q}^{(i)}$, $\mathbf{k}^{(i)}$, and $\mathbf{v}^{(i)}$ is associated with $\mathbf{x}^{(i)}$.
+Each $\mathbf{q}^{(i)}$, $\mathbf{k}^{(i)}$, and $\mathbf{v}^{(i)}$ is associated with $\mathbf{x}^{(i)}$. To compute the query, key, and value vectors, compute
 $$
 \begin{align*}
 \mathbf{q}^{(i)} &= {\mathbf{x}^{(i)}}^{T}W^{Q}, \\
 \mathbf{k}^{(i)} &= {\mathbf{x}^{(i)}}^{T}W^{K}, \\
-\mathbf{v}^{(i)} &= {\mathbf{x}^{(i)}}^{T}W^{V}. \\
+\mathbf{v}^{(i)} &= {\mathbf{x}^{(i)}}^{T}W^{V}, \\
 \end{align*}
 $$
 
@@ -499,7 +498,7 @@ $$
 \begin{align*}
 Q &= XW^{Q}, \\
 K &= XW^{K}, \\
-V &= XW^{V}, \\
+V &= XW^{V}. \\
 \end{align*}
 $$
 :::
