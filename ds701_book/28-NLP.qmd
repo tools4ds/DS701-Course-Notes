@@ -574,8 +574,7 @@ The darker the color, the more this word **attends** to the word *it*.
 
 :::: {.columns}
 ::: {.column width="60%"}
-- Training with features on different scales takes longer.
-- The potential cause of exploding gradients.
+- Training with features on different scales takes longer and is the potential cause of exploding gradients.
 - Layer normalization ensures all values along the embedding dimension have the same distribution.
 - Layer normalization is calculated by a modified Z-score equation.
 :::
@@ -661,13 +660,13 @@ The word with the maximum probability is chosen and output by the model.
 
 ## 3 Types of Transformer Models
 
+1. **Encoder-Decoder** – used in sequence-to-sequence tasks, where one text string is converted to another (e.g., machine translation)
+
 1. **Encoder** – transforms text embeddings into representations that support variety of tasks (e.g., sentiment analysis, classification)
  Model Example: BERT
 
 1. **Decoder** – predicts the next token to continue the input text (e.g., ChatGPT, AI assistants)
  Model Example: GPT4, GPT4
-
-1. **Encoder-Decoder** – used in sequence-to-sequence tasks, where one text string is converted to another (e.g., machine translation)
 
 ## Encoder Model Example: BERT (2019)
 
