@@ -73,6 +73,10 @@ The creation and maintenance of such rule based systems for every language was n
 
 These systems focused predominantly on syntax and vocabulary. They were not able to capture the deeper meaning and context of the texts they were analyzing.
 
+:::: {.fragment}
+See for example [WordNet](https://wordnet.princeton.edu/), ([Wikpedia:WordNet](https://en.wikipedia.org/wiki/WordNet)).
+::::
+
 
 ## The Statistical Revolution
 
@@ -80,7 +84,7 @@ Due to the limitations or rule-based systems coupled with a steady increase in c
 
 In contrast to rule-based systems, these statistical models learned patterns from data. This allowed them to better handle the variations and complexities of natural language. IBM research developed a set of important machine translation models, called the [IBM alignment models](http://www2.statmt.org/survey/Topic/IBMModels).  
 
-The concepts of Recurrent Neural Networks were introduced in 1986 in the paper, "Learning Representations by Back-Propagating Errors," by David Rumelhart, Geoffrey Hinton, and Ronald J. Williams.
+The concepts of Recurrent Neural Networks were introduced in 1986 in the paper, "Learning Representations by Back-Propagating Errors," by [@rumelhart1986learning].
 
 In addition, the use of n-gram models became more formalized and widely adopted. An n-gram language model predicts the probability of a word based on the previous n-1 words in a sequence, making it a fundamental tool in natural language processing for tasks like text prediction and speech recognition.
 
@@ -152,7 +156,13 @@ print(character_tokens)
 
 ---
 
-There are advantages and disadvantages to different tokenization methods. We showed two very simple strategies. However, there are other strategies, such as subword and sentence tokenization. With tokenization, our goal is to not lose meaning with the tokens. With character based tokenization, especially for English (non-character based languages) we certainly lose meaning. 
+There are advantages and disadvantages to different tokenization methods. We showed two very simple strategies. 
+
+However, there are other strategies, such as subword and sentence tokenization,
+see for example [Byte-Pair Encoding](https://en.wikipedia.org/wiki/Byte-pair_encoding),
+and [SentencePiece](https://github.com/google/sentencepiece).
+
+With tokenization, our goal is to not lose meaning with the tokens. With character based tokenization, especially for English (non-character based languages) we certainly lose meaning. 
 
 Here is a demo of how to tokenize using the [transformers](https://huggingface.co/docs/transformers/en/index) package from Huggingface.
 
@@ -223,8 +233,11 @@ Suppose we have the following sentences
 ---
 
 ### TF-IDF (Term Frequency-Inverse Document Frequency)
+
 - Adjusts word frequency by its importance across documents.
 - Highlights unique words in a document.
+- See [Course Notes: Feature Extraction](https://tools4ds.github.io/DS701-Course-Notes/07-Clustering-II-in-practice.html#feature-extraction) 
+  for more details.
 
 **Example**
 
@@ -240,9 +253,13 @@ The TF-IDF representations corresponding to the previous sentences.
 
 Word embeddings represent words as dense vectors in high-dimensional spaces.
 
-The individual values of the vector may be difficult to interpret, but the overall pattern is that words with similar meanings are close to each other, in the sense that their vectors have small angles with each other.
+The individual values of the vector may be difficult to interpret, but the 
+overall pattern is that _words with similar meanings are close to each other_, 
+in the sense that their vectors have small angles with each other.
 
-The similarity of two word embeddings is the cosine of the angle between the two vectors. Recall that for two vectors $v_1, v_2\in\mathbb{R}^{n}$, the formula for the cosine of the angle between them is
+The similarity of two word embeddings is the cosine of the angle between the two
+vectors. Recall that for two vectors $v_1, v_2\in\mathbb{R}^{n}$, the formula 
+for the cosine of the angle between them is
 
 $$ 
 \cos{(\theta)} = \frac{v_1 \cdot v_2}{\Vert v_1 \Vert_2 \Vert v_2 \Vert_2}.
@@ -277,9 +294,9 @@ We'll discuss N-grams briefly followed by a deep dive on Transformers.
 - **Definition**: An n-gram model is a type of probabilistic language model used in natural language processing.
 - **Purpose**: It predicts the next item in a sequence based on the previous \( n-1 \) items.
 - **Types**:
-  - **Unigram**: Considers each word independently.
-  - **Bigram**: Considers pairs of consecutive words.
-  - **Trigram**: Considers triples of consecutive words.
+  - **Unigram (n=1)**: Considers each word independently.
+  - **Bigram (n=2)**: Considers pairs of consecutive words.
+  - **Trigram (n=3)**: Considers triples of consecutive words.
 
 ## How N-gram Models Work
 
@@ -393,7 +410,8 @@ $$
 
 ---
 
-Here is sample code to generate an illustration of the positional encodings.
+Here is sample code to generate an illustration of the positional encodings for
+embedding dimension $n=64$ and $m=10$ tokens.
 
 ```{python}
 #| fig-align: center
@@ -638,7 +656,7 @@ $$
 
 ## Decoder Blocks
 
-The architecture of a decoder block is nearly identical to than of an encoder block. 
+The architecture of a decoder block (in an encoder-decoder transformer) is nearly identical to than of an encoder block. 
 
 :::: {.columns}
 ::: {.column width="60%"}
@@ -657,7 +675,7 @@ The decoder blocks consists of
 
 The major differences in the decoder
 
-1. An encoder-decoder attention layer. This layer attends to the output of the encoder with *cross attention*.
+1. An encoder-decoder attention layer. This layer attends to the output of the encoder with *cross attention* (e.g. keys and values come from the encoder and queries come from the decoder).
 1. The self-attention layer only attends to earlier positions (not future) in the output sequence.
 
 ## Decoder Output
