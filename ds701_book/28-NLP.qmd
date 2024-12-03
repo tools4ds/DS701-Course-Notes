@@ -45,6 +45,10 @@ NLP has its origin ins the 1950s. Two important figures in the development of co
 :::
 ::::
 
+:::: {.fragment}
+Do you think LLMs are able to pass the Turing Test?
+::::
+
 ---
 
 :::: {.columns}
@@ -252,8 +256,6 @@ Word embeddings can be static or contextual. A static embedding is when each wor
 ## Language Models
 
 A language model is a statistical tool that predicts the probability of a sequence of words. It helps in understanding and generating human language by learning patterns and structures from large text corpora.
-
-Here is a 
 
 1. **N-gram Models**:
    - Predict the next word based on the previous  $n-1$ words.
