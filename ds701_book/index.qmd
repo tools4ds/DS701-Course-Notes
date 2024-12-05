@@ -41,7 +41,7 @@ me to errors -- or better yet, submit a pull request!).
 The notes are in the form of Jupyter notebooks.   Demos and most figures
 are included as executable Python code.   All course materials are in
 the github repository
-[here.](https://github.com/mcrovella/CS701-Tools-for-Data-Science)
+[here.](https://github.com/tools4ds/DS701-Course-Notes)
 
 Each Chapter is based on a single Jupyter notebook, and each notebook
 forms the basis for one lecture (more or less).
