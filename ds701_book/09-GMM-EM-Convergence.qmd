@@ -1,0 +1,56 @@
+---
+title: "GMM EM Convergence"
+---
+
+The convergence criteria for the Expectation-Maximization (EM) algorithm generally revolve around assessing the change in either the model parameters or the likelihood function across iterations. Here are the common convergence criteria used:
+
+1. Log-Likelihood Convergence (Most Common)
+
+The EM algorithm seeks to maximize the log-likelihood of the observed data under the current model parameters. A common convergence criterion is based on the change in the log-likelihood value between successive iterations. The algorithm stops when the difference between the log-likelihood in two consecutive iterations is smaller than a predefined threshold (tolerance), typically denoted as tol.
+
+Convergence criterion:
+￼
+Where:
+
+	•	￼ is the log-likelihood at iteration ￼,
+	•	￼ is a small positive number (e.g., ￼).
+
+2. Parameter Convergence
+
+Instead of focusing on the log-likelihood, another approach is to check whether the model parameters (means, covariances, and mixture weights) have stabilized. This can be useful when the log-likelihood changes only marginally but the parameter values continue to evolve.
+
+Convergence criterion:
+￼
+Where:
+
+	•	￼ represents the model parameters (means, covariances, and weights) at iteration ￼,
+	•	￼ is the Euclidean (L2) norm,
+	•	￼ is a small positive number.
+
+3. Responsibility Convergence
+
+This criterion checks whether the soft assignments or responsibilities (posterior probabilities of cluster membership) have stabilized across iterations. If the change in responsibilities between iterations is smaller than a threshold, the algorithm stops.
+
+Convergence criterion:
+￼
+Where:
+
+	•	￼ is the responsibility of data point ￼ for cluster ￼ at iteration ￼,
+	•	￼ is a small positive number.
+
+4. Maximum Number of Iterations
+
+The EM algorithm is typically capped at a maximum number of iterations to avoid long runtimes in cases where the log-likelihood or parameters converge very slowly or never fully stabilize.
+
+Criterion:
+￼
+Where:
+
+	•	￼ is a predefined limit (e.g., 100 or 500 iterations).
+
+Typical Setup in Practice:
+
+	•	The most commonly used criterion is log-likelihood convergence, combined with a maximum number of iterations as a safeguard.
+	•	A typical tolerance value for the log-likelihood difference is ￼ or ￼, depending on the precision needed.
+
+In summary, the EM algorithm usually stops when the log-likelihood improvement between iterations falls below a small threshold or when the number of iterations exceeds a predefined limit.

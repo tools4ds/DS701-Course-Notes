@@ -1,0 +1,279 @@
+---
+title: TS Notes
+jupyter: python3
+---
+
+
+(gtp-4o, personal communications, Nov. 20, 2024)
+
+Classical decomposition is primarily used for breaking down a time series into its constituent components: trend, seasonality, and residuals. While it doesn't directly provide a forecasting method, you can use the decomposed components to make forecasts. Here's a general approach to forecasting using classical decomposition:
+
+1. **Decompose the Time Series**: Break down the time series into trend, seasonal, and residual components.
+
+2. **Forecast the Trend Component**: Use a suitable method (e.g., linear regression, moving average) to forecast the trend component.
+
+3. **Forecast the Seasonal Component**: Assume the seasonal component repeats itself and use the last observed seasonal pattern for future periods.
+
+4. **Combine the Forecasts**: Add the forecasted trend and seasonal components to get the final forecast. The residual component is often assumed to be zero for forecasting purposes.
+
+Here's a simplified example in Python using the `statsmodels` library for decomposition and a basic approach for forecasting:
+
+````{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+# Load the dataset
+data = pd.read_csv('data/air_passengers_1949_1960.csv', index_col='Date', parse_dates=True)
+ts = data['Number of Passengers']
+
+# Decompose the time series
+decomposition = seasonal_decompose(ts, model='additive')
+trend = decomposition.trend
+seasonal = decomposition.seasonal
+residual = decomposition.resid
+
+# Forecast the trend component using a simple linear extrapolation
+trend_forecast = trend.dropna().iloc[-1] + np.arange(1, 25) * (trend.dropna().iloc[-1] - trend.dropna().iloc[-2])
+
+# Forecast the seasonal component by repeating the last observed seasonal pattern
+seasonal_forecast = np.tile(seasonal[-12:], 2)
+
+# Combine the forecasts
+forecast = trend_forecast + seasonal_forecast
+
+# Plot the original data and the forecast
+plt.figure(figsize=(10, 6))
+plt.plot(ts, label='Observed')
+forecast_index = pd.date_range(ts.index[-1] + pd.DateOffset(months=1), periods=24, freq='M')
+plt.plot(forecast_index, forecast, label='Forecast', color='red')
+plt.legend()
+plt.title('Forecast using Classical Decomposition')
+plt.show()
+````
+
+### Explanation:
+- **Trend Forecasting**: This example uses a simple linear extrapolation of the last two trend values. You might want to use a more sophisticated method depending on your data.
+- **Seasonal Forecasting**: The seasonal component is assumed to repeat itself, so the last observed seasonal pattern is used for future periods.
+- **Combining Components**: The final forecast is the sum of the trend and seasonal forecasts. The residual component is not used in the forecast.
+
+This approach is quite basic and may not be suitable for all datasets, especially those with complex patterns. For more accurate forecasting, consider using more advanced models like ARIMA or machine learning techniques.
+
+## MA Model Definition
+
+(gtp-4o, personal communications, Nov. 20, 2024)
+
+Certainly! Let's walk through an example of defining and training a Moving Average (MA) model using the Air Passengers dataset in Python. We'll use the `statsmodels` library, which provides tools for estimating MA models.
+
+### Step-by-Step Example
+
+1. **Import Libraries**: We'll need `pandas` for data manipulation and `statsmodels` for the MA model.
+
+2. **Load the Data**: We'll load the Air Passengers dataset.
+
+3. **Visualize the Data**: It's always a good idea to visualize the data to understand its structure.
+
+4. **Fit an MA Model**: We'll fit an MA model to the data.
+
+5. **Evaluate the Model**: We'll look at the model summary and plot the residuals.
+
+Here's how you can do it:
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.tsa.arima.model import ARIMA
+
+# Load the Air Passengers dataset
+data = pd.read_csv(os.path.join('data', 'air_passengers_1949_1960.csv'), 
+                   index_col='Date', parse_dates=True)
+
+# Visualize the data
+plt.figure(figsize=(10, 6))
+plt.plot(data, label='Number of Passengers')
+plt.title('Air Passengers Data')
+plt.xlabel('Date')
+plt.ylabel('Number of Passengers')
+plt.legend()
+plt.show()
+
+# Fit an MA model
+# We use ARIMA with order (0, 0, q) to specify an MA(q) model
+ma_order = 1  # You can experiment with different orders
+model = ARIMA(data, order=(0, 0, ma_order))
+model_fit = model.fit()
+
+# Print the model summary
+print(model_fit.summary())
+
+# Plot the residuals
+residuals = model_fit.resid
+plt.figure(figsize=(10, 6))
+plt.plot(residuals, label='Residuals')
+plt.title('Residuals of the MA Model')
+plt.xlabel('Date')
+plt.ylabel('Residuals')
+plt.legend()
+plt.show()
+
+# Plot the ACF of the residuals to check for remaining autocorrelation
+from statsmodels.graphics.tsaplots import plot_acf
+plot_acf(residuals, lags=20)
+plt.show()
+```
+
+### Explanation
+
+- **Data Loading**: We load the dataset directly from a URL. The `parse_dates=True` argument ensures that the 'Month' column is treated as a datetime index.
+
+- **Visualization**: We plot the time series to get a sense of its structure.
+
+- **Model Fitting**: We use the `ARIMA` class from `statsmodels` with the order `(0, 0, ma_order)` to specify an MA model. The first two zeros indicate no autoregressive terms and no differencing, respectively.
+
+- **Model Summary**: The summary provides details about the estimated parameters and their statistical significance.
+
+- **Residuals**: We plot the residuals to check for any patterns. Ideally, they should resemble white noise.
+
+- **ACF Plot**: The autocorrelation function (ACF) plot of the residuals helps us check if there is any remaining autocorrelation. If the residuals are white noise, the ACF should show no significant lags.
+
+This example demonstrates how to define and train an MA model using the Air Passengers dataset. You can experiment with different orders of the MA model to see how it affects the fit.
+
+## Building MA from scratch
+
+(gtp-4o, personal communications, Nov. 20, 2024)
+
+Building a Moving Average (MA) model from scratch involves manually calculating the moving average of the error terms. Here's how you can implement an MA(1) model without using the `statsmodels` library:
+
+### Step-by-Step Implementation
+
+1. **Import Libraries**: We'll use `pandas` for data manipulation and `numpy` for numerical operations.
+
+2. **Load the Data**: Load the Air Passengers dataset.
+
+3. **Define the MA Model**: Implement the MA(1) model manually.
+
+4. **Calculate Residuals**: Compute the residuals and use them to predict future values.
+
+5. **Visualize the Results**: Plot the original data and the fitted values.
+
+Here's how you can do it:
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load the Air Passengers dataset
+data = pd.read_csv('data/air_passengers_1949_1960.csv', index_col='Date', parse_dates=True)
+ts = data['Number of Passengers']
+
+# Define the MA(1) model
+def moving_average_forecast(series, window_size):
+    # Initialize the list to store the forecasted values
+    forecast = [np.nan] * window_size  # First 'window_size' values are NaN
+    for t in range(window_size, len(series)):
+        # Calculate the average of the past 'window_size' residuals
+        forecast.append(np.mean(series[t-window_size:t]))
+    return np.array(forecast)
+
+# Calculate the residuals
+residuals = ts - ts.shift(1)
+
+# Fit the MA(1) model
+window_size = 1  # MA(1) model
+ma_forecast = moving_average_forecast(residuals.dropna(), window_size)
+
+# Add the forecasted residuals to the original series to get the fitted values
+fitted_values = ts.shift(1) + ma_forecast
+
+# Plot the original data and the fitted values
+plt.figure(figsize=(10, 6))
+plt.plot(ts, label='Observed')
+plt.plot(fitted_values, label='Fitted', color='red')
+plt.title('MA(1) Model Fitting')
+plt.xlabel('Date')
+plt.ylabel('Number of Passengers')
+plt.legend()
+plt.show()
+```
+
+### Explanation
+
+- **Data Loading**: We load the dataset and parse the dates to use them as the index.
+
+- **MA Model Definition**: The `moving_average_forecast` function calculates the moving average of the past `window_size` residuals to forecast future values.
+
+- **Residual Calculation**: We calculate the residuals by subtracting the previous value from the current value.
+
+- **Model Fitting**: We use a window size of 1 for the MA(1) model, which means we use the last residual to predict the next value.
+
+- **Visualization**: We plot the original time series and the fitted values to visualize the model's performance.
+
+This implementation provides a basic example of how to manually fit an MA(1) model. You can extend this approach to higher-order MA models by adjusting the `window_size` and modifying the forecast calculation accordingly.
+
+## Parameterize the MA 1. 
+
+(gtp-4o, personal communications, Nov. 20, 2024)
+
+Certainly! We can modify the function to accept the MA order as a parameter, allowing you to specify different orders for the Moving Average model. Here's how you can do it:
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load the Air Passengers dataset
+data = pd.read_csv('data/air_passengers_1949_1960.csv', index_col='Date', parse_dates=True)
+ts = data['Number of Passengers']
+
+# Define the MA model with a parameter for the order
+def moving_average_forecast(series, ma_order):
+    # Initialize the list to store the forecasted values
+    forecast = [np.nan] * ma_order  # First 'ma_order' values are NaN
+    for t in range(ma_order, len(series)):
+        # Calculate the average of the past 'ma_order' residuals
+        forecast.append(np.mean(series[t-ma_order:t]))
+    return np.array(forecast)
+
+# Calculate the residuals
+residuals = ts - ts.shift(1)
+
+print(len(residuals))
+print(len(ts))
+print(len(ts.shift(1)))
+
+# Specify the MA order
+ma_order = 3  # You can change this to experiment with different orders
+
+# Fit the MA model
+ma_forecast = moving_average_forecast(residuals.dropna(), ma_order)
+# Extend the forecast to be the same length as ts.shift(1) by repeating the last value
+extended_ma_forecast = np.concatenate([ma_forecast, np.full(len(ts.shift(1)) - len(ma_forecast), ma_forecast[-1])])
+
+print(len(ma_forecast))
+
+# Add the forecasted residuals to the original series to get the fitted values
+fitted_values = ts.shift(1) + ma_forecast
+
+# Plot the original data and the fitted values
+plt.figure(figsize=(10, 6))
+plt.plot(ts, label='Observed')
+plt.plot(fitted_values, label='Fitted', color='red')
+plt.title(f'MA({ma_order}) Model Fitting')
+plt.xlabel('Date')
+plt.ylabel('Number of Passengers')
+plt.legend()
+plt.show()
+```
+
+### Explanation
+
+- **MA Order Parameter**: The `moving_average_forecast` function now takes `ma_order` as a parameter, allowing you to specify the order of the MA model.
+
+- **Forecast Calculation**: The function calculates the moving average of the past `ma_order` residuals to forecast future values.
+
+- **Experimentation**: You can change the `ma_order` variable to experiment with different orders of the MA model and observe how it affects the fit.
+
+This approach provides flexibility in choosing the order of the MA model, enabling you to tailor the model to better fit your data.
