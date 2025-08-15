@@ -3,8 +3,7 @@ title: Welcome to DS701
 jupyter: python3
 ---
 
-::: {.content-visible when-profile="slides"}
-## Course overview {.center}
+## Course overview
 
 Welcome to Fall 2025 DS701 Tools for Data Science.
 
@@ -16,19 +15,7 @@ In this course you will:
 - develop proficiency in working and analyzing data
 - work with a wide range of data analysis techniques and tools
 ::::
-:::
 
-::: {.content-visible when-profile="web"}
-
-## Course Abstract
-
-This course is a Master’s level introduction to data science, focusing on
-proficiency in working with and analyzing data. The course emphasizes practical
-skills in working with data, while introducing students to a wide range of
-techniques that are commonly used in the analysis of data, such as clustering,
-classification, regression, and network analysis.
-
-:::
 
 ## Instructor {.center}
 
@@ -120,6 +107,8 @@ There are two sections of this course:
 :::
 ::::
 
+Please attend the discussion section you signed up for.
+
 
 ## Learning outcomes
 
@@ -164,7 +153,7 @@ They will have good working knowledge of the most commonly used methods of clust
 Almost all details of the course can be found on this webpage
 
 ::: {.r-fit-text .center}
-[https://tools4ds.github.io/fa2024/](https://tools4ds.github.io/fa2024/)
+[https://github.com/tools4ds/DS701-Course-Notes/](https://github.com/tools4ds/DS701-Course-Notes/)
 :::
 
 *Bookmark this page!*
@@ -410,21 +399,6 @@ best interest and worth it to struggle some in creating your answers and solutio
 to learn what doesn't work, and which paths are dead ends, as it is to learn what does work. 
 :::
 
-## DS701 AI Tutor
-
-In fact we're offering an experimental generative AI tutor tailored to this course's content.
-
-::: {layout-ncol=3}
-![AI Tutor Sign In](figs/ai-tutor-signin.png){width="200px"}
-
-![AI Tutor Start](figs/ai-tutor-start.png){width="200px"}
-
-![AI Tutor Chat Interface](figs/ai-tutor-chat-interface.png){width="600px"}
-:::
-
-* Try it: [https://tools4ds-ai-tutor.hf.space](https://tools4ds-ai-tutor.hf.space).
-* All DS701 Students are registered to use it
-* It is open source hosted at [https://github.com/tools4ds/ds701-tutor](https://github.com/tools4ds/ds701-tutor)
 
 ## Academic honesty
 

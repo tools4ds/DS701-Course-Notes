@@ -42,9 +42,10 @@ resources:
 
 format:
   revealjs:
-    footer: "DS701 -- Gardos/Ladenheim"
+    footer: "DS701 -- Fall 2025 -- Gardos"
     scrollable: true
     slide-number: c/t
+    center: true
     show-slide-number: all
     chalkboard: true
     smaller: true
@@ -55,7 +56,7 @@ format:
     # to enable it so late in the semester since it will effect all
     # the earlier slides. See
     # https://quarto.org/docs/presentations/revealjs/advanced.html#stretch
-    auto-stretch: false
+    auto-stretch: true
 
 execute: 
   freeze: auto # see https://quarto.org/docs/projects/code-execution.html#freeze

@@ -51,7 +51,7 @@ website:
     search: true
     contents:
     - href: index.qmd
-      text: Home
+      text: Syllabus
     - section: "Course Overview"
       contents:
         - 00-Class-Introduction.qmd
