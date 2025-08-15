@@ -1,3 +1,7 @@
+---
+title: "Syllabus"
+---
+
 > "Data is the new oil.""
 >
 >  -- Clive Humby, former CEO of Tesco
@@ -68,7 +72,7 @@ classification, regression, and network analysis.
 
 **Meeting Time:** Tu, Th 9:30am -- 10:45am
 
-**Instructor:** Prof. Thomas Gardos
+**Instructor:** Thomas Gardos
 
 * Office: CCDS 1623
 * Office Hours: Thursdays 11:00 AM -- 12:00 noon and by appointment
@@ -136,12 +140,17 @@ methods, but rather on helping students understand the practical settings in whi
 Class discussion will study use cases and will go over relevant Python packages that will enable the students
 to perform hands-on experiments with their data.
 
-### Prerequisites
+### Pre/Co-requisites
 
-Prerequisites: Students taking this class must have prior familiarity with programming, at the level of
-DS110, CS105, CS108, or CS111, or equivalent. In this course you will use python – you are assumed
-to either know python, or be ready to learn it quickly on your own in the first week. Linear Algebra – DS121
-or CS132 or equivalent (MA 242, MA 442) – is required. DS210 or CS112 is also helpful.
+**Prerequisite:** Students taking this class must have proficiency in python, at the level of
+an undergradute python programming course such as DS110 or equivalent. If you are not
+confident in your python skills, we recommend you take one of many online courses.
+
+**Corequisite:** Most of the techniques we will cover in this course are based on
+linear algebra and probability. Having a strong foundation in these subjects will
+serve you well in this course. We will cover the basics of linear algebra and probability,
+but we strongly encourage you take _Mathematics for Data Science_ at the same time
+as this course.
 
 ### Learning Outcomes
 
@@ -152,7 +161,7 @@ working on very large datasets.
 
 ### Textbook and Slides
 
-The textbook used in the course is published at
+The notes used in the course are published at
 [https://tools4ds.github.io/DS701-Course-Notes/](https://tools4ds.github.io/DS701-Course-Notes/).
 This online text will evolve as the course progresses, but we will work to keep it up-to-date.
 
@@ -169,10 +178,12 @@ you can open the page directly from the
 [Course Notes](https://tools4ds.github.io/DS701-Course-Notes/) web page and
 execute the python cells that way.
 
-Feel free to clone the [Course Notes repository](https://tools4ds.github.io/DS701-Course-Notes/)
+Feel free to fork and clone the [Course Notes repository](https://tools4ds.github.io/DS701-Course-Notes/)
 and execute on your own computer. You can modify them any way you’d like, play
 around with them, experiment, etc.  If you find a bug, feel free to submit a pull
-request. Some of the lectures were previously based on 
+request. 
+
+Some of the lectures were previously based on 
 _[Introduction to Data Mining](https://www-users.cse.umn.edu/~kumar001/dmbook/index.php)[^1]_. 
 This is a good place to go for more detail if some methodological aspect is not
 clear. For up-to-date reference on Pandas, scikit-learn, or any of the other
@@ -184,28 +195,29 @@ software tools we use, there is no substitute for online resources.
 
 We will use:
 
-1. [Piazza](https://piazza.com/bu/fall2024/ds701) for questions
-2. Github for [web](https://github.com/tools4ds/fa2024) and [notes](https://github.com/tools4ds/DS701-Course-Notes) 
+1. [Piazza](https://piazza.com/bu/fall2025/ds701) for questions
+2. Github for [notes](https://github.com/tools4ds/DS701-Course-Notes) 
    source, some homeworks and assignments
-3. [Gradescope](https://www.gradescope.com/courses/845172) for grading and grade
+3. [Gradescope](https://www.gradescope.com/courses/10840242) for grading and grade
    management
-4. Kaggle for the midterm.
+4. Most likely also [Kaggle](https://www.kaggle.com/) for the midterm competition.
 
 You should already be signed up for Gradescope and Piazza, if not see the
 enrollment codes in the course welcome email or contact an instructor.
 
 You will need an account on Github. Please also add your real name to your GitHub
-account profile so we can find you.
+account profile so we can easily associate you with your GitHub username.
 
 If you don’t have an up to date Python installation, take care of that right away.
+We recommend Python 3.10 or later.
 
 ### Piazza
 
 We will be using Piazza for class discussion. The system is really well tuned to
 getting you help fast and efficiently from classmates, the teaching fellows, and
-myself. Rather than emailing questions to the teaching staff, we encourage you
+the instructor. Rather than emailing questions to the teaching staff, we encourage you
 to post your questions on Piazza. Our class Piazza page is at:
-[https://piazza.com/bu/fall2024/ds701](https://piazza.com/bu/fall2024/ds701). 
+[https://piazza.com/bu/fall2025/ds701](https://piazza.com/bu/fall2025/ds701). 
 
 When someone posts a question on Piazza, if you know the answer, please go ahead
 and post it. However please don’t provide answers to homework questions on Piazza.
@@ -216,6 +228,8 @@ assignment; just don’t provide actual solutions to homework questions.
 
 We will use python as the language for teaching and for assignments that require
 coding. Instructions for installing and using Python are in the online textbook.
+
+We'll also be using Jupyter notebooks and Google Colab environments.
 
 ## Course and Grading Administration
 
@@ -253,9 +267,9 @@ Of the 40% of the project course grade, it is further weighted as the following
 
 In a typical assignment you will analyze one or more datasets using the tools and techniques presented in class.
 
-Homeworks will be submitted via github. For this, we need your github account (create one if
+Homeworks will be submitted via Gradescope or GitHub. For this, we need your github account (create one if
 you don’t already have it). After you have created it, fill out this
-[form](https://forms.gle/ZaYWHE8SwqqMgYLZA) to let us know what it is. We also 
+[form](https://forms.gle/dUWCdYNEjoZ25uaD6) to let us know what it is. We also 
 highly recommend you add your full name to your GitHub account profile.
 
 You are expected to work individually on homeworks.
@@ -265,8 +279,7 @@ You are expected to work individually on homeworks.
 The midterm will be a Kaggle Data Science competition among the students in the class with a live leaderboard.
 Students will need to submit predictions based on a training dataset and a report detailing the methods
 used and decisions made. Note that the intent is not to use the leaderboard to determine your grade, but rather
-to help you assess how effective your work is. Accordingly, 80% of the grade will be based on the report
-and only 20% will be based on the competition score related to the quality of the predictions made.
+to help you assess how effective your work is.
 
 ### Project
 
@@ -300,10 +313,6 @@ grade.
 * You should meet with your team every other day (can / should be a short meeting)
 * For any team communication issues, please let your spark PMs know asap - they are here to help. If
 the problem persists please email me with a description of the situation.
-* All students are expected to abide by University conduct policies as detailed in the following links:
-   * [Boston University Student Codes of Conduct](https://www.bu.edu/policies/policy-category/student-codes-condcut/)
-   * [College of Arts & Sciences Codes of Conduct](https://www.bu.edu/cas/academics/undergraduate-education/academic-conduct-code/resources-for-students/)
-   * [Boston University Student Responsibilities](https://www.bu.edu/dos/policies/student-responsibilities/)
 * All Spark! project teams
    – Project Managers: These are the project leads and will communicate with the client directly, they will assist with administrative support (meeting scheduling, agenda setting), and will be a point of contact for project questions / concerns. Project Managers are also responsible for
 grading all Spark! project deliverables as detailed in the syllabus below. – Team Lead: These students will assist the Project Manager in attending client meetings, organizing team questions, and facilitating team meetings.
@@ -379,25 +388,6 @@ And finally, to reiterate, it is vitally important, and a core part of academic 
 using Generative AI Assistive technologies. Arguably, not citing and risking plagiarism is worse than
 using and citing GAIA.
 
-### The DS701 AI Terrier Tutor
-
-In fact, we have an experimental generative AI tutor tailored to this course's content at
-[https://tools4ds-ai-tutor.hf.space](https://tools4ds-ai-tutor.hf.space).  It is open
-source hosted at [https://github.com/tools4ds/ds701-tutor](https://github.com/tools4ds/ds701-tutor)
-which itself is forked from a parent project
-[https://github.com/edubotics-ai/edubotics-app](https://github.com/edubotics-ai/edubotics-app).
-
-We've attempted to make it Socratic in that it shouldn't just give answers but rather
-guide you to solving the problem yourself, but it is not guaranteed to not give 
-answers, so if GenAI is prohibited on an assignment then that will include 
-our AI Terrier Tutor.
-
-Otherwise, please utilize this resource and most importantly, give feedback.
-Initially a simple thumbs up or thumbs down at the response. Also feel free to 
-add a comment when prompted. We will use the feedback to evaluate the performance
-of the model and ultimately use it to fine-tune and improve it.
-
-The Github repo links are shared above. Feel free to contribute if you are interested.
 
 ## Academic Honesty
 
@@ -420,6 +410,13 @@ this – you can usually get an answer in an hour if not a few minutes.
 if there is some way to verify the solution yourself. Usually, there is. You will understand what you
 have done much better if you do that. So ... it would be better to simply submit what you have at the
 deadline (without going online to cheat) and plan to allocate more time for homeworks in the future.
+
+
+University conduct policies:
+
+* [Boston University Student Codes of Conduct](https://www.bu.edu/policies/policy-category/student-codes-condcut/)
+* [College of Arts & Sciences Codes of Conduct](https://www.bu.edu/cas/academics/undergraduate-education/academic-conduct-code/resources-for-students/)
+* [Boston University Student Responsibilities](https://www.bu.edu/dos/policies/student-responsibilities/)
 
 
 _This syllabus provides a general plan for the course; deviations may be necessary depending on the progress of the class._
