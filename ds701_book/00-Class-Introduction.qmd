@@ -150,39 +150,40 @@ They will have good working knowledge of the most commonly used methods of clust
 
 ## Course webpage
 
-Almost all details of the course can be found on this webpage
+Syllabus and course notes can be found on this webpage
 
 ::: {.r-fit-text .center}
-[https://github.com/tools4ds/DS701-Course-Notes/](https://github.com/tools4ds/DS701-Course-Notes/)
+[{{< var course_notes_url >}}]({{< var course_notes_url >}})
 :::
+
+This online text will evolve as the course progresses.
 
 *Bookmark this page!*
 
-## Textbook and slides
+## Course Notes Source
 
-The textbook used in the course is published at
+You have a few ways to follow on with the course lectures/notes:
+
+1. Open the Colab version of the lecture and save to your own Google Drive when you see the see the badge 
+![](https://colab.research.google.com/assets/colab-badge.svg).
+2. Fork and clone the repository and run the Jupyter notebooks version of the lectures locally.
+3. Use an annotation tool like [hypoethes.is](https://web.hypothes.is/hypothesis-for-students/) on the website.
+
+In general, you'll want to have your laptop computer with you at the lectures to
+follow along and participate in in-class activities.
+
+## Repo
+
+Course repository:
 
 ::: {.r-fit-text .center} 
-[https://tools4ds.github.io/DS701-Course-Notes/](https://tools4ds.github.io/DS701-Course-Notes/) 
+[{{< var github_url >}}]({{< var github_url >}}) 
 :::
-
-This online text will evolve as the course progresses, but we will work to keep it up-to-date.
 
 The slides used in the lecture are [Quarto](https://quarto.org/) RevealJS presentations. Setup
-instructions are on the repo 
-[README](https://github.com/tools4ds/DS701-Course-Notes). 
+instructions are on the repo [README]({{< var github_url >}}). 
 
-For lectures with python you'll see the badge 
-![](https://colab.research.google.com/assets/colab-badge.svg). If you click on
-the badge, it will open the Jupyter notebook version of the lecture in Google Colab. 
-
-Feel free to explore, experiment, and modify this code as you see fit.
-
-The lecture slides and everything else used in lecture are published on github. The repository is 
-
-::: {.r-fit-text .center} 
-[https://github.com/tools4ds/DS701-Course-Notes](https://github.com/tools4ds/DS701-Course-Notes)
-:::
+Feel free to fork the repository to explore, experiment, and modify this code as you see fit.
 
 
 :::: {.notes}
@@ -198,16 +199,17 @@ online resources. Google will quickly bring you to the authoritative (and curren
 
 We will use:
 
-1. Piazza for questions
-1. Github for homeworks, midterm, lectures
-1. Gradescope for grading and grade management
-1. Kaggle for the midterm
+1. [Piazza]({{< var piazza_url >}}) for questions
+1. Github for homeworks, midterm, lectures.
+1. [Gradescope]({{< var gradescope_url >}}) for grading and grade management
+1. [Kaggle](https://www.kaggle.com/) for the midterm
 
 You should already be signed up for Gradescope (if not, enroll using code sent via welcome email).
 
 You can add yourself to Piazza if you are not already enrolled (again, use the code sent via welcome email).
 
-You will need an account on Github. Please tell us your Github user name on this [form](https://forms.gle/LdYwKn9o9rAZKEsW8).
+You will need an account on Github. Please tell us your Github user name on this
+[form]({{< var github_username_form_url >}}).
 
 If you don’t have an up to date Python installation, take care of that right away.
 
@@ -222,7 +224,7 @@ I encourage you to post your questions on Piazza.
 Our class Piazza page is at 
 
 ::: {.r-fit-text .center} 
-[https://piazza.com/bu/fall2024/ds701](https://piazza.com/bu/fall2024/ds701)
+[{{< var piazza_url >}}]({{< var piazza_url >}})
 :::
 
 ## Piazza Etiquette
@@ -319,7 +321,7 @@ Students will need to submit predictions based on a training dataset and a repor
 
 The intent is not to use the leaderboard to determine your grade, but to help you assess how effective your work is. 
 
-Accordingly, 80% of the grade will be based on the report and only 20% will be based on the competition score related to the quality of the predictions made.
+Having said that we will give a few bonus points to the leaders.
 
 ## Project
 
@@ -336,7 +338,8 @@ For the project, students will get the opportunity to work with BU Spark! on a r
 
 Spark projects have already been curated and will be presented during “Pitch Day”. 
 
-Every team will need to upload a SCRUM file to the final project repository every week which gives a short report on the status of their project. These SCRUM reports are a fast and concise way to answer:
+Every team will need to upload a SCRUM file to the final project repository every
+week which gives a short report on the status of their project. These SCRUM reports are a fast and concise way to answer:
 
 :::: {.incremental}
 - What have I worked on?
