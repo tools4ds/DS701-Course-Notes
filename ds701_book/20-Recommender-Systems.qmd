@@ -932,7 +932,7 @@ model = KNeighborsClassifier(n_neighbors=3).fit(X_train, y_train)
 ```
 
 ```{python}
-print(f'RMSE on visible entries (test set): {mean_squared_error(y_train, y_hat, squared = False):0.3f}')
+print(f'RMSE on visible entries (test set): {np.sqrt(mean_squared_error(y_train, y_hat)):.3f}')
 ```
 
 ## Assessing Matrix Factorization

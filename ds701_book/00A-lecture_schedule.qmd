@@ -1,0 +1,54 @@
+---
+title: Lecture Schedule
+---
+
+> This is a tentative schedule. It is subject to change.
+
+| Date | Lecture | Notes | Homework |
+| ---- | ------- | --- | -------- |
+| **Week 1**  | --- | --- | --- |
+| Sep 2 | 01 -- Course Intro and Git | [Class Intro](./00-Class-Introduction.qmd), [Git](./02A-Git.qmd)  | |
+| Sep 4 | 02 -- Intro to Pandas and SciKit-Learn | [Pandas](./02B-Pandas.qmd), [SciKit-Learn](./02C-Sklearn.qmd) |  |
+| **Week 2**  | --- | --- | --- |
+| Sep 9 | 03 -- Spark Project Pitch Day |   | |
+| Sep 11 | 04 -- Probability & Linear Algebra Refresher | [Probability](./03-Probability-and-Statistics-Refresher.qmd), [Linear Algebra](./04-Linear-Algebra-Refresher.qmd) |  |
+| **Week 3**  | --- | --- | --- |
+| Sep 16 | 05 -- Distance, Similarity Functions and Time Series  | [Distances, Time Series](./05-Distances-Timeseries.qmd)   | |
+| Sep 18 | 06 -- Clustering I: k-means | [k-means](./06-Clustering-I-kmeans.qmd) | |
+| **Week 4**  | --- | --- | --- |
+| Sep 23 | 07 -- Clusterin II: In Practice |  [Clustering in Practice](./07-Clustering-II-In-Practice.qmd)  |  |
+| Sep 25 | 08 -- Clustering III: Hierarchical |  [Hierarchical Clustering](./08-clustering-III-hierarchical.qmd)  |  |
+| **Week 5**  | --- | --- | --- |
+| Sep 30 | 09 -- Clustering IV: GMM and Expectation Maximization | [GMM and EM](./09-Clustering-IV-GMM-EM.qmd)  | |
+| Oct 2| 10 -- Classification I: Decision Trees and Random Forests | [Decision Trees](./14-Classification-I-Decision-Trees.qmd) |  |
+| **Week 6**  | --- | --- | --- |
+| Oct 7 | 11 -- Classification II: k-Nearest Neighbors | [k-NN](./15-Classification-II-kNN.qmd)  | |
+| Oct 9| 12 -- Classification III: Naive Bayes and SVM | [Naive Bayes and SVM](./16-Classification-III-NB-SVM.qmd) |  |
+| **Week 7**  | --- | --- | --- |
+| Oct 14 | _🍂 No Class -- Monday Schedule_ 🍂 |   |  |
+| Oct 16| 13 -- SVD Low Rank Approximations | [SVD](./10-Low-Rank-and-SVD.qmd) | |
+| **Week 8**  | --- | --- | --- |
+| Oct 21 | 14 -- Dimensionality Reduction: PCA and t-SNE | [PCA and t-SNE](./11-Dimensionality-Reduction-SVD-II.qmd)  | |
+| Oct 23 | 15 -- Linear Regression | [Linear Regression](./17-Regression-I-Linear.qmd) |  |
+| **Week 9**  | --- | --- | --- |
+| Oct 28 | 16 -- Logistic Regression and Regularization | [Logistic Regression](./18-Regression-II-Logistic.qmd)   | |
+| Oct 30 | 17 -- Neural Networks I: Gradient Descent | [NN I](./23-NN-I-Gradient-Descent.qmd) | |
+| **Week 10**  | --- | --- | --- |
+| Nov 4 | 18 -- Neural Networks II: Backpropagation | [NN II](./24-NN-II-Backprop.qmd)   | |
+| Nov 6 | 19 -- Neural Networks III: CNNs | [NN III](./25-NN-III-CNNs.qmd) |  |
+| **Week 11**  | --- | --- | --- |
+| Nov 11 | 20 -- Recommender Systems | [Recommender Systems](./20-Recommender-Systems.qmd)  | |
+| Nov 13 | 21  -- Graphs I| [Graphs I](./21-Networks-I.qmd) | |
+| **Week 12**  | --- | --- | --- |
+| Nov 18 | 22 -- Graphs II | [Graphs II](./22-Networks-II-Centrality-Clustering.qmd)  | |
+| Nov 20 | 23 -- Time Series Analysis | [Time Series](./26-TimeSeries.qmd) | |
+| **Week 13**  | --- | --- | --- |
+| Nov 25 | 24 -- Intro to NLP | [NLP](./28-NLP.qmd)  | |
+| Nov 27 | 🦃 _No Class -- Thanksgiving Recess_ 🌽 |  | |
+| **Week 14**  | --- | --- | --- |
+| Dec 2 | 25 -- Lecture to be announced |   | |
+| Dec 4 | 📽️ _Project Presentation I_ 📽️| |  |
+| **Week 15**  | --- | --- | --- |
+| Dec 9 | 📽️ _Project Presentations II_ 📽️ |   | |
+| Dec 10 | 🎉 _Last Day of Classes_ 🎉 | 🔬 Projects Due 🔬  | |
+

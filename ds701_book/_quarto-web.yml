@@ -5,6 +5,7 @@ project:
   render:
     - index.qmd
     - 00-Class-Introduction.qmd
+    - 00A-lecture_schedule.qmd
     - 01-Intro-to-Python.qmd
     - 02A-Git.qmd
     - 02B-Pandas.qmd
@@ -43,7 +44,7 @@ resources:
   - figs/NN-figs/conv-demo/external/d3.min.js
 
 website:
-  title: "Tools for data science"
+  title: "Tools for Data Science"
   back-to-top-navigation: true
   sidebar:
     style: "docked"
@@ -51,9 +52,12 @@ website:
     contents:
     - href: index.qmd
       text: Home
-    - section: "Preliminaries"
+    - section: "Course Overview"
       contents:
         - 00-Class-Introduction.qmd
+        - 00A-lecture_schedule.qmd
+    - section: "Preliminaries"
+      contents:
         - 01-Intro-to-Python.qmd
         - 02A-Git.qmd
         - 02B-Pandas.qmd
