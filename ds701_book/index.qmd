@@ -46,7 +46,7 @@ Python code.
 
 All course materials are in
 the github repository:
-[here.](https://github.com/tools4ds/DS701-Course-Notes)
+[here.]({{< var course_notes_url >}})
 
 When you see this badge, 
 ![](https://colab.research.google.com/assets/colab-badge.svg), at the beginning
@@ -195,10 +195,10 @@ software tools we use, there is no substitute for online resources.
 
 We will use:
 
-1. [Piazza](https://piazza.com/bu/fall2025/ds701) for questions
-2. Github for [notes](https://github.com/tools4ds/DS701-Course-Notes) 
+1. [Piazza]({{< var piazza_url >}}) for questions
+2. Github for [notes]({{< var github_url >}}) 
    source, some homeworks and assignments
-3. [Gradescope](https://www.gradescope.com/courses/10840242) for grading and grade
+3. [Gradescope]({{< var gradescope_url >}}) for grading and grade
    management
 4. Most likely also [Kaggle](https://www.kaggle.com/) for the midterm competition.
 
@@ -217,7 +217,7 @@ We will be using Piazza for class discussion. The system is really well tuned to
 getting you help fast and efficiently from classmates, the teaching fellows, and
 the instructor. Rather than emailing questions to the teaching staff, we encourage you
 to post your questions on Piazza. Our class Piazza page is at:
-[https://piazza.com/bu/fall2025/ds701](https://piazza.com/bu/fall2025/ds701). 
+[{{< var piazza_url >}}]({{< var piazza_url >}}). 
 
 When someone posts a question on Piazza, if you know the answer, please go ahead
 and post it. However please don’t provide answers to homework questions on Piazza.
@@ -269,7 +269,7 @@ In a typical assignment you will analyze one or more datasets using the tools an
 
 Homeworks will be submitted via Gradescope or GitHub. For this, we need your github account (create one if
 you don’t already have it). After you have created it, fill out this
-[form](https://forms.gle/dUWCdYNEjoZ25uaD6) to let us know what it is. We also 
+[form]({{< var github_username_form_url >}}) to let us know what it is. We also 
 highly recommend you add your full name to your GitHub account profile.
 
 You are expected to work individually on homeworks.
