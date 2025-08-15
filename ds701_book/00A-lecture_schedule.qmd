@@ -10,7 +10,7 @@ title: Lecture Schedule
 | Sep 2 | 01 -- Course Intro and Git | [Class Intro](./00-Class-Introduction.qmd), [Git](./02A-Git.qmd)  | |
 | Sep 4 | 02 -- Intro to Pandas and SciKit-Learn | [Pandas](./02B-Pandas.qmd), [SciKit-Learn](./02C-Sklearn.qmd) |  |
 | **Week 2**  | --- | --- | --- |
-| Sep 9 | 03 -- Spark Project Pitch Day |   | |
+| Sep 9 | 03 -- Spark Project Pitch Day (Tentative) |   | |
 | Sep 11 | 04 -- Probability & Linear Algebra Refresher | [Probability](./03-Probability-and-Statistics-Refresher.qmd), [Linear Algebra](./04-Linear-Algebra-Refresher.qmd) |  |
 | **Week 3**  | --- | --- | --- |
 | Sep 16 | 05 -- Distance, Similarity Functions and Time Series  | [Distances, Time Series](./05-Distances-Timeseries.qmd)   | |

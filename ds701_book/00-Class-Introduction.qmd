@@ -167,7 +167,7 @@ You have a few ways to follow on with the course lectures/notes:
 1. Open the Colab version of the lecture and save to your own Google Drive when you see the see the badge 
 ![](https://colab.research.google.com/assets/colab-badge.svg).
 2. Fork and clone the repository and run the Jupyter notebooks version of the lectures locally.
-3. Use an annotation tool like [hypoethes.is](https://web.hypothes.is/hypothesis-for-students/) on the website.
+3. Use an annotation tool like [hypothes.is](https://web.hypothes.is/hypothesis-for-students/) on the website.
 
 In general, you'll want to have your laptop computer with you at the lectures to
 follow along and participate in in-class activities.
