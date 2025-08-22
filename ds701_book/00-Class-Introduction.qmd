@@ -73,29 +73,29 @@ There are two sections of this course:
 ::: {.column width="50%"}
 **Lecture (A1)**
 
-- Tu,Th 2:00 pm -- 3:15 pm
-- 765 Commonwealth Ave LAW AUD
+- Tu,Th 11:00 am -- 12:15 pm
+- 928 Commonwealth Ave SHA 110
 :::
 ::: {.column width="50%"}
 **A2 Discussions** (TA TBA)
 
-- We 12:20 pm -- 1:20 pm
-- 635 Commonwealth Ave SAR 300
+- We 10:10 am -- 11:00 am
+- 665 Commonwealth Ave CDS 164
 
 **A3 Discussions** (TA TBA)
 
-- We 1:25 pm -- 2:15 pm
-- 888 Commonwealth Ave IEC B10
+- We 11:15 am -- 12:05 pm
+- 665 Commonwealth Ave CDS 164
 
 **A4 Discussions** (TA TBA)
 
-- We 2:30 pm -- 3:20 pm
-- 871 Commonwealth Ave CGS 311
+- We 12:20 pm -- 1:10 pm
+- 685-725 Commonwealth Ave CAS B06B
 
 **A5 Discussions** (TA TBA)
 
-- We 3:35 pm -- 4:25 pm
-- 835 Commonwealth Ave CGS 315
+- We 9:05 am -- 9:55 am
+- 685-725 Commonwealth Ave CAS 204A
 :::
 ::::
 
