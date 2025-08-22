@@ -44,6 +44,7 @@ We have the following teaching assistants:
 
 **Atul Aravind Das**
 
+![](figs/people/atul.jpg){width=200px}
 
 * **Office Hours:** TBA
 * **Office Hours Location:** TBA
@@ -54,6 +55,7 @@ We have the following teaching assistants:
 
 **Samritha Aadhi Ravikumar**
 
+![](figs/people/samritha.jpg){width=200px}
 
 * **Office Hours:** TBA
 * **Office Hours Location:** TBA
