@@ -40,34 +40,24 @@ In this course you will:
 We have the following teaching assistants:
 
 :::: {.columns}
-::: {.column width="33%"}
+::: {.column width="45%"}
 
-**TBA**
+**Atul Aravind Das**
 
 
 * **Office Hours:** TBA
 * **Office Hours Location:** TBA
-* **Email:** TBA
+* **Email:** atuladas &lt;at&gt; bu &lt;dot&gt; edu
 
 :::
-::: {.column width="33%"}
+::: {.column width="45%"}
 
-**TBA**
-
-
-* **Office Hours:** TBA
-* **Office Hours Location:** TBA
-* **Email:** TBA
-
-:::
-::: {.column width="33%"}
-
-**TBA**
+**Samritha Aadhi Ravikumar**
 
 
 * **Office Hours:** TBA
 * **Office Hours Location:** TBA
-* **Email:** TBA
+* **Email:** samritha &lt;at&gt; bu &lt;dot&gt; edu
 
 :::
 ::::
