@@ -1,0 +1,351 @@
+---
+title: Recommendation Systems Part II -- Deep Learning Based
+bibliography: references.bib
+jupyter: python3
+nocite: |
+    @ricci2022recommender
+---
+
+# Deep Learning for Recommender Systems
+
+Based on [@zhang2022deep].
+
+## Introduction
+- **Deep Learning in Recommender Systems**:
+  - Revolutionized AI applications across fields like computer vision and NLP.
+  - Reduces feature engineering effort and supports diverse data (e.g., text, images).
+  - Enhances tasks such as cold-start problems, temporal dynamics, and explainability.
+
+## Key Techniques
+1. **Multi-layer Perceptrons (MLPs)**:
+   - Flexible, hierarchical networks for feature interaction.
+   - Universal approximators (@fig-dl-recsys-mlp).
+2. **Convolutional Neural Networks (CNNs)**:
+   - Efficiently capture spatial patterns in grid-like data (@fig-dl-recsys-cnn).
+3. **Recurrent Neural Networks (RNNs)**:
+   - Models sequential data with memory states (@fig-dl-recsys-rnn).
+4. **Graph Neural Networks (GNNs)**:
+   - Handles graph-structured data like social and knowledge graphs.
+5. **Autoencoders and GANs**:
+   - For representation learning and data generation.
+
+![Multi-layer Perceptrons](figs/RecSys-figs/dl-recsys-mlp.png){width=30% fig-align="center"  #fig-dl-recsys-mlp}
+
+![Convolutional Neural Networks](figs/RecSys-figs/dl-recsys-cnn.png){width=30% fig-align="center" #fig-dl-recsys-cnn}
+
+![Recurrent Neural Networks](figs/RecSys-figs/dl-recsys-rnn.png){width=30% fig-align="center" #fig-dl-recsys-rnn}
+
+---
+
+## Challenges in Recommender Systems
+### Interaction Modeling
+- Captures relationships in sparse user-item matrices.
+- Approaches:
+  - **NeuMF**: Replaces dot product with MLPs.
+  - **Outer Product + CNNs**: Higher-order correlations (Figure 6).
+
+---
+
+### User Modeling
+1. **Temporal Dynamics**:
+   - Sequence-aware recommendations using RNNs, CNNs, and attention mechanisms (Figure 8).
+2. **Diverse Interests**:
+   - Models multiple user preferences via clustering and disentanglement.
+
+---
+
+## Content Representation Learning
+1. **Text Features**:
+   - Leverages reviews and descriptions using CNNs, RNNs, and attention mechanisms.
+2. **Image Features**:
+   - Integrates CNN-extracted visual data for applications like fashion and social media.
+3. **Video/Audio Features**:
+   - Processes multimedia content for personalized music and video recommendations.
+
+---
+
+## Advanced Applications
+### Graph-Structured Data
+- Incorporates graphs like user-item networks for collaborative filtering (Figure 10).
+- Examples:
+  - **Session-based Recommendations**: Sequence learning from click patterns.
+  - **Knowledge Graphs**: Path-based reasoning for explainability.
+
+### Cold-Start Recommendations
+- Tackles sparse data with side information and meta-learning.
+- GNN-based approaches predict embeddings for new users/items.
+
+---
+
+## Beyond Accuracy
+### Explainability
+- Enhances transparency and trust:
+  - Attention mechanisms highlight critical features.
+  - Knowledge graph paths provide reasoning for recommendations.
+
+### Robustness
+- Defends against adversarial attacks with perturbation-based training.
+
+---
+
+## Applications of Deep Learning in Recommendation
+1. **E-commerce**:
+   - Amazon, eBay, Alibaba use deep learning for personalized shopping.
+2. **Entertainment**:
+   - YouTube employs candidate generation and ranking modules.
+3. **News**:
+   - Self-attention mechanisms capture user preferences across multiple views.
+4. **Point-of-Interest**:
+   - Combines visual and textual data for location-based recommendations.
+
+---
+
+## Conclusion
+- **Deep learning transforms recommender systems**:
+  - Combines memorization and generalization.
+  - Supports diverse data types and complex challenges.
+- Future directions include improving scalability and real-time adaptability.
+
+This presentation references key figures and tables from the document and is paced for a 15-minute delivery. Let me know if further adjustments are needed!
+
+
+# Wide and Deep Learning for Recommender Systems
+
+Based on [@cheng2016wide].
+
+## Introduction
+- **Problem**: Balancing memorization and generalization in recommender systems.
+  - **Memorization**: Learns frequent co-occurrences of features for relevant recommendations.
+  - **Generalization**: Predicts unseen feature combinations for diverse recommendations.
+- **Wide & Deep Learning Framework**:
+  - Combines linear models (memorization) and neural networks (generalization).
+  - Evaluated on Google Play, with over 1 billion users and 1 million apps.
+- **Key Results**:
+  - Significant improvements in app acquisitions.
+  - Open-sourced implementation in TensorFlow.
+
+---
+
+## Recommender System Overview
+- Workflow (Figure 2):
+  - **Query**: User and contextual features (e.g., demographics, app usage).
+  - **Retrieval**: Filters 100 items based on relevance.
+  - **Ranking**: Scores and ranks items using Wide & Deep Learning.
+- Challenges:
+  - High throughput with low latency (e.g., scoring over 10 million apps per second).
+
+---
+
+## Wide & Deep Learning Framework
+### Wide Component
+- Linear model (Figure 1, left):
+  - Cross-product transformations capture interactions (e.g., "gender=female" AND "language=en").
+  - Effective for memorization but limited in generalization.
+
+### Deep Component
+- Feed-forward neural network (Figure 1, right):
+  - Converts sparse categorical features into dense embeddings.
+  - Layers compute activations using ReLU functions.
+  - Learns complex, nonlinear feature interactions.
+
+---
+
+### Joint Training
+- Combines wide and deep components (Figure 1, center):
+  - Jointly optimized via a shared logistic loss function.
+  - Uses:
+    - **FTRL** optimizer for wide part.
+    - **AdaGrad** for deep part.
+- Distinction:
+  - Joint training integrates components during training, unlike ensembles.
+
+---
+
+## System Implementation
+### Data Generation
+- **Training Data**:
+  - Generated from user-app interactions.
+  - Labels: 1 for app installs, 0 otherwise.
+- **Feature Engineering**:
+  - Maps categorical strings to integer IDs (vocabulary generation).
+  - Normalizes continuous features using quantile-based scaling.
+
+### Model Training
+- Structure (Figure 4):
+  - Cross-product transformations for wide component.
+  - Dense embeddings (32 dimensions each) for deep component.
+  - Three ReLU layers process embeddings and continuous features.
+- **Warm-Starting**:
+  - Retrains models incrementally using weights from previous models.
+
+---
+
+### Model Serving
+- Scoring:
+  - Scores candidate apps using forward inference on Wide & Deep models.
+- Optimization:
+  - Multithreading reduces latency from 31 ms to 14 ms (Table 2).
+
+---
+
+## Experiment Results
+### App Acquisitions
+- A/B Testing (Table 1):
+  - **Wide-only**: Baseline model.
+  - **Deep-only**: +2.9% acquisition rate.
+  - **Wide & Deep**: +3.9% acquisition rate over baseline.
+- Insights:
+  - Joint training enables exploratory recommendations for new user responses.
+
+### Serving Performance
+- At peak, servers score over 10 million apps/second.
+- Optimized serving reduces latency significantly.
+
+---
+
+## Related Work
+- **Factorization Machines**:
+  - Generalize linear models but lack nonlinear interaction modeling.
+- **Collaborative Deep Learning**:
+  - Combines deep learning with collaborative filtering.
+- Wide & Deep innovates by integrating linear models with deep networks.
+
+---
+
+## Conclusion
+- **Key Contributions**:
+  - Combines memorization (wide) and generalization (deep) in a single model.
+  - Scalable and effective for massive datasets (e.g., Google Play).
+- **Impact**:
+  - Open-source implementation facilitates adoption in diverse applications.
+
+This structure references critical figures (Figure 1, 2, 4) and tables (Table 1, 2) and is timed for a detailed explanation within 25 minutes. Let me know if adjustments are needed!
+
+
+# Deep Learning Recommender Model
+
+Besides the Collaborative Filtering and Matrix Factorization models, another popular approach to building recommender systems is to use Deep Learning.
+
+We'll look at the Deep Learning Recommender Model (DLRM) proposed by Facebook in 2019 [@naumov2019deep].
+
+## Introduction
+
+- **Key Features**:
+  - Embeddings for categorical data.
+  - Multi-layer perceptrons (MLPs) for dense data processing.
+  - Combines statistical techniques like matrix factorization and factorization machines.
+
+## DLRM Architecture
+
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- Components (@fig-dlrm-model):
+  1. **Embeddings**: Dense representations for categorical data.
+  2. **Bottom MLP**: Transforms dense continuous features.
+  3. **Feature Interaction**: Dot-product of embeddings and dense features.
+  4. **Top MLP**: Processes interactions and outputs probabilities.
+
+:::
+::: {.column width="50%"}
+
+![DLRM Architecture](figs/RecSys-figs/dlrm-model.png){width=80% fig-align="center" #fig-dlrm-model}
+
+:::
+::::
+
+## Embeddings and Feature Interactions
+1. **Embeddings**:
+   - Maps categorical inputs to latent factor space.
+   - Multi-hot vectors allow weighted combinations (Equation 2).
+
+```{python}
+import torch
+import torch.nn as nn
+
+# Example embedding matrix: 5 embeddings, each of dimension 3
+embedding_matrix = nn.EmbeddingBag(num_embeddings=5, embedding_dim=3, mode='mean')
+
+# Input: Indices into the embedding matrix
+input_indices = torch.tensor([1, 2, 3, 4])  # Flat list of indices
+offsets = torch.tensor([0, 2])  # Start new bag at position 0 and 2 in input_indices
+
+# Forward pass
+output = embedding_matrix(input_indices, offsets)
+
+print("Embedding Matrix:\n", embedding_matrix.weight)
+print("Output:\n", output)
+```
+
+## 2. **Feature Interaction**:
+   - Second-order interactions modeled via dot-products.
+   - Mimics Factorization Machines for efficiency (Equation 4).
+
+
+
+---
+
+## Model Training and Parallelism
+- **Training Challenges**:
+  - Large embeddings exceed single-device memory.
+  - Requires efficient parallelization of computations.
+- **Parallelism Strategy**:
+  - **Model Parallelism**: Distributes embeddings across devices.
+  - **Data Parallelism**: Replicates MLPs for concurrent mini-batch processing.
+  - Butterfly shuffle for all-to-all communication (Figure 2).
+
+---
+
+## Data Handling
+1. **Random and Synthetic Data**:
+   - Facilitates system testing and preserves data privacy.
+   - Techniques for generating synthetic categorical data (Figure 3).
+2. **Public Datasets**:
+   - Criteo AI Labs Ad Kaggle Dataset.
+   - Used for evaluating click-through rate (CTR) prediction models.
+
+---
+
+## Experiments: Accuracy and Performance
+1. **Accuracy**:
+   - Evaluated on Criteo dataset (Figure 5).
+   - Compared with Deep & Cross Network (DCN).
+   - DLRM shows superior training and validation accuracy with both SGD and Adagrad.
+2. **Performance Profiling**:
+   - Tested on Big Basin AI platform (Figure 4).
+   - GPU significantly outperforms CPU, particularly in MLP computations (Figure 6).
+
+---
+
+## Comparison with Prior Models
+- DLRM vs Other Networks:
+  - Simplified interactions reduce dimensionality.
+  - Focuses on second-order interactions for computational efficiency.
+  - Outperforms alternatives like Wide & Deep, DeepFM, and xDeepFM.
+
+---
+
+## Conclusion
+- **Key Takeaways**:
+  - DLRM effectively combines embeddings, MLPs, and interaction layers for personalization tasks.
+  - Offers a scalable solution for large-scale recommendation systems.
+  - Open-source implementation fosters further research and system design.
+- **Future Directions**:
+  - Optimization of communication primitives.
+  - Exploring higher-order interactions with minimal computational costs.
+
+
+# Recap and References
+
+
+## Recap
+
+
+## References
+
+::: {#refs}
+:::
+
+
+
