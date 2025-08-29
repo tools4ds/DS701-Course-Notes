@@ -12,7 +12,30 @@ For those that don't know Python -- but do know programming -- this chapter will
 
 Python is a fully object oriented programming language. It was originally created by Dutch programmer Guido van Rossum as a hobby project during his 1989 Christmas vacation. The name was inspired by Monty Python's Flying circus.
 
-To install Python, we recommend using the free [Anaconda Scientific Python](https://anaconda.org/) distribution.
+## Installing Python
+
+There are a number of ways to install Python.
+
+1. Directly from the [Python website](https://www.python.org/downloads/)
+2. Using brew install from homebrew if you are on a Mac.
+3. Using [miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main)
+4. ...
+
+Python comes with a rich library of packages. You can install packages using `pip` or `conda`.
+
+You'll also find that you might have different version requirements for different projects
+that you are working on. It is best to use a virtual environment to manage your dependencies.
+Besides, installation and package management, `conda` can also be used to create virtual environments.
+If you don't use `conda`, you can use `pip` to install packages.
+
+We wrote an explanation of package management and virtual environments on this
+[page](https://bu-spark.github.io/ml-549-sp25/02_python_environments.html) for
+a previous course.
+
+It will serve you well to become comfortable with virtual environments and package
+management.
+
+
 
 ## How do I run code?
 
