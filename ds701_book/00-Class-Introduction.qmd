@@ -1,6 +1,7 @@
 ---
 title: Welcome to DS701
 jupyter: python3
+scrollable: true
 ---
 
 ## Course overview
@@ -11,24 +12,26 @@ This course is a Master's level introduction to data science.
 
 In this course you will:
 
-:::: {.incremental}
 - develop proficiency in working and analyzing data
 - work with a wide range of data analysis techniques and tools
-::::
 
+::: {.content-visible when-profile="slides"}
+# Course Staff and Meeting Times
+:::
 
 ## Instructor {.center}
 
 :::: {.columns}
-::: {.column width="45%"}
+::: {.column width="35%"}
 
 **Thomas Gardos**
 
 ![](figs/people/gardos.jpg)
 :::
-::: {.column width="45%"}
+::: {.column width="60%"}
 
-* **Office Hours:** TBA
+* **Office Hours:** Tuesdays 3:30 pm -- 4:45 pm
+  * and by appointment (email me to schedule)
 * **Office Location:** CDS 1623
 * **Email:** tgardos &lt;at&gt; bu &lt;dot&gt; edu
 
@@ -64,10 +67,36 @@ We have the following teaching assistants:
 :::
 ::::
 
+## Course Assistants {.center}
 
-## Course overview {.center}
+We have the following course assistants:
 
-There are two sections of this course:
+:::: {.columns}
+::: {.column width="45%"}
+
+**Caslow Chien**
+
+<!-- ![](figs/people/atul.jpg){width=200px} -->
+
+* **Office Hours:** TBA
+* **Office Hours Location:** TBA
+* **Email:** caslow &lt;at&gt; bu &lt;dot&gt; edu
+
+:::
+::: {.column width="45%"}
+
+**Carlos Fernando Garcia Padilla**
+
+<!-- ![](figs/people/samritha.jpg){width=200px} -->
+
+* **Office Hours:** TBA
+* **Office Hours Location:** TBA
+* **Email:** cfg001 &lt;at&gt; bu &lt;dot&gt; edu
+
+:::
+::::
+
+## Course Meeting Times {.center}
 
 :::: {.columns}
 ::: {.column width="50%"}
@@ -75,24 +104,26 @@ There are two sections of this course:
 
 - Tu,Th 11:00 am -- 12:15 pm
 - 928 Commonwealth Ave SHA 110
-:::
-::: {.column width="50%"}
-**A2 Discussions** (TA TBA)
+
+**A2 Discussions** (Atul)
 
 - We 10:10 am -- 11:00 am
 - 665 Commonwealth Ave CDS 164
+:::
+::: {.column width="50%"}
 
-**A3 Discussions** (TA TBA)
+
+**A3 Discussions** (Samritha)
 
 - We 11:15 am -- 12:05 pm
 - 665 Commonwealth Ave CDS 164
 
-**A4 Discussions** (TA TBA)
+**A4 Discussions** (Samritha)
 
 - We 12:20 pm -- 1:10 pm
 - 685-725 Commonwealth Ave CAS B06B
 
-**A5 Discussions** (TA TBA)
+**A5 Discussions** (Atul)
 
 - We 9:05 am -- 9:55 am
 - 685-725 Commonwealth Ave CAS 204A
@@ -104,15 +135,18 @@ Please attend the discussion section you signed up for.
 
 ## Learning outcomes
 
-The goal of the class is to provide to students a hands-on understanding of classical data analysis techniques and to develop proficiency in applying these techniques in a modern programming language (Python).
+The goal of the class is to:
+
+* give youa hands-on understanding of classical (but still useful!) data analysis techniques (although we cover neural networks too!)
+* help you gain proficiency in applying these techniques in a modern programming language (Python)
 
 :::: {.fragment}
-Broadly speaking, the course breaks down into three main components, which we will take in order of increasing complication: 
+Broadly speaking, the course breaks down into three main categories of approaches:
 
 :::: {.incremental}
 1. unsupervised methods
 1. supervised methods
-1. methods for structured data
+1. methods for structured (e.g. tabular) data
 ::::
 ::::
 
@@ -126,23 +160,50 @@ Focus is not on the theoretical analysis of the methods, but rather on helping s
 Class discussion will study use cases and cover relevant Python packages to enable the students to perform hands-on experiments with their data.
 ::::
 
-
-## Learning outcomes
-Students who successfully complete this course will be proficient in 
+## We'll Cover
 
 :::: {.incremental}
-- data acquisition
-- data manipulation
-- data analysis
+- Introductory material (_probability and linear algebra refreshers, pandas and scikit-learn_)
+- Clustering techniques (_k-means, hierarchical clustering, gaussian mixture models_)
+- Classification and regression with decision trees
+- Linear and logistic regression
+- Hands-on neural networks
+- Recommendation systems
+- Networks/Graphs
 ::::
 
 :::: {.fragment}
-They will have good working knowledge of the most commonly used methods of clustering, classification, and regression. They will also understand the efficiency issues and systems issues related to working on very large datasets.
+With lots of hands-on practice!
 ::::
+
+## You'll be using
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- Python
+- Jupyter notebooks
+- numpy
+- pandas
+- scikit-learn
+:::
+::: {.column width="50%"}
+- statsmodels
+- matplotlib
+- scipy
+- networkx
+- pytorch
+- _and others..._
+:::
+::::
+
+::: {.content-visible when-profile="slides"}
+# Course Content and Sites
+:::
 
 ## Course webpage
 
-Syllabus and course notes can be found on this webpage
+Syllabus, lecture schedule, and course notes can be found on this webpage
 
 ::: {.r-fit-text .center}
 [{{< var course_notes_url >}}]({{< var course_notes_url >}})
@@ -154,29 +215,27 @@ This online text will evolve as the course progresses.
 
 ## Course Notes Source
 
-You have a few ways to follow on with the course lectures/notes:
+You have a few ways to follow along with the course lectures/notes:
 
 1. Open the Colab version of the lecture and save to your own Google Drive when you see the see the badge 
 ![](https://colab.research.google.com/assets/colab-badge.svg).
-2. Fork and clone the repository and run the Jupyter notebooks version of the lectures locally.
+2. Fork and clone the [repository]({{< var github_url >}}) and run the Jupyter notebooks version of the lectures locally.
 3. Use an annotation tool like [hypothes.is](https://web.hypothes.is/hypothesis-for-students/) on the website.
 
 In general, you'll want to have your laptop computer with you at the lectures to
 follow along and participate in in-class activities.
 
-## Repo
-
-Course repository:
+## Course Repository
 
 ::: {.r-fit-text .center} 
 [{{< var github_url >}}]({{< var github_url >}}) 
 :::
 
-The slides used in the lecture are [Quarto](https://quarto.org/) RevealJS presentations. Setup
-instructions are on the repo [README]({{< var github_url >}}). 
+* The course notes are written in [Quarto](https://quarto.org/) markdown.
+* The slides are [Quarto RevealJS](https://quarto.org/docs/presentations/) presentations. 
+* Setup instructions are on the repo [README]({{< var github_url >}}/blob/main/README.md). 
 
 Feel free to fork the repository to explore, experiment, and modify this code as you see fit.
-
 
 :::: {.notes}
 If you want to clone or fork the repository using git, please feel free. If you find a bug, feel free to submit a pull
@@ -194,7 +253,7 @@ We will use:
 1. [Piazza]({{< var piazza_url >}}) for questions
 1. Github for homeworks, midterm, lectures.
 1. [Gradescope]({{< var gradescope_url >}}) for grading and grade management
-1. [Kaggle](https://www.kaggle.com/) for the midterm
+1. [Kaggle](https://www.kaggle.com/) for the midterm challenge
 
 You should already be signed up for Gradescope (if not, enroll using code sent via welcome email).
 
@@ -236,25 +295,29 @@ Please be respectful on Piazza.
 
 ## Programming environment
 
-We will use [Python](https://www.python.org/) as the language for teaching and for assignments that require coding. Instructions for installing and using Python are in the online textbook.
+We will use [Python](https://www.python.org/) as the language for teaching and
+for assignments that require coding. 
+
+We have a [chapter](01-Intro-to-Python.qmd) on installing python and a brief
+recap of some python fundamentals.
+
+If you are don't feel proficient in python, you should review the chapter, or
+even better, complete a more comprehensive on-line course on python.
+
+::: {.content-visible when-profile="slides"}
+# Grading
+:::
 
 ## Grading
-
-Homeworks are due at midnight on the date shown on the syllabus. 
-
-Assignments will be submitted using Github and Gradescope. 
-
-Please review the instructions for submitting homeworks, on the Resources page of Piazza.
-
-> NOTE: IMPORTANT: Late assignments WILL NOT be accepted. However, you may submit one homework up to 3 days late. You must post a note to "Instructors" on Piazza before _the deadline_ if you intend to submit a homework late.
 
 :::: {.fragment}
 Final grades will be computed based on the following:
 
 :::: {.incremental}
-- 20% Midterm
-- 40% Homework assignments.
-- 40% Final Project
+- 15% participation and in-class activities
+- 15% homework (~7 assignments)
+- 30% midterm challenge
+- 40% final project
 ::::
 ::::
 
@@ -274,7 +337,7 @@ Of the 40% of the project course grade, it is further weighted as the following
 | 10%        | Collaboration    | 
 
 
-## Project Grading Details
+## Project Grading Details {.scrollable}
 
 ::: {.incremental}
 * Project quality (50%)
@@ -295,13 +358,16 @@ Of the 40% of the project course grade, it is further weighted as the following
 
 ## Homeworks
 
-There will be weekly homework assignments. 
+Homeworks are due at 11:59 pm on the date shown on the syllabus. 
+
+Assignments will be submitted using Github and/or Gradescope. 
+
+Please review the instructions for submitting homeworks, on the Resources page of Piazza.
+
+> NOTE: Late assignments will be accepted up to 48 hours after the deadline
+> with a 10% penalty.
 
 In a typical assignment you will analyze one or more datasets using the tools and techniques presented in class.
-
-Homeworks will be assigned and submitted via gradescope. 
-
-The format of the homeworks will be Jupyter notebooks. 
 
 You are expected to work individually on homeworks.
 
@@ -314,6 +380,10 @@ Students will need to submit predictions based on a training dataset and a repor
 The intent is not to use the leaderboard to determine your grade, but to help you assess how effective your work is. 
 
 Having said that we will give a few bonus points to the leaders.
+
+::: {.content-visible when-profile="slides"}
+# Project
+:::
 
 ## Project
 
@@ -374,6 +444,59 @@ Your project team will be led by one of the Spark! Project managers. Their role 
 
 Spark! projects are a great opportunity for students to get real-world project experience to highlight on their github and CV. 
 
+::: {.content-visible when-profile="slides"}
+# Participation and In-Class Activities
+:::
+
+## Participation and In-Class Activities
+
+Lecture sessions will be a combination of lecture and in-class activities.
+
+**Participation** is an important part of the class and intended to keep you
+engaged as well as practice "thinking on your feet". It will be a combination
+of volunteered answers and randomly calling students.
+
+**In-Class Activities** will be where you work in small groups on challenges that
+reinforce your understanding of the material in the lecture.
+
+> You'll get credit for participation and activities (not graded).
+
+## AI Use Discussion
+
+Think-pair-share style, each ~6-7 minutes, with wrap-up. 
+
+> See team assignment in [Gradescope]({{< var gradescope_url >}}).
+
+#### Round 1: Learning Impact 
+"How might GenAI tools help your learning in this course? How might they get in the way?"
+
+#### Round 2: Values & Fairness
+"What expectations do you have for how other students in this course will or won't use GenAI?  What expectations do you have for the teaching team so we can assess your learning fairly given easy access to these tools?"
+
+#### Round 3: Real Decisions
+"Picture yourself stuck on a challenging problem at midnight with an assignment deadline looming. What options do you have? What would help you make decisions you'd feel good about?"
+
+## Thoughts on GenAI
+
+GenAI is a powerful tool that can help you learn and be more productive and
+undoubtedly will be part of your workflow going forward. We will use it!
+
+But, would you...
+
+::: {#fig-robots layout-ncol=2}
+
+![...build strength by having a robot left weights for you?](figs/robot_weightlifting.png){.fragment width=300px #fig-robot-weightlifting}
+
+![...increase your fitness by having a robot jog for you?](figs/robot_jogging.png){.fragment width=300px #fig-robot-jogging}
+
+Via ChatGPT -- _And yes, I'm aware of the irony._
+:::
+
+::: {.content-visible when-profile="slides"}
+# Policies
+:::
+
+
 ## Generative AI Assistance (GAIA) Policy
 
 In general, we follow the policy outlined in the
@@ -382,7 +505,7 @@ In general, we follow the policy outlined in the
 In particular students shall:
 
 ::: {.incremental}
-1. When using GenAI on _written_ assignments, **unless prohibited**, add an appendix  citing which model was used and prompts used.
+1. When using GenAI on _written_ assignments, **unless prohibited**, add an appendix citing which model was used and prompts used.
 2. When using AI tools on _coding_ assignments, **unless prohibited**:
     1. If generating several lines of code or entire functions, add the prompt text and tool used as comments before the generated code.
     2. If auto-completing function syntax, no need to cite the tool, but add a comment at the top of the file citing tool used (e.g. "This file was written with help of Copilot")
@@ -409,3 +532,10 @@ Graduate students must also be aware of and abide by the [GRS Academic Conduct c
 - If you are looking online for an answer because you don’t know how to start thinking about a problem, talk to your Professors or TAs, who may be able to give you pointers to get you started. Piazza is great for this – you can usually get an answer in an hour if not a few minutes.
 - If you are looking online for an answer because you want to see if your solution is correct, ask yourself if there is some way to verify the solution yourself. Usually, there is. You will understand what you have done much better if you do that. So ... it would be better to simply submit what you have at the deadline (without going online to cheat) and plan to allocate more time for homeworks in the future.
 ::::
+
+## For Thursday
+
+* We will have Spark! project pitches and open up the project preferences survey.
+* Bring your laptop and have python installed as well as VS Code and/or Cursor.
+
+And fill out the [intro survey]({{< var intro_survey_form_url >}}) and indicate so in [Gradescope]({{< var gradescope_url >}}).

@@ -241,8 +241,9 @@ Final grades will be computed based on the following:<br>
 
 | Percentage | Category |
 | ---------- | -------- |
-| 20%        | Midterm  |
-| 40%        | Homework assignments |
+| 15%        | Participation and in-class activities |
+| 15%        | Homework assignments |
+| 30%        | Midterm challenge |
 | 40%        | Final Project   |
 
 The exact cutoffs for final grades will be determined after the class is complete.
@@ -269,6 +270,9 @@ you don’t already have it). After you have created it, fill out this
 highly recommend you add your full name to your GitHub account profile.
 
 You are expected to work individually on homeworks.
+
+> NOTE: Late assignments will be accepted up to 48 hours after the deadline
+> with a 10% penalty.
 
 ### Midterm
 
