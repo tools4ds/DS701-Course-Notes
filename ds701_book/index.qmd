@@ -75,23 +75,34 @@ classification, regression, and network analysis.
 **Instructor:** Thomas Gardos
 
 * Office: CCDS 1623
-* Office Hours: TBA
+* Office Hours: Thursdays, 3:30pm -- 4:45pm
 * Office Hours Location: CCDS 1623
 * Email: tgardos &lt;at&gt; bu &lt;do&gt; edu
 
 
 ### Teaching Assistants
 
-* Name: Atul Aravind Das
-   * Office Hours: TBA
+* Name: Atul Aravind Das (MSDS '25)
+   * Office Hours: Wednesdays, 2-3:30pm
    * Office Hours Location: TBA
    * Email: atuladas &lt;at&gt; bu &lt;do&gt;edu
 
-* Name: Samritha Aadhi Ravikumar
-   * Office Hours: TBA
+* Name: Samritha Aadhi Ravikumar (MSDS '25)
+   * Office Hours: Mondays, 2-3:30pm
    * Office Hours Location: TBA
    * Email: samritha &lt;at&gt; bu &lt;do&gt; edu
 
+### Course Assistants
+
+* Name: Caslow Chien (MSDS '25)
+   * Office Hours: TBA
+   * Office Hours Location: TBA
+   * Email: caslow &lt;at&gt; bu &lt;do&gt; edu
+
+* Name: Carlos Fernando Garcia Padilla (MSDS '25)
+   * Office Hours: TBA
+   * Office Hours Location: TBA
+   * Email: cfg001 &lt;at&gt; bu &lt;do&gt; edu
 
 **Lecture (A1)**
 
