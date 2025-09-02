@@ -30,7 +30,7 @@ In this course you will:
 :::
 ::: {.column width="60%"}
 
-* **Office Hours:** Tuesdays 3:30 pm -- 4:45 pm
+* **Office Hours:** Thursdays, 3:30 pm -- 4:45 pm
   * and by appointment (email me to schedule)
 * **Office Location:** CDS 1623
 * **Email:** tgardos &lt;at&gt; bu &lt;dot&gt; edu
@@ -45,22 +45,22 @@ We have the following teaching assistants:
 :::: {.columns}
 ::: {.column width="45%"}
 
-**Atul Aravind Das**
+**Atul Aravind Das (MSDS '25)**
 
 ![](figs/people/atul.jpg){width=200px}
 
-* **Office Hours:** TBA
+* **Office Hours:** Wednesdays, 2-3:30pm
 * **Office Hours Location:** TBA
 * **Email:** atuladas &lt;at&gt; bu &lt;dot&gt; edu
 
 :::
 ::: {.column width="45%"}
 
-**Samritha Aadhi Ravikumar**
+**Samritha Aadhi Ravikumar (MSDS '25)**
 
 ![](figs/people/samritha.jpg){width=200px}
 
-* **Office Hours:** TBA
+* **Office Hours:** Mondays, 2-3:30pm
 * **Office Hours Location:** TBA
 * **Email:** samritha &lt;at&gt; bu &lt;dot&gt; edu
 
@@ -74,7 +74,7 @@ We have the following course assistants:
 :::: {.columns}
 ::: {.column width="45%"}
 
-**Caslow Chien**
+**Caslow Chien (MSDS '25)**
 
 <!-- ![](figs/people/atul.jpg){width=200px} -->
 
@@ -85,9 +85,9 @@ We have the following course assistants:
 :::
 ::: {.column width="45%"}
 
-**Carlos Fernando Garcia Padilla**
+**Carlos Fernando Garcia Padilla (MSDS '25)**
 
-<!-- ![](figs/people/samritha.jpg){width=200px} -->
+![](figs/people/carlos.jpg){width=200px}
 
 * **Office Hours:** TBA
 * **Office Hours Location:** TBA
