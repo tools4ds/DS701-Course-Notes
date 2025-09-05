@@ -100,7 +100,7 @@ classification, regression, and network analysis.
    * Email: caslow &lt;at&gt; bu &lt;do&gt; edu
 
 * Name: Carlos Fernando Garcia Padilla (MSDS '25)
-   * Office Hours: TBA
+   * Office Hours: Fridays, 10:30am -- 11:30am
    * Office Hours Location: TBA
    * Email: cfg001 &lt;at&gt; bu &lt;do&gt; edu
 
