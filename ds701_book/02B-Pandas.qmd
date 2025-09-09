@@ -684,6 +684,9 @@ plt.tight_layout()
 plt.show()
 ```
 
+**Upon Completion:**
+
+Execute all the cells, save and download the notebook and submit to Gradescope.
 
 ## Recap
 
