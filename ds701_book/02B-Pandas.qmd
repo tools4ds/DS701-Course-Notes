@@ -43,17 +43,31 @@ Make it a habit that when you're given a tabular dataset, load it into a `DataFr
 
 ## Fetching, storing and retrieving your data
 
-For demonstration purposes, we'll use the `yfinance` package to fetch financial 
-data via the Yahoo! API and store it in a dataframe.
+We'll work with stock data. A popular python package for this is `yfinance`, but
+there seems to be some access rate limits which make it more difficult to use.
+
+Instead we'll manually download a CSV file:
+
+    MANUAL DOWNLOAD FROM WALL STREET JOURNAL:
+    
+    1. Go to: https://www.wsj.com/market-data/quotes/NVDA/historical-prices
+    2. Set date range: January 1, 2024 to December 31, 2024
+    3. Click "Download" button
+    4. Save the CSV file
+    5. Load in Python:
 
 ```{python}
-#| code-fold: false
 import pandas as pd
-import yfinance as yf
 
-# download nvidia stock prices from 2023
-nvidia_stocks = pd.DataFrame(yf.download('NVDA', start='2023-01-01', end='2023-12-31', progress=False))
+try:
+    nvidia_stocks = pd.read_csv('data/stocks/nvidia_stock_2024.csv', index_col=0)
+except FileNotFoundError:
+    url = 'https://raw.githubusercontent.com/tools4ds/DS701-Course-Notes/main/ds701_book/data/stocks/nvidia_stock_2024.csv'
+    nvidia_stocks = pd.read_csv(url, index_col=0)
+
+nvidia_stocks = nvidia_stocks.sort_index()
 ```
+
 
 ---
 
@@ -65,6 +79,7 @@ variety of methods to do so such as `.head()`, `.tail()`, `.info()`,
 #| code-fold: false
 nvidia_stocks.head()
 ```
+
 
 Notice how each row has a label and each column has a label.
 
@@ -87,7 +102,7 @@ The method `.describe()` gives you summary statistics of the dataframe.
 nvidia_stocks.describe()
 ```
 
-## Reading to/from a ``.csv`` file
+## Writing/Reading to/from a ``.csv`` file
 
 Pandas can read and write dataframes with many file formats such as `.csv`, `.json`, `.parquet`,
 `.xlsx`, `.html`, `SQL`, etc.
@@ -194,13 +209,8 @@ df.info()
 
 Observe that we first created a list of column names without spaces using __list comprehension__. This is the pythonic way to generate a new list.
 
----
+Now **all** columns can be accessed using the **dot** notation.
 
-Now **all** columns can be accessed using the **dot** notation:
-
-```{python}
-df.adj_close.head()
-```
 
 ## A sampling of DataFrame methods.
 
@@ -216,7 +226,7 @@ df.mean()
 or we can give a list of columns to the Dataframe object:
 
 ```{python}
-df[['open', 'close', 'volume', 'adj_close']].mean()
+df[['open', 'close', 'volume']].mean()
 ```
 
 ```{python}
@@ -263,8 +273,8 @@ plt.show()
 Or a histogram on the adjusted closing price.
 
 ```{python}
-df.adj_close.hist()
-plt.xlabel('Adjusted Closing Price')
+df.close.hist()
+plt.xlabel('Closing Price')
 plt.ylabel('Dollars')
 plt.title('NVIDIA Stock Price')
 plt.show()
@@ -278,13 +288,13 @@ So far we've seen how to access a column of the DataFrame. To access a row we us
 To access a row by its index label, use the **`.loc()`** method ('location').
 
 ```{python}
-df.loc['2023-01-23']
+df.loc['01/02/24']
 ```
 
 As a tangent, we can use the `.apply()` method to format the output.
 
 ```{python}
-df.loc['2023-01-23'].apply(lambda x: '{:,.2f}'.format(x) if isinstance(x, (int, float)) else x)
+df.loc['01/02/24'].apply(lambda x: '{:,.2f}'.format(x) if isinstance(x, (int, float)) else x)
 ```
 
 ---
@@ -317,6 +327,7 @@ print(f"The total number of positive-gain days is {num_positive_days} out of {le
 ::: {.callout-note}
 This is only capturing the intraday gain/loss, not the cumulative inter-day gain/loss.
 :::
+
 ## Filtering
 
 It is easy to select rows from the data.  
@@ -325,7 +336,7 @@ All the operations below return a new Series or DataFrame, which itself can be
 treated the same way as all Series and DataFrames we have seen so far.
 
 ```{python}
-tmp_high = df.high > 45
+tmp_high = df.high > 100
 tmp_high.tail()
 ```
 
@@ -501,165 +512,178 @@ A 3-D array in Pandas is created using a
 
 For more information read the documentation.
 
-## Comparing multiple stocks
 
-As a last task, we will use the experience we obtained so far -- and learn some
-new things -- in order to compare the performance of different stocks.
 
-```{python}
-stocks = ['NVDA', 'META', 'MSFT', 'TSLA', 'IBM', 'INTC']
-stock_df = pd.DataFrame()
-for s in stocks:
-    stock_df[s] = pd.DataFrame(yf.download(s, 
-                                           start='2023-09-01', 
-                                           end='2024-08-30', 
-                                           progress=False))['Close']
-stock_df.head()
-```
+## In Class Activity
 
----
+### Iris Flower Analysis with Pandas
+**Duration:** 20-25 minutes | **Teams:** 3 students each
 
-Let's look at the closing prices of the stocks.
+#### Dataset: Iris Flower Dataset
+**Download Instructions:**
+The Iris dataset is built into seaborn, so no download needed!
 
 ```{python}
-import matplotlib.pyplot as plt
-
-stock_df.plot()
-plt.title('Stock Closing Prices')
-plt.ylabel('Dollars')
-plt.legend(loc='best')
-plt.show()
-```
-
-But that is not as interesting as the returns.
-
----
-
-So next, we calculate the returns over a period of length $T$. The returns are defined as
-
-$$
-r(t) = \frac{f(t)-f(t-T)}{f(t-T)}. 
-$$
-
-The returns can be computed with a simple DataFrame method `pct_change()`.  Note that for the first $T$ timesteps, this value is not defined.
-
-```{python}
-rets = stock_df.pct_change(30)
-rets.iloc[25:35]
-```
-
----
-
-Now we'll plot the timeseries of the rolling 30-day returns of the different stocks.
-
-Notice that the `NaN` values are dropped by the plotting function.
-
-```{python}
-rets[['NVDA', 'META']].plot()
-plt.ylabel('Returns (%)')
-plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.2f}%'.format(y * 100)))
-plt.show()
-```
-
----
-
-Let's do a scatter plot of the returns of NVDA versus META.
-
-```{python}
-plt.scatter(rets.NVDA, rets.META)
-plt.xlabel('NVDA 30-day returns')
-plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.2f}%'.format(y * 100)))
-plt.ylabel('META 30-day returns')
-plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.2f}%'.format(y * 100)))
-plt.tight_layout()  # Adjust layout to prevent label cutoff
-plt.show()
-```
-
-There appears to be some (fairly strong) correlation between the movement of
-NVDA and META stocks.  Let's measure this.
-
----
-
-The correlation coefficient between variables $X$ and $Y$ is defined as follows
-
-$$
-\text{Corr}(X,Y) = \frac{E\left[(X-\mu_X)(Y-\mu_Y)\right]}{\sigma_X\sigma_Y}. 
-$$
-
-Pandas provides a DataFrame method called `corr()` that computes the correlation coefficient of all pairs of columns.
-
-```{python}
-rets.corr()
-```
-
-It takes a bit of time to examine that table and draw conclusions.  
-
----
-
-To speed that process up let's visualize the table.
-
-
-```{python}
+import pandas as pd
 import seaborn as sns
 
-sns.heatmap(rets.corr(), annot=True)
-plt.show()
+# Load the Iris dataset directly
+iris = sns.load_dataset('iris')
 ```
 
-It does seem like there is a strong correlation between NVDA and META.
 
-What about TSLA and META?
----
+#### Team Roles (2 minutes)
+- **Data Loader:** Loads data and explores structure
+- **Data Analyzer:** Performs calculations and filtering  
+- **Data Visualizer:** Creates plots and charts
+
+#### Activity Tasks (20 minutes)
+
+**Phase 1: Data Loading & Exploration (5 minutes)**
+1. Check the shape and column names
+2. Use `.head()`, `.info()`, and `.describe()` to explore the data
 
 ```{python}
-plt.scatter(rets.TSLA, rets.META)
-plt.xlabel('TESLA 30-day returns')
-plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.2f}%'.format(y * 100)))
-plt.ylabel('META 30-day returns')
-plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.2f}%'.format(y * 100)))
-plt.tight_layout()  # Adjust layout to prevent label cutoff
-plt.show()
+
+# Replace 0 and '[]' with the correct methods on iris
+print(f"Dataset shape: {0}")
+print(f"Columns: {['']}")
+
+# Look at the first few rows
+print("First 5 rows:")
+
+# Get basic info about the dataset
+print("\nDataset Info:")
+
+# Describe the dataset with summary statistics
+print("\nSummary Statistics:")
+
 ```
 
-What can we say about the 30-day returns of TSLA and META?
-
----
-
-## Pandas plotting
-
-As mentioned, the plotting performed by Pandas is just a layer on top of
-`matplotlib` (i.e., the `plt` package).  
-
-So Panda's plots can (and often should) be replaced or improved by using
-additional functions from `matplotlib`.
-
-For example, suppose we want to know both the returns as well as the standard
-deviation of the returns of a stock (i.e., its risk).  
-
----
-
-Here is a visualization of the result of such an analysis. We construct the plot using only functions from `matplotlib`.
+**Phase 2: Basic Data Manipulation (8 minutes)**
+1. **Create new columns:**
+   - Add a 'petal_area' column (petal_length × petal_width)
+   - Create a 'sepal_area' column (sepal_length × sepal_width)
+   - Create a 'size_category' column:
+     - 'Small' (petal_area < 2)
+     - 'Medium' (petal_area 2-5) 
+     - 'Large' (petal_area > 5)
 
 ```{python}
-plt.scatter(rets.mean(), rets.std())
-plt.xlabel('Expected returns')
-plt.ylabel('Standard Deviation (Risk)')
-plt.xlim([-.05, .1])
-plt.ylim([0, .3])
-for label, x, y in zip(rets.columns, rets.mean(), rets.std()):
-    plt.annotate(
-        label, 
-        xy = (x, y), xytext = (30, -30),
-        textcoords = 'offset points', ha = 'right', va = 'bottom',
-        bbox = dict(boxstyle = 'round,pad=0.5', fc = 'yellow', alpha = 0.5),
-        arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'))
+# Create petal area column
+iris['petal_area'] = ...
+
+# Create sepal area column
+iris['sepal_area'] = ...
+
+# Create size category column
+def categorize_size(petal_area):
+    if ... :
+        return 'Small'
+    elif ... :
+        return 'Medium'
+    else:
+        return 'Large'
+
+iris['size_category'] = ...
+
+print("New columns created:")
+print(iris[['petal_length', 'petal_width', 'petal_area', 'size_category']].head(10))
+```
+
+2. **Data Filtering:**
+   - Find all 'setosa' species flowers
+   - Filter for large flowers only
+   - Find flowers with sepal_length > 6
+
+```python
+# Find all 'setosa' species flowers
+setosa_flowers = ...
+print(f"Setosa flowers: {len(setosa_flowers)} out of {len(iris)}")
+
+# Filter for large flowers only
+large_flowers = ...
+print(f"Large flowers: {len(large_flowers)} out of {len(iris)}")
+
+# Find flowers with sepal_length > 6
+long_sepal = ...
+print(f"Flowers with sepal_length > 6: {len(long_sepal)} out of {len(iris)}")
+```
+
+3. **Basic Analysis:**
+   - Count flowers by species
+   - Find average petal length by species
+
+```{python}
+# Count flowers by species
+species_counts = ...
+print("Flowers by species:")
+print(species_counts)
+
+# Find average petal length by species
+avg_petal_by_species = ...
+print("\nAverage petal length by species:")
+print(avg_petal_by_species)
+```
+
+**Phase 3: Simple Visualizations (7 minutes)**
+1. **Create 2-3 basic plots:**
+   - Histogram of petal length
+   - Bar chart of flower count by species
+   - Scatter plot: sepal_length vs sepal_width
+
+```python
+# Create a figure with subplots
+fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+
+# 1. Histogram of petal length
+axes[0, 0].hist(iris['petal_length'], bins=15, alpha=0.7, edgecolor='black', color='skyblue')
+axes[0, 0].set_title('Distribution of Petal Length')
+axes[0, 0].set_xlabel('Petal Length (cm)')
+axes[0, 0].set_ylabel('Frequency')
+axes[0, 0].grid(True, alpha=0.3)
+
+# 2. Bar chart of flower count by species
+species_counts = iris['species'].value_counts()
+species_counts.plot(kind='bar', ax=axes[0, 1], color=['red', 'green', 'blue'])
+axes[0, 1].set_title('Number of Flowers by Species')
+axes[0, 1].set_xlabel('Species')
+axes[0, 1].set_ylabel('Number of Flowers')
+axes[0, 1].tick_params(axis='x', rotation=45)
+axes[0, 1].grid(True, alpha=0.3)
+
+# 3. Scatter plot: sepal_length vs sepal_width
+for species in iris['species'].unique():
+    data = iris[iris['species'] == species]
+    axes[1, 0].scatter(data['sepal_length'], data['sepal_width'], 
+                      alpha=0.7, label=species, s=50)
+axes[1, 0].set_title('Sepal Length vs Sepal Width (by Species)')
+axes[1, 0].set_xlabel('Sepal Length (cm)')
+axes[1, 0].set_ylabel('Sepal Width (cm)')
+axes[1, 0].legend()
+axes[1, 0].grid(True, alpha=0.3)
+
+# 4. Bar chart of size categories (if size_category column exists)
+if 'size_category' in iris.columns:
+    size_categories = iris['size_category'].value_counts()
+    size_categories.plot(kind='bar', ax=axes[1, 1], color=['orange', 'lightgreen', 'lightcoral'])
+    axes[1, 1].set_title('Flowers by Size Category')
+    axes[1, 1].set_xlabel('Size Category')
+    axes[1, 1].set_ylabel('Number of Flowers')
+    axes[1, 1].tick_params(axis='x', rotation=0)
+    axes[1, 1].grid(True, alpha=0.3)
+else:
+    # Alternative: petal length vs petal width scatter
+    axes[1, 1].scatter(iris['petal_length'], iris['petal_width'], alpha=0.7, s=50)
+    axes[1, 1].set_title('Petal Length vs Petal Width')
+    axes[1, 1].set_xlabel('Petal Length (cm)')
+    axes[1, 1].set_ylabel('Petal Width (cm)')
+    axes[1, 1].grid(True, alpha=0.3)
+
+plt.tight_layout()
 plt.show()
 ```
 
-To understand what these functions are doing, (especially the
-[annotate](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.annotate.html)
-function), you will need to consult the online documentation for
-[matplotlib](https://matplotlib.org/stable/api/index.html). 
 
 ## Recap
 
@@ -675,4 +699,4 @@ We learned how to:
 * filter the data
 * create new columns
 * group the data
-* compute the correlation between variables
+
