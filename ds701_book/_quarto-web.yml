@@ -42,6 +42,7 @@ resources:
   - figs/NN-figs/conv-demo/index.html
   - figs/NN-figs/conv-demo/utils.js
   - figs/NN-figs/conv-demo/external/d3.min.js
+  - data/stocks/nvidia_stock_2024.csv
 
 website:
   title: "Tools for Data Science"
