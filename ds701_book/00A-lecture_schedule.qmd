@@ -10,12 +10,13 @@ title: Lecture Schedule
 | Sep 2 | 01 -- Course Intro and Git | [Class Intro](./00-Class-Introduction.qmd), [Git](./02A-Git.qmd)  | |
 | Sep 4 | 02 -- Spark Project Pitch Day |  |  |
 | **Week 2**  | --- | --- | --- |
-| Sep 9 | 03 -- Intro to Pandas and SciKit-Learn | [Pandas](./02B-Pandas.qmd), [SciKit-Learn](./02C-Sklearn.qmd)  | |
-| Sep 11 | 04 -- Probability & Linear Algebra Refresher | [Probability](./03-Probability-and-Statistics-Refresher.qmd), [Linear Algebra](./04-Linear-Algebra-Refresher.qmd) |  |
+| Sep 9 | 03 -- Class Survey Results, Intro to Pandas | [Survey Results (1)](https://docs.google.com/presentation/d/e/2PACX-1vS9da4EjD0vZ0--eIwYKMrNz7YlFKKsfe7QjpyhnVUT-DfpotVsjcL_H8z6vVkzW0k1v2Xxd2bakIDc/pub?start=false&loop=false&delayms=3000&slide=id.p), [Pandas](./02B-Pandas.qmd)<br> (1) BU email address required  | |
+| Sep 11 | 04 -- DS Project Lifecycle, Intro to SciKit-Learn | [SciKit-Learn](./02C-Sklearn.qmd)  | |
 | **Week 3**  | --- | --- | --- |
-| Sep 16 | 05 -- Distance, Similarity Functions and Time Series  | [Distances, Time Series](./05-Distances-Timeseries.qmd)   | |
-| Sep 18 | 06 -- Clustering I: k-means | [k-means](./06-Clustering-I-kmeans.qmd) | |
+| Sep 16 | 05 -- Probability & Linear Algebra Refresher | [Probability](./03-Probability-and-Statistics-Refresher.qmd), [Linear Algebra](./04-Linear-Algebra-Refresher.qmd) |  |
+| Sep 18 | 06 -- Distance, Similarity Functions and Time Series  | [Distances, Time Series](./05-Distances-Timeseries.qmd)   | |
 | **Week 4**  | --- | --- | --- |
+| --- | 07 -- Clustering I: k-means | [k-means](./06-Clustering-I-kmeans.qmd) | |
 | Sep 23 | 07 -- Clusterin II: In Practice |  [Clustering in Practice](./07-Clustering-II-In-Practice.qmd)  |  |
 | Sep 25 | 08 -- Clustering III: Hierarchical |  [Hierarchical Clustering](./08-clustering-III-hierarchical.qmd)  |  |
 | **Week 5**  | --- | --- | --- |
