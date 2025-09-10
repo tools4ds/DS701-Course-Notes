@@ -8,10 +8,10 @@ title: Lecture Schedule
 | ---- | ------- | --- | -------- |
 | **Week 1**  | --- | --- | --- |
 | Sep 2 | 01 -- Course Intro and Git | [Class Intro](./00-Class-Introduction.qmd), [Git](./02A-Git.qmd)  | |
-| Sep 4 | 02 -- Spark Project Pitch Day |  |  |
+| Sep 4 | 02 -- Spark Project Pitch Day | [Pitch Deck](https://docs.google.com/presentation/d/1PuVoX9xIwi5x6FkJBvtjwj6tQ-Fp2WDdmj7ESr1_ESU/edit?slide=id.g3652bfb82da_1_27#slide=id.g3652bfb82da_1_27) |  |
 | **Week 2**  | --- | --- | --- |
 | Sep 9 | 03 -- Class Survey Results, Intro to Pandas | [Survey Results (1)](https://docs.google.com/presentation/d/e/2PACX-1vS9da4EjD0vZ0--eIwYKMrNz7YlFKKsfe7QjpyhnVUT-DfpotVsjcL_H8z6vVkzW0k1v2Xxd2bakIDc/pub?start=false&loop=false&delayms=3000&slide=id.p), [Pandas](./02B-Pandas.qmd)<br> (1) BU email address required  | |
-| Sep 11 | 04 -- DS Project Lifecycle, Intro to SciKit-Learn | [SciKit-Learn](./02C-Sklearn.qmd)  | |
+| Sep 11 | 04 -- DS Project Lifecycle, Intro to SciKit-Learn | [DS PLC](https://docs.google.com/presentation/d/e/2PACX-1vTLyHd8UIU94ayKf17KIHdOYBNkEBJ6F0P5NMRRuJt5v0pioCVdEUpSVBvBc67mikJsVj7ijTCoqPh2/pub?start=false&loop=false&delayms=3000), [SciKit-Learn](./02C-Sklearn.qmd)  | |
 | **Week 3**  | --- | --- | --- |
 | Sep 16 | 05 -- Probability & Linear Algebra Refresher | [Probability](./03-Probability-and-Statistics-Refresher.qmd), [Linear Algebra](./04-Linear-Algebra-Refresher.qmd) |  |
 | Sep 18 | 06 -- Distance, Similarity Functions and Time Series  | [Distances, Time Series](./05-Distances-Timeseries.qmd)   | |
