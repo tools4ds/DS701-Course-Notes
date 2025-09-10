@@ -53,10 +53,10 @@ website:
     contents:
     - href: index.qmd
       text: Syllabus
-    - section: "Course Overview"
-      contents:
-        - 00-Class-Introduction.qmd
-        - 00A-lecture_schedule.qmd
+    - href: 00A-lecture_schedule.qmd
+      text: Lecture Schedule
+    - href: 00-Class-Introduction.qmd
+      text: Course Overview
     - section: "Preliminaries"
       contents:
         - 01-Intro-to-Python.qmd

@@ -87,22 +87,87 @@ from sklearn.metrics import mean_squared_error
 print(sklearn.__version__)
 ```
 
-## Prepare the dataset
+## Fetching Datasets
 
-Scikit-Learn provides a variety of datasets in the `datasets` submodule. These can be used to train simple models. Below we import the california housing dataset. We store the data features as a NumPy arrays called $X$ (2-D) and the target (labels) $y$ (1-D). We can see a description of the dataset by using the `.DESCR` attribute.
+Scikit-Learn provides a variety of datasets in the [`datasets`](https://scikit-learn.org/stable/api/sklearn.datasets.html) 
+that will take care of retrieving.
+
+| Function | Description |
+|----------|-------------|  
+| [`fetch_20newsgroups`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_20newsgroups.html) | Load the filenames and data from the 20 newsgroups dataset (classification). |
+| [`fetch_20newsgroups_vectorized`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_20newsgroups_vectorized.html) | Load and vectorize the 20 newsgroups dataset (classification). |
+| [`fetch_california_housing`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_california_housing.html) | Load the California housing dataset (regression). |
+| [`fetch_covtype`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_covtype.html) | Load the covertype dataset (classification). |
+| [`fetch_kddcup99`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_kddcup99.html) | Load the kddcup99 network intrusion detection dataset (classification). |
+| [`fetch_lfw_pairs`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_lfw_pairs.html) | Load the Labeled Faces in the Wild (LFW) pairs dataset (classification). |
+| [`fetch_lfw_people`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_lfw_people.html) | Load the Labeled Faces in the Wild (LFW) people dataset (classification). |
+| [`fetch_olivetti_faces`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_olivetti_faces.html) | Load the Olivetti faces data-set from AT&T (classification). |
+| [`fetch_rcv1`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_rcv1.html) | Load the Reuters Corpus Volume I multilabel dataset of 800K newswire stories (classification). |
+| [`fetch_species_distributions`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_species_distributions.html) | Loader for species distribution dataset from Phillips et. |
+
+## Loading Built-in Toy Datasets
+
+| Function | Description |
+|----------|-------------|  
+| [`load_breast_cancer`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_breast_cancer.html) | Load the breast cancer dataset (classification). |
+| [`load_diabetes`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_diabetes.html) | Load the diabetes dataset (regression). |
+| [`load_digits`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_digits.html) | Load the digits dataset (classification). |
+| [`load_iris`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_iris.html) | Load the iris dataset (classification). |
+| [`load_linnerud`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_linnerud.html) | Load the linnerud physiological and exercise dataset for 20 subjects (regression). |
+| [`load_wine`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_wine.html) | Load the wine dataset (classification). |
+| [`load_boston`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_boston.html) | Load the boston housing dataset (regression). |
+
+
+## Other Dataset Loading Functions
+
+| Function | Description |
+|----------|-------------|  
+| [`fetch_file`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_file.html) | Fetch a file from the web if not already present in the local folder, otherwise return file path. Check SHA256 checksum when provided. |
+| [`fetch_openml`](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_openml.html) | Fetch datasets from the over 6K available at [openml](https://www.openml.org/search?type=data&status=active) by name or dataset id. |
+
+
+::: {.content-visible when-profile="slides"}
+## Prepare the dataset
+:::
+
+* Below we import the california housing dataset
+    * Predict the median house value of a district based on 8 features
+* We store the data features as a NumPy arrays called
+    * `X` (2-D) and 
+    * the target (labels) `y` (1-D). 
 
 ```{python}
 # Fetch data
 housing_dataset = fetch_california_housing()
 X = housing_dataset["data"]
 y = housing_dataset["target"]
+```
+
+---
+
+* We can see a description of the dataset by using the `.DESCR` attribute.
+
+```{python}
 print(housing_dataset.DESCR)
 ```
+
+## Visualization?
+
+Can we visualize the dataset?
+
+::: {.fragment}
+Not directly because the dataset has 8 features (8-dimensional).
+
+Later we will talk about dimensionality reduction and clustering techniques that can help us visualize the dataset.
+:::
 
 ::: {.content-visible when-profile="slides"}
 ## Train-test split
 :::
-We are going to train a model to predict the median house value. To train and test the model we are going to split the dataset into 80% training data and 20% test data. We use the `train_test_split` function from sklearn.
+
+* We are going to train a model to predict the median house value. 
+* To train and test the model we are going to split the dataset into 80% training data and 20% test data. 
+* We use the `train_test_split` function from sklearn.
 
 ```{python}
 # Split data into train and test sets
@@ -114,7 +179,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20 ,random
 :::
 
 :::: {.fragment}
-As part of the data preparation we will want to scale the dataset. Datasets often contain data with different orders of magnitude. Scaling the dataset prevents data with a large magnitude from potentially dominating the model. 
+* As part of the data preparation we will want to scale the dataset. 
+* Datasets often contain data with different orders of magnitude. 
+* Scaling the dataset prevents data with a large magnitude from potentially dominating the model. 
 ::::
 
 :::: {.fragment}
@@ -162,37 +229,47 @@ y_pred = reg.predict(X_test)
 
 The values in `y_pred` are the models predictions of the median house prices based on the input features of `X_test`.
 
-## Evaluating the performance of the model
+## Model Evaluation -- $R^2$
 
 :::: {.fragment}
-To evaluate the performance of the model, we can use the `score()` method, which is also shared across many model objects in sklearn. 
-::::
-
-::: {.content-hidden when-profile="slides"}
-In addition, we can use specific functions to evaluate the error in our predictions.
-:::
-
-:::: {.fragment}
-Next is the code that computes the $R^2$ value of the model and the mean squared error.
-
-The $R^2$ value is a number between [0, 1] and provides a measure of how good the fit of the model is. A value of 1 
-means the model fits the data perfectly, while a value of 0 indicates there is no linear relationship between the 
-observed and predicted values.
+To evaluate the performance of the model, we can use the `score()` method, which
+is also shared across many model objects in sklearn.
 ::::
 
 :::: {.fragment}
+It calculates the $R^2$ value, which is a number between [0, 1] and provides a
+measure of how good the fit of the model is. 
+
+A value of 1 means the model fits the data perfectly, while a value of 0
+indicates there is no linear relationship between the observed and predicted values.
+::::
+
+:::: {.fragment}
+$$
+R^2 = 1 - \frac{\sum_{i}^{n} (y_i - \hat{y}_i)^2}{\sum_{i}^{n} (y_i - \bar{y})^2}
+$$
+
+where $\bar{y}$ is the sample mean of the target vector.
+::::
+
+:::: {.fragment}
+**Note:** More on this in a later lecture.
+::::
+
+## Model Evaluation -- MSE
+
 The mean squared error (MSE) is given by the formula
 
 $$ 
 \frac{1}{n}\sum_{i}^{n} (y_i - \hat{y}_i)^2,
 $$
 
-where $n$ is the number of data points in the target vector, $y_i$ are the true values of the test set (`y_test`), and $\hat{y}_i$ are the predicted values (`y_pred`).
-::::
+where 
+    * $n$ is the number of data points in the target vector, 
+    * $y_i$ are the true values of the test set (`y_test`), and 
+    * $\hat{y}_i$ are the predicted values (`y_pred`).
 
-::: {.content-visible when-profile="slides"}
 ## Computing $R^2$ and MSE
-:::
 
 ```{python}
 # R^2 value
@@ -203,3 +280,18 @@ print("The R^2 score is : ", r2)
 mse = mean_squared_error(y_test, y_pred)
 print("Mean squared error: ", mse)
 ```
+
+## Summary
+
+* We demonstrated how to use Scikit-Learn to train a linear regression model.
+
+We saw how to:
+
+* evaluate the performance of the model using the `score()` method and the `mean_squared_error()` function.
+* use the `train_test_split()` function to split the dataset into training and test sets.
+* use the `StandardScaler()` function to scale the dataset.
+* use the `LinearRegression()` function to train the model.
+* use the `predict()` function to make predictions.
+* use the `score()` function to evaluate the performance of the model.
+
+**You'll get a chance to practice this in the homework.**
