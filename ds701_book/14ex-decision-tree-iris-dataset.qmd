@@ -1,0 +1,53 @@
+---
+title: "14.1 Decision Trees on the Iris Dataset"
+---
+
+## Iris Data Set Example
+
+Let's look at the classic Iris data set which consists of 150 samples representing3 types of irises:
+
+1. Setosa, 
+2. Versicolor, and 
+3. Virginica
+
+The features for each sample are the petal and sepal length and width in cm.
+
+``` {python}
+from sklearn.datasets import load_iris
+from sklearn import tree
+iris = load_iris()
+X, y = iris.data, iris.target
+clf = tree.DecisionTreeClassifier()
+clf = clf.fit(X, y)
+tree.plot_tree(clf, 
+               filled=True, 
+               max_depth=1, 
+               impurity=False, 
+               class_names=iris.target_names, 
+               feature_names=iris.feature_names)
+```
+
+``` {.python}
+# Render a PDF file of the tree
+import graphviz 
+dot_data = tree.export_graphviz(clf, out_file=None) 
+graph = graphviz.Source(dot_data) 
+graph.render("iris") 
+```
+
+``` {.python}
+# Render a PNG file of the tree
+graph.render("iris", format="png")
+```
+
+``` {python}
+import graphviz
+
+dot_data = tree.export_graphviz(clf, out_file=None, 
+                     feature_names=iris.feature_names,  
+                     class_names=iris.target_names,  
+                     filled=True, rounded=True,  
+                     special_characters=True)  
+graph = graphviz.Source(dot_data)  
+graph 
+```
