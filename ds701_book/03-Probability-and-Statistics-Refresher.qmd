@@ -243,6 +243,31 @@ The sample space $\Omega$ may be continuous or discrete and bounded or unbounded
 ::::
 
 ::: {.content-visible when-profile="web"}
+### Sample Space and Events -- Example
+:::
+
+::: {.content-visible when-profile="slides"}
+## Sample Space and Events -- Example
+:::
+
+You have a jar with three types of candies: (C)hocolates, (G)ummies, and (M)ints.
+
+You randomly select three candies from the jar. 
+
+:::: {.columns}
+::: {.column width="50%"}
+<br><br>
+
+The sample space $\Omega = \ldots$
+
+An example event, $E = \ldots$
+:::
+::: {.column width="50%"}
+![Image by Gemini](figs/Gemini-jar-with-3-candy-types.png){fig-align="center" width=80%}
+:::
+::::
+
+::: {.content-visible when-profile="web"}
 ### Probability and Conditioning
 :::
 
@@ -334,7 +359,7 @@ P(A) &= P(A\cap B_1) + P(A \cap B_2) \\
 \end{align*}
 :::
 ::: {.column width="40%"}
-![](figs/Lec03-LawOfTotalProbability.png){fig-align="center" width=80%}
+![](drawio/LawOfTotalProbability.png){fig-align="center" width=80%}
 :::
 ::::
 
@@ -402,6 +427,63 @@ Or perhaps $P(B)$ itself (which is really the denominator) is easy to estimate.
 We interpret this transformation as updating our estimate of the probability of each $A_i$ based on new information, namely, that $B$ is true.   
 
 This update transforms the __prior__ probabilities $P(A_i)$ into the __posterior__ probabilities $P(A_i|B)$.
+
+## Package Delivery Challenge
+
+**Scenario:** A delivery company is tracking packages and wants to predict the delivery method based on package characteristics.
+
+:::: {.fragment}
+**Given Information:**
+
+- **A₁**: Package is delivered by drone 🚁 (event A₁)
+- **A₂**: Package is delivered by truck 🚚 (event A₂)  
+- **A₃**: Package is delivered by bicycle 🚲 (event A₃)
+- **B**: Package arrives on time
+::::
+
+:::: {.fragment}
+**Prior Probabilities (based on company data):**
+
+- P(A₁) = 0.20 (20% of packages use drone delivery)
+- P(A₂) = 0.65 (65% of packages use truck delivery)
+- P(A₃) = 0.15 (15% of packages use bicycle delivery)
+::::
+
+:::: {.fragment}
+**On-Time Delivery Rates:**
+
+- P(B|A₁) = 0.95 (95% of drone deliveries are on time)
+- P(B|A₂) = 0.85 (85% of truck deliveries are on time)
+- P(B|A₃) = 0.70 (70% of bicycle deliveries are on time)
+::::
+
+:::: {.fragment}
+**Challenge Question:** 
+
+If a package arrives on time, what is the probability it was delivered by drone?
+
+So we want to calculate...
+::::
+
+:::: {.fragment}
+**Solution using Bayes' Theorem:**
+
+$$P(A_1|B) = \frac{P(B|A_1)P(A_1)}{P(B|A_1)P(A_1) + P(B|A_2)P(A_2) + P(B|A_3)P(A_3)}$$
+
+$$P(A_1|B) = \frac{0.95 \times 0.20}{(0.95 \times 0.20) + (0.85 \times 0.65) + (0.70 \times 0.15)}$$
+
+$$P(A_1|B) = \frac{0.19}{0.19 + 0.5525 + 0.105} = \frac{0.19}{0.8475} \approx 0.224$$
+
+**Answer:** If a package arrives on time, there's approximately a **22.4%** chance it was delivered by drone.
+::::
+
+:::: {.fragment}
+**Key Insight:**
+
+Even though drones have the highest on-time rate (95%), most on-time packages still come by truck because trucks handle the majority of deliveries (65% of packages). 
+
+Prior probabilities heavily influence posterior probabilities even with strong likelihood evidence.
+::::
 
 ::: {.content-visible when-profile="web"}
 ### Bayes' Theorem Example
@@ -732,6 +814,53 @@ The expected value is in some sense the "center of mass" of the random
 variable. It is often denoted $\mu$.
 :::
 
+## Expected Value Example: Food Delivery App
+
+**Scenario:** 
+
+* You're working for a food delivery app which takes a 20% commission on
+every food delivery order. 
+* You're considering partnering with a new restaurant
+and need to calculate if the partnership would be profitable. 
+* Your delivery costs are \$3.50 per delivery.
+
+:::: {.fragment}
+**Given Information:**
+
+- The restaurant offers three meal categories with different prices and order probabilities
+- You need to calculate the expected profit per order to decide if the partnership is worthwhile
+
+**Data:**
+
+- **Appetizers:** \$8 each, ordered 15% of the time
+- **Main Courses:** \$18 each, ordered 70% of the time  
+- **Desserts:** \$6 each, ordered 15% of the time
+::::
+
+:::: {.fragment}
+**Question:** What is the expected meal price per order?
+::::
+
+:::: {.fragment}
+**Solution:**
+
+Let $X$ be the meal price per order. We need to calculate $E[X]$.
+
+$$E[X] = \sum_{x} x \cdot P(X=x)$$
+
+$$E[X] = (\$8 \times 0.15) + (\$18 \times 0.70) + (\$6 \times 0.15)$$
+
+$$E[X] = \$1.20 + \$12.60 + \$0.90 = \$14.70$$
+
+**Answer:** The expected meal price per order is **\$14.70**. And 20% of that is **\$2.94**.
+::::
+
+
+::: {.fragment}
+**Follow-up Question:** If the delivery app's average cost per delivery is \$3.50, should they partner with this restaurant?
+:::
+
+
 ::: {.content-visible when-profile="slides"}
 ## Expected value continued
 :::
@@ -743,10 +872,12 @@ However, be careful: in certain situations, it may not be very informative, or i
 In some cases a random variable may not ever take on the expected value as a possible value. 
 
 * As an example, consider the single die, whose expected value is 3.5
-* In other cases the notion of expected value isn't useful. Consider a person with their
-  head in an oven and their feet in a freezer who claims "on average I feel fine." 
 
-Importantly, the mean may not be very informative when observations are highly variable. 
+In other cases the notion of expected value isn't useful. 
+
+* Consider a person with their head in an oven and their feet in a freezer who claims "on average I feel fine." 
+
+Importantly, the expected value may not be very informative when observations are highly variable. 
 
 ::: {.content-visible when-profile="slides"}
 ## Variance and Standard Deviation
@@ -776,11 +907,213 @@ So to compare variance and mean in the same units, we take the square root of th
 
 This is called the __standard deviation__ and is denoted $\sigma$.
 
+## Variance Example
+
+Let's take the daily temperature in Boston for September 2024.
+
+```{python}
+"""
+Boston Historical Temperature Analysis
+=====================================
+
+This script downloads historical monthly temperature data for Boston over the last 100 years,
+calculates statistics for each month, and creates a box and whisker plot.
+
+Data Source: NOAA Climate Data Online (CDO) API
+Station: Boston Logan International Airport (USW00014739)
+"""
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import requests
+import numpy as np
+from datetime import datetime, timedelta
+import warnings
+warnings.filterwarnings('ignore')
+
+# Set up plotting style
+plt.style.use('default')
+sns.set_palette("husl")
+
+def download_boston_temperature_data():
+    """
+    Download historical temperature data for Boston from NOAA CDO API.
+    
+    Returns:
+        pandas.DataFrame: Temperature data with columns for date, month, and temperature
+    """
+    print("Downloading Boston temperature data from NOAA...")
+    
+    # Boston Logan International Airport station ID
+    station_id = "USW00014739"
+    
+    # Calculate date range for last 100 years
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=365*100)
+    
+    # Format dates for API
+    start_str = start_date.strftime("%Y-%m-%d")
+    end_str = end_date.strftime("%Y-%m-%d")
+    
+    # NOAA CDO API endpoint
+    base_url = "https://www.ncei.noaa.gov/access/services/data/v1"
+    
+    # Parameters for the API request
+    params = {
+        'dataset': 'daily-summaries',
+        'stations': station_id,
+        'startDate': start_str,
+        'endDate': end_str,
+        'dataTypes': 'TMAX,TMIN,TAVG',
+        'format': 'json',
+        'units': 'metric'
+    }
+    
+    try:
+        # Make API request
+        response = requests.get(base_url, params=params, timeout=30)
+        response.raise_for_status()
+        
+        # Convert to DataFrame
+        data = response.json()
+        df = pd.DataFrame(data)
+        
+        if df.empty:
+            print("No data returned from API. Trying alternative approach...")
+            return download_alternative_data()
+        
+        # Convert date column
+        df['DATE'] = pd.to_datetime(df['DATE'])
+        
+        # Convert temperature columns to numeric, handling missing values
+        temp_columns = ['TMAX', 'TMIN', 'TAVG']
+        for col in temp_columns:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+        
+        # Add month column
+        df['MONTH'] = df['DATE'].dt.month
+        df['YEAR'] = df['DATE'].dt.year
+        
+        print(f"Downloaded {len(df)} temperature records")
+        return df
+        
+    except Exception as e:
+        print(f"Error downloading from NOAA API: {e}")
+        return None
+
+def calculate_monthly_statistics(df):
+    """
+    Calculate average and standard deviation for each month.
+    
+    Args:
+        df (pandas.DataFrame): Temperature data
+        
+    Returns:
+        pandas.DataFrame: Monthly statistics
+    """
+    print("Calculating monthly statistics...")
+    
+    # Calculate monthly statistics for average temperature
+    monthly_stats = df.groupby('MONTH')['TAVG'].agg([
+        'mean', 'std', 'count', 'min', 'max'
+    ]).round(2)
+    
+    # Add month names
+    month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    monthly_stats['MONTH_NAME'] = [month_names[i-1] for i in monthly_stats.index]
+    
+    print("\nMonthly Temperature Statistics (Celsius):")
+    print("=" * 50)
+    print(f"{'Month':<6} {'Mean':<8} {'Std':<8} {'Count':<8} {'Min':<8} {'Max':<8}")
+    print("-" * 50)
+    for month, row in monthly_stats.iterrows():
+        print(f"{row['MONTH_NAME']:<6} {row['mean']:<8.1f} {row['std']:<8.1f} "
+              f"{row['count']:<8.0f} {row['min']:<8.1f} {row['max']:<8.1f}")
+    
+    return monthly_stats
+
+def create_box_whisker_plot(df):
+    """
+    Create a box and whisker plot showing temperature distribution by month.
+    
+    Args:
+        df (pandas.DataFrame): Temperature data
+    """
+    print("Creating box and whisker plot...")
+    
+    # Set up the plot
+    plt.figure(figsize=(12, 8))
+    
+    # Create box plot
+    box_plot = plt.boxplot([df[df['MONTH'] == month]['TAVG'].dropna() 
+                           for month in range(1, 13)],
+                          labels=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                          patch_artist=True)
+    
+    # Color the boxes
+    colors = plt.cm.viridis(np.linspace(0, 1, 12))
+    for patch, color in zip(box_plot['boxes'], colors):
+        patch.set_facecolor(color)
+        patch.set_alpha(0.7)
+    
+    # Customize the plot
+    plt.title('Boston Monthly Temperature Distribution', 
+              fontsize=16, fontweight='bold', pad=20)
+    plt.xlabel('Month', fontsize=12, fontweight='bold')
+    plt.ylabel('Temperature (°C)', fontsize=12, fontweight='bold')
+    plt.grid(True, alpha=0.3)
+    
+    # Add statistics text
+    stats_text = f"Data Period: {df['DATE'].min().strftime('%Y')} - {df['DATE'].max().strftime('%Y')}\n"
+    stats_text += f"Total Records: {len(df):,}\n"
+    stats_text += f"Station: Boston Logan International Airport"
+    
+    #plt.figtext(0.02, 0.02, stats_text, fontsize=10, 
+    #            bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgray", alpha=0.8))
+    
+    # Rotate x-axis labels for better readability
+    plt.xticks(rotation=45)
+    
+    # Adjust layout to prevent label cutoff
+    plt.tight_layout()
+    
+    plt.show()
+
+
+def main():
+    """
+    Main function to run the complete analysis.
+    """
+    print("Boston Historical Temperature Analysis")
+    print("=" * 40)
+    
+    # Download data
+    df = download_boston_temperature_data()
+    
+    # Filter data to last 100 years if we have more
+    if not df.empty:
+        current_year = datetime.now().year
+        df = df[df['YEAR'] >= (current_year - 100)]
+        print(f"Filtered to last 100 years: {df['YEAR'].min()} - {df['YEAR'].max()}")
+    
+    # Calculate statistics
+    monthly_stats = calculate_monthly_statistics(df)
+    
+    # Create visualizations
+    create_box_whisker_plot(df)  
+
+main()
+```
+
 ::: {.content-visible when-profile="slides"}
 ## Stocks as random variables
 :::
 
-Next, let's recall the case of the Tesla and NVidia returns from the previous lecture:
+Let's take the case of the Tesla and NVidia returns in 2023:
 
 ```{python}
 #| fig-align: center
