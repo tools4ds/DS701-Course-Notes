@@ -63,8 +63,8 @@ website:
         - 02A-Git.qmd
         - 02B-Pandas.qmd
         - 02C-Sklearn.qmd
-        - 04-Linear-Algebra-Refresher.qmd
         - 03-Probability-and-Statistics-Refresher.qmd
+        - 04-Linear-Algebra-Refresher.qmd
         - 05-Distances-Timeseries.qmd
         - 05A-Learning.qmd
     - section: "Clustering"

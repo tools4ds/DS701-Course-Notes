@@ -13,8 +13,9 @@ title: Lecture Schedule
 | Sep 9 | 03 -- Class Survey Results, Intro to Pandas | [Survey Results (1)](https://docs.google.com/presentation/d/e/2PACX-1vS9da4EjD0vZ0--eIwYKMrNz7YlFKKsfe7QjpyhnVUT-DfpotVsjcL_H8z6vVkzW0k1v2Xxd2bakIDc/pub?start=false&loop=false&delayms=3000&slide=id.p), [Pandas](./02B-Pandas.qmd)<br> (1) BU email address required  | |
 | Sep 11 | 04 -- DS Project Lifecycle, Intro to SciKit-Learn | [DS PLC](https://docs.google.com/presentation/d/e/2PACX-1vTLyHd8UIU94ayKf17KIHdOYBNkEBJ6F0P5NMRRuJt5v0pioCVdEUpSVBvBc67mikJsVj7ijTCoqPh2/pub?start=false&loop=false&delayms=3000), [SciKit-Learn](./02C-Sklearn.qmd)  | |
 | **Week 3**  | --- | --- | --- |
-| Sep 16 | 05 -- Probability & Linear Algebra Refresher | [Probability](./03-Probability-and-Statistics-Refresher.qmd), [Linear Algebra](./04-Linear-Algebra-Refresher.qmd) |  |
-| Sep 18 | 06 -- Distance, Similarity Functions and Time Series  | [Distances, Time Series](./05-Distances-Timeseries.qmd)   | |
+| Sep 16 | 05 -- Probability Refresher | [Probability](./03-Probability-and-Statistics-Refresher.qmd) |  |
+| Sep 18 | 06 -- Linear Algebra Refresher | [Linear Algebra](./04-Linear-Algebra-Refresher.qmd)   | |
+| --- |  -- Distance, Similarity Functions and Time Series  | [Distances, Time Series](./05-Distances-Timeseries.qmd)   | |
 | **Week 4**  | --- | --- | --- |
 | --- | 07 -- Clustering I: k-means | [k-means](./06-Clustering-I-kmeans.qmd) | |
 | Sep 23 | 07 -- Clusterin II: In Practice |  [Clustering in Practice](./07-Clustering-II-In-Practice.qmd)  |  |
