@@ -530,7 +530,6 @@ So we have updated our estimate of the twins being identical from 1/3
 (prior probability) to 1/2 (posterior probability).
 
 We did this in a way that used quantities that were relatively easy to obtain or measure.
-
 :::
 
 ::: {.content-visible when-profile="slides"}
@@ -602,7 +601,7 @@ __Examples__
 ::::
 
 ::: {.content-visible when-profile="web"}
-### Continous random variables
+### Continuous random variables
 :::
 
 ::: {.content-visible when-profile="slides"}
@@ -717,7 +716,7 @@ plt.ylabel(r'$P(X\leq x)$', size=14)
 plt.show()
 ```
 
-## Continous Distributions
+## Continuous Distributions
 
 ::: {.content-visible when-profile="web"}
 ### Probability Density Function
@@ -1411,6 +1410,9 @@ Note that there is a particularly concise way of writing the above definition:
 $$ p(x) = P(X=x) = p^x (1-p)^{(1-x)} \: \text{ for } \: x = 0 \text{ and } x=1.$$
 
 The mean of a $X$ is $p$ and the variance of $X$ is $p(1-p)$.
+
+> Can you derive this yourself?
+
 ::::
 
 ::: {.content-visible when-profile="web"}
@@ -1485,7 +1487,7 @@ plt.show()
 ## The Poisson Distribution
 :::
 
-Although the Bernoulli trials underlie all of the previous distributions, they do not form the basis for the Poisson distribution. To introduce the Poisson distribution we will look at some examples of random variables that generally obey the Poisson probability law:
+Although the Bernoulli trials underlie all of the previous distributions in these notes, they do not form the basis for the Poisson distribution. To introduce the Poisson distribution we will look at some examples of random variables that generally obey the Poisson probability law:
 
 1. The number of misprints on a page (or a group of pages) of a book;
 1. The number of people in a community who survive to age 100;
