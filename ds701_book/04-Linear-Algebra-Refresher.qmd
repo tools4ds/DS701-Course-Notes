@@ -24,6 +24,7 @@ Examples
 - Least squares uses matrix inverses and matrix factorizations to compute models for predicting continuous values.
 - PCA (dimensionality reduction) uses the matrix factorization called the Singular Value Decomposition (SVD).
 - Graphs are described by adjacency matrices. Eigenvectors and eigenvalues of this matrix provide information about the graph structure.
+ - Recommendation systems represent the interactions between users and items as a large matrix.  Linear algebra is then used to compute similarities and predict missing ratings.
 ::::
 ::::
 
@@ -38,10 +39,6 @@ Linear algebra is used to implement data science algorithms efficiently and accu
 :::: {.fragment}
 You will not have to program linear algebra algorithms. You will use appropriate Python packages.
 ::::
-
-::: {.content-hidden when-profile="slides"}
-This lecture is a review of some aspects of linear algebra that are important for data science. Given the prerequisites for this course, I assume that you previously learned this material. 
-:::
 
 :::: {.fragment}
 The goal of this lecture is to refresh the following topics:
@@ -85,17 +82,31 @@ x_n
 \end{bmatrix}.
 $$
 
-
 When discussing vectors we will only consider column vectors. A row vector can always be obtained from a column vector via transposition
 
 $$
 \mathbf{x}^{T} = [x_1, x_2, \ldots, x_n].
 $$
 
+## Examples of Vectors
+
+In practice we use vectors to encode measurements or features.  
+
+* a housing dataset with two features: $\mathbf{x}=[\text{bedrooms},\text{area}]^T$ where the first component counts bedrooms and the second measures square footage.  
+
+* an image patch can be represented by a long vector of pixel intensities. 
+
+**Class activity (1–2 minutes):** With a partner, list three different kinds of data that you can naturally represent as vectors.  Share your examples with the class.
+
+:::: {.fragment}
+Examples: Geographic coordinates (Lat, Long, Elevation), RGB color intensities, term frequencies, sensor readings...
+::::
+
 ## Geometric interpretation of vectors
 
 * Vectors in $\mathbb{R}^{2}$ can be visualized as points in a 2-D plane (or arrows originating at the origin), 
 * Vectors in $\mathbb{R}^{3}$ can be visualized as points in a 3-D space (or arrows originating at the origin).
+* Although we can't visualize vectors in $\mathbb{R}^{n}$ for $n>3$, we can still think of them as points in an $n$-dimensional space, although _the curse of dimensionality_ comes into play (more later)
 
 Let 
 
@@ -177,12 +188,27 @@ ax.grid()
 plt.show()
 ```
 
+## Example: Image processing
+
+* in image processing each pixel's color is typically represented by a 3‑element RGB vector.  
+* Multiplying the RGB vector by a scalar less than one darkens the pixel, while
+* multiplying by a scalar greater than one brightens it.  
+
+E.g. scaling the color $(0.2,0.5,0.7)$ by $0.5$ yields $(0.1,0.25,0.35)$
+
+Scaling by $2$ yields $(0.4,1.0,1.0)$ (clipping values to stay between $0$ and $1$).
+
+
 ---
 
-**Vector addition:** Let $\mathbf{u},\mathbf{v}\in\mathbb{R}^{n}$ then
+## Vector addition
+
+Let $\mathbf{u},\mathbf{v}\in\mathbb{R}^{n}$ then
+
 $$
 \mathbf{u} + \mathbf{v} = \begin{bmatrix} u_1 + v_1 \\ u_2 + v_2 \\ \vdots \\ u_n + v_n \end{bmatrix}.
 $$
+
 
 ---
 
@@ -217,6 +243,18 @@ ax.grid()
 plt.show()
 ```
 
+
+---
+
+Vector addition occurs whenever you combine measurements componentwise.  
+
+For example, 
+
+* if $\mathbf{u}=[100,80]$ and $\mathbf{v}=[20,50]$ record the number of items sold by two shops on Monday and Tuesday, then 
+* their sum $\mathbf{u}+\mathbf{v}=[120,130]$ gives the total items sold by both shops on those days.
+
+**Class activity (1–2 minutes):** Add the vectors $\mathbf{u}=[-1,4]$ and $\mathbf{v}=[3,-2]$ by hand and sketch the result.  Discuss how the parallelogram rule visualizes vector addition.
+
 ---
 
 **Dot product:** Let $\mathbf{u},\mathbf{v}\in\mathbb{R}^{n}$ then the dot product is defined as
@@ -232,6 +270,21 @@ $$
 This norm is referred to as the $\ell_2$ norm. In these notes, the notation $\Vert \mathbf{v} \Vert$, indicates the 2-norm.
 
 ---
+
+Dot products and norms arise constantly in data science.
+
+Let's look at another numerical example.
+
+If $\mathbf{u}=[1,2,0]$ and $\mathbf{v}=[3,-1,4]$, then
+$$
+\mathbf{u}\cdot\mathbf{v} = 1\cdot 3 + 2\cdot(-1) + 0\cdot 4 = 1.
+$$
+
+* norm of $\mathbf{u}$ is $\|\mathbf{u}\|_2 = \sqrt{1^2+2^2+0^2} = \sqrt{5}$ and the 
+* norm of $\mathbf{v}$ is $\sqrt{3^2+(-1)^2+4^2}=\sqrt{26}$.  
+
+
+## Definitions
 
 **Unit vector:** A unit vector $\mathbf{v}$ is a vector such that $\Vert \mathbf{v} \Vert_2 = 1$. 
     - All vectors of the form $\frac{\mathbf{v}}{\Vert \mathbf{v} \Vert_2 }$ are unit vectors.
@@ -306,6 +359,18 @@ print(f"The angle between u and v is {theta} radians or {np.degrees(theta)} degr
 
 ---
 
+Such cosine similarities are used in natural language processing to quantify how similar two word‑embedding vectors are.
+
+**Class activity (1–2 minutes):** 
+
+Compute the dot product of $\mathbf{u}=[1,2,0]$ and $\mathbf{v}=[3,-1,4]$.  
+
+Are the vectors orthogonal?  
+
+Next compute $\|\mathbf{u}\|_2$, $\|\mathbf{v}\|_2$ and the angle between them.  
+
+## More Definitions
+
 **Linear dependence:** A set of $n$ vectors $\mathbf{v}_{1}, \ldots, \mathbf{v}_{n}\in\mathbb{R}^n$ is linearly dependent if there exists scalars $a_1,\ldots, a_n$ not all zero such that 
 $$
 \sum_{i=1}^{n} a_i \mathbf{v}_i = 0.
@@ -320,6 +385,19 @@ is only satisfied if $a_i=0$ for $i=1, \ldots,n$.
 
 **Span:** Given a set of vectors $V = \{\mathbf{v}_{1}, \ldots, \mathbf{v}_{n}\}$, where $\mathbf{v}_i\in\mathbb{R}^n$, the span(V) is the set of all linear combinations of vectors in $V$.
 
+---
+
+Let's look at an example.
+
+For example, the vectors $\mathbf{v}_1=(1,1,0)$ and $\mathbf{v}_2=(2,2,0)$ are linearly dependent because $\mathbf{v}_2=2\mathbf{v}_1$.  
+
+In contrast, the standard basis vectors $e_1=(1,0,0)$, $e_2=(0,1,0)$ and $e_3=(0,0,1)$ in $\mathbb{R}^3$ are linearly independent, and their span is the entire three‑dimensional space.  
+
+When working with data, linear independence tells us whether a set of features carries redundant information.
+
+:::: {.fragment}
+**Class activity (1–2 minutes):** Consider the set of vectors $\{[1,0], [0,1], [1,1]\}$ in $\mathbb{R}^2$.  Work with a neighbor to decide whether these vectors are linearly independent.  What is their span?  Justify your answer.
+::::
 
 # Matrices
 
@@ -338,6 +416,8 @@ a_{m1} &a_{m2} & \cdots & a_{mn} \\
 $$
 
 with $m$ rows and $n$ columns. The element at row $i$ and column $j$ is denoted $a_{ij}$. If $m=n$ we call it a square matrix.
+
+> Note: By convention, matrix indexing is opposite of graphical vector indexing.
 
 ---
 
@@ -460,25 +540,48 @@ $$
 for $i=1,\ldots, m$ and $j=1, \ldots, p$.
 
 
+$$
+AB = 
+\begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1n} \\
+a_{21} & a_{22} & \cdots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{m1} & a_{m2} & \cdots & a_{mn} \\
+\end{bmatrix}
+\begin{bmatrix}
+b_{11} & b_{12} & \cdots & b_{1p} \\
+b_{21} & b_{22} & \cdots & b_{2p} \\
+\vdots & \vdots & \ddots & \vdots \\
+b_{n1} & b_{n2} & \cdots & b_{np} \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+c_{11} & c_{12} & \cdots & c_{1p} \\
+c_{21} & c_{22} & \cdots & c_{2p} \\
+\vdots & \vdots & \ddots & \vdots \\
+c_{m1} & c_{m2} & \cdots & c_{mp} \\
+\end{bmatrix}.
+$$
+
 # Vector spaces
 
 ## Vector spaces
 
 An essential concept in linear algebra is the notion of a **vector space**.
 
-A vector space is a set $V$ such that for any 2 elements in the set, say $\mathbf{u},\mathbf{v}\in V$, and any scalars, $c$ and $d$, then $c\mathbf{u} + d\mathbf{v}\in V$. 
+A vector space is a set $V$ such that for any two vectors in the set, say $\mathbf{u},\mathbf{v}\in V$, and any scalars $c$ and $d$, the linear combination $c\mathbf{u} + d\mathbf{v}$ is also in $V$.  
 
 In addition, a vector space must satisfy the following properties
 
 :::: {.incremental}
-1. $\mathbf{u} + (\mathbf{v} + \mathbf{w}) = (\mathbf{u} + \mathbf{v}) + \mathbf{w}$ (associativity).
-1. $\mathbf{u} + \mathbf{v} = \mathbf{v} + \mathbf{u}$ (commutativity).
-1. There exists $\mathbf{0}\in V$ such that $\mathbf{v} + \mathbf{0} = \mathbf{v}$ for all $\mathbf{v}\in V$ (identity element).
-1. For every $\mathbf{v}\in V$, there exists $-\mathbf{v}\in V$ such that $\mathbf{v} + (-\mathbf{v}) = \mathbf{0}$ (inverse).
-1. $c(d\mathbf{v}) = (cd)\mathbf{v}$
-1. $1\mathbf{v} = \mathbf{v}$
-1. $c(\mathbf{u} + \mathbf{v}) = c\mathbf{u} + c\mathbf{v}$
-1. $(c + d)\mathbf{v} = c\mathbf{v} + d\mathbf{v}$
+1. $\mathbf{u} + (\mathbf{v} + \mathbf{w}) = (\mathbf{u} + \mathbf{v}) + \mathbf{w}$ _(associativity)_.
+1. $\mathbf{u} + \mathbf{v} = \mathbf{v} + \mathbf{u}$ _(commutativity)_.
+1. There exists $\mathbf{0}\in V$ such that $\mathbf{v} + \mathbf{0} = \mathbf{v}$ for all $\mathbf{v}\in V$ _(additive identity element)_.
+1. For every $\mathbf{v}\in V$, there exists $-\mathbf{v}\in V$ such that $\mathbf{v} + (-\mathbf{v}) = \mathbf{0}$ _(additive inverse)_.
+1. $c(d\mathbf{v}) = (cd)\mathbf{v}$ _(associativity)_.
+1. $1\mathbf{v} = \mathbf{v}$ _(multiplicative identity element)_.
+1. $c(\mathbf{u} + \mathbf{v}) = c\mathbf{u} + c\mathbf{v}$ _(distributivity)_.
+1. $(c + d)\mathbf{v} = c\mathbf{v} + d\mathbf{v}$ _(distributivity)_.
 ::::
 
 ::: {.content-hidden when-profile="web"}
@@ -523,6 +626,13 @@ $$
 
 For every $\mathbf{A}\in\mathbb{R}^{n\times n}$, then $\mathbf{AI} = \mathbf{IA}$. 
 
+In practice the identity matrix leaves any vector unchanged.  For example,
+$$
+\begin{bmatrix}1 & 0 \\ 0 & 1 \end{bmatrix}
+\begin{bmatrix}3\\ -2 \end{bmatrix} = \begin{bmatrix}3\\ -2 \end{bmatrix}.
+$$
+Because of this property we sometimes call $I$ the *do nothing* transform.
+
 ::: {.content-visible when-profile="slides"}
 ## Matrix inverse
 :::
@@ -533,6 +643,22 @@ $$AA^{-1} = A^{-1}A = I,$$
 When $A^{-1}$ exists the matrix is said to be _invertible_. 
 
 Note that $(AB)^{-1} = B^{-1}A^{-1}$ for invertible $B\in\mathbb{R}^{n\times n}$.
+
+---
+
+For example, the $2\times 2$ matrix
+$$
+A = \begin{bmatrix}1 & 2\\ 3 & 4\end{bmatrix}
+$$
+has inverse
+$$
+A^{-1} = \begin{bmatrix}-2 & 1\\ 1.5 & -0.5\end{bmatrix},
+$$
+and one can check that $AA^{-1} = I$ and $A^{-1}A = I$.
+
+<br><br>
+
+**Class activity (1–2 minutes):** Show that $AA^{-1} = I$ and $A^{-1}A = I$.
 
 ::: {.content-visible when-profile="slides"}
 ## Diagonal matrices
@@ -558,6 +684,25 @@ $$QQ^{T}=Q^{T}Q=I.$$
 
 In particular, the inverse of an orthogonal matrix is it's transpose.
 
+> Note: Think about this in terms of matrix multiplication of rows and columns and
+> the dot product of orthogonal vectors.
+
+---
+
+A familiar example of an orthogonal matrix is the $2\times 2$ rotation matrix
+$$
+R(\theta) = \begin{bmatrix} \cos \theta & -\sin \theta\\ \sin \theta & \cos \theta\end{bmatrix}.
+$$
+For $\theta=45^\circ$ this becomes $\big[\tfrac{\sqrt{2}}{2}, -\tfrac{\sqrt{2}}{2}; \tfrac{\sqrt{2}}{2}, \tfrac{\sqrt{2}}{2}\big]$, and one can verify that $R(\theta)R(\theta)^T=I$.  
+
+Orthogonal matrices preserve lengths and angles, which is why they model rigid rotations and reflections.
+
+<br><br>
+
+:::: {.fragment}
+**Class activity (1–2 minutes):** Show that the $2\times 2$ matrix $\begin{bmatrix}0 & -1\\ 1 & 0\end{bmatrix}$ and check that it is orthogonal.  What geometric transformation does it represent?
+::::
+
 ::: {.content-visible when-profile="slides"}
 ## Lower triangular matrices
 :::
@@ -573,6 +718,18 @@ l_{1n} & l_{n2} & \cdots & l_{nn} \\
 \end{bmatrix}.
 $$
 
+---
+
+Solving a linear system $L\mathbf{x}=\mathbf{b}$ with $L$ lower triangular can be done efficiently by forward substitution.  
+
+For example, let
+$$
+L = \begin{bmatrix}1 & 0\\ 2 & 3\end{bmatrix},\quad \mathbf{b} = \begin{bmatrix}1\\4\end{bmatrix}.
+$$
+Then the system $L\mathbf{x}=\mathbf{b}$ yields $x_1=1$ from the first equation and $2x_1+3x_2=4$ from the second, giving $x_2=\tfrac{2}{3}$.
+
+**Class activity (1–2 minutes):** Solve the lower triangular system $\begin{bmatrix}1 & 0\\ -1 & 2\end{bmatrix}\mathbf{x} = \begin{bmatrix}3\\1\end{bmatrix}$ by forward substitution.
+
 ::: {.content-visible when-profile="slides"}
 ## Upper triangular matrices
 :::
@@ -587,6 +744,16 @@ u_{11} & u_{12} & \cdots & u_{1n} \\
 0 & 0 & \cdots & u_{nn} \\
 \end{bmatrix}.
 $$
+
+---
+
+Upper triangular systems are solved by backward substitution.  For example, if
+$$
+U = \begin{bmatrix}4 & 1\\ 0 & 5\end{bmatrix},\quad \mathbf{b} = \begin{bmatrix}9\\10\end{bmatrix},
+$$
+the equation $U\mathbf{x}=\mathbf{b}$ implies $5x_2=10$ so $x_2=2$, and then $4x_1 + x_2 =9$ gives $x_1 = \tfrac{7}{4}$.
+
+**Class activity (1–2 minutes):** Solve the upper triangular system $\begin{bmatrix}2 & 3\\ 0 & -1\end{bmatrix}\mathbf{x} = \begin{bmatrix}7\\ -2\end{bmatrix}$ by backward substitution.
 
 ::: {.content-visible when-profile="web"}
 The inverse of a lower triangular matrix is itself a lower triangular matrix. This is also true for upper triangular matrices, i.e., the inverse is also upper triangular.
@@ -605,6 +772,21 @@ for some scalar $\lambda.$
 The scalar $\lambda$ is called an eigenvalue.
 
 An $n \times n$ matrix has at most $n$ distinct eigenvectors and at most $n$ distinct eigenvalues.
+
+---
+
+For example, consider the matrix
+$$
+A = \begin{bmatrix}2 & 1\\1 & 2\end{bmatrix}.
+$$
+It has eigenvalues $\lambda_1=3$ and $\lambda_2=1$ with corresponding eigenvectors $\mathbf{v}_1=[1,1]^T$ and $\mathbf{v}_2=[1,-1]^T$.  
+
+
+Eigenvectors reveal directions that the matrix stretches or compresses without changing direction.
+
+<br><br>
+
+**Class activity (1–2 minutes):** Verify that $A\mathbf{v}_1 = 3\mathbf{v}_1$ and $A\mathbf{v}_2 = 1\mathbf{v}_2$. 
 
 ::: {.content-visible when-profile="slides"}
 # Matrix decompositions
@@ -630,7 +812,7 @@ $$
 A = LU,
 $$
 
-where $L$ is a lower triangular square matrix and $U$ is an triangular square matrix. For example, when $n=3$, we have
+where $L$ is a lower triangular square matrix and $U$ is an upper triangular square matrix. For example, when $n=3$, we have
 
 $$ 
 \begin{bmatrix}
@@ -654,8 +836,9 @@ $$
 It simplifies the process of solving linear equations and is more numerically
 stable than computing the inverse of $A$.
 
-<br>
-You can then solve this in two steps:
+---
+
+Then instad of computing the inverse of $A$, we can solve the linear system $A\mathbf{x}=\mathbf{b}$ in two steps:
 
 1. **Forward substitution:** First, solve the equation $L\mathbf{y} = \mathbf{b}$ for $\mathbf{y}$.
 2. **Backward substitution:** Then, solve $U\mathbf{x} = \mathbf{y}$ for $\mathbf{x}$.
@@ -665,13 +848,22 @@ work with. It can make solving linear systems faster and more efficient,
 especially for large matrices.
 
 
+---
+
+For example, consider the matrix
+$$
+A = \begin{bmatrix}4 & 3\\6 & 3\end{bmatrix}.
+$$
+One possible LU factorization is
+$$
+A = LU = \begin{bmatrix}1 & 0\\ 1.5 & 1\end{bmatrix}\begin{bmatrix}4 & 3\\ 0 & -1.5\end{bmatrix}.
+$$
+Once we have $L$ and $U$ we can solve $A\mathbf{x}=\mathbf{b}$ by first solving $L\mathbf{y}=\mathbf{b}$ and then $U\mathbf{x}=\mathbf{y}$.
+
+
 ::: {.content-visible when-profile="web"}
 ### QR decomposition
-:::
 
-::: {.content-visible when-profile="slides"}
-## QR factorization
-:::
 
 A QR decomposition of a square matrix $A\in\mathbb{R}^{n\times n}$ is a factorization of $A$ into a product of matrices
 
@@ -683,7 +875,8 @@ where $Q$ is an orthogonal square matrix and $R$ is an upper-triangular square m
 
 QR factorization is useful in solving linear systems and performing least squares fitting.
 
-<br>
+---
+
 This factorization has a couple of important benefits:
 
 1. **Solving Linear Systems**: When you're working with a system of equations represented by $A\mathbf{x} = \mathbf{b}$, you can substitute the QR factorization into this equation:
@@ -707,6 +900,20 @@ This factorization has a couple of important benefits:
    $$
 
 By converting the problem into a triangular system, QR factorization often provides a more stable numerical solution than other methods, especially for poorly conditioned matrices.
+
+
+---
+
+As a simple example, consider the $2\times 2$ matrix
+$$
+A = \begin{bmatrix}1 & 1\\1 & -1\end{bmatrix}.
+$$
+Using the _Gram–Schmidt process_ we can factor it as
+$$
+A = QR \quad\text{with}\quad Q = \tfrac{1}{\sqrt{2}}\begin{bmatrix}1 & 1\\1 & -1\end{bmatrix},\quad R = \sqrt{2}\begin{bmatrix}1 & 0\\ 0 & 1\end{bmatrix}.
+$$
+Here $Q$ has orthonormal columns and $R$ is upper triangular.
+
 
 
 
@@ -752,9 +959,6 @@ $$
 
 We'll use eigendecomposition in Principal Component Analysis (PCA) to reduce dimensionality in datasets while preserving as much variance as possible.
 
-::: {.content-visible when-profile="slides"}
-## Spectral decomposition
-:::
 A special case occurs when $A$ is symmetric. Recall that a matrix is symmetric when $A = A^T.$
 
 In this case, it can be shown that the eigenvectors of $A$ are all mutually orthogonal. Consequently, $X^{-1} = X^{T}$ and we can decompose $A$ as:
@@ -762,6 +966,12 @@ In this case, it can be shown that the eigenvectors of $A$ are all mutually orth
 $$A = XDX^T.$$
 
 This is known as the spectral theorem and this decomposition of $A$ is its spectral decomposition. The eigenvalues of a matrix are also called its spectrum.
+
+For symmetric matrices the eigenvectors can be chosen to be orthonormal, so $X^{-1} = X^T$.  In the earlier example $A=\begin{bmatrix}2&1\\1&2\end{bmatrix}$, which is symmetric, its eigendecomposition can be written in orthonormal form as $A = X \Lambda X^T$ with
+$$
+X = \tfrac{1}{\sqrt{2}}\begin{bmatrix}1 & 1\\ 1 & -1\end{bmatrix},\quad \Lambda = \mathrm{diag}(3,1).
+$$
+Because the columns of $X$ are orthonormal, the factorization $A = X\Lambda X^T$ is often easier to use numerically and conceptually.
 
 
 ::: {.content-visible when-profile="web"}
@@ -796,6 +1006,21 @@ The values $\sigma_{ij}$ are the singular values of the matrix $A$.
 
 Amazingly, it can be proven that every matrix $A\in\mathbb{R}^{m\times n}$ has a singular value decomposition.
 
+---
+
+For example, let
+$$
+A = \begin{bmatrix}3 & 1\\ 1 & 3\end{bmatrix}.
+$$
+This matrix has singular value decomposition $A = U\Sigma V^T$ where the singular values are $\sigma_1=4$ and $\sigma_2=2$.  The first singular vector (in $U$) points along the direction $[1,1]^T$ and corresponds to the dominant variation in the matrix.  In data analysis we often keep only a few largest singular values to approximate a matrix with lower rank—a technique used in latent semantic analysis and image compression.
+
+**Class activity (1–2 minutes):** Use NumPy (or by hand if you prefer) to compute the singular values of the matrix $\begin{bmatrix}2 & 0\\ 0 & 1\end{bmatrix}$.  Discuss how the singular values relate to how the matrix scales different directions.
+
+:::
+
+::: {.content-visible when-profile="slides"}
+## See notes for more examples
+:::
 
 # Linear Systems and Least Squares
 
@@ -841,27 +1066,56 @@ b_m
 \end{bmatrix}.
 $$
 
-::: {.content-visible when-profile="slides"}
+<!-- merged continuation of linear systems section; removed redundant heading -->
+
+---
+
+A linear system of equations may have 
+
+- no solution, 
+- a unique solution, 
+- or infinitely many solutions 
+
+depending on the relationship between the rows and columns of $A$.  
+
+Whether $m<n$ or $m>n$ does not by itself determine the number of solutions
+
+the key is the _rank_ of $A$.
+
+---
+
+For example, the system
+$$
+2x + y = 5,\\
+x - y = 1
+$$
+has a unique solution $(x,y)=(2,1)$.  
+
+In contrast, the system
+$$
+2x + y = 5,\\
+4x + 2y = 10
+$$
+has infinitely many solutions because the second equation is just twice the first.  
+
+Finally the system
+$$
+x + y = 2,\\
+x + y = 3
+$$
+has no solution because the two lines are parallel and never intersect.
+
+---
+
+When the coefficient matrix $A$ is invertible (square and full rank), there is always a unique solution given by $\mathbf{x}=A^{-1}\mathbf{b}$.  
+
+When $A$ is rank deficient or when there are more equations than unknowns, a solution may not exist or there may be infinitely many solutions.
+
+Rank deficient means that the matrix has less than $n$ linearly independent columns.
+
+::: {.content-visible when-profile="web"}
 ## Linear systems of equations continued
-:::
 
-A linear system of equations may have:
-
-:::: {.incremental}
-- infinitely many solutions,
-- a unique solution,
-- no solutions.
-::::
-
-:::: {.fragment}
-When $m > n$, the system is said to be overdetermined and _in general_ has no  solutions. When $m < n$ the system is underdetermined and _in general_ has infinitely many solutions. For the case when $m=n$ and the matrix has $n$ linearly dependent columns, the solution is always unique.
-
-For an invertible square matrix $A\mathbf{x}=\mathbf{b}$, the solution is always $\mathbf{x}=A^{-1}\mathbf{b}$. 
-::::
-
-::: {.content-visible when-profile="slides"}
-## Linear systems of equations continued
-:::
 We can use matrix factorizations to help us solve a linear system of equation. We demonstrate how to do this with the LU decomposition. Observe that 
 $$A\mathbf{x} = LU\mathbf{x} = \mathbf{b}.$$ 
 
@@ -873,6 +1127,7 @@ $$
 
 The process of inverting $L$ and $U$ is called backward and forward substitution.
 
+:::
 
 ## Least squares
 
@@ -995,4 +1250,664 @@ We have introduced the following concepts:
 - linear systems of equations,
 - least squares,
 - eigenvalues and eigenvectors.
+
+> See notes for python implementations of linear algebra operations.
+:::
+
+::: {.content-visible when-profile="web"}
+
+# Appendix: Python Implementations of Linear Algebra Operations
+
+## 1. Vector Operations
+
+### Vector Creation and Basic Properties
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.linalg import qr, lu, svd, eig, solve_triangular
+from scipy.sparse.linalg import eigs
+
+# Create vectors
+x = np.array([2, 2])
+y = np.array([3, -1])
+z = np.array([-2, -1])
+
+print(f"Vector x: {x}")
+print(f"Vector y: {y}")
+print(f"Vector z: {z}")
+```
+
+### Scalar Multiplication
+
+```{python}
+# Scalar multiplication
+c = 2
+scaled_x = c * x
+print(f"Scalar multiplication: {c} * {x} = {scaled_x}")
+
+# Example: Image processing (RGB scaling)
+rgb_color = np.array([0.2, 0.5, 0.7])
+darkened = 0.5 * rgb_color
+brightened = np.clip(2 * rgb_color, 0, 1)  # Clip to stay in [0,1]
+print(f"Original RGB: {rgb_color}")
+print(f"Darkened: {darkened}")
+print(f"Brightened: {brightened}")
+```
+
+### Vector Addition
+
+```{python}
+# Vector addition
+u = np.array([1, 2])
+v = np.array([4, 1])
+w = u + v
+print(f"Vector addition: {u} + {v} = {w}")
+
+# Example: Sales data
+shop1_sales = np.array([100, 80])  # Monday, Tuesday
+shop2_sales = np.array([20, 50])
+total_sales = shop1_sales + shop2_sales
+print(f"Total sales: {total_sales}")
+```
+
+### Dot Product
+
+```{python}
+# Dot product
+u = np.array([1, 2, 0])
+v = np.array([3, -1, 4])
+dot_product = np.dot(u, v)
+print(f"Dot product: {u} · {v} = {dot_product}")
+
+# Alternative syntax
+dot_product_alt = u @ v  # Matrix multiplication operator
+print(f"Dot product (alternative): {dot_product_alt}")
+```
+
+### Vector Norms
+
+```{python}
+# Vector 2-norm (Euclidean norm)
+norm_u = np.linalg.norm(u)
+norm_v = np.linalg.norm(v)
+print(f"||u||_2 = {norm_u}")
+print(f"||v||_2 = {norm_v}")
+
+# Manual calculation
+norm_u_manual = np.sqrt(np.sum(u**2))
+print(f"||u||_2 (manual): {norm_u_manual}")
+```
+
+### Unit Vectors
+
+```{python}
+# Create unit vector
+unit_u = u / np.linalg.norm(u)
+print(f"u: {u}")
+print(f"Unit vector from u: {unit_u}")
+print(f"Norm of unit vector: {np.linalg.norm(unit_u)}")
+```
+
+### Distance Between Vectors
+
+```{python}
+# Distance between vectors
+distance = np.linalg.norm(u - v)
+print(f"Distance between u and v: {distance}")
+```
+
+### Orthogonality Check
+
+```{python}
+# Check orthogonality
+def are_orthogonal(vec1, vec2, tolerance=1e-10):
+    return abs(np.dot(vec1, vec2)) < tolerance
+
+print(f"Are u and v orthogonal? {are_orthogonal(u, v)}")
+
+# Example of orthogonal vectors
+orth1 = np.array([1, 0])
+orth2 = np.array([0, 1])
+print(f"Are orth1 and orth2 orthogonal? {are_orthogonal(orth1, orth2)}")
+```
+
+### Angle Between Vectors
+
+```{python}
+# Angle between vectors
+def angle_between_vectors(vec1, vec2):
+    cos_theta = np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+    # Clamp to avoid numerical errors
+    cos_theta = np.clip(cos_theta, -1.0, 1.0)
+    return np.arccos(cos_theta)
+
+u_2d = np.array([1, 2])
+v_2d = np.array([4, 1])
+theta = angle_between_vectors(u_2d, v_2d)
+print(f"Angle between u and v: {theta} radians = {np.degrees(theta)} degrees")
+```
+
+### Vector Projection
+
+```{python}
+# Project u onto v
+def project_vector(u, v):
+    return (np.dot(u, v) / np.dot(v, v)) * v
+
+projection = project_vector(u_2d, v_2d)
+print(f"Projection of u onto v: {projection}")
+```
+
+### Linear Independence Check
+
+```{python}
+# Check linear independence
+def check_linear_independence(vectors):
+    """Check if a set of vectors is linearly independent"""
+    matrix = np.column_stack(vectors)
+    rank = np.linalg.matrix_rank(matrix)
+    return rank == len(vectors)
+
+# Example vectors
+v1 = np.array([1, 0])
+v2 = np.array([0, 1])
+v3 = np.array([1, 1])
+
+vectors = [v1, v2, v3]
+is_independent = check_linear_independence(vectors)
+print(f"Are vectors {v1}, {v2}, {v3} linearly independent? {is_independent}")
+```
+
+## 2. Matrix Operations
+
+### Matrix Creation and Basic Properties
+
+```{python}
+# Create matrices
+A = np.array([[1, 2, 3],
+              [4, 5, 6]])
+B = np.array([[7, 8],
+              [9, 10],
+              [11, 12]])
+
+print(f"Matrix A (2x3):\n{A}")
+print(f"Matrix B (3x2):\n{B}")
+print(f"A shape: {A.shape}")
+print(f"B shape: {B.shape}")
+```
+
+### Scalar Multiplication of Matrices
+
+```{python}
+# Scalar multiplication
+c = 2
+scaled_A = c * A
+print(f"Scalar multiplication:\n{scaled_A}")
+```
+
+### Matrix Addition
+
+```{python}
+# Matrix addition (matrices must have same dimensions)
+C = np.array([[1, 1, 1],
+              [2, 2, 2]])
+matrix_sum = A + C
+print(f"Matrix addition A + C:\n{matrix_sum}")
+```
+
+### Matrix Transpose
+
+```{python}
+# Matrix transpose
+A_T = A.T
+print(f"A transpose:\n{A_T}")
+
+# Check if matrix is symmetric
+symmetric_matrix = np.array([[1, 2, 3],
+                           [2, 4, 5],
+                           [3, 5, 6]])
+is_symmetric = np.allclose(symmetric_matrix, symmetric_matrix.T)
+print(f"Is matrix symmetric? {is_symmetric}")
+```
+
+### Matrix-Vector Multiplication
+
+```{python}
+# Matrix-vector multiplication
+x = np.array([1, 2, 3])
+result = A @ x  # or np.dot(A, x)
+print(f"Matrix-vector multiplication A @ x:\n{result}")
+
+# Interpretation as linear combination of columns
+col1, col2, col3 = A[:, 0], A[:, 1], A[:, 2]
+linear_combination = x[0]*col1 + x[1]*col2 + x[2]*col3
+print(f"As linear combination of columns:\n{linear_combination}")
+```
+
+### Matrix-Matrix Multiplication
+
+```{python}
+# Matrix-matrix multiplication
+product = A @ B
+print(f"Matrix multiplication A @ B:\n{product}")
+
+# Element-wise calculation (for demonstration)
+def matrix_multiply_manual(A, B):
+    m, n = A.shape
+    n_b, p = B.shape
+    assert n == n_b, "Incompatible dimensions"
+    
+    C = np.zeros((m, p))
+    for i in range(m):
+        for j in range(p):
+            C[i, j] = np.sum(A[i, :] * B[:, j])
+    return C
+
+manual_product = matrix_multiply_manual(A, B)
+print(f"Manual matrix multiplication:\n{manual_product}")
+```
+
+## 3. Special Matrices
+
+### Identity Matrix
+
+```{python}
+# Identity matrix
+I_3 = np.eye(3)
+print(f"3x3 Identity matrix:\n{I_3}")
+
+# Verify identity property
+square_matrix = np.array([[1, 2], [3, 4]])
+I_2 = np.eye(2)
+print(f"A @ I = I @ A:")
+print(f"A @ I:\n{square_matrix @ I_2}")
+print(f"I @ A:\n{I_2 @ square_matrix}")
+```
+
+### Matrix Inverse
+
+```{python}
+# Matrix inverse
+A_square = np.array([[1, 2], [3, 4]])
+A_inv = np.linalg.inv(A_square)
+print(f"Matrix A:\n{A_square}")
+print(f"Matrix A inverse:\n{A_inv}")
+
+# Verify inverse property
+print(f"A @ A_inv:\n{A_square @ A_inv}")
+print(f"A_inv @ A:\n{A_inv @ A_square}")
+
+# Check if matrix is invertible
+def is_invertible(matrix):
+    return np.linalg.det(matrix) != 0
+
+print(f"Is A invertible? {is_invertible(A_square)}")
+```
+
+### Diagonal Matrices
+
+```{python}
+# Diagonal matrix
+diagonal_values = [1, 2, 3]
+D = np.diag(diagonal_values)
+print(f"Diagonal matrix:\n{D}")
+
+# Extract diagonal elements
+diag_elements = np.diag(D)
+print(f"Diagonal elements: {diag_elements}")
+```
+
+### Orthogonal Matrices
+
+```{python}
+# Rotation matrix (orthogonal)
+theta = np.pi/4  # 45 degrees
+rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)],
+                           [np.sin(theta), np.cos(theta)]])
+print(f"Rotation matrix (45°):\n{rotation_matrix}")
+
+# Verify orthogonality
+is_orthogonal = np.allclose(rotation_matrix @ rotation_matrix.T, np.eye(2))
+print(f"Is rotation matrix orthogonal? {is_orthogonal}")
+
+# 90-degree rotation matrix
+rotation_90 = np.array([[0, -1], [1, 0]])
+print(f"90° rotation matrix:\n{rotation_90}")
+print(f"Is 90° rotation orthogonal? {np.allclose(rotation_90 @ rotation_90.T, np.eye(2))}")
+```
+
+### Triangular Matrices
+
+```{python}
+# Lower triangular matrix
+L = np.array([[1, 0, 0],
+              [2, 3, 0],
+              [4, 5, 6]])
+print(f"Lower triangular matrix:\n{L}")
+
+# Upper triangular matrix
+U = np.array([[1, 2, 3],
+              [0, 4, 5],
+              [0, 0, 6]])
+print(f"Upper triangular matrix:\n{U}")
+
+# Extract lower/upper triangular parts
+matrix = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+lower_part = np.tril(matrix)
+upper_part = np.triu(matrix)
+print(f"Lower triangular part:\n{lower_part}")
+print(f"Upper triangular part:\n{upper_part}")
+```
+
+## 4. Matrix Decompositions
+
+### LU Decomposition
+
+```{python}
+# LU decomposition
+A_square = np.array([[4, 3], [6, 3]], dtype=float)
+P, L, U = lu(A_square)
+print(f"Original matrix A:\n{A_square}")
+print(f"P (permutation):\n{P}")
+print(f"L (lower triangular):\n{L}")
+print(f"U (upper triangular):\n{U}")
+print(f"Verification P@L@U:\n{P @ L @ U}")
+
+# Solve system using LU decomposition
+def solve_with_lu(A, b):
+    P, L, U = lu(A)
+    # Solve Ly = Pb for y
+    Pb = P @ b
+    y = solve_triangular(L, Pb, lower=True)
+    # Solve Ux = y for x
+    x = solve_triangular(U, y, lower=False)
+    return x
+
+b = np.array([7, 9])
+x_lu = solve_with_lu(A_square, b)
+print(f"Solution using LU: {x_lu}")
+```
+
+### QR Decomposition
+
+> FIXME: This is not working.
+
+```python
+# QR decomposition
+A_rect = np.array([[1, 1], [1, -1]], dtype=float)
+Q, R = qr(A_rect)
+print(f"Original matrix A:\n{A_rect}")
+print(f"Q (orthogonal):\n{Q}")
+print(f"R (upper triangular):\n{R}")
+print(f"Verification Q@R:\n{Q @ R}")
+
+# Verify Q is orthogonal
+print(f"Q@Q.T (should be identity):\n{Q @ Q.T}")
+
+# Solve least squares using QR
+def solve_least_squares_qr(A, b):
+    Q, R = qr(A)
+    return solve_triangular(R, Q.T @ b, lower=False)
+
+# Example overdetermined system
+A_over = np.array([[1, 1], [1, 2], [1, 3]], dtype=float)
+b_over = np.array([2, 3, 4])
+x_qr = solve_least_squares_qr(A_over, b_over)
+print(f"Least squares solution using QR: {x_qr}")
+```
+
+### Eigendecomposition
+
+```{python}
+# Eigenvalues and eigenvectors
+symmetric_A = np.array([[2, 1], [1, 2]], dtype=float)
+eigenvalues, eigenvectors = eig(symmetric_A)
+print(f"Matrix A:\n{symmetric_A}")
+print(f"Eigenvalues: {eigenvalues}")
+print(f"Eigenvectors:\n{eigenvectors}")
+
+# Verify eigenvalue equation: Av = λv
+for i, (lam, v) in enumerate(zip(eigenvalues, eigenvectors.T)):
+    Av = symmetric_A @ v
+    lambda_v = lam * v
+    print(f"Eigenvalue {i+1}: λ={lam:.3f}")
+    print(f"Av = {Av}")
+    print(f"λv = {lambda_v}")
+    print(f"Close? {np.allclose(Av, lambda_v)}\n")
+
+# Eigendecomposition: A = XΛX^(-1)
+X = eigenvectors
+Lambda = np.diag(eigenvalues)
+A_reconstructed = X @ Lambda @ np.linalg.inv(X)
+print(f"Reconstructed A:\n{A_reconstructed}")
+print(f"Original A:\n{symmetric_A}")
+print(f"Reconstruction accurate? {np.allclose(A_reconstructed, symmetric_A)}")
+
+# For symmetric matrices: A = XΛX^T
+if np.allclose(symmetric_A, symmetric_A.T):
+    A_symmetric_recon = X @ Lambda @ X.T
+    print(f"Symmetric reconstruction:\n{A_symmetric_recon}")
+```
+
+### Singular Value Decomposition (SVD)
+
+```{python}
+# SVD decomposition
+A_rect = np.array([[3, 1], [1, 3]], dtype=float)
+U, sigma, Vt = svd(A_rect)
+print(f"Original matrix A:\n{A_rect}")
+print(f"U (left singular vectors):\n{U}")
+print(f"Singular values: {sigma}")
+print(f"V^T (right singular vectors transposed):\n{Vt}")
+
+# Reconstruct matrix
+Sigma = np.diag(sigma)
+A_reconstructed = U @ Sigma @ Vt
+print(f"Reconstructed A:\n{A_reconstructed}")
+print(f"Reconstruction accurate? {np.allclose(A_reconstructed, A_rect)}")
+
+# Low-rank approximation
+def low_rank_approximation(A, k):
+    U, sigma, Vt = svd(A)
+    return U[:, :k] @ np.diag(sigma[:k]) @ Vt[:k, :]
+
+# Example: approximate with rank 1
+A_rank1 = low_rank_approximation(A_rect, 1)
+print(f"Rank-1 approximation:\n{A_rank1}")
+
+# SVD for rectangular matrix
+A_tall = np.array([[1, 2], [3, 4], [5, 6]], dtype=float)
+U_tall, sigma_tall, Vt_tall = svd(A_tall)
+print(f"Tall matrix A:\n{A_tall}")
+print(f"U shape: {U_tall.shape}")
+print(f"Sigma shape: {sigma_tall.shape}")
+print(f"Vt shape: {Vt_tall.shape}")
+```
+
+## 5. Linear Systems and Least Squares
+
+### Solving Linear Systems
+
+```{python}
+# Solve Ax = b for square, invertible A
+A_system = np.array([[2, 1], [1, -1]], dtype=float)
+b_system = np.array([5, 1])
+
+# Method 1: Direct inverse (not recommended for large systems)
+x_inverse = np.linalg.inv(A_system) @ b_system
+print(f"Solution using inverse: {x_inverse}")
+
+# Method 2: Using numpy.linalg.solve (recommended)
+x_solve = np.linalg.solve(A_system, b_system)
+print(f"Solution using solve: {x_solve}")
+
+# Verify solution
+print(f"Verification A@x = b: {A_system @ x_solve}")
+print(f"Original b: {b_system}")
+```
+
+### Forward and Backward Substitution
+
+```{python}
+# Forward substitution for lower triangular system Ly = b
+def forward_substitution(L, b):
+    n = len(b)
+    y = np.zeros(n)
+    for i in range(n):
+        y[i] = (b[i] - np.dot(L[i, :i], y[:i])) / L[i, i]
+    return y
+
+# Backward substitution for upper triangular system Ux = y
+def backward_substitution(U, y):
+    n = len(y)
+    x = np.zeros(n)
+    for i in range(n-1, -1, -1):
+        x[i] = (y[i] - np.dot(U[i, i+1:], x[i+1:])) / U[i, i]
+    return x
+
+# Example
+L_example = np.array([[1, 0], [2, 3]], dtype=float)
+b_example = np.array([1, 4])
+y_forward = forward_substitution(L_example, b_example)
+print(f"Forward substitution result: {y_forward}")
+
+U_example = np.array([[4, 1], [0, 5]], dtype=float)
+y_example = np.array([9, 10])
+x_backward = backward_substitution(U_example, y_example)
+print(f"Backward substitution result: {x_backward}")
+```
+
+### Least Squares Problems
+
+> FIXME: This is not working.
+
+```python
+# Overdetermined system (more equations than unknowns)
+A_over = np.array([[-1.42382504, -1.4238264],
+                   [1.26372846, 1.26372911],
+                   [-0.87066174, -0.87066138]])
+b_over = A_over @ np.array([1, 1])  # Known solution
+
+# Method 1: Normal equations (can be numerically unstable)
+x_normal = np.linalg.inv(A_over.T @ A_over) @ A_over.T @ b_over
+print(f"Normal equations solution: {x_normal}")
+
+# Method 2: QR decomposition (more stable)
+Q, R = qr(A_over)
+x_qr = solve_triangular(R, Q.T @ b_over, lower=False)
+print(f"QR solution: {x_qr}")
+
+# Method 3: NumPy's least squares (most robust)
+x_lstsq, residuals, rank, s = np.linalg.lstsq(A_over, b_over, rcond=None)
+print(f"lstsq solution: {x_lstsq}")
+
+# Compare errors
+true_solution = np.array([1, 1])
+print(f"Normal equations error: {np.linalg.norm(x_normal - true_solution)}")
+print(f"QR error: {np.linalg.norm(x_qr - true_solution)}")
+print(f"lstsq error: {np.linalg.norm(x_lstsq - true_solution)}")
+
+# Pseudoinverse approach
+x_pinv = np.linalg.pinv(A_over) @ b_over
+print(f"Pseudoinverse solution: {x_pinv}")
+```
+
+### Computing Residuals and Fit Quality
+
+> FIXME: This is not working.
+
+```python
+# Compute residuals and R-squared
+def compute_fit_statistics(A, x, b):
+    y_pred = A @ x
+    residuals = b - y_pred
+    ss_res = np.sum(residuals**2)
+    ss_tot = np.sum((b - np.mean(b))**2)
+    r_squared = 1 - (ss_res / ss_tot)
+    
+    return {
+        'residuals': residuals,
+        'ss_res': ss_res,
+        'r_squared': r_squared,
+        'rmse': np.sqrt(ss_res / len(b))
+    }
+
+stats = compute_fit_statistics(A_over, x_lstsq, b_over)
+print(f"Fit statistics:")
+print(f"R-squared: {stats['r_squared']:.6f}")
+print(f"RMSE: {stats['rmse']:.6f}")
+print(f"Sum of squared residuals: {stats['ss_res']:.6f}")
+```
+
+## 6. Advanced Operations and Applications
+
+### Matrix Rank and Condition Number
+
+```{python}
+# Matrix rank
+A_rank = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+rank = np.linalg.matrix_rank(A_rank)
+print(f"Matrix rank: {rank}")
+
+# Condition number
+A_cond = np.array([[1, 2], [2, 4.0001]])  # Nearly singular
+cond_num = np.linalg.cond(A_cond)
+print(f"Condition number: {cond_num}")
+print(f"Matrix is {'well-conditioned' if cond_num < 1e12 else 'ill-conditioned'}")
+```
+
+### Matrix Powers and Matrix Functions
+
+```{python}
+# Matrix power
+A_power = np.array([[2, 1], [1, 2]])
+A_squared = np.linalg.matrix_power(A_power, 2)
+print(f"A^2:\n{A_squared}")
+
+# Matrix exponential
+from scipy.linalg import expm, logm, sqrtm
+
+A_exp = expm(A_power)
+print(f"Matrix exponential e^A:\n{A_exp}")
+
+# Matrix square root
+A_sqrt = sqrtm(A_power)
+print(f"Matrix square root:\n{A_sqrt}")
+print(f"Verification (sqrt(A))^2:\n{A_sqrt @ A_sqrt}")
+```
+
+### Kronecker Product
+
+```{python}
+# Kronecker product
+A_kron = np.array([[1, 2], [3, 4]])
+B_kron = np.array([[5, 6], [7, 8]])
+kron_product = np.kron(A_kron, B_kron)
+print(f"Kronecker product A ⊗ B:\n{kron_product}")
+```
+
+### Vector and Matrix Norms
+
+```{python}
+# Different vector norms
+v_norm = np.array([1, -2, 3])
+l1_norm = np.linalg.norm(v_norm, ord=1)  # L1 norm
+l2_norm = np.linalg.norm(v_norm, ord=2)  # L2 norm (default)
+linf_norm = np.linalg.norm(v_norm, ord=np.inf)  # L∞ norm
+
+print(f"Vector: {v_norm}")
+print(f"L1 norm: {l1_norm}")
+print(f"L2 norm: {l2_norm}")
+print(f"L∞ norm: {linf_norm}")
+
+# Matrix norms
+A_norm = np.array([[1, 2], [3, 4]])
+frobenius_norm = np.linalg.norm(A_norm, ord='fro')
+spectral_norm = np.linalg.norm(A_norm, ord=2)  # Largest singular value
+
+print(f"Matrix Frobenius norm: {frobenius_norm}")
+print(f"Matrix spectral norm: {spectral_norm}")
+```
+
 :::

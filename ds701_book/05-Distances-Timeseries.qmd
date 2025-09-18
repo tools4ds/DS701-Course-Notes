@@ -132,7 +132,7 @@ A metric is a function $d(x, y)$ that satisfies the following properties.
 :::
 ::: {.column width="30%"}
 :::: {.fragment}
-![](figs/Lec03-TriangleInequality.png){fig-align="center"}
+![](figs/TriangleInequality.png){fig-align="center"}
 ::::
 :::
 ::::
