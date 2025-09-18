@@ -108,7 +108,9 @@ Examples: Geographic coordinates (Lat, Long, Elevation), RGB color intensities, 
 * Vectors in $\mathbb{R}^{3}$ can be visualized as points in a 3-D space (or arrows originating at the origin).
 * Although we can't visualize vectors in $\mathbb{R}^{n}$ for $n>3$, we can still think of them as points in an $n$-dimensional space, although _the curse of dimensionality_ comes into play (more later)
 
-Let 
+---
+
+Consider these vectors in $\mathbb{R}^{2}$ visualized in 2-D:
 
 $$
 \mathbf{x}=\begin{bmatrix} 2 \\ 2 \end{bmatrix},~
@@ -153,13 +155,13 @@ $$
 c\mathbf{x} = \begin{bmatrix} cx_1 \\ cx_2 \\ \vdots \\ cx_n \end{bmatrix}.
 $$
 
----
-
 Multiplication by a scalar $c\in\mathbb{R}$. 
 
 * For $c>1$ the vector is _lengthened_. 
 * For $0<c<1$ the vector _shrinks_. 
 * If we negate $c$ the direction of the vector is _flipped 180 degrees_. 
+
+---
 
 Figure @fig-vector-scaling shows the vector $\mathbf{x} = [2, 2]$ multiplied by the scalar value $c=2$.
 
@@ -190,13 +192,16 @@ plt.show()
 
 ## Example: Image processing
 
-* in image processing each pixel's color is typically represented by a 3‑element RGB vector.  
+* In image processing each pixel's color is typically represented by a 3‑element RGB vector
+    * These exist in a _color space_
 * Multiplying the RGB vector by a scalar less than one darkens the pixel, while
 * multiplying by a scalar greater than one brightens it.  
 
-E.g. scaling the color $(0.2,0.5,0.7)$ by $0.5$ yields $(0.1,0.25,0.35)$
+E.g. Take pixel value $(0.2,0.5,0.7)$ 
 
-Scaling by $2$ yields $(0.4,1.0,1.0)$ (clipping values to stay between $0$ and $1$).
+* Scaling by $0.5$ yields $(0.1,0.25,0.35)$
+
+* Scaling by $2$ yields $(0.4,1.0,1.0)$ (clipping values to stay between $0$ and $1$).
 
 
 ---
@@ -213,7 +218,8 @@ $$
 ---
 
 We plot the sum of $\mathbf{u} = [1, 2]$ and $\mathbf{v} = [4, 1]$ in @fig-vector-addition. 
-The sum $\mathbf{u} + \mathbf{v} = [5, 3]$ is obtained by placing the tip of one vector to the tail of the other vector. 
+
+Graphically, the sum $\mathbf{u} + \mathbf{v} = [5, 3]$ can be obtained by placing the tip of one vector to the tail of the other vector. 
 
 ```{python}
 #| label: fig-vector-addition
@@ -255,12 +261,44 @@ For example,
 
 **Class activity (1–2 minutes):** Add the vectors $\mathbf{u}=[-1,4]$ and $\mathbf{v}=[3,-2]$ by hand and sketch the result.  Discuss how the parallelogram rule visualizes vector addition.
 
----
+## Element-wise multiplication
+
+For two matrices $A$ and $B$ of the same dimension $m\times n$, the Hadamard 
+product $A \odot B$ (sometimes $A \circ B$) is a matrix of the same dimension as
+the operands, with elements given by
+
+$$(A \odot B)_{ij} = (A)_{ij} (B)_{ij}.$$
+
+For matrices of different dimensions $m\times n$ and $p\times q$, where $m\neq p$ or $n\neq q$, the Hadamard product is undefined.
+
+An example of the Hadamard product for two arbitrary $2\times 3$ matrices:
+
+$$
+  \begin{bmatrix}
+    2 & 3 & 1 \\
+    0 & 8 & -2
+  \end{bmatrix} \odot \begin{bmatrix}
+    3 & 1 & 4 \\
+    7 & 9 & 5
+  \end{bmatrix} = \begin{bmatrix}
+    2 \times 3 & 3 \times 1 & 1 \times 4 \\
+    0 \times 7 & 8 \times 9 & -2 \times 5
+  \end{bmatrix} = \begin{bmatrix}
+    6 & 3 & 4 \\
+    0 & 72 & -10
+  \end{bmatrix}.
+$$
+
+[Wikipedia](https://en.wikipedia.org/wiki/Hadamard_product_(matrices))
+
+## Dot product and $\ell_2$ norm
 
 **Dot product:** Let $\mathbf{u},\mathbf{v}\in\mathbb{R}^{n}$ then the dot product is defined as
 $$
 \mathbf{u}\cdot\mathbf{v} = \sum_{i=0}^n u_i v_i.
 $$
+
+_It's element wise multiplication, followed by summing the results._
 
 **Vector 2-norm:** The 2-norm of a vector $\mathbf{v}\in\mathbb{R}^{n}$ is defined as
 $$
@@ -269,7 +307,7 @@ $$
 
 This norm is referred to as the $\ell_2$ norm. In these notes, the notation $\Vert \mathbf{v} \Vert$, indicates the 2-norm.
 
----
+## Dot product example
 
 Dot products and norms arise constantly in data science.
 
@@ -286,8 +324,9 @@ $$
 
 ## Definitions
 
-**Unit vector:** A unit vector $\mathbf{v}$ is a vector such that $\Vert \mathbf{v} \Vert_2 = 1$. 
-    - All vectors of the form $\frac{\mathbf{v}}{\Vert \mathbf{v} \Vert_2 }$ are unit vectors.
+**Unit vector:** A unit vector $\mathbf{v}$ is a vector such that $\Vert \mathbf{v} \Vert_2 = 1$.
+
+- All vectors of the form $\frac{\mathbf{v}}{\Vert \mathbf{v} \Vert_2 }$ are unit vectors.
 
 **Distance:** Let $\mathbf{u},\mathbf{v}\in\mathbb{R}^{n}$, the distance between $\mathbf{u}$ and $\mathbf{v}$ is
 $$
@@ -301,23 +340,30 @@ $$
 \cos{\theta} = \frac{\mathbf{u}\cdot\mathbf{v}}{\Vert \mathbf{u}\Vert_2 \Vert\mathbf{v}\Vert_2}.
 $$
 
----
+Often used as a similarity measure -- "Cosine similarity"
+
+## Dot product and projection
 
 The dot product of two vectors $\mathbf{u}, \mathbf{v}$ can be used to project $\mathbf{u}$ onto $\mathbf{v}$
 
 $$
-\mathrm{proj}_{\mathbf{v}}\mathbf{u} = \frac{\mathbf{u}\cdot\mathbf{v}}{\Vert \mathbf{v} \Vert^2}\mathbf{v}.
+\mathrm{proj}_{\mathbf{v}}\mathbf{u} = \frac{\mathbf{u}\cdot\mathbf{v}}{\Vert \mathbf{v} \Vert^2}\mathbf{v}
+= \mathbf{u}\cdot\mathbf{v}\frac{\mathbf{v}}{\Vert \mathbf{v} \Vert^2}.
 $$
+
+---
 
 This is illustrated in @fig-dot-product.
 
 ```{python}
 #| label: fig-dot-product
 #| fig-cap: "Dot product"
+#| fig-width: 5
+#| fig-height: 3
 import matplotlib.pyplot as plt
 import numpy as np
 
-fig = plt.figure()
+fig = plt.figure(figsize=(5, 3))
 ax = plt.gca()
 
 # Define vectors u and v
@@ -360,6 +406,8 @@ print(f"The angle between u and v is {theta} radians or {np.degrees(theta)} degr
 ---
 
 Such cosine similarities are used in natural language processing to quantify how similar two word‑embedding vectors are.
+
+<br><br>
 
 **Class activity (1–2 minutes):** 
 
