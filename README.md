@@ -91,6 +91,16 @@ You can render just one slide with a command like
 quarto render 05-Distances-Timeseries.qmd --profile slides
 ```
 
+### Creating PDFs from the Slides
+
+To create PDFs from the reveal.js slides, you can use
+[decktape](https://github.com/astefanutti/decktape).
+
+For example, from `ds701_book`, run
+
+```bash
+decktape _revealjs/04-Linear-Algebra-Refresher.html 04-Linear-Algebra-Refresher.pdf
+```
 
 ## Creating Jupyter Notebooks
 
