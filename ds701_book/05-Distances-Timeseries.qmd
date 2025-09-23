@@ -107,6 +107,27 @@ This is not a good idea because it implicitly assumes that the categories are or
 One hot encoding treats the categorical data as orthogonal from a vector space perspective.
 :::
 
+::: {.content-visible when-profile="slides"}
+## 🎯 Class Activity: Feature Encoding
+
+**Task**: Work in pairs to encode the following data into feature vectors.
+
+**Data to encode**:
+
+- Person A: (age=30, salary=$75,000, city="New York", education="PhD")
+- Person B: (age=25, salary=$50,000, city="Boston", education="Masters") 
+- Person C: (age=35, salary=$90,000, city="New York", education="Bachelors")
+
+**Instructions**:
+
+1. Create one-hot encodings for categorical variables (city: NY, Boston, LA; education: Bachelors, Masters, PhD)
+2. Normalize the numerical features (age: divide by 100, salary: divide by 100,000)
+3. Write out the complete feature vectors for all three people
+4. Calculate the Euclidean distance between Person A and Person B
+
+**Discussion**: Why might we normalize numerical features? What does the distance tell us about similarity?
+:::
+
 ::: {.content-hidden when-profile="web"}
 ## Encodings
 :::
@@ -397,6 +418,30 @@ __$\ell_\infty$ norm__
 
 :::
 
+::: {.content-visible when-profile="slides"}
+## 🎯 Class Activity: Norm Comparison
+
+**Task**: Compare how different norms measure distance between the same two points.
+
+**Given**: Two 2D points A = (3, 4) and B = (1, 1)
+
+**Instructions**:
+
+1. Calculate the distance between A and B using:
+   - $\ell_1$ norm (Manhattan distance)
+   - $\ell_2$ norm (Euclidean distance) 
+   - $\ell_\infty$ norm (Chebyshev distance)
+
+2. Now consider points C = (0, 0) and D = (1, 0)
+   - Calculate all three distances again
+   - Which norm gives the smallest distance? Largest?
+
+3. **Think-pair-share**: 
+   - In what real-world scenarios would you prefer each norm?
+   - How does the choice of norm affect outlier sensitivity?
+
+**Bonus**: Sketch the "unit circles" for each norm in 2D space.
+:::
 
 ## Similarity and Dissimilarity Functions
 
@@ -439,7 +484,13 @@ We know that the inner product of two vectors can be used to compute the __cosin
 
 $$ \cos(\theta) = \frac{\mathbf{x}^T\mathbf{y}}{\Vert\mathbf{x}\Vert \Vert\mathbf{y}\Vert} \equiv \cos(\mathbf{x}, \mathbf{y})  .$$
 
-This value is close to 1 when $\mathbf{x} \approx \mathbf{y}$. We can use this formula to define a __similarity__ function called the __cosine similarity__ $\cos(\mathbf{x}, \mathbf{y})$.
+This value is close to 1 when $\mathbf{x} \approx \mathbf{y}$. 
+
+We can use this formula to define a __similarity__ function called the __cosine similarity__ $\cos(\mathbf{x}, \mathbf{y})$.
+
+<br>
+
+Abuse of notation? 🤔
 
 ::: {.content-visible when-profile="web"}
 ### Dissimilarity
@@ -474,6 +525,138 @@ $$ d(\mathbf{x}, \mathbf{y}) = 1 - \cos(\mathbf{x}, \mathbf{y})$$
 ::: {.content-visible when-profile="web"}
 Note however that this is __not a metric!__
 :::
+
+::: {.content-visible when-profile="slides"}
+## 🎯 Class Activity: Similarity Calculations
+
+**Task**: Calculate different similarity measures between two documents represented as word frequency vectors.
+
+**Given**: Two documents with word counts:
+
+- Document A: [cat: 3, dog: 2, bird: 1, fish: 0]
+- Document B: [cat: 1, dog: 3, bird: 0, fish: 2]
+
+**Instructions**:
+
+1. Convert to normalized vectors (divide by total word count)
+2. Calculate cosine similarity between the documents
+3. Calculate the dissimilarity using: d = 1 - cosine_similarity
+4. **Quick discussion**: 
+   - What does a cosine similarity of 0.5 mean?
+   - Why might cosine similarity be better than Euclidean distance for text documents?
+:::
+
+## Solution
+
+```{python}
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+def calculate_document_similarity():
+    """
+    Calculate different similarity measures between two documents represented as word frequency vectors.
+    """
+    print("Document Similarity Analysis")
+    print("=" * 40)
+    
+    # Given word frequency vectors
+    doc_a = np.array([3, 2, 1, 0])  # [cat, dog, bird, fish]
+    doc_b = np.array([1, 3, 0, 2])  # [cat, dog, bird, fish]
+    
+    print("Original word frequency vectors:")
+    print(f"Document A: {doc_a} (cat: 3, dog: 2, bird: 1, fish: 0)")
+    print(f"Document B: {doc_b} (cat: 1, dog: 3, bird: 0, fish: 2)")
+    print()
+    
+    # Step 1: Convert to normalized vectors (divide by total word count)
+    doc_a_normalized = doc_a / np.sum(doc_a)
+    doc_b_normalized = doc_b / np.sum(doc_b)
+    
+    print("Step 1: Normalized vectors (divided by total word count)")
+    print(f"Document A normalized: {doc_a_normalized}")
+    print(f"Document B normalized: {doc_b_normalized}")
+    print(f"Sum of normalized A: {np.sum(doc_a_normalized):.6f}")
+    print(f"Sum of normalized B: {np.sum(doc_b_normalized):.6f}")
+    print()
+    
+    # Step 2: Calculate cosine similarity
+    # Reshape for sklearn's cosine_similarity function
+    doc_a_reshaped = doc_a_normalized.reshape(1, -1)
+    doc_b_reshaped = doc_b_normalized.reshape(1, -1)
+    
+    cosine_sim = cosine_similarity(doc_a_reshaped, doc_b_reshaped)[0][0]
+    
+    print("Step 2: Cosine similarity calculation")
+    print(f"Cosine similarity: {cosine_sim:.6f}")
+    print()
+    
+    # Manual calculation for verification
+    dot_product = np.dot(doc_a_normalized, doc_b_normalized)
+    norm_a = np.linalg.norm(doc_a_normalized)
+    norm_b = np.linalg.norm(doc_b_normalized)
+    cosine_sim_manual = dot_product / (norm_a * norm_b)
+    
+    print("Manual verification:")
+    print(f"Dot product: {dot_product:.6f}")
+    print(f"Norm of A: {norm_a:.6f}")
+    print(f"Norm of B: {norm_b:.6f}")
+    print(f"Cosine similarity (manual): {cosine_sim_manual:.6f}")
+    print()
+    
+    # Step 3: Calculate dissimilarity
+    dissimilarity = 1 - cosine_sim
+    
+    print("Step 3: Dissimilarity calculation")
+    print(f"Dissimilarity (1 - cosine_similarity): {dissimilarity:.6f}")
+    print()
+    
+    # Additional analysis
+    print("Additional Analysis:")
+    print("-" * 20)
+    
+    # Euclidean distance for comparison
+    euclidean_dist = np.linalg.norm(doc_a_normalized - doc_b_normalized)
+    print(f"Euclidean distance: {euclidean_dist:.6f}")
+    
+    # Manhattan distance
+    manhattan_dist = np.sum(np.abs(doc_a_normalized - doc_b_normalized))
+    print(f"Manhattan distance: {manhattan_dist:.6f}")
+    print()
+    
+    return {
+        'doc_a_normalized': doc_a_normalized,
+        'doc_b_normalized': doc_b_normalized,
+        'cosine_similarity': cosine_sim,
+        'dissimilarity': dissimilarity,
+        'euclidean_distance': euclidean_dist,
+        'manhattan_distance': manhattan_dist
+    }
+
+if __name__ == "__main__":
+    results = calculate_document_similarity()
+```
+
+## Discussion points
+
+1. **What does a cosine similarity of 0.5 mean?**
+
+A cosine similarity of 0.5 means the documents are moderately similar.
+The angle between their vectors is approximately 60 degrees.
+This indicates some overlap in word usage patterns but not complete similarity.
+
+2. **Why might cosine similarity be better than Euclidean distance for text documents?**
+
+**Scale invariance:** Cosine similarity focuses on the direction of vectors,
+not their magnitude, so document length doesn't affect the comparison.
+
+**Normalization:** It naturally handles documents of different lengths.
+Word frequency interpretation: It measures the relative proportion of words,
+which is more meaningful for text analysis than absolute differences.
+
+**Range:** Cosine similarity ranges from -1 to 1, with 1 being identical,
+making it more interpretable for similarity measures.
+
+
 
 
 ## Bit vectors and Sets
@@ -574,6 +757,32 @@ Case 2: Very small disjoint documents.
 ![](figs/L5-jaccard-3.png){fig-align="center"}
 
 Here $J_{Sim}(\mathbf{x}, \mathbf{y})$ is 0.
+
+::: {.content-visible when-profile="slides"}
+## 🎯 Class Activity: Jaccard Similarity Practice
+
+**Task**: Calculate Jaccard similarity for different document scenarios.
+
+**Given**: Three documents represented as sets of unique words:
+
+- Document 1: {apple, banana, cherry, date}
+- Document 2: {apple, banana, cherry, elderberry}  
+- Document 3: {grape, kiwi, lemon, mango}
+
+**Instructions**:
+
+1. Calculate Jaccard similarity between:
+   - Document 1 and Document 2
+   - Document 1 and Document 3
+   - Document 2 and Document 3
+
+2. **Think-pair-share**:
+   - Which pair is most similar? Least similar?
+   - How does this compare to what you'd expect from Hamming distance?
+   - When would you prefer Jaccard similarity over Hamming distance?
+
+**Real-world application**: Consider how this applies to comparing user preferences, shopping baskets, or social media interests.
+:::
 
 ## Time Series
 
@@ -889,6 +1098,34 @@ And python packages such as:
 
 * [dtw-python](https://dynamictimewarping.github.io/)
 * [dtaidistance](https://dtaidistance.readthedocs.io/en/latest/index.html)
+
+::: {.content-visible when-profile="slides"}
+## 🎯 Class Activity: DTW Concept Exploration
+
+**Task**: Explore why DTW is better than Euclidean distance for time series with temporal shifts.
+
+**Given**: Two simple time series:
+
+- Series A: [1, 2, 3, 2, 1] (peak at position 3)
+- Series B: [0, 1, 2, 3, 2, 1, 0] (peak at position 4)
+
+**Instructions**:
+
+1. **Calculate Euclidean distance** between the series (pad with zeros if needed)
+2. **Sketch the DTW alignment** by hand:
+   - Expand series A to better align with series B
+3. **Calculate the Euclidean distance of the aligned series**
+3. **Group discussion**:
+   - Why does Euclidean distance of the original series fail here?
+   - What real-world scenarios would benefit from DTW?
+
+::: {.fragment}
+**Scenarios**:
+
+- Speech recognition (different speaking speeds)
+- Gesture recognition (different execution speeds)
+- Stock price patterns (different market timing)
+:::
 
 ## From Time series to Strings
 
