@@ -87,6 +87,26 @@ So an encoding of `(25, USD 200000, 'house')` could be:
 $$\begin{bmatrix}25\\200000\\1\\0\\0\end{bmatrix}.$$
 ::: 
 
+## Why not alternative encoding?
+
+Why would we not encode as follows:
+
+
+* `house`: $[1]$
+* `tree`:  $[2]$
+* `moon`:  $[3]$
+
+::: {.fragment}
+So an encoding of `(25, USD 200000, 'house')` could be: 
+$$\begin{bmatrix}25\\200000\\1\end{bmatrix}.$$
+::: 
+
+::: {.fragment}
+This is not a good idea because it implicitly assumes that the categories are ordered.
+
+One hot encoding treats the categorical data as orthogonal from a vector space perspective.
+:::
+
 ::: {.content-hidden when-profile="web"}
 ## Encodings
 :::
@@ -176,7 +196,6 @@ where $x_i$ denotes the $i$-th column of the data matrix $X$.
 
 Let $\mathbf{u}, \mathbf{v}\in\mathbb{R}^{n}$ and $a\in\mathbb{R}$. The vector function $p(\mathbf{v})$ is called a __norm__ if
 
-:::: {.fragment}
 
 ::: {.incremental}
 * $p(a\mathbf{v}) = |a|p(\mathbf{v})$,
@@ -186,13 +205,26 @@ Let $\mathbf{u}, \mathbf{v}\in\mathbb{R}^{n}$ and $a\in\mathbb{R}$. The vector f
 
 ::: {.fragment}
 __Every norm defines a corresponding metric.__ 
-:::
 
-::: {.fragment}
 In particular If $p()$ is a norm, then $d(\mathbf{x}, \mathbf{y}) = p(\mathbf{x}-\mathbf{y})$ is a metric.
 :::
 
-::::
+::: {.fragment}
+**But not every metric can be derived from a norm!**
+
+For example, the discrete metric is not a norm.
+$$
+d(x,y) =
+\begin{cases}
+0 & x=y \\
+1 & x \neq y
+\end{cases}
+$$
+
+
+
+
+:::
 
 ::: {.content-visible when-profile="web"}
 ### $\ell_p$ norm
@@ -204,11 +236,29 @@ In particular If $p()$ is a norm, then $d(\mathbf{x}, \mathbf{y}) = p(\mathbf{x}
 
 A general class of norms are called __$\ell_p$__ norms, where $p \geq 1.$
 
-$$\Vert \mathbf{x} \Vert_p = \left(\sum_{i=1}^d |x_i|^p\right)^{\frac{1}{p}}.$$ 
+$$
+\Vert \mathbf{x} \Vert_p = \left(\sum_{i=1}^d |x_i|^p\right)^{\frac{1}{p}}.
+$$ 
 
 The corresponding distance that an $\ell_p$ norm defines is called the _Minkowski distance._
 
-$$\Vert \mathbf{x} - \mathbf{y} \Vert_p = \left(\sum_{i=1}^d |x_i - y_i|^p\right)^{\frac{1}{p}}.$$
+$$
+\Vert \mathbf{x} - \mathbf{y} \Vert_p = \left(\sum_{i=1}^d |x_i - y_i|^p\right)^{\frac{1}{p}}.
+$$
+
+::: {.fragment}
+The choice of $p$ affects what gets emphasized in the distance calculation:
+
+::: {.incremental}
+* For small $p$ (e.g. $p=1$):
+  * More emphasis on many small differences
+  * Less sensitive to outliers/large differences
+* For large $p$ (e.g. $p\rightarrow \infty$):
+  * More emphasis on the largest difference
+  * Very sensitive to outliers
+:::
+:::
+
 
 ::: {.content-visible when-profile="web"}
 ### $\ell_2$ norm
@@ -248,7 +298,7 @@ This defines the __Manhattan__ distance, or (for binary vectors), the __Hamming_
 
 $$ \Vert \mathbf{x} - \mathbf{y} \Vert_1 = \sum_{i=1} |x_i - y_i|.$$
 
-![](figs/L05-manhattan-distance.png){fig-align="center"}
+![](figs/L05-manhattan-distance.png){fig-align="center" width="400px"}
 
 ::: {.content-visible when-profile="web"}
 ### $\ell_\infty$ norm
@@ -268,6 +318,14 @@ $$
 
 ::: {.fragment}
 What is the metric that this norm induces?
+:::
+
+::: {.fragment}
+Answer: The $\ell_\infty$ norm induces the __Chebyshev__ distance which is also known as the __maximum__ distance.
+
+$$
+\Vert \mathbf{x} - \mathbf{y} \Vert_{\infty} = \max_{i} \vert x_{i} - y_{i} \vert .
+$$
 :::
 
 ::: {.content-visible when-profile="web"}
@@ -333,7 +391,7 @@ __$\ell_2$ norm__
 __$\ell_\infty$ norm__
 
 - Use when you need uniform bounds.
-- Maximum deviation.
+- Limits maximum deviation.
 :::
 ::::
 
@@ -422,7 +480,7 @@ Note however that this is __not a metric!__
 
 When working with bit vectors, the $\ell_1$ metric is commonly used and is called the __Hamming__ distance.
 
-![](figs/L5-hamming-1.png){fig-align="center"}
+![](figs/L5-hamming-1.png){fig-align="center" width="500px"}
 
 This has a natural interpretation: "how well do the two vectors match?"
 
@@ -432,7 +490,7 @@ Or: "What is the smallest number of bit flips that will convert one vector into 
 ## Hamming distance
 :::
 
-![](figs/L5-hamming-2.png){fig-align="center"}
+![](figs/L5-hamming-2.png){fig-align="center" width="700px"}
 
 ::: {.content-visible when-profile="web"}
 In other cases, the Hamming distance is not a very appropriate metric.
@@ -442,7 +500,9 @@ In other cases, the Hamming distance is not a very appropriate metric.
 ## Hamming distance with sets
 :::
 
-Consider the case in which the bit vector is being used to represent a set.
+Consider the case in which the bit vector is being used to represent a _set_.
+
+**Definition**: A _set_ is an unordered collection of distinct elements.
 
 In that case, Hamming distance measures the __size of the set difference.__
 
@@ -454,6 +514,14 @@ For example, consider two documents. We will use bit vectors to represent the se
 ::::
 
 :::: {.fragment}
+What is the Hamming distance for each case?
+:::
+
+:::: {.fragment}
+$L_1(\text{Case 1}) = 10$ and $L_1(\text{Case 2}) = 5$. Is case 1 really more different than case 2? 
+:::
+
+:::: {.fragment}
 What matters is not just the size of the set difference, but the size of the intersection.
 ::::
 
@@ -461,7 +529,7 @@ What matters is not just the size of the set difference, but the size of the int
 ::: {.content-hidden when-profile="web"}
 ## Jaccard similarity
 :::
-This leads to the _Jaccard_ similarity:
+This leads to the _Jaccard_ similarity or _Intersection over Union (IoU)_:
 
 $$
 J_{Sim}(\mathbf{x}, \mathbf{y}) = \frac{|\mathbf{x} \cap \mathbf{y}|}{|\mathbf{x} \cup \mathbf{y}|}.
@@ -493,7 +561,7 @@ Let's revisit the previously introduces cases comparing documents.
 
 Case 1: Very large almost identical documents.
 
-![](figs/L5-jaccard-2.png){fig-align="center"}
+![](figs/L5-jaccard-2.png){fig-align="center" width="500px"}
 
 Here $J_{Sim}(\mathbf{x}, \mathbf{y})$ is almost 1.
 
@@ -663,11 +731,12 @@ But a one-to-one match (ala Euclidean distance) will not detect the similarity.
 A solution to this is called __dynamic time warping.__
 
 
+
 ::: {.content-hidden when-profile="web"}
 ## Dynamic Time Warping
 :::
 
-The basic idea is to allow acceleration or deceleration of signals along the time dimension.
+The basic idea is to allow stretching or compressing of signals along the time dimension.
 
 ::: {.fragment}
 __Classic applications__
@@ -683,8 +752,8 @@ Specifically
 
 ::: {.incremental}
 * Consider $X = x_1, x_2, \dots, x_n$ and $Y = y_1, y_2, \dots, y_m$.
-* We are allowed to modify each sequence by inserting, deleting, or matching elements to form $X'$ and $Y'$.
-* We then calculate, e.g., Euclidean distance between the extended sequences $X'$ and $Y'$.
+* We are allowed to modify each sequence by duplicating, deleting, or matching elements to form $X'$ and $Y'$.
+* We then search over the space of all possible alignments to find the one that minimizes the distance between $X'$ and $Y'$.
 :::
 :::
 
@@ -692,65 +761,135 @@ Specifically
 ## Visualizing DTW
 :::
 
+:::: {.columns}
+::: {.column width="50%"}
+
 There is a simple way to visualize this algorithm.
 
-Consider a matrix $M$ where $M_{ij} = |x_i - y_j|$ (or some other error measure).
-
-![](figs/L5-DTW-2.png){fig-align="center"}
+Consider a matrix $M$ where $M_{ij} = |x_i - y_j|$.
 
 $M$ measures the amount of error we get if we match $x_i$ with $y_j$. 
 
-So we seek a __path through $M$ that minimizes the total error.__
+So we seek a __path, starting from lower left, through $M$ that minimizes the total error.__
+:::
 
-::: {.content-hidden when-profile="web"}
+::: {.column width="50%"}
+![](figs/L5-DTW-2.png){fig-align="center" width="550px"}
+:::
+::::
+
 ## DTW restrictions
-:::
-::: {.content-visible when-profile="web"}
-We need to start in the lower left and work our way up via a continuous path.
-:::
 
-::: {.fragment}
+
+:::: {.columns}
+::: {.column width="50%"}
+
 The basic restrictions on path are:
     
-::: {.incremental}
-* Monotonicity
-  * The path should not go down or to the left.
-* Continuity
-  * No elements may be skipped in a sequence.
-:::
-:::
+Monotonicity
 
-::: {.fragment}
-This can be solved via dynamic programming. However, the algorithm is still quadratic in $n$.
-:::
+* The path should not go down or to the left.
 
-::: {.content-hidden when-profile="web"}
-## Improving DTW 
+Continuity
+
+* No elements may be skipped in a sequence.
+
+Restrict amount of deviation from diagonal (Sakoe-Chiba constraint)
+
+This can be solved via dynamic programming.
+
 :::
 
-To reduce the computational complexity, we can put a restriction on the amount that the path can deviate from the diagonal.
+::: {.column width="50%"}
+![](figs/L5-DTW-2.png){fig-align="center" width="550px"}
+:::
+::::
 
-The basic algorithm looks like this:
+## Dynamic Time Warping Example
 
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# sequences
+x = [1,1,2,2,3]
+y = [1,2,3,3,3]
+n, m = len(x), len(y)
+
+# build DTW table
+dtw = np.full((n+1,m+1), np.inf)
+dtw[0,0] = 0
+for i in range(1,n+1):
+    for j in range(1,m+1):
+        cost = abs(x[i-1]-y[j-1])
+        dtw[i,j] = cost + min(dtw[i-1,j], dtw[i,j-1], dtw[i-1,j-1])
+
+# backtrack with tie-breaking: prefer diagonal
+i,j = n,m
+path = [(i-1,j-1)]
+while (i>0 and j>0):
+    candidates = [(i-1,j-1,"↖"), (i-1,j,"↑"), (i,j-1,"←")]
+    i,j,_ = min(candidates, key=lambda s: (dtw[s[0],s[1]], ["↖","↑","←"].index(s[2])))
+    if i>0 or j>0:
+        path.append((i-1,j-1))
+path.reverse()
+
+# Print the fully aligned sequences
+print("Original sequences:")
+print(f"X = {x}")
+print(f"Y = {y}")
+print(f"\nDTW distance = {dtw[n,m]:.1f}")
+print(f"\nOptimal alignment path (0-indexed): {path}")
+print("\nFully aligned sequences:")
+print("X_aligned: ", end="")
+for i, j in path:
+    print(f"{x[i]:2d}", end=" ")
+print()
+print("Y_aligned: ", end="")
+for i, j in path:
+    print(f"{y[j]:2d}", end=" ")
+print()
+print("\nAlignment mapping:")
+for k, (i, j) in enumerate(path):
+    print(f"Step {k}: X[{i}] = {x[i]} ↔ Y[{j}] = {y[j]}")
+
+# plot cost matrix + path
+plt.figure(figsize=(10, 4))
+plt.subplot(1, 2, 1)
+plt.imshow(dtw[1:,1:], origin="lower", cmap="Blues", aspect="auto")
+px, py = zip(*[(pi+1,pj+1) for pi,pj in path])
+plt.plot(np.array(py)-1, np.array(px)-1, 'r', linewidth=2)
+plt.colorbar(label="Cumulative Cost")
+plt.title("DTW Cost Matrix with Optimal Path")
+plt.xlabel("Y values")
+plt.ylabel("X values")
+
+# plot aligned sequences
+plt.subplot(1, 2, 2)
+x_aligned = [x[i] for i, j in path]
+y_aligned = [y[j] for i, j in path]
+plt.plot(range(len(x_aligned)), x_aligned, 'bo-', label='X aligned', linewidth=2)
+plt.plot(range(len(y_aligned)), y_aligned, 'ro-', label='Y aligned', linewidth=2)
+plt.xlabel('Alignment step')
+plt.ylabel('Value')
+plt.title('Aligned Sequences')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
 ```
-D[0, 0] = 0
-for i in range(n):
-  for j in range(m):
-    D[i,j] = M[i,j] + 
-             min( D[i-1, j],    # insertion
-                  D[i, j-1],    # deletion
-                  D[i-1, j-1] ) # match
-```
 
-Unfortunately, the algorithm is still quadratic in $n$ -- it is $\mathcal{O}(nm)$.
+## To explore further
 
-Hence, we may choose to put a restriction on the amount that the path can deviate from the diagonal.
+See 
 
-This is implemented by not allowing the path to pass through locations where $|i - j| > w$.
+T. Giorgino, "Computing and Visualizing Dynamic Time Warping Alignments in R: The dtw Package", Journal of Statistical Software, 2003. [link](https://www.jstatsoft.org/article/view/v031i07)
 
-Then the algorithm is $\mathcal{O}(nw)$.
+And python packages such as:
 
-::: {.content-hidden when-profile="slides"}
+* [dtw-python](https://dynamictimewarping.github.io/)
+* [dtaidistance](https://dtaidistance.readthedocs.io/en/latest/index.html)
+
 ## From Time series to Strings
 
 A closely related idea concerns strings.
@@ -765,41 +904,32 @@ Edit operations are insertion, deletion, and substitution of single characters.
 
 This is called __edit distance__ or __Levenshtein distance.__
 
-For example, given strings:
+## Example
 
-``s = VIVALASVEGAS``
-    
-and
-
-``t = VIVADAVIS``
-
+For example, given strings: ``s = VIVALASVEGAS`` and ``t = VIVADAVIS``
 
 we would like to 
 
 * compute the edit distance, and
 * obtain the optimal __alignment__.
 
+![](figs/viva-las-vegas.png){fig-align="center" width="550px"}
 
-![](figs/viva-las-vegas.png){fig-align="center"}
-
-[Source](http://medicalbioinformaticsgroup.de/downloads/lectures/Algorithmen_und_Datenstrukturen/WS15-16/aldabi_ws15-16_woche6.pdf)
 
 A dynamic programming algorithm can also be used to find this distance, and it is __very similar to dynamic time-warping.__
 
 In bioinformatics this algorithm is called __"Smith-Waterman" sequence alignment.__
-:::
+
 
 ::: {.content-visible when-profile="slides"}
 ## Recap
 
 We covered the following topics
 
-:::: {.incremental}
 - reviewed representations of data,
 - discussed metrics and norms,
 - discussed similarity and dissimilarity functions,
 - introduced time series, 
 - feature engineering, and
 - dynamic time warping.
-:::: 
 :::
