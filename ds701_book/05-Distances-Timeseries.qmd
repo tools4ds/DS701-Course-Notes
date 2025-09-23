@@ -484,7 +484,10 @@ We know that the inner product of two vectors can be used to compute the __cosin
 
 $$ \cos(\theta) = \frac{\mathbf{x}^T\mathbf{y}}{\Vert\mathbf{x}\Vert \Vert\mathbf{y}\Vert} \equiv \cos(\mathbf{x}, \mathbf{y})  .$$
 
-This value is close to 1 when $\mathbf{x} \approx \mathbf{y}$. 
+This value is 
+
+* close to 1 when $\mathbf{x} \approx \mathbf{y}$ ($\theta \approx 0$) and 
+* close to 0 when $\mathbf{x}$ and $\mathbf{y}$ are orthogonal ($\theta \approx 90^\circ$). 
 
 We can use this formula to define a __similarity__ function called the __cosine similarity__ $\cos(\mathbf{x}, \mathbf{y})$.
 
@@ -638,14 +641,21 @@ if __name__ == "__main__":
 
 ## Discussion points
 
+::: {.fragment}
 1. **What does a cosine similarity of 0.5 mean?**
+:::
 
+::: {.fragment}
 A cosine similarity of 0.5 means the documents are moderately similar.
 The angle between their vectors is approximately 60 degrees.
 This indicates some overlap in word usage patterns but not complete similarity.
+:::
 
+::: {.fragment}
 2. **Why might cosine similarity be better than Euclidean distance for text documents?**
+:::
 
+::: {.fragment}
 **Scale invariance:** Cosine similarity focuses on the direction of vectors,
 not their magnitude, so document length doesn't affect the comparison.
 
@@ -655,7 +665,7 @@ which is more meaningful for text analysis than absolute differences.
 
 **Range:** Cosine similarity ranges from -1 to 1, with 1 being identical,
 making it more interpretable for similarity measures.
-
+:::
 
 
 
@@ -705,7 +715,7 @@ $L_1(\text{Case 1}) = 10$ and $L_1(\text{Case 2}) = 5$. Is case 1 really more di
 :::
 
 :::: {.fragment}
-What matters is not just the size of the set difference, but the size of the intersection.
+What matters is not just the size of the set difference, but the size of the _normalized_ intersection.
 ::::
 
 
