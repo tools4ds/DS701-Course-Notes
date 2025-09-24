@@ -56,7 +56,7 @@ import seaborn as sns
 :::: {.columns }
 
 ::: {.column width="60%"}
-![London cholera outbreak](figs/L6-Snow-cholera-map-1.png)
+![London cholera outbreak](figs/L6-Snow-cholera-map-1.png){width=500px}
 :::
 
 ::: {.column width="40%" .incremental}
@@ -152,11 +152,7 @@ __Unsupervised__ methods:  Data items do not have labels, and we want to learn a
 When we apply clustering, what problem are we trying to solve?
 
 ::: {.fragment}
-We will answer this question informally at first. 
-:::
-
-::: {.fragment}
-(But soon we will look at formal criteria!)
+We will answer this question informally at first, then apply formal criteria.
 :::
 
 ::: {.fragment .fade-in}
@@ -171,27 +167,40 @@ Informally, a __clustering__ is:
 ## The Clustering Problem, continued
 :::
 
-![](figs/L06-clustering-1.png){width=350 fig-align="center"}
-    
+
+:::: {.columns}
+::: {.column width="50%"}
 So we want our clustering algorithm to:
 
 * <font color = "blue">minimize</font> intra-cluster distances.
 * <font color = "red">maximize</font> inter-cluster distances.
+:::
+::: {.column width="50%"}
+![](figs/L06-clustering-1.png){width=500 fig-align="center"}
+:::
+::::
 
 
-::: {.content-hidden when-profile="web"}
 ## The Clustering Problem, continued
 
-![](figs/L06-clustering-1.png){width=350 fig-align="center"}
-:::
+:::: {.columns}
+::: {.column width="50%"}
 Here are the basic questions we need to ask about clustering:
 
+::: {.incremental}
 * What is the right kind of <font color = "blue">"similarity"</font> to use?
 * What is a <font color="blue">*good* partition</font> of objects?
     * i.e., how is the quality of a solution measured?
 * <font color = "blue">How to find</font> a good partition?
     * Are there efficient algorithms?  
     * Are there algorithms that are guaranteed to find good clusters?
+:::
+:::
+::: {.column width="50%"}
+![](figs/L06-clustering-1.png){width=500 fig-align="center"}
+:::
+::::
+
 
 ::: {.content-hidden when-profile="web"}
 ## The Clustering Problem, continued
@@ -202,28 +211,28 @@ a "best" clustering can still be ambiguous.
     
 ![](figs/L06-clustering-2.png){width=600 fig-align="center"}
 
-To accommodate the ambiguity here, one approach is to seek a __hierarchical__ clustering.
+::: {.fragment}
+Later, we will discuss hierarchical clustering which let's us consider clustering
+at multiple scales.
+:::
 
-That is, as set of nested clusters organized in a tree.
+## Partitional Clustering
 
-We'll discuss hierarchical cluster in an upcoming lecture.
+:::: {.columns}
+::: {.column width="50%"}
+For now, we'll focus on __partitional__ clustering. 
 
----
+Points are divided into a set of __non-overlapping__ groups:
 
-For today, we'll focus on __partitional__ clustering. 
+* Each object belongs to __one__, and only one, cluster. (mutually exclusive)
+* The set of clusters covers all the objects. (exhaustive)
 
-In a partitional clustering, the points are divided into a set of __non-overlapping__ groups.
-    
+We are going to assume for now that the number of clusters, $k$, is given in advance.
+:::
+::: {.column width="50%"}
 ![](figs/L06-partitional-clustering.png){width=600 fig-align="center"}
-    
-In a partitional clustering.
-
-* Each object belongs to __one__, and only one, cluster.
-* The set of clusters covers all the objects.
-
-We are going to assume for now that the number of clusters is given in advance.
-
-We will denote the number of clusters as $k$.
+:::
+::::
 
 # The $k$-means Algorithm
 
@@ -244,10 +253,10 @@ Find $K$ disjoint clusters $C_k$, each described by points $c_1, \dots, c_K$
 that minimizes
 
 $$
-\sum_{k=1}^K \sum_{x\in C_k} \Vert x-c_k\Vert^2. 
+\underset{C_1, \dots, C_K}{\arg\min} \hspace{1em} \sum_{k=1}^K \hspace{1em} \sum_{x\in C_k} \Vert x-c_k\Vert^2. 
 $$
 
-The literature sometimes calls this the _Inertia_ of the clustering.
+* The _Within-Cluster Sum of Squares_ (WCSS) or the _Inertia_ of the clustering.
 
 ::: aside
 See [Norms](./05-Distances-Timeseries.html#norms) in
@@ -268,28 +277,24 @@ How hard is it to solve this problem?
 
 __Nonetheless,__ there is a simple algorithm that works quite well in practice!
 
-::: {.content-hidden when-profile="slides"}
-## $k$-means as NP-hard
+
+## Aside: $k$-means as NP-hard
 
 For context, **NP-hard** is a term used in the study of
 [computational complexity](https://en.wikipedia.org/wiki/Computational_complexity_theory).
 
-Problems in [**P**](https://en.wikipedia.org/wiki/P_(complexity)) are those that can be solved in polynomial time.
+Problems in [**P**](https://en.wikipedia.org/wiki/P_(complexity)) are those that
+can be solved in polynomial time,  e.g. for $n$ items, the time to solve the problem is $O(n^2)$ or $O(n^3)$.
 
 Problems in [**NP**](https://en.wikipedia.org/wiki/NP_(complexity)) are those that
 can be _verified_ in polynomial time but not necessarily _solved_ in polynomial time.
 
-[**NP-hard**](https://en.wikipedia.org/wiki/NP-hardness) problems are those that are at least as hard as the hardest problems in **NP**.
+[**NP-hard**](https://en.wikipedia.org/wiki/NP-hardness) problems are those that are at least as hard as the hardest problems in **NP**, not necessarily verifiable in polynomial time.
 
-[**NP-complete**](https://en.wikipedia.org/wiki/NP-complete) problems are those that are both NP-hard and in NP.
+[**NP-complete**](https://en.wikipedia.org/wiki/NP-complete) problems are those that are both NP-hard and in NP, e.g. hardest problems in NP and verifiable in polynomial time.
 
 You can prove that the $k$-means problem is NP-hard by finding a reduction from a known NP-hard problem such as the [**Partition Problem**](https://en.wikipedia.org/wiki/Partition_problem).
 
-::: {.callout-note}
-The $k$-means problem is NP-hard.
-:::
-
-:::
 
 ## The $k$-means Algorithm
 
@@ -494,13 +499,15 @@ However, we don't have any guarantees on the performance of $k$-means.
 
 In particular, there are various settings in which $k$-means can fail to do a good job.
 
----
 
-1. __$k$-means tries to find spherical clusters__.
+## Limitation: non-spherical clusters
 
 Because each point is assigned to its closest center, the points in a cluster are implicitly assumed to be arranged in a sphere around the center.
 
 ```{python}
+#| fig-cap: "K-means clustering on a dataset with anisotropic clusters."
+#| fig-align: "center"
+
 # Author: Phil Roth <mr.phil.roth@gmail.com>
 #         Arturo Amor <david-arturo.amor-quiroz@inria.fr>
 # License: BSD 3 clause
@@ -508,34 +515,12 @@ Because each point is assigned to its closest center, the points in a cluster ar
 # From https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_assumptions.html
 
 import numpy as np
-from sklearn.datasets import make_blobs, make_moons
-
-n_samples = 1500
-random_state = 170
-transformation = [[0.60834549, -0.63667341], [-0.40887718, 0.85253229]]
-
-X, y = make_blobs(n_samples=n_samples, random_state=random_state)
-X_aniso = np.dot(X, transformation)  # Anisotropic blobs
-X_varied, y_varied = make_blobs(
-    n_samples=n_samples, cluster_std=[1.0, 2.5, 0.5], random_state=random_state
-    )  # Unequal variance
-X_filtered = np.vstack(
-    (X[y == 0][:500], X[y == 1][:100], X[y == 2][:10])
-    )  # Unevenly sized blobs
-y_filtered = [0] * 500 + [1] * 100 + [2] * 10
+from sklearn.datasets import make_moons
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
 
 # Generate two half-moon clusters
 X_moons, y_moons_true = make_moons(n_samples=200, noise=0.1, random_state=42)
-```
-
-```{python}
-#| fig-cap: "K-means clustering on a dataset with anisotropic clusters."
-#| fig-align: "center"
-
-# Run above cell first
-
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
 
 # Perform k-means clustering
 kmeans = KMeans(n_clusters=2, random_state=42)
@@ -564,10 +549,27 @@ plt.tight_layout()
 plt.show()
 ```
 
----
+## Limitation: anisotropic clusters
 
 ```{python}
 #| fig-cap: "K-means clustering on a dataset with anisotropic gaussian clusters."
+
+import numpy as np
+from sklearn.datasets import make_blobs
+
+n_samples = 1500
+random_state = 170
+transformation = [[0.60834549, -0.63667341], [-0.40887718, 0.85253229]]
+
+X, y = make_blobs(n_samples=n_samples, random_state=random_state)
+X_aniso = np.dot(X, transformation)  # Anisotropic blobs
+X_varied, y_varied = make_blobs(
+    n_samples=n_samples, cluster_std=[1.0, 2.5, 0.5], random_state=random_state
+    )  # Unequal variance
+X_filtered = np.vstack(
+    (X[y == 0][:500], X[y == 1][:100], X[y == 2][:10])
+    )  # Unevenly sized blobs
+y_filtered = [0] * 500 + [1] * 100 + [2] * 10
 
 # run previous two cells first
 
@@ -593,9 +595,8 @@ axs[1].scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1],
 # plt.suptitle("Unexpected KMeans clusters").set_y(0.95)
 plt.show()
 ```
----
 
-2. __$k$-means tries to find equal-sized clusters.__
+## Limitation: unequal-sized clusters
 
 For the same reason, $k$-means tends to try to balance the sizes of the clusters.
 
@@ -623,10 +624,7 @@ plt.show()
 
 ```
 
----
-
-3. __$k$-means is sensitive to variance of the clusters.__
-
+## Limitation: unequal variance clusters
 
 ```{python}
 #| fig-cap: "K-means clustering on a dataset with unequal variance clusters."
@@ -652,17 +650,14 @@ plt.show()
 
 ```
 
----
-
-4. __$k$-means is sensitive to the starting cluster centers.__
+## Limitation: sensitive to starting cluster centers
 
 If the initial guess (Step 1) is a bad one, $k$-means may get "stuck" in a bad solution.
     
 ![](figs/L06-kmeans-bad-initialization.png){width=600 fig-align="center"}
 
----
 
-5. __$k$-means is sensitive to the number of clusters.__
+## Limitation: sensitive to number of clusters
 
 ```{python}
 #| fig-cap: "K-means clustering on a dataset with incorrect number of clusters parameter."
@@ -697,21 +692,25 @@ plt.show()
 
 ## Choosing the right $k$
 
-Generally, we would say that, given some $K$, the $k$-means algorithm "learns" the cluster centers -- that is, the parameters of the model.
+Given some $K$, the $k$-means algorithm "learns" the cluster centers.
 
-But we have not yet considered how to choose the right number of clusters.
+::: {.fragment}
+How do we choose the right number of clusters, $K$?
+:::
 
-That's typically __not__ something one knows in advance.
-
+::: {.fragment}
 As an aside:
 
 * This parameter ($K$) is the first example we have seen of a __hyperparameter__.
 * A hyperparameter is a parameter that must be set before the model parameters can be learned.
+:::
 
+::: {.fragment}
 Our basic strategy will be to:
 
 * Iterate through different $K$ and use some criterion to decide which $K$ is most appropriate.
 * We will discuss this more in the next lecture.
+:::
 
 ## Feature Scales
 
@@ -763,91 +762,6 @@ For example, one may choose to:
 * Then rescale each feature so that the standard deviation overall observed values is 1.
     * This means that the feature will have about the same range of values as all the others.
 
-## Feature Scaling Example
-
-For example, let's work with Bortkiewicz's famous
-[horse-kick data](http://www.randomservices.org/random/data/HorseKicks.html) which is the the number of soilders in the Prussian cavalry killed by horse kicks over the 20 years between 1875 and 1894, inclusive.
-
-## Ladislaus Bortkiewicz
-
-:::: {.columns}
-::: {.column width="40%"}
-![Ladislaus Bortkiewicz](figs/Ladislaus_Bortkiewicz.jpg){width=150}^[By no conegut - MacTutor History of Mathematics: http://www-history.mcs.st-andrews.ac.uk/PictDisplay/Bortkiewicz.html, Public Domain, https://commons.wikimedia.org/w/index.php?curid=79219622] ![Law of Small Numbers Book](figs/Bortkiewicz%20LSN%20Book.png){width=200}^[Law of Small Numbers]
-:::
-::: {.column width="60%"}
-* Ladislaus Bortkiewicz (1868 -- 1931)
-* Wrote book ["Law of Small Numbers"](https://archive.org/details/dasgesetzderklei00bortrich/mode/2up) in 1898
-* Showed how the horse kick data fits the
-[Poisson model](03-Probability-and-Statistics-Refresher.html#the-poisson-distribution)
-* More generally that rare events in large populations can be statistically modeled using the Poisson distribution
-:::
-::::
-
-## Feature Scaling Example, Continued
-
-Here is the horse kick data:
-
-```{python}
-# source: http://www.randomservices.org/random/data/HorseKicks.html
-import pandas as pd
-df = pd.read_table('data/HorseKicks.txt',index_col='Year',dtype='float')
-counts = df.sum(axis=1)
-counts
-```
-
-And here is the histogram by year number.
-
-```{python}
-counts.hist(bins=25,xlabelsize=16);
-plt.xlabel('# of Kick Deaths')
-plt.ylabel('Count')
-plt.title('Histogram of Kick Deaths')
-plt.show()
-```
-
-The average:
-
-```{python}
-counts.mean()
-```
-::: {.content-hidden when-profile="web"}
-## Feature Scaling Example, Continued
-:::
-
-To standardize to zero mean and unit standard deviation, we can use pre-processing
-tools from
-the [scikit-learn](https://scikit-learn.org/stable/modules/preprocessing.html)
-library.
-
-The distribution after rescaling:
-
-```{python}
-from sklearn import preprocessing
-counts_scaled = pd.DataFrame(preprocessing.scale(counts))
-counts_scaled.hist(bins=25,xlabelsize=16);
-```
-
-With a new mean:
-
-```{python}
-counts_scaled.mean().values
-```
-
-::: {.content-hidden when-profile="web"}
-## Feature Scaling Example, Continued
-:::
-
-Notice that values that used to be positive have now become negative.
-
-In some situations it may not be sensible to change non-negative values into something else.
-It may make more sense to map all values into a fixed range, for example $[0, 1]$.
-
-```{python}
-min_max_scaler = preprocessing.MinMaxScaler()
-counts_minmax = min_max_scaler.fit_transform(counts.values.reshape(-1,1))
-counts_minmax = pd.DataFrame(counts_minmax)
-counts_minmax.hist(bins=25,xlabelsize=16);
-```
 
 ## Example Application of k-means
 
