@@ -762,6 +762,620 @@ For example, one may choose to:
 * Then rescale each feature so that the standard deviation overall observed values is 1.
     * This means that the feature will have about the same range of values as all the others.
 
+# $k$-means Clustering Examples
+
+## Customer Segmentation
+
+Another powerful application of $k$-means clustering is **customer segmentation** in e-commerce.
+
+::: {.incremental}
+* Businesses want to understand their customers to provide better service and targeted marketing
+* Group customers with similar behaviors and characteristics $\rightarrow$ **personas**
+* This enables personalized marketing campaigns, product recommendations, and customer service strategies
+:::
+
+## E-commerce Customer Data
+
+Let's synthesize e-commerce data to segment customers based on their purchasing behavior.
+
+* The features will be "Annual Spending", "Average Order Value", and "Total Orders".
+* We'll create four segments of customers:
+    * High-value, frequent buyers (20% of customers)
+    * Moderate buyers (40% of customers)
+    * Bargain hunters (25% of customers)
+    * Occasional buyers (15% of customers)
+
+```{python}
+#| fig-cap: "Customer segmentation analysis using e-commerce data"
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+# Create realistic e-commerce customer data
+np.random.seed(42)
+n_customers = 1000
+
+# Generate customer segments with different characteristics
+# Segment 1: High-value, frequent buyers (20% of customers)
+high_value = np.random.normal([120, 15, 450], [20, 3, 80], (200, 3))
+
+# Segment 2: Moderate buyers (40% of customers)
+moderate = np.random.normal([60, 8, 250], [15, 2, 50], (400, 3))
+
+# Segment 3: Bargain hunters (25% of customers)
+bargain = np.random.normal([25, 12, 150], [8, 4, 30], (250, 3))
+
+# Segment 4: Occasional buyers (15% of customers)
+occasional = np.random.normal([15, 3, 300], [5, 1, 60], (150, 3))
+
+# Combine all segments
+customer_data = np.vstack([high_value, moderate, bargain, occasional])
+
+# Add some noise and shuffle
+customer_data += np.random.normal(0, 5, customer_data.shape)
+np.random.shuffle(customer_data)
+
+# Create DataFrame
+df = pd.DataFrame(customer_data, columns=['Annual_Spending', 'Avg_Order_Value', 'Total_Orders'])
+df['Customer_ID'] = range(1, len(df) + 1)
+
+print("E-commerce Customer Data Head:")
+print(df.head().round(2))
+```
+
+## Understanding Customer Features
+
+```{python}
+#| fig-cap: "Distribution of customer features"
+
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+# Annual Spending
+axes[0].hist(df['Annual_Spending'], bins=30, alpha=0.7, color='skyblue', edgecolor='black')
+axes[0].set_title('Distribution of Annual Spending')
+axes[0].set_xlabel('Annual Spending ($)')
+axes[0].set_ylabel('Number of Customers')
+
+# Average Order Value
+axes[1].hist(df['Avg_Order_Value'], bins=30, alpha=0.7, color='lightgreen', edgecolor='black')
+axes[1].set_title('Distribution of Average Order Value')
+axes[1].set_xlabel('Average Order Value ($)')
+axes[1].set_ylabel('Number of Customers')
+
+# Total Orders
+axes[2].hist(df['Total_Orders'], bins=30, alpha=0.7, color='salmon', edgecolor='black')
+axes[2].set_title('Distribution of Total Orders')
+axes[2].set_xlabel('Total Orders')
+axes[2].set_ylabel('Number of Customers')
+
+plt.tight_layout()
+plt.show()
+```
+
+> Can you see clusters?
+
+## Feature Scaling is Critical
+
+Before clustering, we need to scale our features since they have very different ranges:
+
+```{python}
+#| fig-cap: "Feature scaling for customer segmentation"
+
+# Prepare features for clustering
+features = ['Annual_Spending', 'Avg_Order_Value', 'Total_Orders']
+X = df[features].values
+
+# Scale the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+print("Original feature ranges:")
+print(f"Annual Spending: ${X[:, 0].min():.0f} - ${X[:, 0].max():.0f}")
+print(f"Avg Order Value: ${X[:, 1].min():.0f} - ${X[:, 1].max():.0f}")
+print(f"Total Orders: {X[:, 2].min():.0f} - {X[:, 2].max():.0f}")
+
+print("\nScaled feature ranges:")
+print(f"Annual Spending: {X_scaled[:, 0].min():.2f} - {X_scaled[:, 0].max():.2f}")
+print(f"Avg Order Value: {X_scaled[:, 1].min():.2f} - {X_scaled[:, 1].max():.2f}")
+print(f"Total Orders: {X_scaled[:, 2].min():.2f} - {X_scaled[:, 2].max():.2f}")
+```
+
+## Finding the Optimal Number of Clusters
+
+```{python}
+#| fig-cap: "Elbow method for determining optimal number of clusters"
+
+# Calculate WCSS for different numbers of clusters
+wcss = []
+K_range = range(1, 11)
+
+for k in K_range:
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    kmeans.fit(X_scaled)
+    wcss.append(kmeans.inertia_)
+
+# Plot the elbow curve
+plt.figure(figsize=(10, 6))
+plt.plot(K_range, wcss, 'bo-', linewidth=2, markersize=8)
+plt.title('Elbow Method for Optimal Number of Clusters')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('Within-Cluster Sum of Squares (WCSS)')
+plt.grid(True, alpha=0.3)
+
+# Highlight the elbow point (k=4)
+plt.axvline(x=4, color='red', linestyle='--', alpha=0.7, label='Elbow Point (k=4)')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+```
+
+## Customer Segmentation Results
+
+```{python}
+#| fig-cap: "K-means customer segmentation results"
+
+# Perform k-means clustering with k=4
+kmeans = KMeans(n_clusters=4, random_state=42, n_init=10)
+cluster_labels = kmeans.fit_predict(X_scaled)
+
+# Add cluster labels to the dataframe
+df['Cluster'] = cluster_labels
+
+# Visualize clusters in 2D using PCA
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+plt.figure(figsize=(12, 5))
+
+# Plot 1: PCA visualization
+plt.subplot(1, 2, 1)
+scatter = plt.scatter(X_pca[:, 0], X_pca[:, 1], c=cluster_labels, cmap='viridis', alpha=0.6)
+plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], 
+            c='red', marker='x', s=200, linewidths=3, label='Centroids')
+plt.title('Customer Segments (PCA View)')
+plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.1%} variance)')
+plt.ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.1%} variance)')
+plt.legend()
+
+# Plot 2: Feature space visualization
+plt.subplot(1, 2, 2)
+plt.scatter(df['Annual_Spending'], df['Avg_Order_Value'], c=cluster_labels, cmap='viridis', alpha=0.6)
+plt.title('Customer Segments (Annual Spending vs Avg Order Value)')
+plt.xlabel('Annual Spending ($)')
+plt.ylabel('Average Order Value ($)')
+
+plt.tight_layout()
+plt.show()
+```
+
+## Customer Segment Profiles
+
+```{python}
+#| fig-cap: "Detailed analysis of customer segments"
+
+# Analyze each cluster
+cluster_summary = df.groupby('Cluster').agg({
+    'Annual_Spending': ['mean', 'std'],
+    'Avg_Order_Value': ['mean', 'std'],
+    'Total_Orders': ['mean', 'std'],
+    'Customer_ID': 'count'
+}).round(2)
+
+cluster_summary.columns = ['Avg_Annual_Spending', 'Std_Annual_Spending', 
+                          'Avg_Order_Value', 'Std_Order_Value',
+                          'Avg_Total_Orders', 'Std_Total_Orders', 'Count']
+
+print("Customer Segment Profiles:")
+print("=" * 60)
+for cluster in sorted(df['Cluster'].unique()):
+    cluster_data = df[df['Cluster'] == cluster]
+    print(f"\nSegment {cluster} ({len(cluster_data)} customers):")
+    print(f"  • Average Annual Spending: ${cluster_data['Annual_Spending'].mean():.0f}")
+    print(f"  • Average Order Value: ${cluster_data['Avg_Order_Value'].mean():.0f}")
+    print(f"  • Average Total Orders: {cluster_data['Total_Orders'].mean():.1f}")
+    
+    # Assign business meaning
+    if cluster_data['Annual_Spending'].mean() > 80:
+        print(f"  • Business Label: 'High-Value Customers'")
+    elif cluster_data['Avg_Order_Value'].mean() > 10:
+        print(f"  • Business Label: 'Bargain Hunters'")
+    elif cluster_data['Total_Orders'].mean() < 5:
+        print(f"  • Business Label: 'Occasional Buyers'")
+    else:
+        print(f"  • Business Label: 'Regular Customers'")
+```
+
+## Business Applications of Customer Segmentation
+
+```{python}
+#| fig-cap: "Business strategy recommendations for each customer segment"
+
+# Create a summary visualization
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# Create a radar chart for each segment
+categories = ['Annual Spending', 'Avg Order Value', 'Total Orders']
+N = len(categories)
+
+# Normalize data for radar chart (0-1 scale)
+normalized_data = df.groupby('Cluster')[['Annual_Spending', 'Avg_Order_Value', 'Total_Orders']].mean()
+for col in normalized_data.columns:
+    normalized_data[col] = (normalized_data[col] - normalized_data[col].min()) / (normalized_data[col].max() - normalized_data[col].min())
+
+# Plot each segment
+colors = ['red', 'blue', 'green', 'orange']
+segment_names = ['High-Value', 'Regular', 'Bargain Hunters', 'Occasional']
+
+for i, (cluster, color, name) in enumerate(zip(normalized_data.index, colors, segment_names)):
+    values = normalized_data.loc[cluster].values.tolist()
+    values += values[:1]  # Complete the circle
+    
+    angles = [n / float(N) * 2 * np.pi for n in range(N)]
+    angles += angles[:1]
+    
+    ax.plot(angles, values, 'o-', linewidth=2, label=f'Segment {cluster}: {name}', color=color)
+    ax.fill(angles, values, alpha=0.25, color=color)
+
+# Customize the chart
+ax.set_xticks(angles[:-1])
+ax.set_xticklabels(categories)
+ax.set_ylim(0, 1)
+ax.set_title('Customer Segment Profiles', size=16, fontweight='bold')
+ax.legend(loc='upper right', bbox_to_anchor=(1.2, 1.0))
+ax.grid(True)
+
+plt.tight_layout()
+plt.show()
+
+print("\nBusiness Strategy Recommendations:")
+print("=" * 50)
+print("Segment 0 (High-Value): VIP treatment, exclusive offers, loyalty rewards")
+print("Segment 1 (Regular): Upselling, subscription services, regular promotions")
+print("Segment 2 (Bargain Hunters): Clearance sales, bulk discounts, price alerts")
+print("Segment 3 (Occasional): Re-engagement campaigns, seasonal promotions, referral programs")
+```
+
+## Key Insights from Customer Segmentation
+
+::: {.incremental}
+* **Segment 0 (High-Value)**: High spending, moderate order frequency - focus on retention and premium offerings
+* **Segment 1 (Regular)**: Balanced spending pattern - ideal for cross-selling and upselling
+* **Segment 2 (Bargain Hunters)**: Low spending but high order frequency - target with value promotions
+* **Segment 3 (Occasional)**: Low engagement across all metrics - re-engagement campaigns needed
+:::
+
+::: {.fragment}
+This segmentation enables:
+* **Personalized Marketing**: Tailored campaigns for each segment
+* **Product Recommendations**: Segment-specific product suggestions
+* **Pricing Strategies**: Different pricing approaches per segment
+* **Customer Service**: Segment-appropriate service levels
+:::
+
+## Plant Species Classification with Iris Data
+
+Let's explore another real-world application using the famous **Iris dataset** from scikit-learn.
+
+::: {.incremental}
+* The Iris dataset contains measurements of 150 iris flowers from 3 species
+* Each flower has 4 features: sepal length, sepal width, petal length, and petal width
+* This is a classic example where we know the true species but want to see if k-means can discover these natural groupings
+:::
+
+## Loading and Exploring the Iris Dataset
+
+```{python}
+#| fig-cap: "Loading and exploring the Iris dataset"
+
+from sklearn.datasets import load_iris
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+
+# Load the Iris dataset
+iris = load_iris()
+X = iris.data
+y = iris.target
+feature_names = iris.feature_names
+target_names = iris.target_names
+
+print("Iris Dataset Information:")
+print("=" * 40)
+print(f"Number of samples: {X.shape[0]}")
+print(f"Number of features: {X.shape[1]}")
+print(f"Feature names: {feature_names}")
+print(f"Target names: {target_names}")
+print(f"Number of species: {len(target_names)}")
+
+# Display first few samples
+print(f"\nFirst 5 samples:")
+print(f"{'Sepal Length':<12} {'Sepal Width':<11} {'Petal Length':<12} {'Petal Width':<11} {'Species':<8}")
+print("-" * 60)
+for i in range(5):
+    print(f"{X[i, 0]:<12.1f} {X[i, 1]:<11.1f} {X[i, 2]:<12.1f} {X[i, 3]:<11.1f} {target_names[y[i]]:<8}")
+```
+
+## Visualizing Iris Data in 2D
+
+```{python}
+#| fig-cap: "2D visualization of Iris dataset features"
+
+fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+axes = axes.ravel()
+
+# Color mapping for species
+colors = ['red', 'green', 'blue']
+
+# Plot all pairwise combinations of features
+feature_pairs = [(0, 1), (0, 2), (0, 3), (2, 3)]
+titles = ['Sepal Length vs Width', 'Sepal Length vs Petal Length', 
+          'Sepal Length vs Petal Width', 'Petal Length vs Width']
+
+for i, (feat1, feat2) in enumerate(feature_pairs):
+    for species in range(3):
+        mask = y == species
+        axes[i].scatter(X[mask, feat1], X[mask, feat2], 
+                       c=colors[species], label=target_names[species], 
+                       alpha=0.7, s=50)
+    
+    axes[i].set_xlabel(feature_names[feat1])
+    axes[i].set_ylabel(feature_names[feat2])
+    axes[i].set_title(titles[i])
+    axes[i].legend()
+    axes[i].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+
+# Show which feature pairs separate species best
+print("\nKey Observations:")
+print("• Petal Length vs Petal Width shows the clearest separation between species")
+print("• Setosa is easily distinguishable from the other two species")
+print("• Versicolor and Virginica have some overlap, especially in sepal dimensions")
+```
+
+## 3D Visualization of Iris Data
+
+```{python}
+#| fig-cap: "3D visualization of Iris dataset using petal and sepal measurements"
+
+fig = plt.figure(figsize=(15, 5))
+
+# 3D plot 1: Sepal Length, Sepal Width, Petal Length
+ax1 = fig.add_subplot(131, projection='3d')
+for species in range(3):
+    mask = y == species
+    ax1.scatter(X[mask, 0], X[mask, 1], X[mask, 2], 
+               c=colors[species], label=target_names[species], alpha=0.7)
+
+ax1.set_xlabel('Sepal Length')
+ax1.set_ylabel('Sepal Width')
+ax1.set_zlabel('Petal Length')
+ax1.set_title('3D View: Sepal + Petal Length')
+ax1.legend()
+
+# 3D plot 2: Petal Length, Petal Width, Sepal Length
+ax2 = fig.add_subplot(132, projection='3d')
+for species in range(3):
+    mask = y == species
+    ax2.scatter(X[mask, 2], X[mask, 3], X[mask, 0], 
+               c=colors[species], label=target_names[species], alpha=0.7)
+
+ax2.set_xlabel('Petal Length')
+ax2.set_ylabel('Petal Width')
+ax2.set_zlabel('Sepal Length')
+ax2.set_title('3D View: Petal + Sepal Length')
+ax2.legend()
+
+# 3D plot 3: All four features (using PCA for 3D projection)
+from sklearn.decomposition import PCA
+pca = PCA(n_components=3)
+X_pca = pca.fit_transform(X)
+
+ax3 = fig.add_subplot(133, projection='3d')
+for species in range(3):
+    mask = y == species
+    ax3.scatter(X_pca[mask, 0], X_pca[mask, 1], X_pca[mask, 2], 
+               c=colors[species], label=target_names[species], alpha=0.7)
+
+ax3.set_xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.1%})')
+ax3.set_ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.1%})')
+ax3.set_zlabel(f'PC3 ({pca.explained_variance_ratio_[2]:.1%})')
+ax3.set_title('3D PCA View')
+ax3.legend()
+
+plt.tight_layout()
+plt.show()
+```
+
+## K-means Clustering on Iris Data
+
+```{python}
+#| fig-cap: "K-means clustering results on Iris dataset"
+
+from sklearn.cluster import KMeans
+from sklearn.metrics import adjusted_rand_score, confusion_matrix
+import seaborn as sns
+
+# Perform k-means clustering with k=3 (we know there are 3 species)
+kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+cluster_labels = kmeans.fit_predict(X)
+
+# Calculate clustering performance
+ari_score = adjusted_rand_score(y, cluster_labels)
+print(f"Adjusted Rand Index: {ari_score:.3f}")
+print("(Perfect clustering would score 1.0)")
+
+# Create confusion matrix
+cm = confusion_matrix(y, cluster_labels)
+print(f"\nConfusion Matrix:")
+print("Rows: True species, Columns: Predicted clusters")
+print("     ", end="")
+for i in range(3):
+    print(f"Cluster {i}", end="  ")
+print()
+for i, species in enumerate(target_names):
+    print(f"{species:<8} {cm[i, 0]:<8} {cm[i, 1]:<8} {cm[i, 2]:<8}")
+
+# Visualize clustering results in 2D
+fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+
+# Plot 1: True species
+scatter1 = axes[0].scatter(X[:, 2], X[:, 3], c=y, cmap='viridis', alpha=0.7, s=50)
+axes[0].set_xlabel('Petal Length')
+axes[0].set_ylabel('Petal Width')
+axes[0].set_title('True Species')
+axes[0].grid(True, alpha=0.3)
+
+# Add species labels
+for i, species in enumerate(target_names):
+    mask = y == i
+    centroid_x = X[mask, 2].mean()
+    centroid_y = X[mask, 3].mean()
+    axes[0].annotate(species, (centroid_x, centroid_y), 
+                    xytext=(5, 5), textcoords='offset points',
+                    fontsize=10, fontweight='bold')
+
+# Plot 2: K-means clusters
+scatter2 = axes[1].scatter(X[:, 2], X[:, 3], c=cluster_labels, cmap='viridis', alpha=0.7, s=50)
+axes[1].scatter(kmeans.cluster_centers_[:, 2], kmeans.cluster_centers_[:, 3], 
+               c='red', marker='x', s=200, linewidths=3, label='Centroids')
+axes[1].set_xlabel('Petal Length')
+axes[1].set_ylabel('Petal Width')
+axes[1].set_title(f'K-means Clusters (ARI: {ari_score:.3f})')
+axes[1].legend()
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+## 3D Clustering Visualization
+
+```{python}
+#| fig-cap: "3D visualization of k-means clustering results"
+
+fig = plt.figure(figsize=(15, 5))
+
+# 3D plot 1: True species
+ax1 = fig.add_subplot(131, projection='3d')
+for species in range(3):
+    mask = y == species
+    ax1.scatter(X[mask, 2], X[mask, 3], X[mask, 0], 
+               c=colors[species], label=target_names[species], alpha=0.7, s=50)
+
+ax1.set_xlabel('Petal Length')
+ax1.set_ylabel('Petal Width')
+ax1.set_zlabel('Sepal Length')
+ax1.set_title('True Species (3D)')
+ax1.legend()
+
+# 3D plot 2: K-means clusters
+ax2 = fig.add_subplot(132, projection='3d')
+cluster_colors = ['red', 'green', 'blue']
+for cluster in range(3):
+    mask = cluster_labels == cluster
+    ax2.scatter(X[mask, 2], X[mask, 3], X[mask, 0], 
+               c=cluster_colors[cluster], label=f'Cluster {cluster}', alpha=0.7, s=50)
+
+# Add cluster centers
+centers_3d = kmeans.cluster_centers_[:, [2, 3, 0]]  # Reorder to match plot axes
+ax2.scatter(centers_3d[:, 0], centers_3d[:, 1], centers_3d[:, 2], 
+           c='black', marker='x', s=200, linewidths=3, label='Centroids')
+
+ax2.set_xlabel('Petal Length')
+ax2.set_ylabel('Petal Width')
+ax2.set_zlabel('Sepal Length')
+ax2.set_title('K-means Clusters (3D)')
+ax2.legend()
+
+# 3D plot 3: PCA space
+ax3 = fig.add_subplot(133, projection='3d')
+for cluster in range(3):
+    mask = cluster_labels == cluster
+    ax3.scatter(X_pca[mask, 0], X_pca[mask, 1], X_pca[mask, 2], 
+               c=cluster_colors[cluster], label=f'Cluster {cluster}', alpha=0.7, s=50)
+
+# Add cluster centers in PCA space
+centers_pca = pca.transform(kmeans.cluster_centers_)
+ax3.scatter(centers_pca[:, 0], centers_pca[:, 1], centers_pca[:, 2], 
+           c='black', marker='x', s=200, linewidths=3, label='Centroids')
+
+ax3.set_xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.1%})')
+ax3.set_ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.1%})')
+ax3.set_zlabel(f'PC3 ({pca.explained_variance_ratio_[2]:.1%})')
+ax3.set_title('K-means in PCA Space')
+ax3.legend()
+
+plt.tight_layout()
+plt.show()
+```
+
+## Analysis of K-means Performance
+
+```{python}
+#| fig-cap: "Detailed analysis of k-means clustering performance"
+
+# Analyze cluster assignments
+print("Cluster Analysis:")
+print("=" * 50)
+
+for cluster in range(3):
+    mask = cluster_labels == cluster
+    cluster_data = X[mask]
+    true_species = y[mask]
+    
+    # Find the most common species in this cluster
+    species_counts = np.bincount(true_species)
+    dominant_species = np.argmax(species_counts)
+    purity = species_counts[dominant_species] / len(true_species)
+    
+    print(f"\nCluster {cluster}:")
+    print(f"  • Size: {len(cluster_data)} samples")
+    print(f"  • Dominant species: {target_names[dominant_species]} ({purity:.1%})")
+    print(f"  • Average petal length: {cluster_data[:, 2].mean():.1f} cm")
+    print(f"  • Average petal width: {cluster_data[:, 3].mean():.1f} cm")
+    print(f"  • Average sepal length: {cluster_data[:, 0].mean():.1f} cm")
+    print(f"  • Average sepal width: {cluster_data[:, 1].mean():.1f} cm")
+
+# Feature importance analysis
+print(f"\nFeature Analysis:")
+print("=" * 50)
+feature_importance = np.abs(pca.components_[0])  # First principal component
+for i, (feature, importance) in enumerate(zip(feature_names, feature_importance)):
+    print(f"  • {feature}: {importance:.3f}")
+
+print(f"\nKey Insights:")
+print("=" * 50)
+print("• K-means successfully identified the three iris species")
+print("• Setosa is perfectly separated from the other species")
+print("• Versicolor and Virginica show some overlap, which is realistic")
+print("• Petal measurements are more discriminative than sepal measurements")
+print(f"• Overall clustering quality: {ari_score:.3f} (very good!)")
+```
+
+## Why K-means Works Well on Iris Data
+
+::: {.incremental}
+* **Well-separated clusters**: The three iris species have distinct characteristics
+* **Spherical cluster shapes**: Each species forms roughly spherical groups in feature space
+* **Appropriate feature scaling**: All measurements are in the same units (centimeters)
+* **Reasonable number of clusters**: We correctly chose k=3 matching the true number of species
+:::
+
+::: {.fragment}
+This example demonstrates:
+* **Unsupervised learning**: We discovered species groupings without using species labels
+* **Real-world validation**: We can compare our clusters to known species classifications
+* **Visual interpretation**: 2D and 3D plots help us understand the clustering results
+* **Performance metrics**: We can quantitatively assess clustering quality
+:::
 
 ## Example Application of k-means
 
@@ -811,6 +1425,8 @@ Finally, we use 1 bit (2 color groups) for a compression ratio of $24\times$.
     
 ![](figs/L6-annie_002.png){width=500 fig-align="center"}
 
+
+
 ## Recap and Next
 
 Today we covered:
@@ -819,6 +1435,9 @@ Today we covered:
 * strengths and weaknesses
 * Importance of initialization and cluster number
 * Feature scaling
-* Example application
+* Example applications:
+  * Customer segmentation
+  * Plant species classification with Iris data
+  * Image color compression
 
 Coming up next, we'll look at some practical aspects of applying $k$-means.
