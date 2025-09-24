@@ -1555,6 +1555,21 @@ The Poisson distribution has an interesting role in our perception of randomness
 The classic example comes from history.
 :::
 
+## Ladislaus Bortkiewicz
+
+:::: {.columns}
+::: {.column width="40%"}
+![Ladislaus Bortkiewicz](figs/Ladislaus_Bortkiewicz.jpg){width=150}^[By no conegut - MacTutor History of Mathematics: http://www-history.mcs.st-andrews.ac.uk/PictDisplay/Bortkiewicz.html, Public Domain, https://commons.wikimedia.org/w/index.php?curid=79219622] ![Law of Small Numbers Book](figs/Bortkiewicz%20LSN%20Book.png){width=200}^[Law of Small Numbers]
+:::
+::: {.column width="60%"}
+* Ladislaus Bortkiewicz (1868 -- 1931)
+* Wrote book ["Law of Small Numbers"](https://archive.org/details/dasgesetzderklei00bortrich/mode/2up) in 1898
+* Showed how the [horse-kick data](http://www.randomservices.org/random/data/HorseKicks.html) fits the
+[Poisson model](03-Probability-and-Statistics-Refresher.html#the-poisson-distribution)
+* More generally that rare events in large populations can be statistically modeled using the Poisson distribution
+:::
+::::
+
 ::: {.content-visible when-profile="slides"}
 ## Poisson Distribution and Horse Kicks
 :::

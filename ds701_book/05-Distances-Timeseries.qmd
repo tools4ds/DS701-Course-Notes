@@ -1136,6 +1136,7 @@ And python packages such as:
 - Gesture recognition (different execution speeds)
 - Stock price patterns (different market timing)
 :::
+:::
 
 ## From Time series to Strings
 

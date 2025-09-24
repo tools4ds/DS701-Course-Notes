@@ -56,7 +56,7 @@ import seaborn as sns
 :::: {.columns }
 
 ::: {.column width="60%"}
-![London cholera outbreak](figs/L6-Snow-cholera-map-1.png)
+![London cholera outbreak](figs/L6-Snow-cholera-map-1.png){width=500px}
 :::
 
 ::: {.column width="40%" .incremental}
@@ -152,11 +152,7 @@ __Unsupervised__ methods:  Data items do not have labels, and we want to learn a
 When we apply clustering, what problem are we trying to solve?
 
 ::: {.fragment}
-We will answer this question informally at first. 
-:::
-
-::: {.fragment}
-(But soon we will look at formal criteria!)
+We will answer this question informally at first, then apply formal criteria.
 :::
 
 ::: {.fragment .fade-in}
@@ -171,27 +167,40 @@ Informally, a __clustering__ is:
 ## The Clustering Problem, continued
 :::
 
-![](figs/L06-clustering-1.png){width=350 fig-align="center"}
-    
+
+:::: {.columns}
+::: {.column width="50%"}
 So we want our clustering algorithm to:
 
 * <font color = "blue">minimize</font> intra-cluster distances.
 * <font color = "red">maximize</font> inter-cluster distances.
+:::
+::: {.column width="50%"}
+![](figs/L06-clustering-1.png){width=500 fig-align="center"}
+:::
+::::
 
 
-::: {.content-hidden when-profile="web"}
 ## The Clustering Problem, continued
 
-![](figs/L06-clustering-1.png){width=350 fig-align="center"}
-:::
+:::: {.columns}
+::: {.column width="50%"}
 Here are the basic questions we need to ask about clustering:
 
+::: {.incremental}
 * What is the right kind of <font color = "blue">"similarity"</font> to use?
 * What is a <font color="blue">*good* partition</font> of objects?
     * i.e., how is the quality of a solution measured?
 * <font color = "blue">How to find</font> a good partition?
     * Are there efficient algorithms?  
     * Are there algorithms that are guaranteed to find good clusters?
+:::
+:::
+::: {.column width="50%"}
+![](figs/L06-clustering-1.png){width=500 fig-align="center"}
+:::
+::::
+
 
 ::: {.content-hidden when-profile="web"}
 ## The Clustering Problem, continued
@@ -202,28 +211,28 @@ a "best" clustering can still be ambiguous.
     
 ![](figs/L06-clustering-2.png){width=600 fig-align="center"}
 
-To accommodate the ambiguity here, one approach is to seek a __hierarchical__ clustering.
+::: {.fragment}
+Later, we will discuss hierarchical clustering which let's us consider clustering
+at multiple scales.
+:::
 
-That is, as set of nested clusters organized in a tree.
+## Partitional Clustering
 
-We'll discuss hierarchical cluster in an upcoming lecture.
+:::: {.columns}
+::: {.column width="50%"}
+For now, we'll focus on __partitional__ clustering. 
 
----
+Points are divided into a set of __non-overlapping__ groups:
 
-For today, we'll focus on __partitional__ clustering. 
+* Each object belongs to __one__, and only one, cluster. (mutually exclusive)
+* The set of clusters covers all the objects. (exhaustive)
 
-In a partitional clustering, the points are divided into a set of __non-overlapping__ groups.
-    
+We are going to assume for now that the number of clusters, $k$, is given in advance.
+:::
+::: {.column width="50%"}
 ![](figs/L06-partitional-clustering.png){width=600 fig-align="center"}
-    
-In a partitional clustering.
-
-* Each object belongs to __one__, and only one, cluster.
-* The set of clusters covers all the objects.
-
-We are going to assume for now that the number of clusters is given in advance.
-
-We will denote the number of clusters as $k$.
+:::
+::::
 
 # The $k$-means Algorithm
 
@@ -244,10 +253,10 @@ Find $K$ disjoint clusters $C_k$, each described by points $c_1, \dots, c_K$
 that minimizes
 
 $$
-\sum_{k=1}^K \sum_{x\in C_k} \Vert x-c_k\Vert^2. 
+\underset{C_1, \dots, C_K}{\arg\min} \hspace{1em} \sum_{k=1}^K \hspace{1em} \sum_{x\in C_k} \Vert x-c_k\Vert^2. 
 $$
 
-The literature sometimes calls this the _Inertia_ of the clustering.
+* The _Within-Cluster Sum of Squares_ (WCSS) or the _Inertia_ of the clustering.
 
 ::: aside
 See [Norms](./05-Distances-Timeseries.html#norms) in
@@ -268,28 +277,24 @@ How hard is it to solve this problem?
 
 __Nonetheless,__ there is a simple algorithm that works quite well in practice!
 
-::: {.content-hidden when-profile="slides"}
-## $k$-means as NP-hard
+
+## Aside: $k$-means as NP-hard
 
 For context, **NP-hard** is a term used in the study of
 [computational complexity](https://en.wikipedia.org/wiki/Computational_complexity_theory).
 
-Problems in [**P**](https://en.wikipedia.org/wiki/P_(complexity)) are those that can be solved in polynomial time.
+Problems in [**P**](https://en.wikipedia.org/wiki/P_(complexity)) are those that
+can be solved in polynomial time,  e.g. for $n$ items, the time to solve the problem is $O(n^2)$ or $O(n^3)$.
 
 Problems in [**NP**](https://en.wikipedia.org/wiki/NP_(complexity)) are those that
 can be _verified_ in polynomial time but not necessarily _solved_ in polynomial time.
 
-[**NP-hard**](https://en.wikipedia.org/wiki/NP-hardness) problems are those that are at least as hard as the hardest problems in **NP**.
+[**NP-hard**](https://en.wikipedia.org/wiki/NP-hardness) problems are those that are at least as hard as the hardest problems in **NP**, not necessarily verifiable in polynomial time.
 
-[**NP-complete**](https://en.wikipedia.org/wiki/NP-complete) problems are those that are both NP-hard and in NP.
+[**NP-complete**](https://en.wikipedia.org/wiki/NP-complete) problems are those that are both NP-hard and in NP, e.g. hardest problems in NP and verifiable in polynomial time.
 
 You can prove that the $k$-means problem is NP-hard by finding a reduction from a known NP-hard problem such as the [**Partition Problem**](https://en.wikipedia.org/wiki/Partition_problem).
 
-::: {.callout-note}
-The $k$-means problem is NP-hard.
-:::
-
-:::
 
 ## The $k$-means Algorithm
 
@@ -482,9 +487,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-
 ---
-
 
 ## Limitations of $k$-means
 
@@ -494,13 +497,15 @@ However, we don't have any guarantees on the performance of $k$-means.
 
 In particular, there are various settings in which $k$-means can fail to do a good job.
 
----
 
-1. __$k$-means tries to find spherical clusters__.
+## Limitation: non-spherical clusters
 
 Because each point is assigned to its closest center, the points in a cluster are implicitly assumed to be arranged in a sphere around the center.
 
 ```{python}
+#| fig-cap: "K-means clustering on a dataset with anisotropic clusters."
+#| fig-align: "center"
+
 # Author: Phil Roth <mr.phil.roth@gmail.com>
 #         Arturo Amor <david-arturo.amor-quiroz@inria.fr>
 # License: BSD 3 clause
@@ -508,34 +513,12 @@ Because each point is assigned to its closest center, the points in a cluster ar
 # From https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_assumptions.html
 
 import numpy as np
-from sklearn.datasets import make_blobs, make_moons
-
-n_samples = 1500
-random_state = 170
-transformation = [[0.60834549, -0.63667341], [-0.40887718, 0.85253229]]
-
-X, y = make_blobs(n_samples=n_samples, random_state=random_state)
-X_aniso = np.dot(X, transformation)  # Anisotropic blobs
-X_varied, y_varied = make_blobs(
-    n_samples=n_samples, cluster_std=[1.0, 2.5, 0.5], random_state=random_state
-    )  # Unequal variance
-X_filtered = np.vstack(
-    (X[y == 0][:500], X[y == 1][:100], X[y == 2][:10])
-    )  # Unevenly sized blobs
-y_filtered = [0] * 500 + [1] * 100 + [2] * 10
+from sklearn.datasets import make_moons
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
 
 # Generate two half-moon clusters
 X_moons, y_moons_true = make_moons(n_samples=200, noise=0.1, random_state=42)
-```
-
-```{python}
-#| fig-cap: "K-means clustering on a dataset with anisotropic clusters."
-#| fig-align: "center"
-
-# Run above cell first
-
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
 
 # Perform k-means clustering
 kmeans = KMeans(n_clusters=2, random_state=42)
@@ -564,10 +547,27 @@ plt.tight_layout()
 plt.show()
 ```
 
----
+## Limitation: anisotropic clusters
 
 ```{python}
 #| fig-cap: "K-means clustering on a dataset with anisotropic gaussian clusters."
+
+import numpy as np
+from sklearn.datasets import make_blobs
+
+n_samples = 1500
+random_state = 170
+transformation = [[0.60834549, -0.63667341], [-0.40887718, 0.85253229]]
+
+X, y = make_blobs(n_samples=n_samples, random_state=random_state)
+X_aniso = np.dot(X, transformation)  # Anisotropic blobs
+X_varied, y_varied = make_blobs(
+    n_samples=n_samples, cluster_std=[1.0, 2.5, 0.5], random_state=random_state
+    )  # Unequal variance
+X_filtered = np.vstack(
+    (X[y == 0][:500], X[y == 1][:100], X[y == 2][:10])
+    )  # Unevenly sized blobs
+y_filtered = [0] * 500 + [1] * 100 + [2] * 10
 
 # run previous two cells first
 
@@ -593,9 +593,8 @@ axs[1].scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1],
 # plt.suptitle("Unexpected KMeans clusters").set_y(0.95)
 plt.show()
 ```
----
 
-2. __$k$-means tries to find equal-sized clusters.__
+## Limitation: unequal-sized clusters
 
 For the same reason, $k$-means tends to try to balance the sizes of the clusters.
 
@@ -623,10 +622,7 @@ plt.show()
 
 ```
 
----
-
-3. __$k$-means is sensitive to variance of the clusters.__
-
+## Limitation: unequal variance clusters
 
 ```{python}
 #| fig-cap: "K-means clustering on a dataset with unequal variance clusters."
@@ -652,17 +648,14 @@ plt.show()
 
 ```
 
----
-
-4. __$k$-means is sensitive to the starting cluster centers.__
+## Limitation: sensitive to starting cluster centers
 
 If the initial guess (Step 1) is a bad one, $k$-means may get "stuck" in a bad solution.
     
 ![](figs/L06-kmeans-bad-initialization.png){width=600 fig-align="center"}
 
----
 
-5. __$k$-means is sensitive to the number of clusters.__
+## Limitation: sensitive to number of clusters
 
 ```{python}
 #| fig-cap: "K-means clustering on a dataset with incorrect number of clusters parameter."
@@ -697,21 +690,25 @@ plt.show()
 
 ## Choosing the right $k$
 
-Generally, we would say that, given some $K$, the $k$-means algorithm "learns" the cluster centers -- that is, the parameters of the model.
+Given some $K$, the $k$-means algorithm "learns" the cluster centers.
 
-But we have not yet considered how to choose the right number of clusters.
+::: {.fragment}
+How do we choose the right number of clusters, $K$?
+:::
 
-That's typically __not__ something one knows in advance.
-
+::: {.fragment}
 As an aside:
 
 * This parameter ($K$) is the first example we have seen of a __hyperparameter__.
 * A hyperparameter is a parameter that must be set before the model parameters can be learned.
+:::
 
+::: {.fragment}
 Our basic strategy will be to:
 
 * Iterate through different $K$ and use some criterion to decide which $K$ is most appropriate.
 * We will discuss this more in the next lecture.
+:::
 
 ## Feature Scales
 
@@ -763,93 +760,490 @@ For example, one may choose to:
 * Then rescale each feature so that the standard deviation overall observed values is 1.
     * This means that the feature will have about the same range of values as all the others.
 
-## Feature Scaling Example
+# $k$-means Clustering Examples
 
-For example, let's work with Bortkiewicz's famous
-[horse-kick data](http://www.randomservices.org/random/data/HorseKicks.html) which is the the number of soilders in the Prussian cavalry killed by horse kicks over the 20 years between 1875 and 1894, inclusive.
+# Example 1: Customer Segmentation
 
-## Ladislaus Bortkiewicz
+## Customer Segmentation
 
-:::: {.columns}
-::: {.column width="40%"}
-![Ladislaus Bortkiewicz](figs/Ladislaus_Bortkiewicz.jpg){width=150}^[By no conegut - MacTutor History of Mathematics: http://www-history.mcs.st-andrews.ac.uk/PictDisplay/Bortkiewicz.html, Public Domain, https://commons.wikimedia.org/w/index.php?curid=79219622] ![Law of Small Numbers Book](figs/Bortkiewicz%20LSN%20Book.png){width=200}^[Law of Small Numbers]
+Another powerful application of $k$-means clustering is **customer segmentation** in e-commerce.
+
+::: {.incremental}
+* Businesses want to understand their customers to provide better service and targeted marketing
+* Group customers with similar behaviors and characteristics $\rightarrow$ **personas**
+* This enables personalized marketing campaigns, product recommendations, and customer service strategies
 :::
-::: {.column width="60%"}
-* Ladislaus Bortkiewicz (1868 -- 1931)
-* Wrote book ["Law of Small Numbers"](https://archive.org/details/dasgesetzderklei00bortrich/mode/2up) in 1898
-* Showed how the horse kick data fits the
-[Poisson model](03-Probability-and-Statistics-Refresher.html#the-poisson-distribution)
-* More generally that rare events in large populations can be statistically modeled using the Poisson distribution
-:::
-::::
 
-## Feature Scaling Example, Continued
+## E-commerce Customer Data
 
-Here is the horse kick data:
+Let's synthesize e-commerce data to segment customers based on their purchasing behavior.
+
+High-value, frequent buyers; Moderate buyers; Bargain hunters; Occasional buyers.
+
+| Segment | Percentage | Annual Spending | Average Order Value | Total Orders |
+|---------|------------|----------------|---------------------|--------------|
+| High-value | 20% | $120 \pm 20$ | $15 \pm 3$ | $450 \pm 80$ |
+| Moderate | 40% | $60 \pm 15$ | $8 \pm 2$ | $250 \pm 50$ |
+| Bargain | 25% | $25 \pm 8$ | $12 \pm 4$ | $150 \pm 30$ |
+| Occasional | 15% | $15 \pm 5$ | $3 \pm 1$ | $300 \pm 60$ |
+
+## E-commerce Customer Data
 
 ```{python}
-# source: http://www.randomservices.org/random/data/HorseKicks.html
+#| fig-cap: "Customer segmentation analysis using e-commerce data"
+
 import pandas as pd
-df = pd.read_table('data/HorseKicks.txt',index_col='Year',dtype='float')
-counts = df.sum(axis=1)
-counts
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+# Create realistic e-commerce customer data
+np.random.seed(42)
+n_customers = 1000
+
+# Generate customer segments with different characteristics
+# Segment 1: High-value, frequent buyers (20% of customers)
+high_value = np.random.normal([120, 15, 450], [20, 3, 80], (200, 3))
+
+# Segment 2: Moderate buyers (40% of customers)
+moderate = np.random.normal([60, 8, 250], [15, 2, 50], (400, 3))
+
+# Segment 3: Bargain hunters (25% of customers)
+bargain = np.random.normal([25, 12, 150], [8, 4, 30], (250, 3))
+
+# Segment 4: Occasional buyers (15% of customers)
+occasional = np.random.normal([15, 3, 300], [5, 1, 60], (150, 3))
+
+# Combine all segments
+customer_data = np.vstack([high_value, moderate, bargain, occasional])
+
+# Add some noise and shuffle
+customer_data += np.random.normal(0, 5, customer_data.shape)
+np.random.shuffle(customer_data)
+
+# Create DataFrame
+df = pd.DataFrame(customer_data, columns=['Annual_Spending', 'Avg_Order_Value', 'Total_Orders'])
+df['Customer_ID'] = range(1, len(df) + 1)
+
+print("E-commerce Customer Data Head:")
+print(df.head().round(2))
+
+
+print("\n\nE-commerce Customer Data Summary    :")
+print(df.describe().round(2))
 ```
 
-And here is the histogram by year number.
+## Understanding Customer Features
 
 ```{python}
-counts.hist(bins=25,xlabelsize=16);
-plt.xlabel('# of Kick Deaths')
-plt.ylabel('Count')
-plt.title('Histogram of Kick Deaths')
+#| fig-cap: "Distribution of customer features"
+
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+# Annual Spending
+axes[0].hist(df['Annual_Spending'], bins=30, alpha=0.7, color='skyblue', edgecolor='black')
+axes[0].set_title('Distribution of Annual Spending')
+axes[0].set_xlabel('Annual Spending ($)')
+axes[0].set_ylabel('Number of Customers')
+
+# Average Order Value
+axes[1].hist(df['Avg_Order_Value'], bins=30, alpha=0.7, color='lightgreen', edgecolor='black')
+axes[1].set_title('Distribution of Average Order Value')
+axes[1].set_xlabel('Average Order Value ($)')
+axes[1].set_ylabel('Number of Customers')
+
+# Total Orders
+axes[2].hist(df['Total_Orders'], bins=30, alpha=0.7, color='salmon', edgecolor='black')
+axes[2].set_title('Distribution of Total Orders')
+axes[2].set_xlabel('Total Orders')
+axes[2].set_ylabel('Number of Customers')
+
+plt.tight_layout()
 plt.show()
 ```
 
-The average:
+> Can you see clusters?
+
+## Feature Scaling is Critical
+
+Before clustering, we need to scale our features since they have very different ranges:
 
 ```{python}
-counts.mean()
+#| fig-cap: "Feature scaling for customer segmentation"
+
+# Prepare features for clustering
+features = ['Annual_Spending', 'Avg_Order_Value', 'Total_Orders']
+X = df[features].values
+
+# Scale the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+print("Original feature ranges:")
+print(f"Annual Spending: ${X[:, 0].min():.0f} - ${X[:, 0].max():.0f}")
+print(f"Avg Order Value: ${X[:, 1].min():.0f} - ${X[:, 1].max():.0f}")
+print(f"Total Orders: {X[:, 2].min():.0f} - {X[:, 2].max():.0f}")
+
+print("\nScaled feature ranges:")
+print(f"Annual Spending: {X_scaled[:, 0].min():.2f} - {X_scaled[:, 0].max():.2f}")
+print(f"Avg Order Value: {X_scaled[:, 1].min():.2f} - {X_scaled[:, 1].max():.2f}")
+print(f"Total Orders: {X_scaled[:, 2].min():.2f} - {X_scaled[:, 2].max():.2f}")
 ```
-::: {.content-hidden when-profile="web"}
-## Feature Scaling Example, Continued
+
+## Searching Cluster Numbers
+
+What cluster number should we pick?
+
+```{python}
+#| fig-cap: "Elbow method for determining optimal number of clusters"
+
+# Calculate WCSS for different numbers of clusters
+wcss = []
+K_range = range(1, 11)
+
+for k in K_range:
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    kmeans.fit(X_scaled)
+    wcss.append(kmeans.inertia_)
+
+# Plot the elbow curve
+plt.figure(figsize=(10, 6))
+plt.plot(K_range, wcss, 'bo-', linewidth=2, markersize=8)
+plt.title('WCSS vs Number of Clusters')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('Within-Cluster Sum of Squares (WCSS)')
+plt.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+## Customer Segmentation Results
+
+Visualize in 2D using PCA which we'll cover later.
+
+```{python}
+#| fig-cap: "K-means customer segmentation results"
+
+# Perform k-means clustering with k=4
+kmeans = KMeans(n_clusters=4, random_state=42, n_init=10)
+cluster_labels = kmeans.fit_predict(X_scaled)
+
+# Add cluster labels to the dataframe
+df['Cluster'] = cluster_labels
+
+# Visualize clusters in 2D using PCA
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+plt.figure(figsize=(12, 5))
+
+# Plot 1: PCA visualization
+plt.subplot(1, 2, 1)
+scatter = plt.scatter(X_pca[:, 0], X_pca[:, 1], c=cluster_labels, cmap='viridis', alpha=0.6)
+plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], 
+            c='red', marker='x', s=200, linewidths=3, label='Centroids')
+plt.title('Customer Segments (PCA View)')
+plt.xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.1%} variance)')
+plt.ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.1%} variance)')
+plt.legend()
+
+# Plot 2: Feature space visualization
+plt.subplot(1, 2, 2)
+plt.scatter(df['Annual_Spending'], df['Avg_Order_Value'], c=cluster_labels, cmap='viridis', alpha=0.6)
+plt.title('Customer Segments (Annual Spending vs Avg Order Value)')
+plt.xlabel('Annual Spending ($)')
+plt.ylabel('Average Order Value ($)')
+
+plt.tight_layout()
+plt.show()
+```
+
+## Customer Segment Profiles
+
+
+
+```{python}
+#| fig-cap: "Detailed analysis of customer segments"
+
+# Analyze each cluster
+cluster_summary = df.groupby('Cluster').agg({
+    'Annual_Spending': ['mean', 'std'],
+    'Avg_Order_Value': ['mean', 'std'],
+    'Total_Orders': ['mean', 'std'],
+    'Customer_ID': 'count'
+}).round(2)
+
+cluster_summary.columns = ['Avg_Annual_Spending', 'Std_Annual_Spending', 
+                          'Avg_Order_Value', 'Std_Order_Value',
+                          'Avg_Total_Orders', 'Std_Total_Orders', 'Count']
+
+print("Customer Segment Profiles:")
+print("=" * 60)
+for cluster in sorted(df['Cluster'].unique()):
+    cluster_data = df[df['Cluster'] == cluster]
+    print(f"\nSegment {cluster} ({len(cluster_data)} customers):")
+    print(f"  • Average Annual Spending: ${cluster_data['Annual_Spending'].mean():.0f}")
+    print(f"  • Average Order Value: ${cluster_data['Avg_Order_Value'].mean():.0f}")
+    print(f"  • Average Total Orders: {cluster_data['Total_Orders'].mean():.1f}")
+    
+```
+
+
+| Segment | Percentage | Annual Spending | Average Order Value | Total Orders |
+|---------|------------|----------------|---------------------|--------------|
+| High-value | 20% | $120 \pm 20$ | $15 \pm 3$ | $450 \pm 80$ |
+| Moderate | 40% | $60 \pm 15$ | $8 \pm 2$ | $250 \pm 50$ |
+| Bargain | 25% | $25 \pm 8$ | $12 \pm 4$ | $150 \pm 30$ |
+| Occasional | 15% | $15 \pm 5$ | $3 \pm 1$ | $300 \pm 60$ |
+
+
+# Example 2: Plant Classification Based on Morphology
+
+## Plant Species Classification with Iris Data
+
+Let's explore another real-world application using the famous **Iris dataset** from scikit-learn.
+
+::: {.incremental}
+* The Iris dataset contains measurements of 150 iris flowers from 3 species
+* Each flower has 4 features: sepal length, sepal width, petal length, and petal width
+* This is a classic example where we know the true species but want to see if k-means can discover these natural groupings
 :::
 
-To standardize to zero mean and unit standard deviation, we can use pre-processing
-tools from
-the [scikit-learn](https://scikit-learn.org/stable/modules/preprocessing.html)
-library.
-
-The distribution after rescaling:
+## Loading and Exploring the Iris Dataset
 
 ```{python}
-from sklearn import preprocessing
-counts_scaled = pd.DataFrame(preprocessing.scale(counts))
-counts_scaled.hist(bins=25,xlabelsize=16);
+#| fig-cap: "Loading and exploring the Iris dataset"
+
+from sklearn.datasets import load_iris
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+
+# Load the Iris dataset
+iris = load_iris()
+X = iris.data
+y = iris.target
+feature_names = iris.feature_names
+target_names = iris.target_names
+
+print("Iris Dataset Information:")
+print("=" * 40)
+print(f"Number of samples: {X.shape[0]}")
+print(f"Number of features: {X.shape[1]}")
+print(f"Feature names: {feature_names}")
+print(f"Target names: {target_names}")
+print(f"Number of species: {len(target_names)}")
+
+# Display first few samples
+print(f"\nFirst 5 samples:")
+print(f"{'Sepal Length':<12} {'Sepal Width':<11} {'Petal Length':<12} {'Petal Width':<11} {'Species':<8}")
+print("-" * 60)
+for i in range(5):
+    print(f"{X[i, 0]:<12.1f} {X[i, 1]:<11.1f} {X[i, 2]:<12.1f} {X[i, 3]:<11.1f} {target_names[y[i]]:<8}")
 ```
 
-With a new mean:
+## Visualizing Iris Data in 2D
+
+Let's compare features in pairs. Do you see clusters?
 
 ```{python}
-counts_scaled.mean().values
+fig, axes = plt.subplots(2, 2, figsize=(8, 6))
+axes = axes.ravel()
+
+# Plot all pairwise combinations of features
+feature_pairs = [(0, 1), (0, 2), (0, 3), (2, 3)]
+titles = ['Sepal Length vs Width', 'Sepal Length vs Petal Length', 
+          'Sepal Length vs Petal Width', 'Petal Length vs Width']
+
+for i, (feat1, feat2) in enumerate(feature_pairs):
+    axes[i].scatter(X[:, feat1], X[:, feat2], 
+                   alpha=0.7, s=50)
+    
+    axes[i].set_xlabel(feature_names[feat1])
+    axes[i].set_ylabel(feature_names[feat2])
+    axes[i].set_title(titles[i])
+    axes[i].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
 ```
 
-::: {.content-hidden when-profile="web"}
-## Feature Scaling Example, Continued
-:::
+## Visualizing Iris Data in 2D
 
-Notice that values that used to be positive have now become negative.
-
-In some situations it may not be sensible to change non-negative values into something else.
-It may make more sense to map all values into a fixed range, for example $[0, 1]$.
+Feature pairs with ground truth labels.
 
 ```{python}
-min_max_scaler = preprocessing.MinMaxScaler()
-counts_minmax = min_max_scaler.fit_transform(counts.values.reshape(-1,1))
-counts_minmax = pd.DataFrame(counts_minmax)
-counts_minmax.hist(bins=25,xlabelsize=16);
+fig, axes = plt.subplots(2, 2, figsize=(8, 6))
+axes = axes.ravel()
+
+# Color mapping for species
+colors = ['red', 'green', 'blue']
+
+# Plot all pairwise combinations of features
+feature_pairs = [(0, 1), (0, 2), (0, 3), (2, 3)]
+titles = ['Sepal Length vs Width', 'Sepal Length vs Petal Length', 
+          'Sepal Length vs Petal Width', 'Petal Length vs Width']
+
+for i, (feat1, feat2) in enumerate(feature_pairs):
+    for species in range(3):
+        mask = y == species
+        axes[i].scatter(X[mask, feat1], X[mask, feat2], 
+                       c=colors[species], label=target_names[species], 
+                       alpha=0.7, s=50)
+    
+    axes[i].set_xlabel(feature_names[feat1])
+    axes[i].set_ylabel(feature_names[feat2])
+    axes[i].set_title(titles[i])
+    axes[i].legend()
+    axes[i].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
 ```
 
-## Example Application of k-means
+> Question: What observations can you make?
+
+
+## Try different cluster numbers
+
+```{python}
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Calculate WCSS for different numbers of clusters
+wcss = []
+K_range = range(1, 11)
+
+for k in K_range:
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    kmeans.fit(X)
+    wcss.append(kmeans.inertia_)
+
+# Plot the elbow curve
+plt.figure(figsize=(10, 6))
+plt.plot(K_range, wcss, 'bo-', linewidth=2, markersize=8)
+plt.title('Elbow Method for Iris Dataset')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('Within-Cluster Sum of Squares (WCSS)')
+plt.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+
+## K-means Clustering on Iris Data
+
+Results for $k=3$ clusters.
+
+```{python}
+from sklearn.cluster import KMeans
+from sklearn.metrics import adjusted_rand_score, confusion_matrix
+import seaborn as sns
+
+# Perform k-means clustering with k=3 (we know there are 3 species)
+kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+cluster_labels = kmeans.fit_predict(X)
+
+# Create confusion matrix
+cm = confusion_matrix(y, cluster_labels)
+
+# Convert to DataFrame for better visualization
+cm_df = pd.DataFrame(cm, 
+                    index=target_names, 
+                    columns=[f'Cluster {i}' for i in range(3)])
+
+print(f"\nConfusion Matrix:")
+print("Rows: True species, Columns: Predicted clusters")
+print(cm_df)
+
+# Visualize clustering results in 2D
+fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+
+# Plot 1: True species
+scatter1 = axes[0].scatter(X[:, 2], X[:, 3], c=y, cmap='viridis', alpha=0.7, s=50)
+axes[0].set_xlabel('Petal Length')
+axes[0].set_ylabel('Petal Width')
+axes[0].set_title('True Species')
+axes[0].grid(True, alpha=0.3)
+
+# Add species labels
+for i, species in enumerate(target_names):
+    mask = y == i
+    centroid_x = X[mask, 2].mean()
+    centroid_y = X[mask, 3].mean()
+    axes[0].annotate(species, (centroid_x, centroid_y), 
+                    xytext=(5, 5), textcoords='offset points',
+                    fontsize=10, fontweight='bold')
+
+# Plot 2: K-means clusters
+scatter2 = axes[1].scatter(X[:, 2], X[:, 3], c=cluster_labels, cmap='viridis', alpha=0.7, s=50)
+axes[1].scatter(kmeans.cluster_centers_[:, 2], kmeans.cluster_centers_[:, 3], 
+               c='red', marker='x', s=200, linewidths=3, label='Centroids')
+axes[1].set_xlabel('Petal Length')
+axes[1].set_ylabel('Petal Width')
+axes[1].set_title(f'K-means Clusters')
+axes[1].legend()
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+
+
+## Analysis
+
+```{python}
+#| fig-cap: "Detailed analysis of k-means clustering performance"
+
+# Analyze cluster assignments
+print("Cluster Analysis:")
+print("=" * 50)
+
+for cluster in range(3):
+    mask = cluster_labels == cluster
+    cluster_data = X[mask]
+    true_species = y[mask]
+    
+    # Find the most common species in this cluster
+    species_counts = np.bincount(true_species)
+    dominant_species = np.argmax(species_counts)
+    purity = species_counts[dominant_species] / len(true_species)
+    
+    print(f"\nCluster {cluster}:")
+    print(f"  • Size: {len(cluster_data)} samples")
+    print(f"  • Dominant species: {target_names[dominant_species]} ({purity:.1%})")
+    print(f"  • Average petal length: {cluster_data[:, 2].mean():.1f} cm")
+    print(f"  • Average petal width: {cluster_data[:, 3].mean():.1f} cm")
+    print(f"  • Average sepal length: {cluster_data[:, 0].mean():.1f} cm")
+    print(f"  • Average sepal width: {cluster_data[:, 1].mean():.1f} cm")
+```
+
+## Key Insights:
+
+* K-means successfully identified the three iris species
+* Setosa is perfectly separated from the other species
+* Versicolor and Virginica show some overlap, which is realistic
+* Petal measurements are more discriminative than sepal measurements
+* Overall clustering quality pretty good!
+
+
+## Why K-means Works Well on Iris Data
+
+* **Well-separated clusters**: The three iris species have distinct characteristics
+* **Spherical cluster shapes**: Each species forms roughly spherical groups in feature space
+* **Appropriate feature scaling**: All measurements are in the same units (centimeters)
+* **A Priori knowledge**: We know the true number of species (cluster number)
+
+# Example 3: k-means image compression
+
+## k-means image compression
 
 Here is a simple example of how $k$-means can be used to reduce
 color space and compress data.
@@ -897,6 +1291,8 @@ Finally, we use 1 bit (2 color groups) for a compression ratio of $24\times$.
     
 ![](figs/L6-annie_002.png){width=500 fig-align="center"}
 
+
+
 ## Recap and Next
 
 Today we covered:
@@ -905,6 +1301,9 @@ Today we covered:
 * strengths and weaknesses
 * Importance of initialization and cluster number
 * Feature scaling
-* Example application
+* Example applications:
+  * Customer segmentation
+  * Plant species classification with Iris data
+  * Image color compression
 
 Coming up next, we'll look at some practical aspects of applying $k$-means.
