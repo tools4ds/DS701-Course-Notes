@@ -1292,6 +1292,488 @@ Finally, we use 1 bit (2 color groups) for a compression ratio of $24\times$.
 ![](figs/L6-annie_002.png){width=500 fig-align="center"}
 
 
+# In-Class Activity: k-Means Clustering
+
+**Time: 10 minutes**  
+**Materials: Pencil and paper**  
+**Objective: Understand the k-means algorithm through 1D visualization**
+
+```{python}
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from matplotlib.patches import FancyBboxPatch
+```
+
+## Activity: "Clustering 1D Data"
+
+### The Data
+
+We have 8 data points on a number line that form 2 natural clusters:
+
+**Data Points**: 1.2, 1.8, 2.1, 7.3, 7.9, 8.2, 9.1, 10.5
+
+```{python}
+#| fig-align: "center"
+
+# Data points
+data_points = np.array([1.2, 1.8, 2.1, 7.3, 7.9, 8.2, 9.1, 10.5])
+
+# Create the plot
+fig, ax = plt.subplots(figsize=(12, 4))
+
+# Plot data points with numbers
+for i, point in enumerate(data_points):
+    ax.scatter(point, 0, s=100, c='blue', alpha=0.7, zorder=3)
+    ax.annotate(f'{i+1}', (point, 0), xytext=(0, 15), 
+                textcoords='offset points', ha='center', fontsize=10, fontweight='bold')
+
+# Add horizontal x-axis line
+ax.axhline(y=0, color='black', linewidth=2, zorder=1)
+
+# Formatting
+ax.set_xlim(0, 12)
+ax.set_ylim(-0.5, 0.5)
+ax.set_xlabel('Value')
+ax.set_title('Step 1: Initial Data Points')
+ax.grid(True, alpha=0.3)
+ax.set_yticks([])
+ax.legend(loc='upper right')
+
+plt.tight_layout()
+plt.show()
+```
+
+## The Steps
+
+1. Pick $K$ cluster centers $\{c_1, \dots, c_K\}$.  
+2. For each $j$, define the cluster $C_j$ as the set of points in $X$ that are <font color="blue">closest to center</font> $c_j$.  
+3. For each $j$, update $c_j$ to be <font color="blue">the center of mass of cluster</font> $C_j$.  
+4. Repeat (i.e., go to Step 2) until convergence.
+
+## The Steps
+
+1. **Pick $K$ cluster centers $\{c_1, \dots, c_K\}$.**
+2. For each $j$, define the cluster $C_j$ as the set of points in $X$ that are <font color="blue">closest to center</font> $c_j$.  
+3. For each $j$, update $c_j$ to be <font color="blue">the center of mass of cluster</font> $C_j$.  
+4. Repeat (i.e., go to Step 2) until convergence.
+
+## Step 1: Cluster Centers Initialization
+
+**Assume our randomly chosen initial centers are**:
+
+- Center A = 4.0, Center B = 11.0
+
+```{python}
+#| fig-align: "center"
+
+# Data points
+data_points = np.array([1.2, 1.8, 2.1, 7.3, 7.9, 8.2, 9.1, 10.5])
+initial_centers = np.array([4.0, 11.0])
+
+# Create the plot
+fig, ax = plt.subplots(figsize=(12, 4))
+
+# Plot data points with numbers
+for i, point in enumerate(data_points):
+    ax.scatter(point, 0, s=100, c='blue', alpha=0.7, zorder=3)
+    ax.annotate(f'{i+1}', (point, 0), xytext=(0, 15), 
+                textcoords='offset points', ha='center', fontsize=10, fontweight='bold')
+
+# Plot initial centers
+ax.scatter(initial_centers[0], 0, s=200, c='red', marker='x', linewidths=3, zorder=4, label='Center A')
+ax.scatter(initial_centers[1], 0, s=200, c='green', marker='x', linewidths=3, zorder=4, label='Center B')
+
+# Add labels for centers
+ax.annotate('A', (initial_centers[0], 0), xytext=(0, -25), 
+            textcoords='offset points', ha='center', fontsize=12, fontweight='bold', color='red')
+ax.annotate('B', (initial_centers[1], 0), xytext=(0, -25), 
+            textcoords='offset points', ha='center', fontsize=12, fontweight='bold', color='green')
+
+# Add horizontal x-axis line
+ax.axhline(y=0, color='black', linewidth=2, zorder=1)
+
+# Formatting
+ax.set_xlim(0, 12)
+ax.set_ylim(-0.5, 0.5)
+ax.set_xlabel('Value')
+ax.set_title('Step 1: Initial Data Points and Centers')
+ax.grid(True, alpha=0.3)
+ax.set_yticks([])
+ax.legend(loc='upper right')
+
+plt.tight_layout()
+plt.show()
+```
+
+## The Steps
+
+1. Pick $K$ cluster centers $\{c_1, \dots, c_K\}$.  
+2. **For each $j$, define the cluster $C_j$ as the set of points in $X$ that are <font color="blue">closest to center</font> $c_j$.**
+3. For each $j$, update $c_j$ to be <font color="blue">the center of mass of cluster</font> $C_j$.  
+4. Repeat (i.e., go to Step 2) until convergence.
+
+## Step 2: Assignment (2 minutes)
+
+For each data point, calculate the distance to both centers and assign it to the closer one.
+
+**Complete the table**:
+
+| Point | Value | Distance to A (4.0) | Distance to B (11.0) | Assigned to |
+|-------|-------|---------------|---------------|-------------|
+| 1     | 1.2   | 2.8           | 9.8           | A           |
+| 2     | 1.8   |              |              |            |
+| 3     | 2.1   |              |              |            |
+| 4     | 7.3   |              |              |            |
+| 5     | 7.9   |              |              |            |
+| 6     | 8.2   |              |              |            |
+| 7     | 9.1   |              |              |            |
+| 8     | 10.5  |              |              |            |
+
+## Assignment Visualization
+
+```{python}
+#| fig-cap: "Assignment visualization with cluster colors"
+#| fig-align: "center"
+
+# Calculate assignments
+assignments = []
+for point in data_points:
+    dist_a = abs(point - initial_centers[0])
+    dist_b = abs(point - initial_centers[1])
+    if dist_a < dist_b:
+        assignments.append('A')
+    else:
+        assignments.append('B')
+
+# Create the plot
+fig, ax = plt.subplots(figsize=(12, 4))
+
+# Plot data points with cluster colors
+colors = ['red' if a == 'A' else 'green' for a in assignments]
+for i, (point, color) in enumerate(zip(data_points, colors)):
+    ax.scatter(point, 0, s=100, c=color, alpha=0.7, zorder=3)
+    ax.annotate(f'{i+1}', (point, 0), xytext=(0, 15), 
+                textcoords='offset points', ha='center', fontsize=10, fontweight='bold')
+
+# Plot initial centers
+ax.scatter(initial_centers[0], 0, s=200, c='red', marker='x', linewidths=3, zorder=4, label='Center A')
+ax.scatter(initial_centers[1], 0, s=200, c='green', marker='x', linewidths=3, zorder=4, label='Center B')
+
+# Add labels for centers
+ax.annotate('A', (initial_centers[0], 0), xytext=(0, -25), 
+            textcoords='offset points', ha='center', fontsize=12, fontweight='bold', color='red')
+ax.annotate('B', (initial_centers[1], 0), xytext=(0, -25), 
+            textcoords='offset points', ha='center', fontsize=12, fontweight='bold', color='green')
+
+# Add horizontal x-axis line
+ax.axhline(y=0, color='black', linewidth=2, zorder=1)
+
+# Formatting
+ax.set_xlim(0, 12)
+ax.set_ylim(-0.5, 0.5)
+ax.set_xlabel('Value')
+ax.set_title('Step 2: Assignment to Clusters')
+ax.grid(True, alpha=0.3)
+ax.set_yticks([])
+ax.legend(loc='upper right')
+
+plt.tight_layout()
+plt.show()
+```
+
+## The Steps
+
+1. Pick $K$ cluster centers $\{c_1, \dots, c_K\}$.  
+2. For each $j$, define the cluster $C_j$ as the set of points in $X$ that are <font color="blue">closest to center</font> $c_j$.  
+3. **For each $j$, update $c_j$ to be <font color="blue">the center of mass of cluster</font> $C_j$.**  
+4. Repeat (i.e., go to Step 2) until convergence.
+
+## Step 3: Update Centers (2 minutes)
+
+Calculate the new centers based on the assigned points.
+
+**Cluster A** (points: 1.2, 1.8, 2.1, 7.3):
+
+- New center A = 
+
+**Cluster B** (points: 7.9, 8.2, 9.1, 10.5):
+
+- New center B = 
+
+## Step 3: Update Centers
+
+Calculate the new centers based on the assigned points.
+
+**Cluster A** (points: 1.2, 1.8, 2.1, 7.3):
+
+- New center A = (1.2 + 1.8 + 2.1 + 7.3) ÷ 4 = 3.1
+
+**Cluster B** (points: 7.9, 8.2, 9.1, 10.5):
+
+- New center B = (7.9 + 8.2 + 9.1 + 10.5) ÷ 4 = 8.9
+
+## Step 3: Update Centers Visualization
+
+```{python}
+#| fig-align: "center"
+
+# Calculate new centers
+cluster_a_points = [data_points[i] for i, a in enumerate(assignments) if a == 'A']
+cluster_b_points = [data_points[i] for i, a in enumerate(assignments) if a == 'B']
+
+new_center_a = np.mean(cluster_a_points)
+new_center_b = np.mean(cluster_b_points)
+
+new_centers = np.array([new_center_a, new_center_b])
+
+# Create the plot
+fig, ax = plt.subplots(figsize=(12, 4))
+
+# Plot data points with cluster colors
+colors = ['red' if a == 'A' else 'green' for a in assignments]
+for i, (point, color) in enumerate(zip(data_points, colors)):
+    ax.scatter(point, 0, s=100, c=color, alpha=0.7, zorder=3)
+    ax.annotate(f'{i+1}', (point, 0), xytext=(0, 15), 
+                textcoords='offset points', ha='center', fontsize=10, fontweight='bold')
+
+# Plot old centers (faded)
+ax.scatter(initial_centers[0], 0, s=150, c='red', marker='x', linewidths=2, 
+           zorder=2, alpha=0.5, label='Old Center A')
+ax.scatter(initial_centers[1], 0, s=150, c='green', marker='x', linewidths=2, 
+           zorder=2, alpha=0.5, label='Old Center B')
+
+# Plot new centers
+ax.scatter(new_centers[0], 0, s=200, c='red', marker='*', linewidths=3, 
+           zorder=4, label='New Center A')
+ax.scatter(new_centers[1], 0, s=200, c='green', marker='*', linewidths=3, 
+           zorder=4, label='New Center B')
+
+# Add labels for new centers
+ax.annotate('A\'', (new_centers[0], 0), xytext=(0, -25), 
+            textcoords='offset points', ha='center', fontsize=12, fontweight='bold', color='red')
+ax.annotate('B\'', (new_centers[1], 0), xytext=(0, -25), 
+            textcoords='offset points', ha='center', fontsize=12, fontweight='bold', color='green')
+
+# Add horizontal x-axis line
+ax.axhline(y=0, color='black', linewidth=2, zorder=1)
+
+# Formatting
+ax.set_xlim(0, 12)
+ax.set_ylim(-0.5, 0.5)
+ax.set_xlabel('Value')
+ax.set_title('Step 3: Updated Centers (A\' = 1.7, B\' = 8.6)')
+ax.grid(True, alpha=0.3)
+ax.set_yticks([])
+ax.legend(loc='upper right')
+
+plt.tight_layout()
+plt.show()
+
+print(f"New Center A: {new_center_a:.1f}")
+print(f"New Center B: {new_center_b:.1f}")
+```
+
+## The Steps
+
+1. Pick $K$ cluster centers $\{c_1, \dots, c_K\}$.  
+2. For each $j$, define the cluster $C_j$ as the set of points in $X$ that are <font color="blue">closest to center</font> $c_j$.  
+3. For each $j$, update $c_j$ to be <font color="blue">the center of mass of cluster</font> $C_j$.  
+4. **Repeat (i.e., go to Step 2) until convergence.**
+
+## The Steps
+
+1. Pick $K$ cluster centers $\{c_1, \dots, c_K\}$.  
+2. **For each $j$, define the cluster $C_j$ as the set of points in $X$ that are <font color="blue">closest to center</font> $c_j$.**  
+3. For each $j$, update $c_j$ to be <font color="blue">the center of mass of cluster</font> $C_j$.  
+4. Repeat (i.e., go to Step 2) until convergence.
+
+## Step 4: Second Iteration Cluster Assignment (2 minutes)
+
+Repeat the assignment with the new centers ($A' = 3.1, B' = 8.9$).
+
+**Complete the table**:
+
+| Point | Value | Distance to $A'$ | Distance to $B'$ | Assigned to |
+|-------|-------|----------------|----------------|-------------|
+| 1     | 1.2   | 1.9            | 8.3            | A           |
+| 2     | 1.8   |               |               |            |
+| 3     | 2.1   |               |               |            |
+| 4     | 7.3   |               |               |            |
+| 5     | 7.9   |               |               |            |
+| 6     | 8.2   |               |               |            |
+| 7     | 9.1   |               |               |            |
+| 8     | 10.5  |               |               |            |
+
+## Step 4: Second Iteration Cluster Assignment Visualization
+
+```{python}
+#| fig-align: "center"
+
+# Calculate second iteration assignments
+assignments_2 = []
+for point in data_points:
+    dist_a = abs(point - new_centers[0])
+    dist_b = abs(point - new_centers[1])
+    if dist_a < dist_b:
+        assignments_2.append('A')
+    else:
+        assignments_2.append('B')
+
+
+cluster_a_points_2 = [data_points[i] for i, a in enumerate(assignments_2) if a == 'A']
+cluster_b_points_2 = [data_points[i] for i, a in enumerate(assignments_2) if a == 'B']
+
+# Create the plot
+fig, ax = plt.subplots(figsize=(12, 4))
+
+# Plot data points with final cluster colors
+colors = ['red' if a == 'A' else 'green' for a in assignments_2]
+for i, (point, color) in enumerate(zip(data_points, colors)):
+    ax.scatter(point, 0, s=100, c=color, alpha=0.7, zorder=3)
+    ax.annotate(f'{i+1}', (point, 0), xytext=(0, 15), 
+                textcoords='offset points', ha='center', fontsize=10, fontweight='bold')
+
+# Plot final centers
+ax.scatter(new_centers[0], 0, s=200, c='red', marker='*', linewidths=3, 
+           zorder=4, label='Final Center A')
+ax.scatter(new_centers[1], 0, s=200, c='green', marker='*', linewidths=3, 
+           zorder=4, label='Final Center B')
+
+# Add labels for final centers
+ax.annotate('A*', (new_centers[0], 0), xytext=(0, -25), 
+            textcoords='offset points', ha='center', fontsize=12, fontweight='bold', color='red')
+ax.annotate('B*', (new_centers[1], 0), xytext=(0, -25), 
+            textcoords='offset points', ha='center', fontsize=12, fontweight='bold', color='green')
+
+# Add horizontal x-axis line
+ax.axhline(y=0, color='black', linewidth=2, zorder=1)
+
+# Formatting
+ax.set_xlim(0, 12)
+ax.set_ylim(-0.5, 0.5)
+ax.set_xlabel('Value')
+ax.set_title('Step 4: Centers After Second Iteration ($A* = 3.1, B* = 8.9$)')
+ax.grid(True, alpha=0.3)
+ax.set_yticks([])
+ax.legend(loc='upper right')
+
+plt.tight_layout()
+plt.show()
+
+print(f"New Center A: {new_centers[0]:.1f}")
+print(f"New Center B: {new_centers[1]:.1f}")
+```
+
+## Convergence Check
+
+One type of convergence is when the centers stop changing.
+
+| 1st Iteration Center | 2nd Iteration Center | Abs Difference |
+|----------------------|----------------------|----------------|
+| A = 4               | A = 3.1                | 0.9            |
+| B = 11              | B = 8.9                | 2.1            |
+
+Should we do another iteration?
+
+## The Steps
+
+1. Pick $K$ cluster centers $\{c_1, \dots, c_K\}$.  
+2. For each $j$, define the cluster $C_j$ as the set of points in $X$ that are <font color="blue">closest to center</font> $c_j$.  
+3. **For each $j$, update $c_j$ to be <font color="blue">the center of mass of cluster</font> $C_j$.**  
+4. Repeat (i.e., go to Step 2) until convergence.
+
+## 2nd Iteration Update Centers
+
+**Cluster A** (points: 1.2, 1.8, 2.1):
+
+- New center A = (1.2 + 1.8 + 2.1) ÷ 3 = 1.7
+
+**Cluster B** (points: 7.3, 7.9, 8.2, 9.1, 10.5):
+
+- New center B = (7.3 + 7.9 + 8.2 + 9.1 + 10.5) ÷ 5 = 8.6
+
+## Step 4: Second Iteration Visualization
+
+```{python}
+#| fig-align: "center"
+
+iter3_center_a = np.mean(cluster_a_points_2)
+iter3_center_b = np.mean(cluster_b_points_2)
+iter3_centers = np.array([iter3_center_a, iter3_center_b])
+
+
+# Create the plot
+fig, ax = plt.subplots(figsize=(12, 4))
+
+# Plot data points with final cluster colors
+colors = ['red' if a == 'A' else 'green' for a in assignments_2]
+for i, (point, color) in enumerate(zip(data_points, colors)):
+    ax.scatter(point, 0, s=100, c=color, alpha=0.7, zorder=3)
+    ax.annotate(f'{i+1}', (point, 0), xytext=(0, 15), 
+                textcoords='offset points', ha='center', fontsize=10, fontweight='bold')
+
+# Plot final centers
+ax.scatter(iter3_centers[0], 0, s=200, c='red', marker='*', linewidths=3, 
+           zorder=4, label='Final Center A')
+ax.scatter(iter3_centers[1], 0, s=200, c='green', marker='*', linewidths=3, 
+           zorder=4, label='Final Center B')
+
+# Add labels for final centers
+ax.annotate('A*', (iter3_centers[0], 0), xytext=(0, -25), 
+            textcoords='offset points', ha='center', fontsize=12, fontweight='bold', color='red')
+ax.annotate('B*', (iter3_centers[1], 0), xytext=(0, -25), 
+            textcoords='offset points', ha='center', fontsize=12, fontweight='bold', color='green')
+
+# Add horizontal x-axis line
+ax.axhline(y=0, color='black', linewidth=2, zorder=1)
+
+# Formatting
+ax.set_xlim(0, 12)
+ax.set_ylim(-0.5, 0.5)
+ax.set_xlabel('Value')
+ax.set_title('Step 4: Centers After Third Iteration')
+ax.grid(True, alpha=0.3)
+ax.set_yticks([])
+ax.legend(loc='upper right')
+
+plt.tight_layout()
+plt.show()
+```
+
+## Step 5: Check for Convergence (1 minute)
+
+**Questions**:
+- Would cluster assignments change if we continued?
+- Would the centers change if we continued?
+- Have we found the optimal clustering?
+
+
+## Key Learning Points
+
+1. **Algorithm Steps**: Initialize → Assign → Update → Repeat
+2. **Distance Calculation**: |point - center| in 1D
+3. **Center Updates**: Average of assigned points
+4. **Convergence**: Centers stop changing when optimal
+5. **Initialization Matters**: Different starts can lead to different results
+
+## Quick Assessment
+
+**Answer on your paper**:
+
+1. **What is the correct order of the 4 steps of k-means?**
+   - [ ] Repeat until convergence
+   - [ ] Assign points to closest center
+   - [ ] Initialize centers
+   - [ ] Update centers to average of assigned points
+
+2. **How do you update a center?**
+   - Answer: 
+
+3. **What does "convergence" mean?**
+   - Answer: 
+
 
 ## Recap and Next
 
