@@ -829,7 +829,7 @@ This creates a scale where:
 ## Overall Silhouette Score
 
 
-The overall silhouette score is the average of the silhouette scores for each data point.
+The overall silhouette score is the average of the silhouette coefficient for each data point.
 
 $$
 (1/n) \sum_{i=1}^n s_i
@@ -1034,6 +1034,42 @@ document is lost.
 
 Surprisingly, we can still tell a lot about the document even without knowing its word ordering.
 
+## Bag of Words Example
+
+Consider this short document (one paragraph):
+
+"The quick brown fox jumps over the lazy dog. The dog sleeps soundly at noon."
+
+We ignore word order and count occurrences of each word.
+
+```{python}
+#| code-fold: false
+import re
+from collections import Counter
+
+doc = (
+    "The quick brown fox jumps over the lazy dog. "
+    "The dog sleeps soundly at noon."
+)
+
+# simple tokenization: lowercase and keep alphabetic words
+tokens = re.findall(r"[a-zA-Z']+", doc.lower())
+counts = Counter(tokens)
+
+# show vocabulary and frequencies sorted by word
+sorted_counts = sorted(counts.items())
+sorted_counts
+```
+
+You can also view the words and counts as separate vectors:
+
+```{python}
+vocabulary = [w for w, c in sorted_counts]
+frequencies = [c for w, c in sorted_counts]
+print('words   =', vocabulary)
+print('counts  =', frequencies)
+```
+
 ## Term Frequencies
 
 Counting the number of times each word occurs in a document yields a vector of __term frequencies.__
@@ -1045,27 +1081,68 @@ Hence it often makes sense to normalize the frequency vectors.
 
 $\ell_1$ or $\ell_2$ normalization are common.
 
+## Bag of Words: Normalization
+
+
+We can scale raw counts so documents of different lengths are comparable.
+
+```{python}
+#| code-fold: true
+import math
+
+try:
+    sorted_counts  # reuse if already defined above
+except NameError:
+    import re
+    from collections import Counter
+    doc = (
+        "The quick brown fox jumps over the lazy dog. "
+        "The dog sleeps soundly at noon."
+    )
+    tokens = re.findall(r"[a-zA-Z']+", doc.lower())
+    from collections import Counter
+    counts = Counter(tokens)
+    sorted_counts = sorted(counts.items())
+
+vocabulary = [w for w, c in sorted_counts]
+counts_vec = [c for w, c in sorted_counts]
+
+# L1 normalization: divide by sum of counts
+total = sum(counts_vec)
+l1 = [c / total for c in counts_vec]
+
+# L2 normalization: divide by Euclidean norm
+norm2 = math.sqrt(sum(c*c for c in counts_vec))
+l2 = [c / norm2 for c in counts_vec]
+
+print('words =', vocabulary)
+print('\nL1-normalized counts =', l1)
+print('\nL2-normalized counts =', l2)
+```
+
+
+
 ## Tf-idf
 
 Next, as noted in __scikit-learn__:
 
-> In a large text corpus, some words will be very [frequent] (e.g. “the”, “a”, “is” in English) hence carrying very
-> little meaningful information about the actual contents of the document. 
->
-> If we were to feed the direct count data directly to a classifier those very frequent terms would overshadow the
-> frequencies of rarer yet more interesting terms.
->
-> In order to re-weight the count features into floating point values suitable for usage by a classifier it is very
-> common to use the **tf–idf transform.**
->
->__Tf__ means __term-frequency__ while __tf–idf__ means __term-frequency times inverse document-frequency.__
->
->This is originally a term weighting scheme developed for information retrieval (as a ranking function for search
-> engines results), that has also found good use in document classification and clustering.
+::: {.incremental}
+* In a large text corpus, some words will be very frequent (e.g. “the”, “a”, “is” in English) hence carrying very
+little meaningful information about the actual contents of the document. 
+* If we were to feed the direct count data directly to a classifier those very frequent terms would overshadow the
+frequencies of rarer yet more interesting terms.
+* In order to re-weight the count features into floating point values suitable for usage by a classifier it is very
+common to use the **tf–idf transform.**
+* __Tf__ means __term-frequency__ while __tf–idf__ means __term-frequency times inverse document-frequency.__
+* This is originally a term weighting scheme developed for information retrieval (as a ranking function for search
+engines results), that has also found good use in document classification and clustering.
+:::
 
+::: {.fragment}
 The idea is that rare words are more informative than common words.  
 
 (This has connections to information theory).
+:::
 
 ## Tf-idf Definition
 
@@ -1096,6 +1173,58 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 vectorizer = TfidfVectorizer(stop_words = 'english', min_df = 4, max_df = 0.8)
 data = vectorizer.fit_transform(news_data.data)
 ```
+
+## TF-IDF on Newsgroup Data
+
+
+
+```{python}
+#| code-fold: true
+from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
+
+# Reuse previously loaded 20 Newsgroups subset if available; otherwise load it
+try:
+    news_data
+    categories
+except NameError:
+    from sklearn.datasets import fetch_20newsgroups
+    categories = ['comp.os.ms-windows.misc', 'sci.space', 'rec.sport.baseball']
+    news_data = fetch_20newsgroups(
+        remove=('headers', 'footers', 'quotes'),
+        subset='train',
+        categories=categories,
+        shuffle=True,
+        random_state=42,
+    )
+
+# pick one example document from each category
+docs_by_cat = []
+labels = news_data.target
+for cat_index in range(len(categories)):
+    # first document whose label matches the category index
+    indices = np.where(labels == cat_index)[0]
+    if len(indices) > 0:
+        docs_by_cat.append(news_data.data[indices[0]])
+
+# compute TF-IDF on the selected three documents
+tfidf_vec = TfidfVectorizer(stop_words='english', min_df=1, max_df=1.0)
+X = tfidf_vec.fit_transform(docs_by_cat)
+feature_names = np.array(tfidf_vec.get_feature_names_out())
+
+def top_terms(row_vector, k=10):
+    row = row_vector.toarray().ravel()
+    if row.sum() == 0:
+        return []
+    top_idx = np.argsort(row)[-k:][::-1]
+    return list(zip(feature_names[top_idx], row[top_idx]))
+
+for i, doc in enumerate(docs_by_cat):
+    print(f"\nDocument {i+1} (category: {categories[i]}): Top TF-IDF terms")
+    for term, score in top_terms(X[i], k=10):
+        print(f"  {term:20s} {score:.4f}")
+```
+
 
 ## Getting to know the Data
 
