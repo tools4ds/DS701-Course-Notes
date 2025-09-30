@@ -1745,6 +1745,7 @@ plt.show()
 ## Step 5: Check for Convergence (1 minute)
 
 **Questions**:
+
 - Would cluster assignments change if we continued?
 - Would the centers change if we continued?
 - Have we found the optimal clustering?
