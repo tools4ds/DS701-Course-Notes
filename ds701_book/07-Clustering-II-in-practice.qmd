@@ -205,19 +205,20 @@ The idea behind [Multidimensional Scaling (MDS)](https://en.wikipedia.org/wiki/M
 * The points that are close (or far) in high dimensional space should be close (or far) in the reduced dimension space.
 ::::
 
-::: {.fragment}
+## MDS Continued
+
 Note that there are two forms of MDS:
 
 * Metric MDS, of which Classical MDS is a special case, and has a closed form solution
-  based on the eigenvectors of the centered distance matrix.
+  based on the eigenvectors of the centered distance matrix. 
+    * $O(n^3)$ time complexity and $O(n^2)$ space complexity.
 * Non-Metric MDS, which tries to find a non-parametric monotonic relationship
-  between the dissimilarities and the target coordinates through an iterative approach.
-:::
+  between the dissimilarities and the target coordinates through an iterative approach. 
+    * $O(n^2)$ time complexity.
 
-::: {.fragment}
 MDS may not always work well if, for example the dissimilarities
 are not well modeled by a metric like Euclidean distance.
-:::
+
 
 ## MDS Visualization Result
 
@@ -779,9 +780,7 @@ This suggests a metric that could evaluate a clustering: comparing the distances
 distances between points in different clusters.
 ::::
 
-::: {.content-visible when-profile="slides"}
 ## Silhouette Coefficient
-:::
 
 The Silhouette Coefficient is an example of such an evaluation, where a higher Silhouette Coefficient score relates to a
 model with "better defined" clusters. 
@@ -893,6 +892,85 @@ Once the initial centroids are chosen, the standard k-means algorithm is applied
 
 The main advantage of k-means++ over randomly assigning points is that it reduces the likelihood of poor clustering results due to suboptimal initial centroids. This often leads to faster convergence and better overall clustering quality.
 
+## Visualizing K-means++ Initialization Probability
+
+Let's create a visualization that demonstrates how K-means++ selects the second centroid based on the squared distances from the first selected point:
+
+```{python}
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+
+# Create a small uniformly distributed 2D dataset
+np.random.seed(42)
+n_points = 100
+X = np.random.uniform(-5, 5, (n_points, 2))
+
+# Select the first centroid randomly (simulate k-means++ first step)
+first_centroid = X[0]  # For demonstration, we'll use the first point
+
+# Calculate squared distances from all points to the first centroid
+distances_squared = np.sum((X - first_centroid)**2, axis=1)
+
+# Normalize to get probabilities (proportional to squared distances)
+probabilities = distances_squared / np.sum(distances_squared)
+
+# Create 3D plot
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+# Plot the 2D points
+ax.scatter(X[:, 0], X[:, 1], c='lightblue', s=30, alpha=0.6, label='Data points')
+
+# Highlight the first centroid
+ax.scatter(first_centroid[0], first_centroid[1], c='red', s=100, marker='*', 
+           label='First centroid', edgecolors='darkred', linewidth=2)
+
+# Create 3D visualization where z-axis represents probability
+# We'll create a grid to show the probability surface
+x_range = np.linspace(X[:, 0].min(), X[:, 0].max(), 50)
+y_range = np.linspace(X[:, 1].min(), X[:, 1].max(), 50)
+X_grid, Y_grid = np.meshgrid(x_range, y_range)
+
+# Calculate probability for each grid point
+grid_distances_squared = (X_grid - first_centroid[0])**2 + (Y_grid - first_centroid[1])**2
+grid_probabilities = grid_distances_squared / np.sum(grid_distances_squared)
+
+# Plot the probability surface
+surf = ax.plot_surface(X_grid, Y_grid, grid_probabilities, 
+                      alpha=0.3, cmap='viridis', 
+                      linewidth=0, antialiased=True)
+
+# Add the actual data points with their probabilities as z-values
+ax.scatter(X[:, 0], X[:, 1], probabilities, c='darkblue', s=20, alpha=0.8)
+
+# Add colorbar
+fig.colorbar(surf, ax=ax, shrink=0.5, aspect=20, label='Selection Probability')
+
+# Set labels and title
+ax.set_xlabel('X coordinate')
+ax.set_ylabel('Y coordinate')
+ax.set_zlabel('Selection Probability')
+ax.set_title('K-means++ Initialization Probability\n(Probability ∝ Squared Distance from First Centroid)')
+
+# Add legend
+ax.legend()
+
+# Set viewing angle for better visualization
+ax.view_init(elev=20, azim=45)
+
+plt.tight_layout()
+plt.show()
+```
+
+This 3D visualization shows:
+
+- **Light Blue points**: The uniformly distributed 2D dataset
+- **Red star**: The first randomly selected centroid
+- **Surface and Dark Blue points**: The probability of selecting each point as the second centroid
+- **Z-axis**: Represents the selection probability (proportional to squared distance from first centroid)
+
+As you can see, points farther from the first centroid have higher selection probability, which helps ensure that the second centroid is well-separated from the first one.
 
 # Real Data Clustering Example
 
@@ -908,6 +986,7 @@ We borrow code from this sklearn
 Let's load the data and count the number of documents and categories.
 
 ```{python}
+#| code-fold: false
 from sklearn.datasets import fetch_20newsgroups
 
 # just use the following categories
@@ -926,7 +1005,7 @@ true_k = unique_labels.shape[0]
 
 print(f"{len(news_data.data)} documents - {true_k} categories")
 ```
----
+## Example Document
 
 Here is an example of one of the documents:
 
@@ -944,20 +1023,18 @@ numeric input.
 The starting point is to note that one can encode a set using a binary vector with one component for each potential set
 member.  
 
----
+## Bag of Words
 
-The so-called _bag of words_ encoding for a document is to treat the document as a multiset of words.
+The so-called _bag of words_ encoding for a document is to treat the document as a _multiset_ of words.
 
-::: aside
-A _multiset_ is like a set but allows for multiple instances of each element.
-:::
+> A _multiset_ is like a set but allows for multiple instances of each element.
 
 That is, we simply count how many times each word occurs. It is a "bag" because all the order of the words in the
 document is lost.
 
 Surprisingly, we can still tell a lot about the document even without knowing its word ordering.
 
----
+## Term Frequencies
 
 Counting the number of times each word occurs in a document yields a vector of __term frequencies.__
 
@@ -968,7 +1045,7 @@ Hence it often makes sense to normalize the frequency vectors.
 
 $\ell_1$ or $\ell_2$ normalization are common.
 
----
+## Tf-idf
 
 Next, as noted in __scikit-learn__:
 
@@ -990,7 +1067,7 @@ The idea is that rare words are more informative than common words.
 
 (This has connections to information theory).
 
----
+## Tf-idf Definition
 
 Hence, the definition of tf-idf is as follows.
 
@@ -1039,7 +1116,7 @@ print(news_data.target)
 print(news_data.target_names)
 ```
 
-## Selecting the Number of Clusters
+## Selecting the Number of Clusters -- Error
 
 Now let's look at the different cluster measures versus number of clusters.
 
@@ -1053,7 +1130,7 @@ plt.ylabel('Error')
 plt.show()
 ```
 
----
+## Selecting the Number of Clusters -- RI
 
 ```{python}
 #| fig-align: center
@@ -1065,7 +1142,7 @@ plt.ylabel('Adjusted Rand Index')
 plt.show()
 ```
 
----
+## Selecting the Number of Clusters -- Silhouette Score
 
 ```{python}
 #| fig-align: center
