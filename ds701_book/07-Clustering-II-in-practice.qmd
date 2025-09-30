@@ -205,19 +205,20 @@ The idea behind [Multidimensional Scaling (MDS)](https://en.wikipedia.org/wiki/M
 * The points that are close (or far) in high dimensional space should be close (or far) in the reduced dimension space.
 ::::
 
-::: {.fragment}
+## MDS Continued
+
 Note that there are two forms of MDS:
 
 * Metric MDS, of which Classical MDS is a special case, and has a closed form solution
-  based on the eigenvectors of the centered distance matrix.
+  based on the eigenvectors of the centered distance matrix. 
+    * $O(n^3)$ time complexity and $O(n^2)$ space complexity.
 * Non-Metric MDS, which tries to find a non-parametric monotonic relationship
-  between the dissimilarities and the target coordinates through an iterative approach.
-:::
+  between the dissimilarities and the target coordinates through an iterative approach. 
+    * $O(n^2)$ time complexity.
 
-::: {.fragment}
 MDS may not always work well if, for example the dissimilarities
 are not well modeled by a metric like Euclidean distance.
-:::
+
 
 ## MDS Visualization Result
 
@@ -373,10 +374,16 @@ Here again, you can see the inter-cluster sample distances are small.
 
 ## Cluster Evaluation
 
+:::: {.columns}
+::: {.column width="50%"}
+
 How do we know whether the clusters we get represent "real" structure in our data?
 
-:::: {.fragment}
 Consider a dataset of 100 points _uniformly distributed_ in the unit square.
+
+> Question: Does that look uniformly distributed to you?
+:::
+::: {.column width="50%"}
 
 ```{python}
 #| fig-align: center
@@ -390,7 +397,10 @@ df.plot('X', 'Y', kind = 'scatter',
         figsize = (4, 4))
 ```
 
+:::
 ::::
+
+
 
 ---
 
@@ -471,9 +481,9 @@ We'll look at (Adjusted) Rand Index.
 ::::
 
 :::: {.fragment}
-Even with ground truth labels, we can't apply accuracy measures like we will
-see in supervised learning approaches since clustering algorithms don't try to
-match exact labels, but rather group similar items together.
+> Note: Even with ground truth labels, we can't apply accuracy measures like we will
+> see in supervised learning approaches since clustering algorithms don't try to
+> match exact labels, but rather group similar items together.
 
 ::::
 
@@ -484,15 +494,16 @@ We'll look at Silhouette Coefficient.
 ::::
 
 
-## Rand Index
+## Rand Index (named after William M. Rand)
 
-::: aside
-Named after William M. Rand.
-:::
+* Compare a proposed clustering, $C$, with ground truth labels, $T$.
+* Look at the ratio, compared to total possible pairs, of pairs of points that are either
+    * in the same cluster in both $T$ and $C$, or
+    * in different clusters in both $T$ and $C$.
 
-In some cases we'll have ground truth cluster labels, call them $T$.
+> Question: What are pairs not in either category?
 
-In that case, what we need is a way to compare a proposed clustering, $C$, with $T$. To make this comparison we use the __Rand Index__.
+## Rand Index Formula
 
 The formula for the Rand Index is:
 
@@ -500,12 +511,36 @@ $$
 \text{RI}(T,C) = \frac{a+b}{n \choose 2},
 $$
 
-- where $a$ is the number of pairs of points that are in the same cluster in both $T$ and $C$, and
-- $b$ is the number of pairs of points that are in different clusters in both $T$ and $C$.
+- where $a$ is the number of pairs of points that are _in the same cluster_ in both $T$ and $C$, and
+- $b$ is the number of pairs of points that are _in different clusters_ in both $T$ and $C$.
 
 We normalize the sum by the combinatorial number of pairs of points, $n \choose 2$.
 
 The __Rand Index__ is a value that falls in the range $[0, 1]$.
+
+## Aside: n choose 2
+
+* From combinatorics
+
+**"n choose 2"** (written as $n \choose 2$) represents the number of ways to choose 2 items from a set of n items, where the order doesn't matter.
+
+#### Formula
+
+$$
+C(n,2) = n! / (2! × (n-2)!) = n(n-1)/2
+$$
+
+#### What it means
+
+- It counts the number of **pairs** you can form from n items
+- Order doesn't matter (so {A,B} is the same as {B,A})
+- No repetition (you can't choose the same item twice)
+
+#### Examples
+
+- **3 choose 2**: From items {A, B, C}, you can form pairs {A,B}, {A,C}, {B,C} = **3 pairs**
+- **4 choose 2**: From items {A, B, C, D}, you can form pairs {A,B}, {A,C}, {A,D}, {B,C}, {B,D}, {C,D} = **6 pairs**
+- **5 choose 2**: From items {A, B, C, D, E}, you can form **10 pairs**
 
 ## Rand Index Example 1
 
@@ -515,8 +550,9 @@ We'll create another synthetic dataset of 3 clusters, so we have ground truth
 labels $T$.
 
 ```{python}
-X_rand, y_rand = sk_data.make_blobs(n_samples=[100, 250, 150], 
-                                    centers = [[1, 2],[1.5, 3], [2, 4]], 
+#| code-fold: false
+X_rand, y_rand = sk_data.make_blobs(n_samples=[100, 300, 50], 
+                                    centers = [[1.2, 2.4],[1.5, 3], [1.8, 3.5]], 
                                     n_features = 2,
                                     center_box = (-10.0, 10.0), 
                                     cluster_std = [.2, .3, .2], 
@@ -527,6 +563,8 @@ kmeans = KMeans(init = 'k-means++', n_clusters = 3, n_init = 100, random_state=0
 df_rand_clust['label'] = kmeans.fit_predict(df_rand_gt[['X', 'Y']])
 df_rand_clust['label'] = df_rand_clust['label'].replace({0: 1, 1: 2, 2: 0})
 ```
+
+## Rand Index Example 1: Plotting the Results
 
 We then run $k$-means with 3 clusters to on the datasets to get labels $C$ and plot the results:
 
@@ -557,13 +595,14 @@ plt.show()
 print("The Rand index is: ", metrics.rand_score(df_rand_gt["label"], df_rand_clust["label"]))
 ```
 
-:::: {.fragment}
+## Adjusted Rand Index
+
 How do we know whether a particular Rand Index (RI) score is significant?
 
 We might compare it to the RI for a __random__ assignment of points to labels.
 
 This leads to the __Adjusted Rand Index.__
-::::
+
 
 ## The Adjusted Rand Index
 
@@ -575,36 +614,36 @@ The Expected Rand Index considers $C$ to be a clustering that has the same clust
 Using that, we define the adjusted Rand index as a simple __rescaling__ of RI:
 
 $$
-\text{ARI} = \frac{\text{RI} - E[\text{RI}]}{\max(\text{RI}) - E[\text{RI}]}
+\text{ARI} = \frac{\text{RI} - E[\text{RI}]}{1 - E[\text{RI}]}
 $$
 
-The values of $E[\text{RI}]$ and $\max(\text{RI})$ can be computed using combinatorics (we'll omit the derivation).
+Where $1$ represents $\max(\text{RI})$, the maximum possible Rand Index.
+
+$E[\text{RI}]$ can be computed using combinatorics (we'll omit the derivation).
 
 The below code block computes and prints the adjusted Rand index for the example on the previous slide.
 
 ```{python}
 print("The adjusted Rand index is: ", metrics.adjusted_rand_score(df_rand_gt["label"], df_rand_clust["label"]))
 ```
+
 ::::
 
 ## Rand Index Example 2
 
-:::: {.columns}
-::: {.column width="40%"}
+Let's consider again our 3-cluster dataset with known labels `y`.
+
 ```{python}
 #| fig-align: center
 import matplotlib.pyplot as plt
 
-plt.figure(figsize=(4, 3))  # Adjust the width and height as needed
+plt.figure(figsize=(5, 4))  # Adjust the width and height as needed
 sns.heatmap(X, xticklabels = False, yticklabels = False, linewidths = 0)
 plt.show()
 ```
-:::
-::: {.column width="60%"}
-Let's consider again our 3-cluster dataset with known labels `y`.
-:::
-::::
 
+
+## Rand Index Example 2: Evaluating the Results
 
 Here is the Rand Index and adjusted Rand Index, when using $k$-means to cluster this dataset for 1 to 10 clusters:
 
@@ -624,6 +663,7 @@ def ri_evaluate_clusters(X, max_clusters, ground_truth):
     return ri, ari
     
 ri, ari = ri_evaluate_clusters(X, 10, y)
+plt.figure(figsize=(6, 4))
 plt.plot(range(1, len(ri)), ri[1:], 'ro-', range(1, len(ari)), ari[1:], 'b*-')
 plt.xlabel('Number of clusters')
 plt.title('$k$-means Clustering Compared to Known Labels')
@@ -740,13 +780,10 @@ This suggests a metric that could evaluate a clustering: comparing the distances
 distances between points in different clusters.
 ::::
 
-::: {.content-visible when-profile="slides"}
 ## Silhouette Coefficient
-:::
 
 The Silhouette Coefficient is an example of such an evaluation, where a higher Silhouette Coefficient score relates to a
 model with "better defined" clusters. 
-
 We'll use [`sklearn.metrics.silhouette_score`](https://scikit-learn.org/stable/modules/clustering.html#silhouette-coefficient)
 
 ::: {.incremental}
@@ -761,15 +798,45 @@ Then the **Silhouette Coefficient** for a point is
 $$ 
 s = \frac{b-a}{\max(a, b)}.
 $$
+
+where $\max(a, b)$ is the larger of the two mean distances.
+
 ::::
 
-:::: {.fragment}
-The overall silhouette coefficient for a clustering is the average of the silhouette coefficients for each data point.
-::::
 
-::: {.content-visible when-profile="slides"}
-## Silhouette Coefficient
-:::
+ 
+## Why This Makes Sense
+
+The **max(a, b)** normalization ensures the coefficient is always between -1 and 1:
+
+- **If a < b** (good clustering): Point is closer to its own cluster
+  - max(a, b) = b
+  - s = (b - a) / b = 1 - (a/b) → **positive (0 to 1)**
+
+- **If a > b** (poor clustering): Point is closer to other clusters  
+  - max(a, b) = a
+  - s = (b - a) / a = (b/a) - 1 → **negative (-1 to 0)**
+
+- **If a = b** (boundary): Point is equidistant
+  - s = 0
+
+This creates a scale where:
+
+- **+1** = perfectly clustered (a = 0, b > 0)
+- **0** = on the boundary (a = b)  
+- **-1** = completely misclustered (b = 0, a > 0)
+
+## Overall Silhouette Score
+
+
+The overall silhouette score is the average of the silhouette scores for each data point.
+
+$$
+(1/n) \sum_{i=1}^n s_i
+$$
+
+
+## Silhouette Score for our synthetic data
 
 We can calculate the Silhouette Score for our synthetic data:
 
@@ -825,6 +892,85 @@ Once the initial centroids are chosen, the standard k-means algorithm is applied
 
 The main advantage of k-means++ over randomly assigning points is that it reduces the likelihood of poor clustering results due to suboptimal initial centroids. This often leads to faster convergence and better overall clustering quality.
 
+## Visualizing K-means++ Initialization Probability
+
+Let's create a visualization that demonstrates how K-means++ selects the second centroid based on the squared distances from the first selected point:
+
+```{python}
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+
+# Create a small uniformly distributed 2D dataset
+np.random.seed(42)
+n_points = 100
+X = np.random.uniform(-5, 5, (n_points, 2))
+
+# Select the first centroid randomly (simulate k-means++ first step)
+first_centroid = X[0]  # For demonstration, we'll use the first point
+
+# Calculate squared distances from all points to the first centroid
+distances_squared = np.sum((X - first_centroid)**2, axis=1)
+
+# Normalize to get probabilities (proportional to squared distances)
+probabilities = distances_squared / np.sum(distances_squared)
+
+# Create 3D plot
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+# Plot the 2D points
+ax.scatter(X[:, 0], X[:, 1], c='lightblue', s=30, alpha=0.6, label='Data points')
+
+# Highlight the first centroid
+ax.scatter(first_centroid[0], first_centroid[1], c='red', s=100, marker='*', 
+           label='First centroid', edgecolors='darkred', linewidth=2)
+
+# Create 3D visualization where z-axis represents probability
+# We'll create a grid to show the probability surface
+x_range = np.linspace(X[:, 0].min(), X[:, 0].max(), 50)
+y_range = np.linspace(X[:, 1].min(), X[:, 1].max(), 50)
+X_grid, Y_grid = np.meshgrid(x_range, y_range)
+
+# Calculate probability for each grid point
+grid_distances_squared = (X_grid - first_centroid[0])**2 + (Y_grid - first_centroid[1])**2
+grid_probabilities = grid_distances_squared / np.sum(grid_distances_squared)
+
+# Plot the probability surface
+surf = ax.plot_surface(X_grid, Y_grid, grid_probabilities, 
+                      alpha=0.3, cmap='viridis', 
+                      linewidth=0, antialiased=True)
+
+# Add the actual data points with their probabilities as z-values
+ax.scatter(X[:, 0], X[:, 1], probabilities, c='darkblue', s=20, alpha=0.8)
+
+# Add colorbar
+fig.colorbar(surf, ax=ax, shrink=0.5, aspect=20, label='Selection Probability')
+
+# Set labels and title
+ax.set_xlabel('X coordinate')
+ax.set_ylabel('Y coordinate')
+ax.set_zlabel('Selection Probability')
+ax.set_title('K-means++ Initialization Probability\n(Probability ∝ Squared Distance from First Centroid)')
+
+# Add legend
+ax.legend()
+
+# Set viewing angle for better visualization
+ax.view_init(elev=20, azim=45)
+
+plt.tight_layout()
+plt.show()
+```
+
+This 3D visualization shows:
+
+- **Light Blue points**: The uniformly distributed 2D dataset
+- **Red star**: The first randomly selected centroid
+- **Surface and Dark Blue points**: The probability of selecting each point as the second centroid
+- **Z-axis**: Represents the selection probability (proportional to squared distance from first centroid)
+
+As you can see, points farther from the first centroid have higher selection probability, which helps ensure that the second centroid is well-separated from the first one.
 
 # Real Data Clustering Example
 
@@ -840,6 +986,7 @@ We borrow code from this sklearn
 Let's load the data and count the number of documents and categories.
 
 ```{python}
+#| code-fold: false
 from sklearn.datasets import fetch_20newsgroups
 
 # just use the following categories
@@ -858,7 +1005,7 @@ true_k = unique_labels.shape[0]
 
 print(f"{len(news_data.data)} documents - {true_k} categories")
 ```
----
+## Example Document
 
 Here is an example of one of the documents:
 
@@ -876,20 +1023,18 @@ numeric input.
 The starting point is to note that one can encode a set using a binary vector with one component for each potential set
 member.  
 
----
+## Bag of Words
 
-The so-called _bag of words_ encoding for a document is to treat the document as a multiset of words.
+The so-called _bag of words_ encoding for a document is to treat the document as a _multiset_ of words.
 
-::: aside
-A _multiset_ is like a set but allows for multiple instances of each element.
-:::
+> A _multiset_ is like a set but allows for multiple instances of each element.
 
 That is, we simply count how many times each word occurs. It is a "bag" because all the order of the words in the
 document is lost.
 
 Surprisingly, we can still tell a lot about the document even without knowing its word ordering.
 
----
+## Term Frequencies
 
 Counting the number of times each word occurs in a document yields a vector of __term frequencies.__
 
@@ -900,7 +1045,7 @@ Hence it often makes sense to normalize the frequency vectors.
 
 $\ell_1$ or $\ell_2$ normalization are common.
 
----
+## Tf-idf
 
 Next, as noted in __scikit-learn__:
 
@@ -922,7 +1067,7 @@ The idea is that rare words are more informative than common words.
 
 (This has connections to information theory).
 
----
+## Tf-idf Definition
 
 Hence, the definition of tf-idf is as follows.
 
@@ -971,7 +1116,7 @@ print(news_data.target)
 print(news_data.target_names)
 ```
 
-## Selecting the Number of Clusters
+## Selecting the Number of Clusters -- Error
 
 Now let's look at the different cluster measures versus number of clusters.
 
@@ -985,7 +1130,7 @@ plt.ylabel('Error')
 plt.show()
 ```
 
----
+## Selecting the Number of Clusters -- RI
 
 ```{python}
 #| fig-align: center
@@ -997,7 +1142,7 @@ plt.ylabel('Adjusted Rand Index')
 plt.show()
 ```
 
----
+## Selecting the Number of Clusters -- Silhouette Score
 
 ```{python}
 #| fig-align: center
@@ -1011,10 +1156,10 @@ plt.show()
 
 ## Looking into the clusters
 
-Run $k$-means with 4 clusters:
+Run $k$-means with 3 clusters:
 
 ```{python}
-k = 4
+k = 3
 kmeans = KMeans(n_clusters = k, init = 'k-means++', max_iter = 100, n_init = 25, random_state = 3)
 kmeans.fit_predict(data)
 ```
