@@ -154,12 +154,11 @@ and instead capture a more complex arrangement that includes containment of one 
 > Note: GMMs relax the partitioning notion further!
 ::::
 
-
-
-
 # Hierarchical Clustering Example
 
 ## Hierarchical Clustering Example
+
+Inspired by [Hastie & Tibshirani lecture](https://www.youtube.com/watch?v=yktzn-Mr2Nw).
 
 :::: {.columns}
 ::: {.column width="60%"}
