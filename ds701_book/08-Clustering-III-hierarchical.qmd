@@ -157,7 +157,7 @@ and instead capture a more complex arrangement that includes containment of one 
 
 
 
-# Hierarchical Clustering
+# Hierarchical Clustering Example
 
 ## Hierarchical Clustering Example
 
@@ -1043,28 +1043,29 @@ ax2.set_ylabel('Distance')
 ax2.axhline(y=4, color='red', linestyle='--', linewidth=2, alpha=0.8)
 
 plt.tight_layout()
+
+# Save the plot as a png image (uncomment to save)
+# plt.savefig('figs/L08-dendrogram.png')
 plt.show()
 ```
 
 * We can now split the dendrogram at a certain level to get a clustering
 
 
-
-
-## Hierarchical Clustering
+# Hierarchical Clustering
 
 A hierarchical clustering produces a set of __nested__ clusters organized into a tree.
 
-A hierarchical clustering is visualized using a...
-
- __dendrogram__ 
+A hierarchical clustering is visualized using a __dendrogram__ 
 
 * A tree-like diagram that records the containment relations among clusters.
 
-![](./figs/L08-dendrogram.png){width="600px"}
+![](./figs/L08-dendrogram.png){width="600px" fig-align="center"}
 
 
 ## Strengths of Hierarchical Clustering
+
+![](./figs/L08-dendrogram.png){width="400px" fig-align="center"}
 
 Hierarchical clustering has a number of advantages:
 
@@ -1076,14 +1077,14 @@ Hierarchical clustering has a number of advantages:
 * You can obtain a (somewhat) arbitrary number of clusters.
 ::::
 
-![](./figs/L08-dendrogram-cut.png){width="600px"}
+
 
 ## Another advantage
 
 Another advantage is that the dendrogram may itself correspond to a meaningful
 structure, for example, a taxonomy.
 
-![](./figs/L08-animal-taxonomy.jpg){width="100%"}
+![](./figs/L08-animal-taxonomy.jpg){height="100%" fig-align="center"}
 
 ## Yet another advantage
 
@@ -1105,6 +1106,62 @@ In many real-world situations, clusters may not be round, they may be of
 unequal size, and they may overlap.
 
 Hence we would like clustering algorithms that can work in those cases also.
+
+## In-Class Exercise
+
+Create a hierarchical cluster and dendogram for this data.
+
+```{python}
+#| fig-align: center
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Ellipse
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import pdist
+
+# Create 5 points with labels (same as before)
+points = {
+    'A': (3.4, 6.1),
+    'B': (1.8, 2.3),
+    'C': (4.6, 4.9),
+    'D': (1.6, 5.6),
+    'E': (2.9, 1.7)
+}
+
+# Create figure with two subplots
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+
+# First subplot: Scatter plot with clusters
+for label, (x, y) in points.items():
+    ax1.scatter(x, y, s=100, alpha=0.7)
+    ax1.annotate(label, (x, y), xytext=(5, 5), textcoords='offset points', 
+                fontsize=12, fontweight='bold')
+
+
+ax1.set_xlabel('Feature 1')
+ax1.set_ylabel('Feature 2')
+ax1.set_title('Clusters at Different Levels')
+ax1.grid(True, alpha=0.3)
+ax1.set_xlim(0, 7)
+ax1.set_ylim(0, 7)
+
+# Create empty axis with 5 evenly spaced ticks
+ax2.set_xlim(0, 4)
+ax2.set_ylim(0, 1)
+ax2.set_xticks([0, 1, 2, 3, 4])
+ax2.set_xticklabels([])
+ax2.set_yticks([0, 0.25, 0.5, 0.75, 1])
+ax2.set_yticklabels([])
+ax2.set_title('Dendogram')
+ax2.set_xlabel('Points')
+ax2.set_ylabel('Distance')
+
+plt.tight_layout()
+
+# Save the plot as a png image (uncomment to save)
+# plt.savefig('figs/L08-dendrogram.png')
+plt.show()
+```
 
 
 # Hierarchical Clustering Algorithms
@@ -1160,6 +1217,53 @@ process and
 * indices $\{n, n+1, ...\}$ refer to each new cluster created
 
 And `sample_count` is the number of original data samples in the new cluster.
+
+## Linkage Matrix Example
+
+Let's calculate and display the linkage matrix for our 5 data points A-E:
+
+:::: {.columns}
+::: {.column width="60%"}
+
+```{python}
+#| fig-align: center
+
+# Create 5 points with labels (same as before)
+points = {
+    'A': (1.2, 5.2),
+    'B': (2.7, 4.2),
+    'C': (2, 6),
+    'D': (5, 3),
+    'E': (4, 2)
+}
+
+# Prepare data for hierarchical clustering
+points_array = np.array(list(points.values()))
+point_labels = list(points.keys())
+
+# Calculate linkage matrix using Ward's method
+linkage_matrix = linkage(points_array, method='ward')
+
+print("Linkage Matrix for 5 data points A-E:")
+print("Format: [idx1, idx2, distance, sample_count]")
+print("=" * 50)
+print(linkage_matrix)
+print("=" * 50)
+
+# Display with labels for better understanding
+print("\nInterpretation:")
+print(f"Row 0: Merge points 0 and 2 (A and C) at distance {linkage_matrix[0,2]:.2f}")
+print(f"Row 1: Merge points 3 and 4 (D and E) at distance {linkage_matrix[1,2]:.2f}") 
+print(f"Row 2: Merge point 1 (B) with cluster 5 (A&C) at distance {linkage_matrix[2,2]:.2f}")
+print(f"Row 3: Merge cluster 6 (A&B&C) with cluster 7 (D&E) at distance {linkage_matrix[3,2]:.2f}")
+```
+
+:::
+::: {.column width="40%"}
+
+![](./figs/L08-dendrogram.png){width="100%" fig-align="center"}
+:::
+::::
 
 
 ## Hierarchical Clustering Algorithm Explained
@@ -1220,8 +1324,8 @@ Here is a set of 6 points that we will cluster to show differences between dista
 
 ```{python}
 #| fig-align: center
-#| fig-width: 600px
 
+plt.figure(figsize=(6,4))
 pt_x = [0.4, 0.22, 0.35, 0.26, 0.08, 0.45]
 pt_y = [0.53, 0.38, 0.32, 0.19, 0.41, 0.30]
 plt.plot(pt_x, pt_y, 'o', markersize = 10, color = 'k')
@@ -1438,6 +1542,8 @@ __Limitations:__
     
 * Biased toward elliptical clusters
 
+## Average-Linkage Clustering Strengths and Limitations, cont.
+
 Produces more isotropic clusters.
 
 ```{python}
@@ -1448,6 +1554,8 @@ plt.scatter(X_moon_10[:, 0], X_moon_10[:, 1], c = [['b','g'][i-1] for i in label
 plt.axis('off')
 plt.show()
 ```
+
+## Average-Linkage Clustering Strengths and Limitations, cont.
 
 More resistant to noise than Single-Linkage.
 
@@ -1493,9 +1601,7 @@ $$
 
 where $c_i, c_j, c_{i+j}$ are the corresponding cluster centroids.
 
-::: {.content-visible when-profile="slides"}
 ## Ward's Distance continued
-:::
 
 In a sense, this cluster distance results in a hierarchical analog of $k$-means.
 
@@ -1509,71 +1615,66 @@ Hence it tends to behave more like average-linkage hierarchical clustering.
 
 # Hierarchical Clustering in Practice
 
-## Hierarchical Clustering In Practice
+## In Practice
 
 Now we'll look at doing hierarchical clustering in practice.
 
-We'll use the same synthetic data as we did in the k-means case -- i.e., three "blobs" living in 30 dimensions.
+We'll use 1/10th of the synthetic data set from the beginning of this lecture.
 
-::: {.content-visible when-profile="slides"}
-## Hierarchical Clustering in Practice, cont.
-:::
-
-```{python}
-X, y = sk_data.make_blobs(n_samples=100, centers=3, n_features=30,
-                          center_box=(-10.0, 10.0),random_state=0)
-```
-
-The raw data is shown in the following visualization: 
+[scipy](https://docs.scipy.org/doc/scipy/index.html) has a comprehensive set of
+[clustering tools](https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html).
 
 ```{python}
-sns.heatmap(X, xticklabels=False, yticklabels=False, linewidths=0,cbar=False)
+#| fig-align: center
+
+X, y = sk_data.make_blobs(
+    n_samples=[10, 10, 25, 7, 7, 8], 
+    centers = [[1, 2], [1.5, 1], [3, 2], [1.75, 3.25], [2, 4], [2.25, 3.25]], 
+    n_features = 2,
+    center_box = (-10.0, 10.0), 
+    cluster_std = [.2, .2, .3, .1, .15, .15], 
+    random_state = 0
+)
+
+df_rand = pd.DataFrame(np.column_stack([X[:, 0], X[:, 1], y]), columns = ['X', 'Y', 'label'])
+
+df_rand.plot('X', 'Y', kind = 'scatter',  
+                   colorbar = False, figsize = (5, 5))
+plt.axis('square')
+plt.axis('off')
 plt.show()
 ```
 
-::: {.content-visible when-profile="slides"}
-## Hierarchical Clustering in Practice, cont.
-:::
 
-
-then an embedding into 2-D (using MDS).
-
-```{python}
-import sklearn.manifold
-import sklearn.metrics as metrics
-euclidean_dists = metrics.euclidean_distances(X)
-mds = sklearn.manifold.MDS(n_components = 2, max_iter = 3000, eps = 1e-9, random_state = 0,
-                   dissimilarity = "precomputed", n_jobs = 1)
-fit = mds.fit(euclidean_dists)
-pos = fit.embedding_
-plt.axis('equal')
-plt.scatter(pos[:, 0], pos[:, 1], s = 8)
-plt.show()
-```
-
-::: {.content-visible when-profile="slides"}
-## Hierarchical Clustering in Practice, cont.
-:::
-
-Hierarchical clustering is available in __`sklearn`__, but there is a much more
-fully developed set of 
-[tools](https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html) 
-in the [scipy](https://docs.scipy.org/doc/scipy/index.html) package and that is the one to use.
+## In Practice, cont.
 
 Let's run hierarchical clustering on our synthetic dataset.
 
-::: {.callout-tip}
-Try the other linkage methods and see how the clustering and dendrogram changes.
-:::
+:::: {.columns}
+::: {.column width="50%"}
+
+
+<br><br>
+
+> Try the other linkage methods and see how the clustering and dendrogram changes.
 
 ```{python}
+#| echo: false
+
 import scipy.cluster
 import scipy.cluster.hierarchy as hierarchy
 import scipy.spatial.distance
+```
+
+```{python}
+#| code-fold: false
 
 # linkages = ['single','complete','average','weighted','ward']
 Z = hierarchy.linkage(X, method = 'single')
 ```
+
+:::
+::: {.column width="50%"}
 
 And draw the dendrogram.
 
@@ -1581,11 +1682,17 @@ And draw the dendrogram.
 R = hierarchy.dendrogram(Z)
 ```
 
-## Hierarchical Clustering Real Data
+:::
+::::
+
+## Hierarchical Clustering -- Newsgroups
 
 Once again we'll use the
 ["20 Newsgroup"](http://scikit-learn.org/stable/datasets/twenty_newsgroups.html)
-data provided as example data in sklearn.
+data provided as example data in sklearn. Experiment with different metrics.
+
+:::: {.columns}
+::: {.column width="50%"}
 
 Load three of the newsgroups.
 
@@ -1594,6 +1701,9 @@ from sklearn.datasets import fetch_20newsgroups
 categories = ['comp.os.ms-windows.misc', 'sci.space','rec.sport.baseball']
 news_data = fetch_20newsgroups(subset = 'train', categories = categories)
 ```
+
+:::
+::: {.column width="50%"}
 
 Vectorize the data.
 
@@ -1604,7 +1714,8 @@ data = vectorizer.fit_transform(news_data.data).todense()
 data.shape
 ```
 
-Cluster hierarchically and display dendrogram. Feel free to experiment with different metrics.
+:::
+::::
 
 ```{python}
 # linkages are one of 'single','complete','average','weighted','ward'
@@ -1625,6 +1736,8 @@ Let's flatten the hierarchy to different numbers clusters and calculate the
 _Silhouette Score_.
 
 ```{python}
+import sklearn.metrics as metrics
+
 max_clusters = 20
 s = np.zeros(max_clusters+1)
 
@@ -1664,8 +1777,6 @@ and plot, copied here, that shows the different clusters resulting from differen
 linkage methods.
 
 ![](./figs/L08-sphx_glr_plot_linkage_comparison_001.png){width="100%" fig-align="center"}
-
-
 
 
 # Recap
