@@ -4,6 +4,8 @@ jupyter: python3
 fig-align: center
 ---
 
+## Moving away from strict partitions
+
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/08-Clustering-III-hierarchical.ipynb)
 
 ```{python}
@@ -18,13 +20,12 @@ import seaborn as sns
 ```
 
 
-Today we will look at a fairly different approach to clustering.
-
-So far, we have been thinking of clustering as finding a __partition__ of our dataset.
-
-That is, a set of nonoverlapping clusters, in which each data item is in one cluster.
-
-However, in many cases, the notion of a strict partition is not as useful.
+::: {.incremental}
+* Today we will look at a fairly different approach to clustering.
+* So far, we have been thinking of clustering as finding a __partition__ of our dataset.
+* That is, a set of nonoverlapping clusters, in which each data item is in one cluster.
+* However, in many cases, the notion of a strict partition is not as useful.
+:::
 
 # Example
 
@@ -45,8 +46,10 @@ X_rand, y_rand = sk_data.make_blobs(
 )
 df_rand = pd.DataFrame(np.column_stack([X_rand[:, 0], X_rand[:, 1], y_rand]), columns = ['X', 'Y', 'label'])
 df_rand = df_rand.astype({'label': 'int'})
-df_rand['label2'] = [{0: 0, 1: 1, 2: 2, 3: 3, 4: 3, 5: 3}[x] for x in df_rand['label']]
 df_rand['label3'] = [{0: 0, 1: 0, 2: 1, 3: 2, 4: 2, 5: 2}[x] for x in df_rand['label']]
+df_rand['label4'] = [{0: 0, 1: 1, 2: 2, 3: 3, 4: 3, 5: 3}[x] for x in df_rand['label']]
+df_rand['label5'] = [{0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 3}[x] for x in df_rand['label']]
+
 # kmeans = KMeans(init = 'k-means++', n_clusters = 3, n_init = 100)
 # df_rand['label'] = kmeans.fit_predict(df_rand[['X', 'Y']])
 
@@ -57,7 +60,7 @@ plt.axis('off')
 plt.show()
 ```
 
-## __Three clusters?__
+## Three clusters?
 
 ```{python}
 #| fig-align: center
@@ -69,19 +72,32 @@ plt.axis('off')
 plt.show()
 ```
 
-## __Four clusters?__
+## Four clusters?
 
 ```{python}
 #| fig-align: center
 
-df_rand.plot('X', 'Y', kind = 'scatter', c = 'label2', colormap='viridis', 
+df_rand.plot('X', 'Y', kind = 'scatter', c = 'label4', colormap='viridis', 
                    colorbar = False, figsize = (6, 6))
 plt.axis('square')
 plt.axis('off')
 plt.show()
 ```
 
-## __Six clusters?__
+## Five clusters?
+
+```{python}
+#| fig-align: center
+
+df_rand.plot('X', 'Y', kind = 'scatter', c = 'label5', colormap='viridis', 
+                   colorbar = False, figsize = (6, 6))
+plt.axis('square')
+plt.axis('off')
+plt.show()
+```
+
+
+## Six clusters?
 
 
 ```{python}
@@ -125,19 +141,915 @@ To fully capture the structure in this dataset, two things are needed:
 2. Capturing the containment relations -- which clusters lie within other clusters
 :::
 
+:::
+::::
+
 :::: {.fragment}
 These observations motivate the notion of __hierarchical__ clustering.
 
 In hierarchical clustering, we move away from the __partition__ notion of $k$-means, 
 
 and instead capture a more complex arrangement that includes containment of one cluster within another.
+
+> Note: GMMs relax the partitioning notion further!
 ::::
+
+
+
+
+# Hierarchical Clustering
+
+## Hierarchical Clustering Example
+
+:::: {.columns}
+::: {.column width="60%"}
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Create 5 points with labels
+points = {
+    'A': (1.2, 5.2),
+    'B': (2.7, 4.2),
+    'C': (2, 6),
+    'D': (5, 3),
+    'E': (4, 2)
+}
+
+# Create the scatter plot
+plt.figure(figsize=(6, 6))
+for label, (x, y) in points.items():
+    plt.scatter(x, y, s=100, alpha=0.7)
+    plt.annotate(label, (x, y), xytext=(5, 5), textcoords='offset points', 
+                fontsize=12, fontweight='bold')
+
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title('2D Scatter Plot with 5 Labeled Points')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 7)
+plt.ylim(0, 7)
+plt.show()
+```
+:::
+::: {.column width="40%"}
+
+<br><br>
+
+* Goal: Combine closest points/clusters into a new cluster
+* Use distance metric to define closeness
+* So-called bottom-up approach or _agglomerative_ clustering
+* Which 2 points are closest?
 
 :::
 ::::
 
+## Example, cont.
 
-# Hierarchical Clustering
+:::: {.columns}
+::: {.column width="60%"}
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Ellipse
+
+# Create 5 points with labels (same as before)
+points = {
+    'A': (1.2, 5.2),
+    'B': (2.7, 4.2),
+    'C': (2, 6),
+    'D': (5, 3),
+    'E': (4, 2)
+}
+
+# Create the scatter plot
+plt.figure(figsize=(6, 6))
+for label, (x, y) in points.items():
+    plt.scatter(x, y, s=100, alpha=0.7)
+    plt.annotate(label, (x, y), xytext=(5, 5), textcoords='offset points', 
+                fontsize=12, fontweight='bold')
+
+# Draw an ellipse around points A and C where A and C are the foci
+A_x, A_y = points['A']
+C_x, C_y = points['C']
+
+# Calculate the distance between foci (A and C)
+focal_distance = np.sqrt((C_x - A_x)**2 + (C_y - A_y)**2)
+
+# Calculate center of ellipse (midpoint between foci)
+center_x = (A_x + C_x) / 2
+center_y = (A_y + C_y) / 2
+
+# Calculate the angle of the major axis
+angle = np.degrees(np.arctan2(C_y - A_y, C_x - A_x))
+
+# Set semi-major axis (a) and semi-minor axis (b)
+# For an ellipse: c = sqrt(a^2 - b^2) where c is half the focal distance
+# We'll set a = focal_distance/2 + padding, then calculate b
+a = focal_distance/2 + 0.4  # semi-major axis with padding
+c = focal_distance/2  # half the focal distance
+b = np.sqrt(a**2 - c**2)  # semi-minor axis
+
+# Create and add the ellipse
+ellipse = Ellipse((center_x, center_y), 2*a, 2*b, angle=angle,
+                  facecolor='none', edgecolor='red', linewidth=2, linestyle='--')
+plt.gca().add_patch(ellipse)
+
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title('2D Scatter Plot - First Cluster (A & C)')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 7)
+plt.ylim(0, 7)
+plt.show()
+```
+
+:::
+::: {.column width="40%"}
+
+<br><br>
+
+* Now we want to combine either the next closest pair of points or the point closest to a cluster
+* How do we measure closeness of points to clusters?
+* Or clusters to clusters?
+:::
+::::
+
+## Example, cont. (Part 2)
+
+:::: {.columns}
+::: {.column width="60%"}
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Ellipse
+
+# Create 5 points with labels (same as before)
+points = {
+    'A': (1.2, 5.2),
+    'B': (2.7, 4.2),
+    'C': (2, 6),
+    'D': (5, 3),
+    'E': (4, 2)
+}
+
+# Create the scatter plot
+plt.figure(figsize=(6, 6))
+for label, (x, y) in points.items():
+    plt.scatter(x, y, s=100, alpha=0.7)
+    plt.annotate(label, (x, y), xytext=(5, 5), textcoords='offset points', 
+                fontsize=12, fontweight='bold')
+
+# Draw an ellipse around points A and C where A and C are the foci
+A_x, A_y = points['A']
+C_x, C_y = points['C']
+
+# Calculate the distance between foci (A and C)
+focal_distance = np.sqrt((C_x - A_x)**2 + (C_y - A_y)**2)
+
+# Calculate center of ellipse (midpoint between foci)
+center_x = (A_x + C_x) / 2
+center_y = (A_y + C_y) / 2
+
+# Calculate the angle of the major axis
+angle = np.degrees(np.arctan2(C_y - A_y, C_x - A_x))
+
+# Set semi-major axis (a) and semi-minor axis (b)
+# For an ellipse: c = sqrt(a^2 - b^2) where c is half the focal distance
+# We'll set a = focal_distance/2 + padding, then calculate b
+a = focal_distance/2 + 0.4  # semi-major axis with padding
+c = focal_distance/2  # half the focal distance
+b = np.sqrt(a**2 - c**2)  # semi-minor axis
+
+# Create and add the ellipse for A and C
+ellipse1 = Ellipse((center_x, center_y), 2*a, 2*b, angle=angle,
+                   facecolor='none', edgecolor='red', linewidth=2, linestyle='--')
+plt.gca().add_patch(ellipse1)
+
+# Draw an ellipse around points E and D where E and D are the foci
+E_x, E_y = points['E']
+D_x, D_y = points['D']
+
+# Calculate the distance between foci (E and D)
+focal_distance_ED = np.sqrt((D_x - E_x)**2 + (D_y - E_y)**2)
+
+# Calculate center of ellipse (midpoint between foci)
+center_x_ED = (E_x + D_x) / 2
+center_y_ED = (E_y + D_y) / 2
+
+# Calculate the angle of the major axis
+angle_ED = np.degrees(np.arctan2(D_y - E_y, D_x - E_x))
+
+# Set semi-major axis (a) and semi-minor axis (b)
+a_ED = focal_distance_ED/2 + 0.4  # semi-major axis with padding
+c_ED = focal_distance_ED/2  # half the focal distance
+b_ED = np.sqrt(a_ED**2 - c_ED**2)  # semi-minor axis
+
+# Create and add the ellipse for E and D
+ellipse2 = Ellipse((center_x_ED, center_y_ED), 2*a_ED, 2*b_ED, angle=angle_ED,
+                   facecolor='none', edgecolor='blue', linewidth=2, linestyle='--')
+plt.gca().add_patch(ellipse2)
+
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title('2D Scatter Plot - Two Clusters (A&C, E&D)')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 7)
+plt.ylim(0, 7)
+plt.show()
+```
+
+:::
+::: {.column width="40%"}
+
+<br><br>
+
+* Assume D and E are the next closest pair of points
+* Now which cluster is B closest to?
+
+:::
+::::
+
+## Example, cont. (Part 3)
+
+:::: {.columns}
+::: {.column width="60%"}
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Ellipse
+
+# Create 5 points with labels (same as before)
+points = {
+    'A': (1.2, 5.2),
+    'B': (2.7, 4.2),
+    'C': (2, 6),
+    'D': (5, 3),
+    'E': (4, 2)
+}
+
+# Create the scatter plot
+plt.figure(figsize=(6, 6))
+for label, (x, y) in points.items():
+    plt.scatter(x, y, s=100, alpha=0.7)
+    plt.annotate(label, (x, y), xytext=(5, 5), textcoords='offset points', 
+                fontsize=12, fontweight='bold')
+
+# Draw an ellipse around points A and C where A and C are the foci
+A_x, A_y = points['A']
+C_x, C_y = points['C']
+
+# Calculate the distance between foci (A and C)
+focal_distance = np.sqrt((C_x - A_x)**2 + (C_y - A_y)**2)
+
+# Calculate center of ellipse (midpoint between foci)
+center_x = (A_x + C_x) / 2
+center_y = (A_y + C_y) / 2
+
+# Calculate the angle of the major axis
+angle = np.degrees(np.arctan2(C_y - A_y, C_x - A_x))
+
+# Set semi-major axis (a) and semi-minor axis (b)
+# For an ellipse: c = sqrt(a^2 - b^2) where c is half the focal distance
+# We'll set a = focal_distance/2 + padding, then calculate b
+a = focal_distance/2 + 0.4  # semi-major axis with padding
+c = focal_distance/2  # half the focal distance
+b = np.sqrt(a**2 - c**2)  # semi-minor axis
+
+# Create and add the ellipse for A and C
+ellipse1 = Ellipse((center_x, center_y), 2*a, 2*b, angle=angle,
+                   facecolor='none', edgecolor='red', linewidth=2, linestyle='--')
+plt.gca().add_patch(ellipse1)
+
+# Draw an ellipse around points E and D where E and D are the foci
+E_x, E_y = points['E']
+D_x, D_y = points['D']
+
+# Calculate the distance between foci (E and D)
+focal_distance_ED = np.sqrt((D_x - E_x)**2 + (D_y - E_y)**2)
+
+# Calculate center of ellipse (midpoint between foci)
+center_x_ED = (E_x + D_x) / 2
+center_y_ED = (E_y + D_y) / 2
+
+# Calculate the angle of the major axis
+angle_ED = np.degrees(np.arctan2(D_y - E_y, D_x - E_x))
+
+# Set semi-major axis (a) and semi-minor axis (b)
+a_ED = focal_distance_ED/2 + 0.4  # semi-major axis with padding
+c_ED = focal_distance_ED/2  # half the focal distance
+b_ED = np.sqrt(a_ED**2 - c_ED**2)  # semi-minor axis
+
+# Create and add the ellipse for E and D
+ellipse2 = Ellipse((center_x_ED, center_y_ED), 2*a_ED, 2*b_ED, angle=angle_ED,
+                   facecolor='none', edgecolor='blue', linewidth=2, linestyle='--')
+plt.gca().add_patch(ellipse2)
+
+# Draw a circle around points A, B, and C
+A_x, A_y = points['A']
+B_x, B_y = points['B']
+C_x, C_y = points['C']
+
+# Calculate the center of the circle (centroid of the three points)
+center_x_ABC = (A_x + B_x + C_x) / 3
+center_y_ABC = (A_y + B_y + C_y) / 3
+
+# Calculate the radius as the maximum distance from center to any of the three points
+dist_A = np.sqrt((A_x - center_x_ABC)**2 + (A_y - center_y_ABC)**2)
+dist_B = np.sqrt((B_x - center_x_ABC)**2 + (B_y - center_y_ABC)**2)
+dist_C = np.sqrt((C_x - center_x_ABC)**2 + (C_y - center_y_ABC)**2)
+radius_ABC = max(dist_A, dist_B, dist_C) + 0.3  # Add some padding
+
+# Create and add the circle
+circle = plt.Circle((center_x_ABC, center_y_ABC), radius_ABC,
+                   facecolor='none', edgecolor='green', linewidth=2, linestyle='--')
+plt.gca().add_patch(circle)
+
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title('2D Scatter Plot - Three Clusters')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 7)
+plt.ylim(0, 7)
+plt.show()
+```
+
+:::
+::: {.column width="40%"}
+
+<br><br>
+
+* We'll talk about measuring distances between clusters shortly
+* But let's just say that B is closest to the cluster A, C, E and forms a new cluster
+* and then finally...
+
+:::
+::::
+
+## Example, cont. (Part 4)
+
+:::: {.columns}
+::: {.column width="60%"}
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Ellipse
+
+# Create 5 points with labels (same as before)
+points = {
+    'A': (1.2, 5.2),
+    'B': (2.7, 4.2),
+    'C': (2, 6),
+    'D': (5, 3),
+    'E': (4, 2)
+}
+
+# Create the scatter plot
+plt.figure(figsize=(6, 6))
+for label, (x, y) in points.items():
+    plt.scatter(x, y, s=100, alpha=0.7)
+    plt.annotate(label, (x, y), xytext=(5, 5), textcoords='offset points', 
+                fontsize=12, fontweight='bold')
+
+# Draw an ellipse around points A and C where A and C are the foci
+A_x, A_y = points['A']
+C_x, C_y = points['C']
+
+# Calculate the distance between foci (A and C)
+focal_distance = np.sqrt((C_x - A_x)**2 + (C_y - A_y)**2)
+
+# Calculate center of ellipse (midpoint between foci)
+center_x = (A_x + C_x) / 2
+center_y = (A_y + C_y) / 2
+
+# Calculate the angle of the major axis
+angle = np.degrees(np.arctan2(C_y - A_y, C_x - A_x))
+
+# Set semi-major axis (a) and semi-minor axis (b)
+# For an ellipse: c = sqrt(a^2 - b^2) where c is half the focal distance
+# We'll set a = focal_distance/2 + padding, then calculate b
+a = focal_distance/2 + 0.4  # semi-major axis with padding
+c = focal_distance/2  # half the focal distance
+b = np.sqrt(a**2 - c**2)  # semi-minor axis
+
+# Create and add the ellipse for A and C
+ellipse1 = Ellipse((center_x, center_y), 2*a, 2*b, angle=angle,
+                   facecolor='none', edgecolor='red', linewidth=2, linestyle='--')
+plt.gca().add_patch(ellipse1)
+
+# Draw an ellipse around points E and D where E and D are the foci
+E_x, E_y = points['E']
+D_x, D_y = points['D']
+
+# Calculate the distance between foci (E and D)
+focal_distance_ED = np.sqrt((D_x - E_x)**2 + (D_y - E_y)**2)
+
+# Calculate center of ellipse (midpoint between foci)
+center_x_ED = (E_x + D_x) / 2
+center_y_ED = (E_y + D_y) / 2
+
+# Calculate the angle of the major axis
+angle_ED = np.degrees(np.arctan2(D_y - E_y, D_x - E_x))
+
+# Set semi-major axis (a) and semi-minor axis (b)
+a_ED = focal_distance_ED/2 + 0.4  # semi-major axis with padding
+c_ED = focal_distance_ED/2  # half the focal distance
+b_ED = np.sqrt(a_ED**2 - c_ED**2)  # semi-minor axis
+
+# Create and add the ellipse for E and D
+ellipse2 = Ellipse((center_x_ED, center_y_ED), 2*a_ED, 2*b_ED, angle=angle_ED,
+                   facecolor='none', edgecolor='blue', linewidth=2, linestyle='--')
+plt.gca().add_patch(ellipse2)
+
+# Draw a circle around points A, B, and C
+A_x, A_y = points['A']
+B_x, B_y = points['B']
+C_x, C_y = points['C']
+
+# Calculate the center of the circle (centroid of the three points)
+center_x_ABC = (A_x + B_x + C_x) / 3
+center_y_ABC = (A_y + B_y + C_y) / 3
+
+# Calculate the radius as the maximum distance from center to any of the three points
+dist_A = np.sqrt((A_x - center_x_ABC)**2 + (A_y - center_y_ABC)**2)
+dist_B = np.sqrt((B_x - center_x_ABC)**2 + (B_y - center_y_ABC)**2)
+dist_C = np.sqrt((C_x - center_x_ABC)**2 + (C_y - center_y_ABC)**2)
+radius_ABC = max(dist_A, dist_B, dist_C) + 0.3  # Add some padding
+
+# Create and add the circle
+circle = plt.Circle((center_x_ABC, center_y_ABC), radius_ABC,
+                   facecolor='none', edgecolor='green', linewidth=2, linestyle='--')
+plt.gca().add_patch(circle)
+
+# Draw an ellipse around all 5 points
+all_x = [points[label][0] for label in points.keys()]
+all_y = [points[label][1] for label in points.keys()]
+
+# Calculate center of ellipse (centroid of all points)
+center_x_all = np.mean(all_x)
+center_y_all = np.mean(all_y)
+
+
+
+
+width_all, height_all = 3.2, 7
+angle_all = 40
+
+print(width_all, height_all, angle_all, center_x_all, center_y_all)
+
+# Create and add the ellipse around all points
+ellipse_all = Ellipse((center_x_all, center_y_all), width_all, height_all, angle=angle_all,
+                     facecolor='none', edgecolor='purple', linewidth=3, linestyle='-')
+plt.gca().add_patch(ellipse_all)
+
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title('2D Scatter Plot - Final Cluster (All Points)')
+plt.grid(True, alpha=0.3)
+plt.xlim(0, 7)
+plt.ylim(0, 7)
+plt.show()
+```
+
+:::
+::: {.column width="40%"}
+
+<br><br>
+
+* We combine all points into a single cluster
+
+:::
+::::
+
+## Example: Dendrogram
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Ellipse
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import pdist
+
+# Create 5 points with labels (same as before)
+points = {
+    'A': (1.2, 5.2),
+    'B': (2.7, 4.2),
+    'C': (2, 6),
+    'D': (5, 3),
+    'E': (4, 2)
+}
+
+# Create figure with two subplots
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+
+# First subplot: Scatter plot with clusters
+for label, (x, y) in points.items():
+    ax1.scatter(x, y, s=100, alpha=0.7)
+    ax1.annotate(label, (x, y), xytext=(5, 5), textcoords='offset points', 
+                fontsize=12, fontweight='bold')
+
+# Draw an ellipse around points A and C where A and C are the foci
+A_x, A_y = points['A']
+C_x, C_y = points['C']
+
+# Calculate the distance between foci (A and C)
+focal_distance = np.sqrt((C_x - A_x)**2 + (C_y - A_y)**2)
+
+# Calculate center of ellipse (midpoint between foci)
+center_x = (A_x + C_x) / 2
+center_y = (A_y + C_y) / 2
+
+# Calculate the angle of the major axis
+angle = np.degrees(np.arctan2(C_y - A_y, C_x - A_x))
+
+# Set semi-major axis (a) and semi-minor axis (b)
+a = focal_distance/2 + 0.4  # semi-major axis with padding
+c = focal_distance/2  # half the focal distance
+b = np.sqrt(a**2 - c**2)  # semi-minor axis
+
+# Create and add the ellipse for A and C
+ellipse1 = Ellipse((center_x, center_y), 2*a, 2*b, angle=angle,
+                   facecolor='none', edgecolor='red', linewidth=2, linestyle='--')
+ax1.add_patch(ellipse1)
+
+# Draw an ellipse around points E and D where E and D are the foci
+E_x, E_y = points['E']
+D_x, D_y = points['D']
+
+# Calculate the distance between foci (E and D)
+focal_distance_ED = np.sqrt((D_x - E_x)**2 + (D_y - E_y)**2)
+
+# Calculate center of ellipse (midpoint between foci)
+center_x_ED = (E_x + D_x) / 2
+center_y_ED = (E_y + D_y) / 2
+
+# Calculate the angle of the major axis
+angle_ED = np.degrees(np.arctan2(D_y - E_y, D_x - E_x))
+
+# Set semi-major axis (a) and semi-minor axis (b)
+a_ED = focal_distance_ED/2 + 0.4  # semi-major axis with padding
+c_ED = focal_distance_ED/2  # half the focal distance
+b_ED = np.sqrt(a_ED**2 - c_ED**2)  # semi-minor axis
+
+# Create and add the ellipse for E and D
+ellipse2 = Ellipse((center_x_ED, center_y_ED), 2*a_ED, 2*b_ED, angle=angle_ED,
+                   facecolor='none', edgecolor='blue', linewidth=2, linestyle='--')
+ax1.add_patch(ellipse2)
+
+# Draw a circle around points A, B, and C
+A_x, A_y = points['A']
+B_x, B_y = points['B']
+C_x, C_y = points['C']
+
+# Calculate the center of the circle (centroid of the three points)
+center_x_ABC = (A_x + B_x + C_x) / 3
+center_y_ABC = (A_y + B_y + C_y) / 3
+
+# Calculate the radius as the maximum distance from center to any of the three points
+dist_A = np.sqrt((A_x - center_x_ABC)**2 + (A_y - center_y_ABC)**2)
+dist_B = np.sqrt((B_x - center_x_ABC)**2 + (B_y - center_y_ABC)**2)
+dist_C = np.sqrt((C_x - center_x_ABC)**2 + (C_y - center_y_ABC)**2)
+radius_ABC = max(dist_A, dist_B, dist_C) + 0.3  # Add some padding
+
+# Create and add the circle
+circle = plt.Circle((center_x_ABC, center_y_ABC), radius_ABC,
+                   facecolor='none', edgecolor='green', linewidth=2, linestyle='--')
+ax1.add_patch(circle)
+
+# Draw an ellipse around all 5 points
+all_x = [points[label][0] for label in points.keys()]
+all_y = [points[label][1] for label in points.keys()]
+
+# Calculate center of ellipse (centroid of all points)
+center_x_all = np.mean(all_x)
+center_y_all = np.mean(all_y)
+
+width_all, height_all = 3.2, 7
+angle_all = 40
+
+# Create and add the ellipse around all points
+ellipse_all = Ellipse((center_x_all, center_y_all), width_all, height_all, angle=angle_all,
+                     facecolor='none', edgecolor='purple', linewidth=3, linestyle='-')
+ax1.add_patch(ellipse_all)
+
+ax1.set_xlabel('Feature 1')
+ax1.set_ylabel('Feature 2')
+ax1.set_title('Clusters at Different Levels')
+ax1.grid(True, alpha=0.3)
+ax1.set_xlim(0, 7)
+ax1.set_ylim(0, 7)
+
+# Second subplot: Dendrogram
+# Prepare data for hierarchical clustering
+points_array = np.array(list(points.values()))
+point_labels = list(points.keys())
+
+# Calculate linkage matrix
+linkage_matrix = linkage(points_array, method='ward')
+
+# Create dendrogram
+dendrogram(linkage_matrix, labels=point_labels, ax=ax2, 
+          leaf_rotation=0, leaf_font_size=12)
+ax2.set_title('Hierarchical Clustering Dendrogram')
+ax2.set_xlabel('Points')
+ax2.set_ylabel('Distance')
+
+plt.tight_layout()
+plt.show()
+```
+
+## Example: Dendrogram Explained
+
+```{python}
+#| fig-align: center
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Ellipse
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import pdist
+
+# Create 5 points with labels (same as before)
+points = {
+    'A': (1.2, 5.2),
+    'B': (2.7, 4.2),
+    'C': (2, 6),
+    'D': (5, 3),
+    'E': (4, 2)
+}
+
+# Create figure with two subplots
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3))
+
+# First subplot: Scatter plot with clusters
+for label, (x, y) in points.items():
+    ax1.scatter(x, y, s=100, alpha=0.7)
+    ax1.annotate(label, (x, y), xytext=(5, 5), textcoords='offset points', 
+                fontsize=12, fontweight='bold')
+
+# Draw an ellipse around points A and C where A and C are the foci
+A_x, A_y = points['A']
+C_x, C_y = points['C']
+
+# Calculate the distance between foci (A and C)
+focal_distance = np.sqrt((C_x - A_x)**2 + (C_y - A_y)**2)
+
+# Calculate center of ellipse (midpoint between foci)
+center_x = (A_x + C_x) / 2
+center_y = (A_y + C_y) / 2
+
+# Calculate the angle of the major axis
+angle = np.degrees(np.arctan2(C_y - A_y, C_x - A_x))
+
+# Set semi-major axis (a) and semi-minor axis (b)
+a = focal_distance/2 + 0.4  # semi-major axis with padding
+c = focal_distance/2  # half the focal distance
+b = np.sqrt(a**2 - c**2)  # semi-minor axis
+
+# Create and add the ellipse for A and C
+ellipse1 = Ellipse((center_x, center_y), 2*a, 2*b, angle=angle,
+                   facecolor='none', edgecolor='red', linewidth=2, linestyle='--')
+ax1.add_patch(ellipse1)
+
+# Draw an ellipse around points E and D where E and D are the foci
+E_x, E_y = points['E']
+D_x, D_y = points['D']
+
+# Calculate the distance between foci (E and D)
+focal_distance_ED = np.sqrt((D_x - E_x)**2 + (D_y - E_y)**2)
+
+# Calculate center of ellipse (midpoint between foci)
+center_x_ED = (E_x + D_x) / 2
+center_y_ED = (E_y + D_y) / 2
+
+# Calculate the angle of the major axis
+angle_ED = np.degrees(np.arctan2(D_y - E_y, D_x - E_x))
+
+# Set semi-major axis (a) and semi-minor axis (b)
+a_ED = focal_distance_ED/2 + 0.4  # semi-major axis with padding
+c_ED = focal_distance_ED/2  # half the focal distance
+b_ED = np.sqrt(a_ED**2 - c_ED**2)  # semi-minor axis
+
+# Create and add the ellipse for E and D
+ellipse2 = Ellipse((center_x_ED, center_y_ED), 2*a_ED, 2*b_ED, angle=angle_ED,
+                   facecolor='none', edgecolor='blue', linewidth=2, linestyle='--')
+ax1.add_patch(ellipse2)
+
+# Draw a circle around points A, B, and C
+A_x, A_y = points['A']
+B_x, B_y = points['B']
+C_x, C_y = points['C']
+
+# Calculate the center of the circle (centroid of the three points)
+center_x_ABC = (A_x + B_x + C_x) / 3
+center_y_ABC = (A_y + B_y + C_y) / 3
+
+# Calculate the radius as the maximum distance from center to any of the three points
+dist_A = np.sqrt((A_x - center_x_ABC)**2 + (A_y - center_y_ABC)**2)
+dist_B = np.sqrt((B_x - center_x_ABC)**2 + (B_y - center_y_ABC)**2)
+dist_C = np.sqrt((C_x - center_x_ABC)**2 + (C_y - center_y_ABC)**2)
+radius_ABC = max(dist_A, dist_B, dist_C) + 0.3  # Add some padding
+
+# Create and add the circle
+circle = plt.Circle((center_x_ABC, center_y_ABC), radius_ABC,
+                   facecolor='none', edgecolor='green', linewidth=2, linestyle='--')
+ax1.add_patch(circle)
+
+# Draw an ellipse around all 5 points
+all_x = [points[label][0] for label in points.keys()]
+all_y = [points[label][1] for label in points.keys()]
+
+# Calculate center of ellipse (centroid of all points)
+center_x_all = np.mean(all_x)
+center_y_all = np.mean(all_y)
+
+width_all, height_all = 3.2, 7
+angle_all = 40
+
+# Create and add the ellipse around all points
+ellipse_all = Ellipse((center_x_all, center_y_all), width_all, height_all, angle=angle_all,
+                     facecolor='none', edgecolor='purple', linewidth=3, linestyle='-')
+ax1.add_patch(ellipse_all)
+
+ax1.set_xlabel('Feature 1')
+ax1.set_ylabel('Feature 2')
+ax1.set_title('Clusters at Different Levels')
+ax1.grid(True, alpha=0.3)
+ax1.set_xlim(0, 7)
+ax1.set_ylim(0, 7)
+
+# Second subplot: Dendrogram
+# Prepare data for hierarchical clustering
+points_array = np.array(list(points.values()))
+point_labels = list(points.keys())
+
+# Calculate linkage matrix
+linkage_matrix = linkage(points_array, method='ward')
+
+# Create dendrogram
+dendrogram(linkage_matrix, labels=point_labels, ax=ax2, 
+          leaf_rotation=0, leaf_font_size=12)
+ax2.set_title('Hierarchical Clustering Dendrogram')
+ax2.set_xlabel('Points')
+ax2.set_ylabel('Distance')
+
+plt.tight_layout()
+plt.show()
+```
+
+::: {.incremental}
+* In the dendrogram, the vertical axis is the distance between the clusters
+* The horizontal axis is the points
+* The clusters are merged from the bottom up
+:::
+
+## Example: Dendrogram cont.
+
+```{python}
+#| fig-align: center
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Ellipse
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import pdist
+
+# Create 5 points with labels (same as before)
+points = {
+    'A': (1.2, 5.2),
+    'B': (2.7, 4.2),
+    'C': (2, 6),
+    'D': (5, 3),
+    'E': (4, 2)
+}
+
+# Create figure with two subplots
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3))
+
+# First subplot: Scatter plot with clusters
+for label, (x, y) in points.items():
+    ax1.scatter(x, y, s=100, alpha=0.7)
+    ax1.annotate(label, (x, y), xytext=(5, 5), textcoords='offset points', 
+                fontsize=12, fontweight='bold')
+
+# Draw an ellipse around points A and C where A and C are the foci
+A_x, A_y = points['A']
+C_x, C_y = points['C']
+
+# Calculate the distance between foci (A and C)
+focal_distance = np.sqrt((C_x - A_x)**2 + (C_y - A_y)**2)
+
+# Calculate center of ellipse (midpoint between foci)
+center_x = (A_x + C_x) / 2
+center_y = (A_y + C_y) / 2
+
+# Calculate the angle of the major axis
+angle = np.degrees(np.arctan2(C_y - A_y, C_x - A_x))
+
+# Set semi-major axis (a) and semi-minor axis (b)
+a = focal_distance/2 + 0.4  # semi-major axis with padding
+c = focal_distance/2  # half the focal distance
+b = np.sqrt(a**2 - c**2)  # semi-minor axis
+
+# Create and add the ellipse for A and C
+ellipse1 = Ellipse((center_x, center_y), 2*a, 2*b, angle=angle,
+                   facecolor='none', edgecolor='red', linewidth=2, linestyle='--')
+ax1.add_patch(ellipse1)
+
+# Draw an ellipse around points E and D where E and D are the foci
+E_x, E_y = points['E']
+D_x, D_y = points['D']
+
+# Calculate the distance between foci (E and D)
+focal_distance_ED = np.sqrt((D_x - E_x)**2 + (D_y - E_y)**2)
+
+# Calculate center of ellipse (midpoint between foci)
+center_x_ED = (E_x + D_x) / 2
+center_y_ED = (E_y + D_y) / 2
+
+# Calculate the angle of the major axis
+angle_ED = np.degrees(np.arctan2(D_y - E_y, D_x - E_x))
+
+# Set semi-major axis (a) and semi-minor axis (b)
+a_ED = focal_distance_ED/2 + 0.4  # semi-major axis with padding
+c_ED = focal_distance_ED/2  # half the focal distance
+b_ED = np.sqrt(a_ED**2 - c_ED**2)  # semi-minor axis
+
+# Create and add the ellipse for E and D
+ellipse2 = Ellipse((center_x_ED, center_y_ED), 2*a_ED, 2*b_ED, angle=angle_ED,
+                   facecolor='none', edgecolor='blue', linewidth=2, linestyle='--')
+ax1.add_patch(ellipse2)
+
+# Draw a circle around points A, B, and C
+A_x, A_y = points['A']
+B_x, B_y = points['B']
+C_x, C_y = points['C']
+
+# Calculate the center of the circle (centroid of the three points)
+center_x_ABC = (A_x + B_x + C_x) / 3
+center_y_ABC = (A_y + B_y + C_y) / 3
+
+# Calculate the radius as the maximum distance from center to any of the three points
+dist_A = np.sqrt((A_x - center_x_ABC)**2 + (A_y - center_y_ABC)**2)
+dist_B = np.sqrt((B_x - center_x_ABC)**2 + (B_y - center_y_ABC)**2)
+dist_C = np.sqrt((C_x - center_x_ABC)**2 + (C_y - center_y_ABC)**2)
+radius_ABC = max(dist_A, dist_B, dist_C) + 0.3  # Add some padding
+
+# Create and add the circle
+circle = plt.Circle((center_x_ABC, center_y_ABC), radius_ABC,
+                   facecolor='none', edgecolor='green', linewidth=2, linestyle='--')
+ax1.add_patch(circle)
+
+# Draw an ellipse around all 5 points
+all_x = [points[label][0] for label in points.keys()]
+all_y = [points[label][1] for label in points.keys()]
+
+# Calculate center of ellipse (centroid of all points)
+center_x_all = np.mean(all_x)
+center_y_all = np.mean(all_y)
+
+width_all, height_all = 3.2, 7
+angle_all = 40
+
+# Create and add the ellipse around all points
+ellipse_all = Ellipse((center_x_all, center_y_all), width_all, height_all, angle=angle_all,
+                     facecolor='none', edgecolor='purple', linewidth=3, linestyle='-')
+ax1.add_patch(ellipse_all)
+
+ax1.set_xlabel('Feature 1')
+ax1.set_ylabel('Feature 2')
+ax1.set_title('Clusters at Different Levels')
+ax1.grid(True, alpha=0.3)
+ax1.set_xlim(0, 7)
+ax1.set_ylim(0, 7)
+
+# Second subplot: Dendrogram
+# Prepare data for hierarchical clustering
+points_array = np.array(list(points.values()))
+point_labels = list(points.keys())
+
+# Calculate linkage matrix
+linkage_matrix = linkage(points_array, method='ward')
+
+# Create dendrogram
+dendrogram(linkage_matrix, labels=point_labels, ax=ax2, 
+          leaf_rotation=0, leaf_font_size=12)
+ax2.set_title('Dendrogram with Splits')
+ax2.set_xlabel('Points')
+ax2.set_ylabel('Distance')
+
+# Add horizontal dashed red line at y=4 to show split level
+ax2.axhline(y=4, color='red', linestyle='--', linewidth=2, alpha=0.8)
+
+plt.tight_layout()
+plt.show()
+```
+
+* We can now split the dendrogram at a certain level to get a clustering
+
+
+
 
 ## Hierarchical Clustering
 
