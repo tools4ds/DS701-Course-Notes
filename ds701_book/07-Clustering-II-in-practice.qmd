@@ -216,9 +216,16 @@ Note that there are two forms of MDS:
   between the dissimilarities and the target coordinates through an iterative approach. 
     * $O(n^2)$ time complexity.
 
-MDS may not always work well if, for example the dissimilarities
-are not well modeled by a metric like Euclidean distance.
+> Question If non-metric is faster, why not always use it?
 
+::: {.fragment}
+**Answer:** Metric MDS is more faithful to preserving the relative distances
+between poijnts, where as non-metric MDS preserves the order but not necessarily
+faithful to the distances.
+
+In general, MDS may not always work well if, for example the dissimilarities
+are not well modeled by a metric like Euclidean distance.
+:::
 
 ## MDS Visualization Result
 
@@ -1116,8 +1123,14 @@ norm2 = math.sqrt(sum(c*c for c in counts_vec))
 l2 = [c / norm2 for c in counts_vec]
 
 print('words =', vocabulary)
-print('\nL1-normalized counts =', l1)
-print('\nL2-normalized counts =', l2)
+print('\nL1-normalized counts =', [f'{x:.2f}' for x in l1])
+print(f"Sum of L1-normalized counts = {sum(l1):.2f}")
+
+print('\nL2-normalized counts =', [f'{x:.2f}' for x in l2])
+print(f"Sum of L2-normalized counts = {sum(l2):.2f}")
+
+norm2norm = math.sqrt(sum(c*c for c in l2))
+print(f"The L2 norm of L2-normalized counts = {norm2norm:.2f}")
 ```
 
 
@@ -1223,6 +1236,8 @@ for i, doc in enumerate(docs_by_cat):
     print(f"\nDocument {i+1} (category: {categories[i]}): Top TF-IDF terms")
     for term, score in top_terms(X[i], k=10):
         print(f"  {term:20s} {score:.4f}")
+
+print(f"The shape of the TF-IDF matrix is {X.shape}")
 ```
 
 
@@ -1359,6 +1374,15 @@ legend_labels = [f'Cluster {l}' for l in unique_labels]
 plt.legend(handles, legend_labels, title='Clusters')
 plt.show()
 ```
+
+> Question? Why does it produce this toroid shape?
+
+::: {.fragment}
+**Possible Answer:** The data is high-dimensional and could be suffering from 
+curse of dimensionality where most points are nearly the same distance from
+each other.
+:::
+
 
 ## Recap and Next
 
