@@ -19,8 +19,8 @@ title: Lecture Schedule
 | Sep 23 | 07 -- Distance, Similarity Functions and Time Series  | [Distances, Time Series](./05-Distances-Timeseries.qmd)   | |
 | Sep 25 | 08 -- Clustering I: k-means | [k-means](./06-Clustering-I-kmeans.qmd) | |
 | **Week 5**  | --- | --- | --- |
-| Sep 30 | 09 -- Clusterin II: In Practice |  [Clustering in Practice](./07-Clustering-II-In-Practice.qmd)  |  |
-| Oct 2 | 10 -- Clustering III: Hierarchical |  [Hierarchical Clustering](./08-clustering-III-hierarchical.qmd)  |  |
+| Sep 30 | 09 -- Clusterin II: In Practice |  [Clustering in Practice](./07-Clustering-II-in-practice.qmd)  |  |
+| Oct 2 | 10 -- Clustering III: Hierarchical |  [Hierarchical Clustering](./08-Clustering-III-hierarchical.qmd)  |  |
 | **Week 6**  | --- | --- | --- |
 | Oct 7 | 11 -- Clustering IV: GMM and Expectation Maximization | [GMM and EM](./09-Clustering-IV-GMM-EM.qmd)  | |
 | Oct 9| 12 -- Classification I: Decision Trees and Random Forests | [Decision Trees](./14-Classification-I-Decision-Trees.qmd) |  |
