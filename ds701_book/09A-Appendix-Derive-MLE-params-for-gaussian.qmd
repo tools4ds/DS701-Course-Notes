@@ -1,0 +1,145 @@
+---
+title: "MLE for Gaussian Parameters: Complete Derivation"
+---
+
+# MLE for Gaussian Parameters: Complete Derivation
+
+In this appendix, we will derive the maximum likelihood estimates for the parameters of a Gaussian distribution.
+
+## Setup
+
+We have $n$ i.i.d. observations $x_1, x_2, \ldots, x_n$ from $\mathcal{N}(\mu, \sigma^2)$.
+
+The log-likelihood is:
+
+$$
+\ell(\mu, \sigma^2) = \sum_{i=1}^{n} \log p(x_i \mid \mu, \sigma^2)
+$$
+
+$$
+= \sum_{i=1}^{n} \left[-\frac{1}{2}\log(2\pi) - \frac{1}{2}\log(\sigma^2) - \frac{(x_i-\mu)^2}{2\sigma^2}\right]
+$$
+
+$$
+= -\frac{n}{2}\log(2\pi) - \frac{n}{2}\log(\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^{n}(x_i-\mu)^2
+$$
+
+---
+
+## Derivative with Respect to $\mu$
+
+### Taking the Partial Derivative
+
+$$\frac{\partial \ell}{\partial \mu} = \frac{\partial}{\partial \mu}\left[-\frac{n}{2}\log(2\pi) - \frac{n}{2}\log(\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^{n}(x_i-\mu)^2\right]$$
+
+The first two terms don't depend on $\mu$, so their derivatives are zero:
+
+$$\frac{\partial \ell}{\partial \mu} = -\frac{1}{2\sigma^2} \frac{\partial}{\partial \mu}\sum_{i=1}^{n}(x_i-\mu)^2$$
+
+$$= -\frac{1}{2\sigma^2} \sum_{i=1}^{n}\frac{\partial}{\partial \mu}(x_i-\mu)^2$$
+
+Using the chain rule:
+
+$$\frac{\partial}{\partial \mu}(x_i-\mu)^2 = 2(x_i-\mu) \cdot (-1) = -2(x_i-\mu)$$
+
+Therefore:
+
+$$\frac{\partial \ell}{\partial \mu} = -\frac{1}{2\sigma^2} \sum_{i=1}^{n}[-2(x_i-\mu)]$$
+
+$$= \frac{1}{\sigma^2} \sum_{i=1}^{n}(x_i-\mu)$$
+
+$$\boxed{\frac{\partial \ell}{\partial \mu} = \frac{1}{\sigma^2} \sum_{i=1}^{n}(x_i-\mu)}$$
+
+### Setting Equal to Zero
+
+$$\frac{1}{\sigma^2} \sum_{i=1}^{n}(x_i-\mu) = 0$$
+
+Since $\sigma^2 \neq 0$:
+
+$$\sum_{i=1}^{n}(x_i-\mu) = 0$$
+
+$$\sum_{i=1}^{n}x_i - n\mu = 0$$
+
+$$\boxed{\hat{\mu}_{\text{MLE}} = \frac{1}{n}\sum_{i=1}^{n}x_i = \bar{x}}$$
+
+**The MLE for the mean is simply the sample mean!**
+
+---
+
+## Derivative with Respect to $\sigma^2$
+
+### Taking the Partial Derivative
+
+Let's work with $v = \sigma^2$ for clarity:
+
+$$\ell(\mu, v) = -\frac{n}{2}\log(2\pi) - \frac{n}{2}\log(v) - \frac{1}{2v}\sum_{i=1}^{n}(x_i-\mu)^2$$
+
+$$\frac{\partial \ell}{\partial v} = \frac{\partial}{\partial v}\left[-\frac{n}{2}\log(v)\right] + \frac{\partial}{\partial v}\left[-\frac{1}{2v}\sum_{i=1}^{n}(x_i-\mu)^2\right]$$
+
+### First Term
+
+$$\frac{\partial}{\partial v}\left[-\frac{n}{2}\log(v)\right] = -\frac{n}{2} \cdot \frac{1}{v} = -\frac{n}{2v}$$
+
+### Second Term
+
+Let $S = \sum_{i=1}^{n}(x_i-\mu)^2$ (this doesn't depend on $v$):
+
+$$\frac{\partial}{\partial v}\left[-\frac{S}{2v}\right] = -\frac{S}{2} \cdot \frac{\partial}{\partial v}(v^{-1})$$
+
+$$= -\frac{S}{2} \cdot (-v^{-2}) = \frac{S}{2v^2}$$
+
+### Combining
+
+$$\frac{\partial \ell}{\partial v} = -\frac{n}{2v} + \frac{1}{2v^2}\sum_{i=1}^{n}(x_i-\mu)^2$$
+
+Switching back to $\sigma^2$:
+
+$$\boxed{\frac{\partial \ell}{\partial \sigma^2} = -\frac{n}{2\sigma^2} + \frac{1}{2\sigma^4}\sum_{i=1}^{n}(x_i-\mu)^2}$$
+
+Or equivalently:
+
+$$\frac{\partial \ell}{\partial \sigma^2} = \frac{1}{2\sigma^4}\left[\sum_{i=1}^{n}(x_i-\mu)^2 - n\sigma^2\right]$$
+
+### Setting Equal to Zero
+
+$$-\frac{n}{2\sigma^2} + \frac{1}{2\sigma^4}\sum_{i=1}^{n}(x_i-\mu)^2 = 0$$
+
+Multiply both sides by $2\sigma^4$:
+
+$$-n\sigma^2 + \sum_{i=1}^{n}(x_i-\mu)^2 = 0$$
+
+$$n\sigma^2 = \sum_{i=1}^{n}(x_i-\mu)^2$$
+
+$$\boxed{\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n}\sum_{i=1}^{n}(x_i-\mu)^2}$$
+
+### With Unknown Mean
+
+In practice, we don't know the true $\mu$, so we plug in $\hat{\mu} = \bar{x}$:
+
+$$\boxed{\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n}\sum_{i=1}^{n}(x_i-\bar{x})^2}$$
+
+**The MLE for the variance is the sample variance!**
+
+(Note: This estimator is biased. The unbiased estimator uses $n-1$ in the denominator instead of $n$, but MLE gives $n$.)
+
+---
+
+## Summary of Results
+
+### Log-Likelihood
+
+$$\ell(\mu, \sigma^2) = -\frac{n}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^{n}(x_i-\mu)^2$$
+
+### Partial Derivatives
+
+$$\boxed{\frac{\partial \ell}{\partial \mu} = \frac{1}{\sigma^2} \sum_{i=1}^{n}(x_i-\mu)}$$
+
+$$\boxed{\frac{\partial \ell}{\partial \sigma^2} = -\frac{n}{2\sigma^2} + \frac{1}{2\sigma^4}\sum_{i=1}^{n}(x_i-\mu)^2}$$
+
+### Maximum Likelihood Estimates
+
+$$\boxed{\hat{\mu}_{\text{MLE}} = \frac{1}{n}\sum_{i=1}^{n}x_i = \bar{x}}$$
+
+$$\boxed{\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n}\sum_{i=1}^{n}(x_i-\bar{x})^2}$$
+
+These are the sample mean and sample variance—exactly what intuition suggests!

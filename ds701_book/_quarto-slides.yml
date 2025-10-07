@@ -15,6 +15,8 @@ project:
     - 07-Clustering-II-in-practice.qmd
     - 08-Clustering-III-hierarchical.qmd
     - 09-Clustering-IV-GMM-EM.qmd
+    - 09A-Appendix-Derive-MLE-params-for-gaussian.qmd
+    - 09B-Appendix-Cov-Matrix-in-MV-Gaussians.qmd
     - 10-Low-Rank-and-SVD.qmd
     - 11-Dimensionality-Reduction-SVD-II.qmd
     - 12-Anomaly-Detection-SVD-III.qmd
