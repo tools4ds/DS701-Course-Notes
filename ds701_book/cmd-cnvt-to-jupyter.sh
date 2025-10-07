@@ -11,6 +11,7 @@ qmd_files=(
   "07-Clustering-II-in-practice.qmd"
   "08-Clustering-III-hierarchical.qmd"
   "09-Clustering-IV-GMM-EM.qmd"
+  "09B-Appendix-Cov-Matrix-in-MV-Gaussians.qmd"
   "13-Learning-From-Data.qmd"
   "14-Classification-I-Decision-Trees.qmd"
   "15-Classification-II-kNN.qmd"
