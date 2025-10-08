@@ -246,8 +246,11 @@ Let's look at constant (order 0), linear (order 1), and cubic (order 3) models.
 We will fit each one using the least squares criterion:
 
 ```{python}
-#| echo: false
+#| echo: true
 # y = Aw, A is design matrix 1, [1, x^T], [1, x^T, x^T^2], etc, and w-hat = (A^TA)^-1 A^Ty
+import warnings
+warnings.filterwarnings('ignore')
+
 def design_matrix(x, k):
     N = len(x)
     A = np.ones(N)
