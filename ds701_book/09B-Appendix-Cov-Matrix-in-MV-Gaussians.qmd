@@ -1,6 +1,8 @@
-# Covariance Matrix Structure in Multivariate Gaussians
+---
+title: "GMM Appendix B: Covariance Matrix Structure in Multivariate Gaussians"
+---
 
-## The Multivariate Gaussian
+## The Multivariate Gaussian^[Courtesy of Claude.ai]
 
 For a $d$-dimensional Gaussian distribution:
 
@@ -367,6 +369,8 @@ for idx, (cov_type, ax) in enumerate(zip(covariance_types, axes.ravel())):
     ax.set_title(f'{cov_type.capitalize()} Covariance', fontsize=14, fontweight='bold')
     ax.set_xlabel('Feature 1')
     ax.set_ylabel('Feature 2')
+    ax.set_xlim([-4, 6])
+    ax.set_ylim([-4, 6])
     ax.legend()
     ax.grid(True, alpha=0.3)
 

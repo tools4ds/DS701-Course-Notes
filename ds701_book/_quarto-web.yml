@@ -20,6 +20,8 @@ project:
     - 09-Clustering-IV-GMM-EM.qmd
     - 09A-Appendix-Derive-MLE-params-for-gaussian.qmd
     - 09B-Appendix-Cov-Matrix-in-MV-Gaussians.qmd
+    - 09C-Appendix-complete-data-likelihood.qmd
+    - 09D-Appendix-Derive-the-E-step.qmd
     - 13-Learning-From-Data.qmd
     - 14-Classification-I-Decision-Trees.qmd
     - 15-Classification-II-kNN.qmd
@@ -77,6 +79,8 @@ website:
         - 09-Clustering-IV-GMM-EM.qmd
         - 09A-Appendix-Derive-MLE-params-for-gaussian.qmd
         - 09B-Appendix-Cov-Matrix-in-MV-Gaussians.qmd
+        - 09C-Appendix-complete-data-likelihood.qmd
+        - 09D-Appendix-Derive-the-E-step.qmd
     - section: "Classification"
       contents:
         - 13-Learning-From-Data.qmd

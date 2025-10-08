@@ -145,8 +145,8 @@ Thus, it is a __conditional__ probability:
 
 $$
 \begin{align*}
-P(C_1 \,|\, x_1) &= 0.3, \\
-P(C_2 \,|\, x_1) &= 0.7.
+P(C_1 \,|\, x_1 = 25) &= 0.3, \\
+P(C_2 \,|\, x_1 = 25) &= 0.7.
 \end{align*}
 $$
 
@@ -250,6 +250,7 @@ of observing the given data $x$ as a function of the parameters $\boldsymbol{\th
 
 The primary purpose of the likelihood function is to estimate the parameters that make the observed data $x$ most probable.
 
+:::: {.fragment}
 The likelihood function for a set of samples $x_{n}~\text{for}~n=1, \ldots, N$ drawn from an independent and identically distributed (i.i.d.) Gaussian distribution is
 
 $$
@@ -257,6 +258,8 @@ L(\mu, \sigma^{2}, x_1, \ldots, x_n) \
 = \prod_{n=1}^{N}\mathcal{N}(x_n\vert \mu, \sigma^{2}) \
 = \prod_{n=1}^{N}\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{(x_n-\mu)^{2}}{2\sigma^2}}.
 $$
+
+::::
 
 ## Maximizing the Likelihood
 
@@ -359,6 +362,8 @@ $$
 $$
 
 The full derivation of these results is provided [here](09A-Appendix-Derive-MLE-params-for-gaussian.qmd).
+
+> Tip: Try deriving these results yourself!
 
 ## Summary of MLE
 
@@ -508,7 +513,7 @@ If we knew which cluster generated each point, finding the parameters of the MLE
 
 - $\mu_k$ = mean of points in cluster $k$
 - $\Sigma_k$ = covariance of points in cluster $k$
-- $\pi_k$ = fraction of points in cluster $k$
+- $\pi_k$ = fraction of the total points in cluster $k$
 
 But we don't know the cluster assignments! 
 
@@ -546,11 +551,19 @@ $$
 
 This is much easier to work with because the log operates on individual Gaussian densities rather than on a sum of densities.
 
+See [here](09C-Appendix-complete-data-likelihood.qmd) for a detailed derivation.
+
+> Tip: Try deriving this yourself!
+
 ## Why EM Works for GMMs
 - **E-Step**: Since we don't know $z_i$, we compute the expected value of the indicator $\mathbb{1}(z_i = k)$, which is the posterior probability $\gamma_{ik} = p(z_i = k \mid x_i, \theta^{(t)})$, where $\theta^{(t)}$ is the parameter vector at iteration $t$.
 - **M-Step**: With these soft assignments, maximizing the expected complete log-likelihood yields closed-form updates that look like weighted versions of the standard MLE formulas
 
 This elegant approach transforms an intractable optimization problem into a simple iterative procedure with intuitive updates at each step.
+
+See [here](09D-Appendix-Derive-the-E-step.qmd) for a detailed derivation.
+
+> Tip: Try deriving this yourself!
 
 # EM Algorithm for Gaussian Mixture Models
 
@@ -599,7 +612,7 @@ $$\pi_k = \frac{\sum_{i=1}^{n} \gamma_{ik}}{n}$$
 ## Key Intuition
 - **E-step**: Given current cluster parameters, probabilistically assign points to clusters
 - **M-step**: Given these soft assignments, update cluster parameters as if they were the true assignments
-- This chicken-and-egg problem is resolved through iteration
+- This 🐓 and 🥚 problem is resolved through iteration
 
 
 <!--
@@ -659,12 +672,12 @@ If this is feeling a bit abstract, let's see how this applies to the initial exa
 
 We have 
 
-* our single data point $x=25$, and 
-* we have 2 Gaussians representing our clusters, 
+* Our single data point $x=25$, and 
+* We have 2 Gaussians representing our clusters, 
     * $C_1$ with parameters $\mu_1 = 37, \sigma_1^{2}=14$ and 
     * $C_2$ with parameters $\mu_2 = 45, \sigma_2^{2}=11$, 
 
-our latent variables are the probabilities that we classify someone as either
+Our latent variables are the probabilities that we classify someone as either
 above or below an income threshold, i.e., 
 $$
 \gamma_1 = P(z = 1) = P(\text{above income threshold})
@@ -752,6 +765,12 @@ plt.show()
 $$
 P(\text{above}\,|\,\text{age 25}) = \frac{\text{red}}{\text{red} \cdot P(\text{above}) + \text{black} \cdot P(\text{below})} \cdot P(\text{above}).
 $$
+
+Where:
+
+* "red" = $P(\text{age 25} | \text{above})$ and "black" = $P(\text{age 25} | \text{below})$, and
+* $P(\text{above})$ and $P(\text{below})$ are the prior probabilities (mixing weights) that must sum to 1: $P(\text{above}) + P(\text{below}) = 1$, 
+    * e.g. 0.5 in this example since we split the 20K points equally.
 
 <!--
 ## GMM Likelihood
