@@ -1,10 +1,8 @@
 ---
-title: "MLE for Gaussian Parameters: Complete Derivation"
+title: "GMM Appendix A: MLE for Gaussian Parameters: Complete Derivation"
 ---
 
-# MLE for Gaussian Parameters: Complete Derivation
-
-In this appendix, we will derive the maximum likelihood estimates for the parameters of a Gaussian distribution.
+In this appendix, we will derive the maximum likelihood estimates for the parameters of a Gaussian distribution.^[Courtesy of Claude.ai]
 
 ## Setup
 
