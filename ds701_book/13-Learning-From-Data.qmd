@@ -221,7 +221,7 @@ $$
 
 The $w_i$s are the __parameters__ of the model.
 
-* Note that this function $y(x, \mathbf{w})$ is a nonlinear function in $x$ ... but it is __linear__ in $\mathbf{w}$.  That is, all the $w_i$s appear only raised to the first power.   
+* Note that this function $f(x, \mathbf{w})$ is a nonlinear function in $x$ ... but it is __linear__ in $\mathbf{w}$.  That is, all the $w_i$s appear only raised to the first power.   
 
 * This model is linear in its parameters -- it is called a __linear model.__
 
