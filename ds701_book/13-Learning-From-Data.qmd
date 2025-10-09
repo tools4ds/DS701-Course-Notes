@@ -196,47 +196,54 @@ $$
 
 * and the Gaussian random addition does not depend on $x$ so we cannot hope to predict it.
 
----
+## Model Fitting
 
-OK, let's learn from this data.
+* We will consider a simple approach based on curve fitting.
 
-We will consider a simple approach based on curve fitting.
+* The class of models we will consider are polynomials.   
 
-The class of models we will consider are polynomials.   They are of the form:
+They are of the form:
 
 $$
-y(x, \mathbf{w}) = w_0 + w_1 x + w_2 x^2 + \dots + w_k x^k = \sum_{j = 0}^k w_jx^j 
+f(x, \mathbf{w}) = w_0 + w_1 x + w_2 x^2 + \dots + w_k x^k = \sum_{j = 0}^k w_jx^j 
 $$
 
 where $k$ is the _order_ of the polynomial.
 
 If we are given some $k$, then what we want to learn are the $w_i$s, that is, $\mathbf{w}$.  
 
-The $w_i$s are the __parameters__ of the model.
-
-Note that this function $y(x, \mathbf{w})$ is a nonlinear function in $x$ ... but it is __linear__ in $\mathbf{w}$.  That is, all the $w_i$s appear only raised to the first power.   
-
-This model is linear in its parameters -- it is called a __linear model.__
-
-Linear models are particularly easy to fit to data.
-
-## Model Fitting
-
-How will we fit our model, that is, learn the best parameters $\mathbf{w}$?
-
-We will use an objective function to guide our search through the space of model parameters.
-
-The objective function we will use is called the __least squares criterion__:
+## The Polynomial Model
 
 $$
-E(\mathbf{w}) = \sum_{n=1}^N [y(x_n, \mathbf{w}) - y_n]^2 
+f(x, \mathbf{w}) = w_0 + w_1 x + w_2 x^2 + \dots + w_k x^k = \sum_{j = 0}^k w_jx^j 
+$$
+
+
+The $w_i$s are the __parameters__ of the model.
+
+* Note that this function $y(x, \mathbf{w})$ is a nonlinear function in $x$ ... but it is __linear__ in $\mathbf{w}$.  That is, all the $w_i$s appear only raised to the first power.   
+
+* This model is linear in its parameters -- it is called a __linear model.__
+
+* Linear models are particularly easy to fit to data.
+
+## Least Squares Criterion
+
+* How will we fit our model, that is, learn the best parameters $\mathbf{w}$?
+
+* We will use an objective function to guide our search through the space of model parameters.
+
+* The objective function we will use is called the __least squares criterion__:
+
+$$
+E(\mathbf{w}) = \sum_{n=1}^N [f(x_n, \mathbf{w}) - y_n]^2 
 $$
 
 This is a nonnegative function which is zero if the polynomial passes through every point exactly.
 
----
+## Least Squares Criterion, cont.
 
-We often write $\hat{y}_n$ for $y(x_n, \mathbf{w})$.
+We often write $\hat{y}_n$ for $f(x_n, \mathbf{w})$.
 
 Then:
 
@@ -244,28 +251,30 @@ $$
 E(\mathbf{w}) = \Vert \hat{\mathbf{y}} - \mathbf{y} \Vert^2. 
 $$
 
-In other words, the error function $E(\cdot)$ measures the distance or dissimilarity between the data and the predictions.
+* In other words, the error function $E(\cdot)$ measures the distance or dissimilarity between the data and the predictions.
 
-Finding a $\mathbf{w}$ that minimizes $E(\mathbf{w})$ is a least-squares problem, and we can solve it in closed form (details later in the course).
+* Finding a $\mathbf{w}$ that minimizes $E(\mathbf{w})$ is a least-squares problem, and we can solve it in closed form (details later in the course).
 
-The resulting solution $\mathbf{w}^*$ is the set of parameters that __minimizes the error on the training data.__
+* The resulting solution $\mathbf{w}^*$ is the set of parameters that __minimizes the error on the training data.__
 
 ## Model Selection
 
 So we are done, correct?
 
-Wait ... what about choosing $k$, the order of the polynomial?
+* Wait ... what about choosing $k$, the order of the polynomial?
 
-The problem of choosing $k$ is called __model selection.__
+* The problem of choosing $k$ is called __model selection.__
 
-That is, a polynomial of order 3 (a cubic) is a __different model__ from a polynomial of order 2 (a quadratic).
+* That is, a polynomial of order 3 (a cubic) is a __different model__ from a polynomial of order 2 (a quadratic).
+
+## Model Selection, cont.
 
 Let's look at constant (order 0), linear (order 1), and cubic (order 3) models.
 
 We will fit each one using the least squares criterion:
 
 ```{python}
-#| echo: true
+#| echo: false
 # y = Aw, A is design matrix 1, [1, x^T], [1, x^T, x^T^2], etc, and w-hat = (A^TA)^-1 A^Ty
 import warnings
 warnings.filterwarnings('ignore')
@@ -289,7 +298,7 @@ w_hat_3 = fit_poly(x, y, 3)
 
 ```{python}
 #| echo: false
-fig, axs = plt.subplots(1, 3, sharey = True, figsize = (12, 5))
+fig, axs = plt.subplots(1, 3, sharey = True, figsize = (10, 3.5))
 #
 cy = 1000 * [w_hat_0]
 pred_y = N * [w_hat_0]
@@ -323,20 +332,18 @@ So it looks like a third-order polynomial ($k$ = 3) is a good fit!
 
 How do we know it's good?   Well, the training error $E(\mathbf{w})$ is small.
 
----
-
-But ... can we make the training error __smaller__?
+## Make training error smaller?
 
 Yes, we can, if we increase the order of the polynomial.
 
-In fact, we can reduce the error to zero!
-
-By setting $k = 9$, we get the following polynomial fit to the data:
+We can reduce the error to zero by setting $k = 9$, we get the following polynomial fit to the data:
 
 ```{python}
 #| echo: false
+#| fig-align: center
 w_hat_9 = fit_poly(x, y, 9)
 cy = design_matrix(cx, 9) @ w_hat_9
+plt.figure(figsize = (5, 3))
 plt.plot(cx, cy, lw = 2, label = r'$k$ = 9')
 plt.plot(x, y, 'ro', markersize = 8, fillstyle = 'none')
 plt.xlabel('x', size = 16)
@@ -346,29 +353,52 @@ plt.title(r'$k$ = 9' + '\n' + r'$E(\mathbf{w})$ =' + ' {:0.2f}'.format(0));
 
 So ... is the 9th order polynomial a "better" model for this dataset?
 
----
+## Absolutely not!
 
-__Absolutely not!__
+**Why?**
 
-Why?
+* Informally, the model is very "wiggly".  It seems unlikely that the real data generation process is governed by this curve.
 
-Informally, the model is very "wiggly".  It seems unlikely that the real data generation process is governed by this curve.
+* In other words, we don't expect that, if we had __more__ data from the same source, that this model would do a good job of fitting the additional data.
 
-In other words, we don't expect that, if we had __more__ data from the same source, that this model would do a good job of fitting the additional data.
+* We want the model to do a good job of predicting on __future__ data.  
 
-We want the model to do a good job of predicting on __future__ data.  This is called
-the model's __generalization__ ability.   
+* This is called the model's __generalization__ ability.   
 
 The 9th degree polynomial would seem to have poor generalization ability.
 
----
+## Generalization Error
 
-Let's assess generalization error.   For each polynomial (value of $k$) we will use new data, called __test__ data.  This is data that was __not__ used to train the model, but comes from the same source.
+* Let's assess generalization error.   
 
-In our case, we know how the data is generated -- $\sin(2\pi x)$ plus noise -- so we can easily generate more.
+* For each polynomial (value of $k$) we will use new data, called __test__ data -- not part of the training set.
+
+* In our case, we know how the data is generated -- $\sin(2\pi x)$ plus noise -- so we can easily generate more.
+
+
+## Generalization Error, cont.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+* Notice that as we increase the order of the polynomial, the _training error_ always declines.
+
+* Eventually, the training error reaches zero.
+
+* However, the _test error_ does not -- it reaches its smallest value at $k = 3$, a cubic polynomial.
+
+* The phenomenon in which _training error_ declines, but _testing error_ does not, is called __overfitting.__
+
+* In a sense we are fitting the training data "too well".
+
+:::
+
+::: {.column width="50%"}
 
 ```{python}
 #| echo: false
+#| fig-align: center
 test_y = np.sin(2 * np.pi * x) + default_rng(8).normal(size = N, scale = 0.20)
 max_k = N
 train_err = [np.linalg.norm(y - N * [w_hat_0])]
@@ -378,24 +408,18 @@ for k in range(1, max_k):
     pred_y = design_matrix(x, k) @ w_hat
     train_err.append(np.linalg.norm(y - pred_y))
     test_err.append(np.linalg.norm(test_y - pred_y))
+plt.figure(figsize = (6, 4))
 plt.plot(range(max_k), test_err, 'ro-', label = 'Testing Error')
 plt.plot(range(max_k), train_err, 'bo-', label = 'Training Error')
 plt.xlabel(r'$k$', size = 16)
 plt.ylabel(r'$E(\mathbf{w}^*)$')
 plt.legend(loc = 'best');
 ```
+:::
 
-Notice that as we increase the order of the polynomial, the training error always declines.
+::::
 
-Eventually, the training error reaches zero.
-
-However, the test error does not -- it reaches its smallest value at $k = 3$, a cubic polynomial.
-
-The phenomenon in which training error declines, but testing error does not, is called __overfitting.__
-
-In a sense we are fitting the training data "too well".
-
----
+## Overfitting
 
 There are two ways to think about overfitting:
 
@@ -408,6 +432,8 @@ These suggest techniques we may use to avoid overfitting:
 1. Increase the amount of training data.  All else being equal, more training data is always better.
 
 2. Limit the complexity of the model.  Model complexity is often controlled via __hyperparameters__.
+
+3. Use regularization -- constrain the model to avoid overfitting.
 
 ## More Training Data
 
@@ -426,7 +452,7 @@ ys = {Nval: np.sin(2 * np.pi * xs[Nval]) + default_rng(3).normal(size = Nval, sc
 
 ```{python}
 #| echo: false
-fig, axs = plt.subplots(1, 3, sharey = True, figsize = (12, 5))
+fig, axs = plt.subplots(1, 3, sharey = True, figsize = (10, 3))
 #
 cx = np.linspace(0, 1, 1000)
 for i, Nval in enumerate(Ns):
@@ -447,51 +473,51 @@ We see that with enough training data, the high order polynomial begins to captu
 
 ## Parameters and Hyperparameters
 
-Many times however, we cannot simply get more training data, or enough training data, to solve the overfitting problem. 
+* Many times however, we cannot simply get more training data, or enough training data, to solve the overfitting problem. 
 
-In that case, we need to control the complexity of the model.
+* In that case, we need to control the complexity of the model.
 
-Notice that model selection problem required us to choose a value $k$ that specifies the order of the polynomial model.
+* Notice that model selection problem required us to choose a value $k$ that specifies the order of the polynomial model.
 
-As already mentioned, the values $w_0, w_1, \dots, w_k$ are called the __parameters__ of the model.
+* As already mentioned, the values $w_0, w_1, \dots, w_k$ are called the __parameters__ of the model.
 
-In contrast, $k$ is called a __hyperparameter.__
+* In contrast, $k$ is called a __hyperparameter.__
 
-A hyperparameter is a parameter that must be set first, before the (regular) parameters can be learned.
+## Parameters and Hyperparameters, cont.
 
-Hyperparameters are often used to control model complexity.
+* A hyperparameter is a parameter that must be set first, before the (regular) parameters can be learned.
 
-Here, the hyperparameter $k$ controls the complexity (the order) of the polynomial model.
+* Hyperparameters are often used to control model complexity.
 
-So, to avoid overfitting, we need to choose the proper value for the hyperparameter $k$.
+* Here, the hyperparameter $k$ controls the complexity (the order) of the polynomial model.
 
-We do that by __holding out data.__
+* So, to avoid overfitting, we need to choose the proper value for the hyperparameter $k$.
+
+* We do that by __holding out data.__
 
 ## Holding Out Data
 
-The idea behind holding out data is simple.
+* The idea behind holding out data is simple.
 
-We want to avoid overfitting, which occurs when a model fails to generalize -- that is, when it has high error on  data that it was not trained on.
+* We want to avoid overfitting, which occurs when a model fails to generalize -- that is, when it has high error on  data that it was not trained on.
 
-So: we will hold some data aside, and __not__ use it for training the model, but instead use it for testing generalization ability.
+* So: we will hold some data aside, and __not__ use it for training the model, but instead use it for testing generalization ability.
 
-Let's assume that we have 20 data points to work with, stored in arrays `x` and `y`.
+* Let's assume that we have 20 data points to work with, stored in arrays `x` and `y`.
 
-`scikit-learn` has some functions that can be helpful. 
+* `scikit-learn` has some functions that can be helpful. 
 
----
+## Train-Test Splitting
 
 We will use `train_test_split()`:
 
 ```{python}
-#| echo: false
+#| echo: true
+#| code-fold: false
 N = 20
 x = np.linspace(0, 1, N)
 y = np.sin(2 * np.pi * x) + default_rng(2).normal(size = N, scale = 0.20)
-```
 
-```{python}
-#| echo: false
 import sklearn.model_selection as model_selection
 
 x_train, x_test, y_train, y_test = model_selection.train_test_split(
@@ -504,11 +530,12 @@ Notice that `train_test_split()` splits the data __randomly.__
 
 This will be important.
 
----
+## Train-Test Splitting, cont.
 
 ```{python}
 #| echo: false
-fig, axs = plt.subplots(1, 2, sharey = True, figsize = (8, 5))
+#| fig-align: center
+fig, axs = plt.subplots(1, 2, sharey = True, figsize = (6, 2.5))
 #
 axs[0].plot(x_train, y_train, 'ro', markersize = 8, fillstyle = 'none')
 axs[0].set_xlabel('x', size = 16)
@@ -523,13 +550,14 @@ fig.tight_layout();
 ```
 
 Our strategy will be:
+
 * For each possible value of the hyperparameter $k$:
     * randomly split the data 5 times
     * compute the mean testing and training error over the 5 random splits
 
 What are good possible values for the hyperparameter?  It can depend on the problem, and may involve trial and error.
 
----
+## Grid Search
 
 This strategy of trying all possible values of the hyperparameter is called a __grid search__.
 
@@ -581,14 +609,15 @@ df = pd.DataFrame(err, columns = ['k', 'split', 'Training Error', 'Testing Error
 df.head(10)
 ```
 
----
+## Grid Search, cont.
 
 Let's plot the mean for each value of `k` and its standard error ($\sigma/\sqrt{n}$):
 
 ```{python}
 #| echo: false
+#| fig-align: center
 df.groupby('k').mean()[['Training Error', 'Testing Error']].plot(
-    yerr = df.groupby('k').std()/np.sqrt(n_splits))
+    yerr = df.groupby('k').std()/np.sqrt(n_splits), figsize = (6, 4))
 plt.ylabel('Error')
 plt.ylim([0, 5]);
 ```
@@ -597,42 +626,54 @@ From this plot we can conclude that, for this dataset, a polynomial of degree $k
 
 ## Hold Out Strategies
 
-Deciding how much, and which, data to hold out depends on a number of factors.
+* Deciding how much, and which, data to hold out depends on a number of factors.
 
-In general we'd like to give the training stage as much data as possible to work with.
+* In general we'd like to give the training stage as much data as possible to work with.
 
-However, the more data we use for training, the less we have for testing -- which can decrease the accuracy of the testing stage.
+* However, the more data we use for training, the less we have for testing -- which can decrease the accuracy of the testing stage.
 
-Furthermore, any single partition of the data can introduce dependencies -- any class that is overrepresented in the training data will be underrepresented in the test data.
+* Furthermore, any single partition of the data can introduce dependencies -- any class that is overrepresented in the training data will be underrepresented in the test data.
 
 There are two ways to address these problems:
+
 * Random subsampling
 * Cross-validation
 
----
+## Random Subsampling
 
-In __random subsampling__ one partitions the data randomly between train and test sets.  This is what the function `train_test_split()` does.
+* In __random subsampling__ one partitions the data randomly between train and test sets.  This is what the function `train_test_split()` does.
 
-This ensures there is no dependence between the test and train sets.
+* This ensures there is no dependence between the test and train sets.
 
-One needs to perform a reasonable number of random splits - usually five at least.
+* One needs to perform a reasonable number of random splits - usually five at least.
 
----
+## Cross-Validation
 
 In __cross-validation__, the data is partitioned once, and then each partition is used as the test data once.
 
 This ensures that all the data gets equal weight in the training and in the testing.
 
-We divide the data into $k$ "folds".
+:::: {.columns}
 
-![](figs/L13-k-fold.png){width="50%"}
+::: {.column width="50%"}
 
+* We divide the data into $k$ "folds".
 
-The value of $k$ can vary up to the size of the dataset.
+* The value of $k$ can vary up to the size of the dataset.
 
-The larger $k$ we use, the more data is used for training, but the more folds must be evaluated, which increases the time required.
+* The larger $k$ we use, the more data is used for training, but the more folds must be evaluated, which increases the time required.
 
-In the extreme case where $k$ is equal to the data size, then each data item is held out by itself; this is called "leave-one-out".
+* In the extreme case where $k$ is equal to the data size, then each data item is held out by itself; this is called "leave-one-out".
+
+:::
+
+::: {.column width="50%"}
+
+![](figs/L13-k-fold.png){fig-align="center"}
+
+:::
+
+::::
 
 ## Conclusions
 
