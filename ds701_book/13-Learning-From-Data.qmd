@@ -535,25 +535,26 @@ This will be important.
 ```{python}
 #| echo: false
 #| fig-align: center
-fig, axs = plt.subplots(1, 2, sharey = True, figsize = (6, 2.5))
+fig, axs = plt.subplots(1, 2, sharey = True, figsize = (8, 2))
 #
 axs[0].plot(x_train, y_train, 'ro', markersize = 8, fillstyle = 'none')
-axs[0].set_xlabel('x', size = 16)
+#axs[0].set_xlabel('x', size = 16)
 axs[0].set_ylabel('y', size = 16)
 axs[0].set_title('Training Set', size = 16)
 #
 axs[1].plot(x_test, y_test, 'ro', markersize = 8, fillstyle = 'none')
-axs[1].set_xlabel('x', size = 16)
+#axs[1].set_xlabel('x', size = 16)
 axs[1].set_title('Testing Set', size = 16)
 #
 fig.tight_layout();
 ```
 
-Our strategy will be:
+Our strategy will be, for each possible value of the hyperparameter $k$:
 
-* For each possible value of the hyperparameter $k$:
-    * randomly split the data 5 times
-    * compute the mean testing and training error over the 5 random splits
+* randomly split the data 5 times
+* fit the model on the training data
+* test the model on the testing data
+* compute the mean testing and training error over the 5 random splits
 
 What are good possible values for the hyperparameter?  It can depend on the problem, and may involve trial and error.
 
@@ -634,10 +635,14 @@ From this plot we can conclude that, for this dataset, a polynomial of degree $k
 
 * Furthermore, any single partition of the data can introduce dependencies -- any class that is overrepresented in the training data will be underrepresented in the test data.
 
+::: {.fragment}
+
 There are two ways to address these problems:
 
 * Random subsampling
-* Cross-validation
+* $K$-Fold Cross-validation
+
+:::
 
 ## Random Subsampling
 
@@ -647,9 +652,9 @@ There are two ways to address these problems:
 
 * One needs to perform a reasonable number of random splits - usually five at least.
 
-## Cross-Validation
+## $K$-Fold Cross-Validation
 
-In __cross-validation__, the data is partitioned once, and then each partition is used as the test data once.
+In __$K$-Fold Cross-validation__, the data is partitioned _once_, and then each partition is used as the test data once.
 
 This ensures that all the data gets equal weight in the training and in the testing.
 
