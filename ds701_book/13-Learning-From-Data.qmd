@@ -20,12 +20,10 @@ from IPython.display import Image, display_html, display, Math, HTML;
 ```
 
 
-We are now beginnging to discuss how to learn from data.
-
 The idea of learning from data is one of the most important shifts in thinking
 about computing to come about in the past 50 years.
 
-Consider the commonly heard phrase:
+Not that long ago, it was commonly thought that:
 
 >"Computers can only do what we tell them to do."
 
@@ -56,19 +54,32 @@ Ada Augusta Lovelace, Commentary on "Sketch of the Analytical Engine" (1843)
 :::
 ::::
 
----
 
-However, it is clear that this viewpoint is entirely __wrong.__
+## Can Computers Create Something New?
 
-All around us today, computers solve problems that humans do not know how to solve.
+Generative Techniques:
 
-Computers routinely beat the world's experts in games of chess, go, etc.    They perform tasks such as facial recognition, speech synthesis, automatic language translation, and so forth.   
+1. ChatGPT
+2. Generative Image AI
+3. Generative Music AI
+4. Claude/Cursor/Copilot Code
 
-In each case, the programmers who wrote the programs may not themselves know how to perform these tasks.
+Is this innovation? Invention? Recombination?
+
+
+## Paradigm Shift
+
+Learning from data is a paradigm shift of _some kind_.
+
+* It is no longer purely prescriptive
+* We can build models at a scale that can solve problems humans cannot
+
+
+* Computers routinely beat the world's experts in games of chess, go, etc.
+
+In each case, the programmers who wrote the programs may not themselves know how to perform these tasks well.
 
 Instead, those programmers have written programs that __learn from data.__
-
-However, the best methods for learning from data have taken decades to develop.  
 
 So we will spend some time now talking about the general problem of learning from data.
 
@@ -76,37 +87,45 @@ So we will spend some time now talking about the general problem of learning fro
 
 The supervised learning problem in general is:
     
-You are given some example data, which we'll think of abstractly as tuples $\{(\mathbf{x}_i, y_i)\,|\,i = 1,\dots,N\}$.  
+* You are given some example data, which we'll think of abstractly as tuples $\{(\mathbf{x}_i, y_i)\,|\,i = 1,\dots,N\}$.  
+    * $\mathbf{x}_i$ are the inputs or independent variables.
+    * $y_i$ are the outputs or dependent variables, (a.k.a. labels, targets or ground truth)
 
-Your goal is to learn a rule that allows you to predict $y_j$ for some $\mathbf{x}_j$ that is not in the example data you were given.
+* Your goal is to learn a rule that allows you to predict $y_j$ for some $\mathbf{x}_j$ that is not in the example data you were given.
 
-Typically $\mathbf{x}$ is a vector.
 
-We use the term "features" to refer to the components of $\mathbf{x}$.
+* Typically $\mathbf{x}$ is a vector. Sometimes $y_i$ is too.
 
-The collection $\{(\mathbf{x}_i, y_i)\,|\,i = 1,\dots,N\}$ is called the __training data.__
+* We use the term "features" to refer to the components of $\mathbf{x}$.
 
----
+* The collection $\{(\mathbf{x}_i, y_i)\,|\,i = 1,\dots,N\}$ is called the __training data.__
 
-If $y$ is a discrete value (a label, for example) then the problem is called __classification.__
+* The collection $\{(\mathbf{x}_j, y_j)\,|\,j = 1,\dots,M\}$ is called the __test data.__
 
-For example, in image recognition, the features $\mathbf{x}$ could be a vector that represents the pixels of the image, and $y$ could be a label such as "tiger," "tree," etc.
+## Classification versus Regression
 
-If $y$ is a continuous (numeric) value, then the problem is called __regression.__ 
+* If $y$ is a discrete value (a label, for example) then the problem is called __classification.__
 
-For example, in predicting housing prices, the features $\mathbf{x}$ could be a vector containing lot size, square footage, number of bathrooms, etc., and $y$ could be the sale price of the house.
+* For example, in image recognition, the features $\mathbf{x}$ could be a vector that represents the pixels of the image, and $y$ could be a label such as "tiger," "tree," etc.
 
-In the regression case, you will usually be satisfied if your prediction is __close__ to the true $y$ (it doesn't have to be exact to be useful).
+* If $y$ is a continuous (numeric) value, then the problem is called __regression.__ 
 
----
+* For example, in predicting housing prices, the features $\mathbf{x}$ could be a vector containing lot size, square footage, number of bathrooms, etc., and $y$ could be the sale price of the house.
+
+* In the regression case, you will usually be satisfied if your prediction is __close__ to the true $y$ (it doesn't have to be exact to be useful).
+
+## Assumptions
 
 What do we have to assume to make this problem tractable?
 
 We assume two things:
 
-1. There is a set of functions ("rules") that could be used to predict $y_i$ from $\mathbf{x}_i$.   This allows us to turn the learning problem into one that searches through this set for the "right" function.   However, this set is probably __very__ large!
+1. There is a set of functions that could be used to predict $y_i$ from $\mathbf{x}_i$.
+    * This allows us to turn the learning problem into one that searches through this set for the "right" function.   
+    * However, this set is probably __very__ large!
 
-2. The rule for predicting $y_i$ from $\mathbf{x}_i$ is the same as the rule for predicting $y_j$ from the new item $\mathbf{x}_j$. Speaking probabilistically, we say that $(\mathbf{x}_i, y_i)$ and $(\mathbf{x}_j, y_j)$ are drawn from the __same distribution.__
+2. The rule for predicting $y_i$ from $\mathbf{x}_i$ is the same as the rule for predicting $y_j$ from the new item $\mathbf{x}_j$. 
+    * Speaking probabilistically, we say that $(\mathbf{x}_i, y_i)$ and $(\mathbf{x}_j, y_j)$ are drawn from the __same distribution.__
 
 ## A Toy Example
 
@@ -128,11 +147,10 @@ For each $x_i$ we have a corresponding numeric value $y_i$, and these form $\mat
 
 Here is a plot of the 10 training points:
 
-::: {layout-ncol=2}
+
 
 ```{python}
-#| echo: false
-#| fig-cap: "The training data."
+#| fig-align: center
 N = 10
 x = np.linspace(0, 1, N)
 from numpy.random import default_rng
@@ -143,10 +161,10 @@ plt.xlabel('x', size = 16)
 plt.ylabel('y', size = 16);
 ```
 
+## The Underlying Sine Curve
 
 ```{python}
-#| echo: false
-#| fig-cap: "The underlying sine curve."
+#| fig-align: center
 cx = np.linspace(0, 1, 1000)
 cy = np.sin(2 * np.pi * cx)
 plt.figure(figsize = (5, 3))
@@ -156,26 +174,27 @@ plt.xlabel('x', size = 16)
 plt.ylabel('y', size = 16);
 ```
 
-:::
 
 The way we generated these points was to take $\mathbf{x}$ as equal spaced points in the range 0 to 1,
 and for each $x_i$, we take $y_i = \sin(2\pi x_i)$ __plus__ a sample of a Gaussian random variable.
 
 Many data sets are like this!  
 
----
+## The Noise
 
-In many cases, there is some component of $y$ that depends on $x$, and some component that we treat as random, called "noise."
+* In many cases, there is some component of $y$ that depends on $x$, and some component that we treat as random, called "noise."
 
-The "noise" component is typically not __really__ random, but rather depends on features that we cannot see.
+* The "noise" component might not __really__ be random, but rather depends on features that we cannot see.
 
-(Remember, probability is useful for exactly this case.)
+* Remember, probability is useful for exactly this case.)
 
-Now for this toy example, we "happen" to know that the __correct__ rule to use for prediction is:
+* Now for this toy example, we "happen" to know that the __correct__ rule to use for prediction is:
     
-$$ y = \sin(2\pi x) $$
+$$
+y = \sin(2\pi x) 
+$$
 
-and the Gaussian random addition does not depend on $x$ so we cannot hope to predict it.
+* and the Gaussian random addition does not depend on $x$ so we cannot hope to predict it.
 
 ---
 
