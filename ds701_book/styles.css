@@ -1,1 +1,15 @@
 /* css styles */
+
+/* Table with outside borders */
+table {
+  border: 2px solid #767676;
+  border-collapse: collapse;
+}
+
+table thead {
+  border-bottom: 2px solid #333;
+}
+
+table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid #ddd;
+}
