@@ -1,8 +1,10 @@
 ---
-title: $k$-Nearest Neighbors and Model Selection
+title: $k$-Nearest Neighbors, Curse of Dimensionality, and Model Selection
 jupyter: python3
 fig-align: center
 ---
+
+## Introduction 
 
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/15-Classification-II-kNN.ipynb)
 
@@ -87,8 +89,11 @@ Like any classifier, $k$-Nearest Neighbors is trained by providing it a set of l
 
 However, at training time, the classifier does very little. It just stores away the training data.
 
----
+## Example: Training Points - 2 Classes
+
 ```{python}
+#| fig-align: center
+plt.figure(figsize=(5, 5))
 demo_y = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
 demo_X = np.array([[-3,1], [-2, 4], [-2, 2], [-1.5, 1], [-1, 3], [0, 0], [1, 1.5], [2, 0.5], [2, 3], [2, 0], [3, 1], [4, 4], [0, 1]])
 test_X = [-0.3, 0.7]
@@ -96,20 +101,15 @@ test_X = [-0.3, 0.7]
 plt.scatter(demo_X[:,0], demo_X[:,1], c=demo_y, cmap=cmap_bold, s=80)
 plt.axis('equal')
 plt.axis('off')
-plt.title('Training Points: 2 Classes')
+# plt.title('Training Points: 2 Classes')
 plt.show()
 ```
 
 --- 
 
-At test time, simply 
-
-* "look at" the $k$ points in the training set that are nearest to the test input $x$, and 
-* make a decision based on the labels on those points, e.g. majority vote
-
-By "nearest" we usually mean in Euclidean distance.
-
 ```{python}
+#| fig-align: center
+plt.figure(figsize=(5, 5))
 plt.scatter(demo_X[:, 0], demo_X[:, 1], c=demo_y, cmap=cmap_bold, s=80)
 plt.plot(test_X[0], test_X[1], 'ok', markersize=10)
 plt.annotate('Test Point', test_X, [75, 25], 
@@ -117,13 +117,20 @@ plt.annotate('Test Point', test_X, [75, 25],
              arrowprops = {'arrowstyle': '->'})
 plt.axis('equal')
 plt.axis('off')
-plt.title('Training Points: 2 Classes')
+# plt.title('Training Points: 2 Classes')
 plt.show()
 ```
+
+At test time, simply 
+
+* "look at" the $k$ points in the training set that are nearest to the test input $x$, and 
+* make a decision based on the labels on those points, e.g. majority vote
 
 ## 1-Nearest Neighbor
 
 ```{python}
+#| fig-align: center
+plt.figure(figsize=(5, 5))
 plt.scatter(demo_X[:, 0], demo_X[:, 1], c=demo_y, cmap=cmap_bold, s=80)
 plt.plot(test_X[0], test_X[1], 'ok', markersize=10)
 ax=plt.gcf().gca()
@@ -131,13 +138,14 @@ circle = mp.patches.Circle(test_X, 0.5, facecolor = 'red', alpha = 0.2)
 plt.axis('equal')
 plt.axis('off')
 ax.add_artist(circle)
-plt.title('1-Nearest-Neighbor: Classification: Red')
+# plt.title('1-Nearest-Neighbor: Classification: Red')
 plt.show()
 ```
 
 ## 2-Nearest Neighbors
 ```{python}
-
+#| fig-align: center
+plt.figure(figsize=(5, 5))
 plt.scatter(demo_X[:,0], demo_X[:,1], c=demo_y, cmap=cmap_bold, s=80)
 test_X = [-0.3, 0.7]
 plt.plot(test_X[0], test_X[1], 'ok', markersize=10)
@@ -146,15 +154,15 @@ circle = mp.patches.Circle(test_X, 0.9, facecolor = 'gray', alpha = 0.3)
 plt.axis('equal')
 plt.axis('off')
 ax.add_artist(circle)
-plt.title('2-Nearest-Neighbor')
+# plt.title('2-Nearest-Neighbor')
 plt.show()
 ```
 
 ## 3-Nearest Neighbors
 
 ```{python}
-import matplotlib.pyplot as plt
-plt.figure(figsize=(7, 6))
+#| fig-align: center
+plt.figure(figsize=(5, 5))
 ax=plt.gcf().gca()
 circle = mp.patches.Circle(test_X, 1.4, facecolor = 'blue', alpha = 0.2)
 ax.add_artist(circle)
@@ -163,7 +171,7 @@ test_X = [-0.3, 0.7]
 plt.plot(test_X[0], test_X[1], 'ok', markersize=10)
 plt.axis('equal')
 plt.axis('off')
-plt.title('3-Nearest-Neighbor: Classification: Blue')
+# plt.title('3-Nearest-Neighbor: Classification: Blue')
 plt.tight_layout()
 plt.show()
 ```
@@ -174,25 +182,34 @@ $k$-Nearest Neighbors can do either __hard__ or __soft__ classification.
 
 * As a **hard classifier**, it returns the majority vote of the labels on the $k$ Nearest Neighbors.
 
-Which may be indeterminate, as above.
+Which may be indeterminate in the case of a tie.
 
+::: {.fragment}
 * As a **soft classifier**, it returns the fraction of points in the neighborhood with label $c$.
     
 $$
 p(x = c\,|\,\mathbf{x}, k) = \frac{\text{number of points in neighborhood with label } c}{k} 
 $$
 
+:::
+
 ## Model Selection for $k$-NN
 
-Each value of $k$ results in a different "model".
+::: {.incremental}
+* Each value of $k$ results in a different "model".
 
-The complexity of the resulting model is therefore controlled by the hyperparameter $k$.
+* The complexity of the resulting model is therefore controlled by the hyperparameter $k$.
 
-We will want to select $k$ using held-out data to avoid over-fitting.
+* We will want to select $k$ using held-out data to avoid over-fitting.
+:::
 
 ## Varying $k$
 
 Consider this dataset where items fall into three classes:
+
+::: {.columns}
+::: {.column width="50%"}
+
 
 ```{python}
 import sklearn.datasets as sk_data
@@ -208,9 +225,16 @@ plt.scatter(X[:, 0], X[:, 1], c = y, cmap = cmap_bold, s = 80)
 plt.show()
 ```
 
-Let's observe how the complexity of the resulting model changes as we vary $k$.
+:::
+::: {.column width="50%"}
 
-We'll do this by plotting the __decision regions__.   These show how the method would classify each potential test point in the space.
+
+* Let's observe how the complexity of the resulting model changes as we vary $k$.
+
+* We'll do this by plotting the __decision regions__.   These show how the method would classify each potential test point in the space.
+
+:::
+:::
 
 ---
 
@@ -246,6 +270,7 @@ These are more likely to show good generalization ability.
 
 Working with a $k$-NN classifier can involve some challenges.
 
+::: {.incremental}
 1. The computational cost of classification grows linearly with the size of the training data. Note that the training step is trivial, but the classification step can be prohibitively expensive.
 
 2. Euclidean distance is the most common distance function used in $k$-NN so data scaling is important. As previously
@@ -253,18 +278,23 @@ Working with a $k$-NN classifier can involve some challenges.
    should be scaled to prevent distance measures from being dominated by a potentially small subset of features.
 
 3. The __curse of dimensionality.__ If the training data lives in a high dimensional space, Euclidean distance measures become less effective.
+:::
 
+::: {.fragment}
 This last point is subtle but important, so we will now look at the curse of dimensionality more closely.
+:::
 
 # The Curse of Dimensionality
 
 ## The Curse of Dimensionality
 
 :::: {.columns}
-::: {.column width="30%"}
-![](figs/L15-curse-frankenstein-edited.jpeg)
+::: {.column width="40%"}
+![](figs/L15-curse-frankenstein-edited.jpeg){width="300px"}
 :::
-::: {.column width="70%"}
+::: {.column width="60%"}
+
+<br><br>
 The **curse of dimensionality** is a somewhat tongue-in-cheek term for serious problems that arise when we use geometric algorithms in high dimensions.
 :::
 ::::
@@ -278,11 +308,11 @@ The phrase `curse of dimensionality' was coined by the mathematician Richard Bel
 
 ## Points are far apart in high D
 
-$k$-NN relies on there being one or more "close" points to the test point $x$.   
+* $k$-NN relies on there being one or more "close" points to the test point $x$.   
 
-In other words, we need the training data to be relatively dense, so there are "close" points everywhere.
+* In other words, we need the training data to be relatively dense, so there are "close" points everywhere.
 
-Unfortunately, the amount of space we work in grows exponentially with the dimension $d$.
+* Unfortunately, the amount of space we work in grows exponentially with the dimension $d$.
 
 ::: {.content-visible when-profile="slides"}
 ## Points are far apart in high D
@@ -290,9 +320,9 @@ Unfortunately, the amount of space we work in grows exponentially with the dimen
 
 ::: {layout-ncol="2"}
 
-![10x10 grid with $10^2$ bins](figs/L15-10x10-grid.png){width="200px"}  
+![10x10 grid with $10^2$ bins](figs/L15-10x10-grid.png){width="170px"}  
 
-![10x10x10 grid with $10^3$ bins](figs/L15-10x10x10-grid.png){width="200px"}
+![10x10x10 grid with $10^3$ bins](figs/L15-10x10x10-grid.png){width="170px"}
 
 :::
 
@@ -304,11 +334,6 @@ Unfortunately, the amount of space we work in grows exponentially with the dimen
 * So the amount of data we need to maintain a given density also grows exponentially with dimension $d$.
 :::
 
-:::: {.fragment}
-::: {.callout-important}
-Hence, points in high-dimensional spaces tend not to be close to one another at all.
-:::
-::::
 
 ::: {.content-visible when-profile="slides"}
 ## Points are far apart in high D
@@ -321,12 +346,10 @@ One very intuitive way to think about it is this.
 
 ## Distances shrink in high dimensions
 
-Let's see how distances shrink in high dimensions by way of an example.
+* Contrarily, distances shrink in high dimensions. An example:
 
-Let's generate 1000 normally distributed points in 2D, 3D, 100D, and 1000D and
+* Let's generate 1000 normally distributed points in 2D, 3D, 100D, and 1000D and
 look at the ratio of the largest to smallest distance between points.
-
-First, let's generate the data.
 
 ```{python}
 import numpy as np
@@ -356,6 +379,7 @@ x_1000D = np.random.normal(size=(n_data, n_dim))
 ##  Scatter plot of 2D data
 
 ```{python}
+#| fig-align: center
 import matplotlib.pyplot as plt
 
 # scatter plot of the 2D data
@@ -367,7 +391,8 @@ plt.show()
 ## Scatter plot of 3D data
 
 ```{python}
-# make an interactive scatter plot of the 3D data
+#| fig-align: center
+
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax.scatter(x_3D[:,0], x_3D[:,1], x_3D[:,2])
@@ -413,7 +438,7 @@ def distance_ratio(x, metric='euclidean'):
     return dist_ratio
 ```
 
-And then calculate the ratio for each dataset.
+And then calculate the Euclidean distance ratio for each dataset.
 
 ```{python}
 dist_ratio_2d = distance_ratio(x_2D)
@@ -429,9 +454,42 @@ dist_ratio_1000d = distance_ratio(x_1000D)
 print('Ratio of largest to smallest distance 1000D: %3.3f'%(dist_ratio_1000d))
 ```
 
-## Plot the closest/farthest distance ratios.
+## Manhattan distance ratio
 
 ```{python}
+dist_ratio_2d_manhattan = distance_ratio(x_2D, metric='manhattan')
+print('Ratio of largest to smallest distance 2D (Manhattan): %3.3f'%(dist_ratio_2d_manhattan))
+
+dist_ratio_3d_manhattan = distance_ratio(x_3D, metric='manhattan')
+print('Ratio of largest to smallest distance 3D (Manhattan): %3.3f'%(dist_ratio_3d_manhattan))
+
+dist_ratio_100d_manhattan = distance_ratio(x_100D, metric='manhattan')
+print('Ratio of largest to smallest distance 100D (Manhattan): %3.3f'%(dist_ratio_100d_manhattan))
+
+dist_ratio_1000d_manhattan = distance_ratio(x_1000D, metric='manhattan')
+print('Ratio of largest to smallest distance 1000D (Manhattan): %3.3f'%(dist_ratio_1000d_manhattan))
+```
+
+## Cosine distance ratio
+```{python}
+dist_ratio_2d_cosine = distance_ratio(x_2D, metric='cosine')
+print('Ratio of largest to smallest distance 2D (Cosine): %3.3f'%(dist_ratio_2d_cosine))
+
+dist_ratio_3d_cosine = distance_ratio(x_3D, metric='cosine')
+print('Ratio of largest to smallest distance 3D (Cosine): %3.3f'%(dist_ratio_3d_cosine))
+
+dist_ratio_100d_cosine = distance_ratio(x_100D, metric='cosine')
+print('Ratio of largest to smallest distance 100D (Cosine): %3.3f'%(dist_ratio_100d_cosine))
+
+dist_ratio_1000d_cosine = distance_ratio(x_1000D, metric='cosine')
+print('Ratio of largest to smallest distance 1000D (Cosine): %3.3f'%(dist_ratio_1000d_cosine))
+```
+
+## Euclidean distance ratios
+
+```{python}
+#| fig-align: center
+plt.figure(figsize=(8, 5))
 plt.scatter([2,3,100,1000], [dist_ratio_2d, dist_ratio_3d, dist_ratio_100d, dist_ratio_1000d])
 plt.plot([2,3,100,1000], [dist_ratio_2d, dist_ratio_3d, dist_ratio_100d, dist_ratio_1000d], '--', color='lightgray')
 plt.xscale('log')
@@ -442,6 +500,24 @@ plt.show()
 ```
 
 You see that the ratio of the largest to smallest distance drops dramatically as the dimension increases.
+
+## Compare distance ratios
+
+Let's compare the distance ratios for the Euclidean, Manhattan, and Cosine metrics in 100d and 1000d all in the same plot.
+
+```{python}
+#| fig-align: center
+plt.figure(figsize=(8, 5))
+plt.scatter([100, 1000], [dist_ratio_100d, dist_ratio_1000d], color='blue', s=80, label='Euclidean')
+plt.scatter([100, 1000], [dist_ratio_100d_manhattan, dist_ratio_1000d_manhattan], color='red', s=80, label='Manhattan')
+plt.scatter([100, 1000], [dist_ratio_100d_cosine, dist_ratio_1000d_cosine], color='green', s=80, label='Cosine')
+plt.xscale('log')
+plt.title('Distance ratio for different metrics')
+plt.xlabel('Dimension')
+plt.ylabel('Distance ratio')
+plt.legend()
+plt.show()
+```
 
 ## Volume of a hypersphere
 
@@ -454,7 +530,7 @@ see [An Adventure in the Nth Dimension](https://www.americanscientist.org/articl
 by Brian Hayes in _American Scientist._
 :::
 
-Now, the volume of a hypersphere in 2D and 3D is:
+Now, the volume of a _hypersphere_ in 2D and 3D is:
 
 * For $d = 2$, $\pi r^2$,  which is $\pi$ for a unit radius.
 * For $d = 3$, $\frac{4\pi}{3} r^3$, which is $\frac{4}{3} \pi$ for a unit radius.
@@ -466,7 +542,7 @@ $$
 V_d(R) = \frac{\pi^{d/2}}{\Gamma\bigl(\tfrac d2 + 1\bigr)}R^d,
 $$
 
-where $\Gamma$  is Euler's gamma function and simplifies to $\Gamma(d) = (d - 1)!$ for all positive integers $d$. 
+where $\Gamma$  is Euler's gamma function and simplifies to $\Gamma(d) = (d - 1)!$ for all positive integers $d$ and has a compact representation for postive half integers.
 
 ## Hypersphere volume in increasing dimensions
 
@@ -488,7 +564,7 @@ radius = 1.0
 vols = []
 for c_dim in range(1,21):
   vols.append(volume_of_hypersphere(radius, c_dim))
-  # print("Volume of unit radius hypersphere in %d dimensions is %3.3f"%(c_dim, volume_of_hypersphere(radius, c_dim)))
+  print(f" {c_dim}: {volume_of_hypersphere(radius, c_dim):.1f}", end=', ')
 ```
 
 ## Plot volumes of hyperspheres
@@ -619,6 +695,8 @@ K_d = \frac{\pi^{d/2}}{\Gamma\bigl(\tfrac d2 + 1\bigr)}
 $$
 
 so that the volume of a hypersphere of radius $R$ is $K_d \times R^d$.
+
+---
 
 Then for $R=1$ and $R=1-\epsilon$ we have:
 
@@ -752,37 +830,53 @@ The most basic measure of success for a classifier is __accuracy__:
 
 * **Accuracy** is the fraction of test points that are correctly classified.
 
-Accuracy is important, however it may not convey enough useful information.
-
-For example, let's say we have a dataset showing __class imbalance__, e.g., 90% of the data are the Positive class and 10% are the Negative class.
-
-For this dataset, consider a classifier that always predicts 'Positive'. 
-
-Its accuracy is 90%, but it is not an effective classifier.
+::: {.incremental}
+* Accuracy is important, however it may not convey enough useful information.
+* For example, let's say we have a dataset showing __class imbalance__, e.g., 90% of the data are the Positive class and 10% are the Negative class.
+* For this dataset, consider a classifier that always predicts 'Positive'. 
+* Its accuracy is 90%, but it is not an effective classifier.
+ 
+::: 
 
 ## Precision and Recall
 
-A better way to measure the classifier's performance is using a Confusion Matrix.
+::: {.columns}
+::: {.column width="50%"}
 
-![](figs/L15-confusion-matrix.png){width="30%" }
+![](figs/L15-confusion-matrix.png){fig-align="center"}
+
+:::
+::: {.column width="50%"}
+A better way to measure the classifier's performance is using a Confusion Matrix.
 
 Diagonal elements represent successes and off diagonals represent errors.
 
+:::
+:::
+
 Using the confusion matrix we can define some more useful measures:
 
-   * __Recall__ - defined as the fraction of actual positives correctly classified
-       * TP/(TP + FN)
-   * __Precision__ - defined as the fraction of classified positives correctly classified
-       * TP/(TP + FP)
-
+* __Recall__ - defined as the fraction of actual positives correctly classified
+    * TP/(TP + FN)
+* __Precision__ - defined as the fraction of classified positives correctly classified
+    * TP/(TP + FP)
 
 ## Precision and Recall Illustration
 
-![](figs/Precisionrecall.svg){fig-align="center"}
+::: {layout-ncol="2"}
+
+![](figs/Precisionrecall.png){width="400px"}
+
+![](figs/Precisionrecall2.png)
+
+:::
 
 <!-- By Walber - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=36926283 -->
 
 ## Evaluating $k$- Nearest Neighbors
+
+::: {.columns}
+::: {.column width="50%"}
 
 First we'll generate some synthetic data to work with.
 
@@ -791,6 +885,10 @@ X, y = datasets.make_circles(noise=.1, factor=.5, random_state=1)
 print('Shape of data: {}'.format(X.shape))
 print('Unique labels: {}'.format(np.unique(y)))
 ```
+
+:::
+::: {.column width="50%"}
+
 
 Here is what the data looks like.
 
@@ -804,6 +902,9 @@ plt.axis('equal')
 plt.show()
 ```
 
+:::
+:::
+
 ---
 
 Recall that we always want to test on data separate from our training data.
@@ -811,14 +912,13 @@ Recall that we always want to test on data separate from our training data.
 For now, we will do something very simple: take the first 50 examples for training and the rest for testing.
 
 ```{python}
+#| fig-align: center
+
 X_train = X[:50]
 y_train = y[:50]
 X_test = X[50:]
 y_test = y[50:]
-```
 
-```{python}
-#| fig-align: center
 plt.figure(figsize = (10, 4))
 plt.subplot(1, 2, 1)
 plt.scatter(X_train[:, 0], X_train[:, 1], c = y_train, s = 80)
@@ -1283,6 +1383,7 @@ plt.plot(kvals, accy[:, 0], '.-', label = 'Accuracy on Test Data')
 plt.plot(kvals, accy[:, 1], '.-', label = 'Accuracy on Training Data')
 plt.xlabel('k')
 plt.ylabel('Accuracy')
+plt.ylim(0.9, None)
 plt.xticks(kvals)
 plt.legend(loc = 'best')
 plt.show()
