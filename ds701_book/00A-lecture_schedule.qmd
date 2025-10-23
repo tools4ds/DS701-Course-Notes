@@ -29,12 +29,12 @@ title: Lecture Schedule
 | Oct 16 | 13 -- Classification I: Decision Trees and Random Forests | [Decision Trees](./14-Classification-I-Decision-Trees.qmd) |  |
 | **Week 8**  | --- | --- | --- |
 | Oct 21 | 14 -- Classification II: k-Nearest Neighbors | [k-NN](./15-Classification-II-kNN.qmd)  | |
-| Oct 23 | 15 -- SVD Low Rank Approximations | [SVD](./10-Low-Rank-and-SVD.qmd) | |
+| Oct 23 | 15 -- Linear Regression | [Linear Regression](./17-Regression-I-Linear.qmd)  | |
 | **Week 9**  | --- | --- | --- |
-| Oct 28 | 16 -- Dimensionality Reduction: PCA and t-SNE | [PCA and t-SNE](./11-Dimensionality-Reduction-SVD-II.qmd)  | |
-| Oct 30 | 17 -- Linear Regression | [Linear Regression](./17-Regression-I-Linear.qmd) |  |
+| Oct 28 | 16 -- Logistic Regression and Regularization | [Logistic Regression](./18-Regression-II-Logistic.qmd) [Regularization](./19-Regression-III-More-Linear.qmd) | |
+| Oct 30 | 17  -- SVD Low Rank Approximations | [SVD](./10-Low-Rank-and-SVD.qmd)  |  |
 | **Week 10**  | --- | --- | --- |
-| Nov 4 | 18 -- Logistic Regression and Regularization | [Logistic Regression](./18-Regression-II-Logistic.qmd)   | |
+| Nov 4 | 18 -- Dimensionality Reduction: PCA and t-SNE | [PCA and t-SNE](./11-Dimensionality-Reduction-SVD-II.qmd)  | |
 | Nov 6 | 19 -- Neural Networks: Gradient Descent & Backpropagation | [NN I](./23-NN-I-Gradient-Descent.qmd), [NN II](./24-NN-II-Backprop.qmd) | |
 | **Week 11**  | --- | --- | --- |
 | Nov 11 | 20 -- Intro to NLP | [NLP](./28-NLP.qmd) 
