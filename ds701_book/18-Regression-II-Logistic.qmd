@@ -34,23 +34,29 @@ So far we have seen linear regression:
 
 Now we will look at the following situation.
 
----
+## Estimating a Probability
 
-Imagine that you are observing a binary variable -- value 0 or 1.
+::: {.incremental}
 
-That is, these could be pass/fail, admit/reject, Democrat/Republican, etc.
+* Imagine that you are observing a binary variable -- value 0 or 1.
 
-Assume there is some __probability__ of observing a 1, and that probability is a
+* That is, these could be pass/fail, admit/reject, Democrat/Republican, etc.
+
+* Assume there is some __probability__ of observing a 1, and that probability is a
 function of certain independent variables.
 
-So the key properties of a problem that make it appropriate for logistic
+* So the key properties of a problem that make it appropriate for logistic
 regression are:
-    
-* You are trying to predict a __categorical__ variable
-* You want to estimate a __probability__ of seeing a particular value of the
-  categorical variable.
+
+    * You are trying to predict a __categorical__ variable
+    * You want to estimate a __probability__ of seeing a particular value of the
+      categorical variable.
+
+:::
 
 ## Example: Grad School Admission
+
+::: {.content-visible when-profile="web"}
 
 ::: {.callout-note}
 The following example was adapted from this 
@@ -58,6 +64,7 @@ The following example was adapted from this
 available. There is an 
 [archive of the page](https://web.archive.org/web/20161118221128/http://www.ats.ucla.edu/stat/r/dae/logit.htm)
 and an [archive of the dataset](https://web.archive.org/web/20161022051727/http://www.ats.ucla.edu/stat/data/binary.csv).
+:::
 :::
 
 Let's consider this question:
@@ -96,6 +103,11 @@ df = pd.read_csv('data/ats-admissions.csv')
 df.head(10)
 ```
 
+```{python}
+df.shape
+```
+
+
 ::: {.content-visible when-profile="slides"}
 ## Example continued
 :::
@@ -115,8 +127,11 @@ We can also plot histograms of the variables:
 
 ```{python}
 #| code-fold: true
-df.hist(figsize = (10, 7));
+df.hist(figsize = (10, 4));
 ```
+
+> Note how `df.hist()` automatically plots a histogram for each column in the
+> dataframe as a subplot.
 
 ::: {.content-visible when-profile="slides"}
 ## Example continued
@@ -124,6 +139,8 @@ df.hist(figsize = (10, 7));
 
 Let's look at how each independent variable affects admission probability by
 plotting the mean admission probability as a function of the independent variable.
+
+> Note that there's a greatly expanded [`groupby`](https://tools4ds.github.io/DS701-Course-Notes/02B-Pandas.html#understanding-pandas-dataframe.groupby) section in the Pandas refresher.
 
 We add error bars to the means to indicate the standard error of the mean.
 
@@ -140,6 +157,8 @@ import numpy as np
 # Calculate mean and standard error
 grouped = df.groupby('rank')['admit']
 means = grouped.mean()
+
+# Compute 'standard error of the mean'
 errors = grouped.std() / np.sqrt(grouped.count())
 
 # Plot with error bars
@@ -187,7 +206,7 @@ ax.set_xticklabels([f'{center:.2f}' for center in bin_centers], rotation=45);
 ## Example continued
 :::
 
-Finally, we plot admission value for each data point for each of the four ranks:
+Finally, we plot admission status versus GRE score for each data point for each of the four ranks:
 
 ```{python}
 #| code-fold: true
@@ -220,15 +239,19 @@ as a function of these independent variables.
 
 ## Logistic Regression
 
-Logistic regression is concerned with estimating a __probability.__
+::: {.incremental}
+* Logistic regression is concerned with estimating a __probability.__
 
-However, all that is available are categorical observations, which we will code as 0/1.
+* However, all that is available are categorical observations, which we will code as 0/1.
 
-That is, these could be pass/fail, admit/reject, Democrat/Republican, etc.
+* That is, these could be pass/fail, admit/reject, Democrat/Republican, etc.
 
-Now, a linear function like $\beta_0 + \beta_1 x$ cannot be used to predict
-probability directly, because the linear function takes on all values (from
--$\infty$ to +$\infty$), and probability only ranges over $[0, 1]$.
+* Now, a linear function like $\beta_0 + \beta_1 x$ cannot be used to predict
+probability directly, because 
+    * the linear function takes on all values (from -$\infty$ to +$\infty$), 
+    * and probability only ranges over $[0, 1]$.
+
+:::
 
 ## Odds and Log-Odds
 
@@ -290,8 +313,10 @@ $$
 p(x) = P(y=1\mid x) = \frac{e^{\beta_0+\beta_1 x}}{1+e^{\beta_0+\beta_1 x}}.
 $$
 
-This is a sigmoid function; when $\beta_1 > 0$, $x\rightarrow \infty$, then
-$p(x)\rightarrow 1$ and when $x\rightarrow -\infty$, then $p(x)\rightarrow 0$.
+This is a **sigmoid function**; when $\beta_1 > 0$, 
+
+* as $x\rightarrow \infty$, then $p(x)\rightarrow 1$ and 
+* as $x\rightarrow -\infty$, then $p(x)\rightarrow 0$.
 
 ::: {.content-visible when-profile="slides"}
 ## Odds and Log-Odds
@@ -327,8 +352,28 @@ The value of -$\beta_0$/$\beta_1$ shows the value of $x$ for which $p(x)=0.5$
 :::
 
 Another interpretation of $\beta_0$ is that it gives the __base rate__ -- the
-unconditional probability of a 1.   That is, if you knew nothing about a
+unconditional probability of a 1.   
+
+That is, if you knew nothing about a
 particular data item, then $p(x) = 1/(1+e^{-\beta_0})$.
+
+```{python}
+#| fig-align: center
+
+# plot the base rate as a function of beta_0
+beta_0_values = np.linspace(-10, 10, 100)
+base_rate = 1 / (1 + np.exp(-beta_0_values))
+plt.figure(figsize=(6, 4))
+plt.plot(beta_0_values, base_rate)
+plt.xlabel('beta_0')
+plt.ylabel('Base Rate')
+plt.title('Base Rate as a function of beta_0')
+plt.show()
+```
+
+::: {.content-visible when-profile="slides"}
+## Odds and Log-Odds
+:::
 
 The function $f(x) = \log (x/(1-x))$ is called the __logit__ function.
 
@@ -492,14 +537,15 @@ Let's see how well the model fits the data.
 We have three independent variables, so in each case we'll use average values
 for the two that we aren't evaluating.
 
-GPA:
+GPA (GRE = 600, Rank = 2.5):
 
 ```{python}
 #| code-fold: true
+#| fig-align: center
 bins = np.linspace(df.gpa.min(), df.gpa.max(), 10)
 groups = df.groupby(np.digitize(df.gpa, bins))
 prob = [result.predict([600, b, 2.5, 1.0]) for b in bins]
-ax = plt.figure(figsize = (7, 5)).add_subplot()
+ax = plt.figure(figsize = (7, 4)).add_subplot()
 ax.plot(bins, prob)
 ax.plot(bins,groups.admit.mean(),'o')
 ax.tick_params(labelsize=12)
@@ -512,12 +558,13 @@ ax.set_title('Marginal Effect of GPA', fontsize = 16);
 ## Logistic Regression in Practice
 :::
 
-GRE Score:
+GRE Score (GPA = 3.4, Rank = 2.5):
 
 ```{python}
 #| code-fold: true
+#| fig-align: center
 prob = [result.predict([b, 3.4, 2.5, 1.0]) for b in sorted(df.gre.unique())]
-ax = plt.figure(figsize = (7, 5)).add_subplot()
+ax = plt.figure(figsize = (7, 4)).add_subplot()
 ax.plot(sorted(df.gre.unique()), prob)
 ax.plot(df.groupby('gre').mean()['admit'],'o')
 ax.tick_params(labelsize=12)
@@ -530,12 +577,13 @@ ax.set_title('Marginal Effect of GRE', fontsize = 16);
 ## Logistic Regression in Practice
 :::
 
-Institution Rank:
+Institution Rank (GRE = 600, GPA = 3.4):
 
 ```{python}
 #| code-fold: true
+#| fig-align: center
 prob = [result.predict([600, 3.4, b, 1.0]) for b in range(1,5)]
-ax = plt.figure(figsize = (7, 5)).add_subplot()
+ax = plt.figure(figsize = (7, 4)).add_subplot()
 ax.plot(range(1,5), prob)
 ax.plot(df.groupby('rank').mean()['admit'],'o')
 ax.tick_params(labelsize=12)
@@ -561,10 +609,6 @@ For this reason, logistic regression could be considered a classification method
 ::: {.content-visible when-profile="slides"}
 ## Logistic Regression in Perspective
 :::
-
-In fact, that is what we did with Naive Bayes -- we used it to estimate something
-like a probability, and then chose the class with the maximum value to create a
-classifier.
 
 Let's use our logistic regression as a classifier.
 
@@ -698,6 +742,8 @@ f1vals = [evalThresh(df, tval)[0] for tval in tvals]
 
 ```{python}
 #| code-fold: true
+#| fig-align: center
+plt.figure(figsize=(6, 4))
 plt.plot(tvals,f1vals)
 plt.ylabel('F1 Score')
 plt.xlabel('Threshold for Classification')
@@ -713,9 +759,13 @@ F1, Prec, Rec = evalThresh(df, 0.3)
 print('Best Precision: {:0.3f}, Best Recall: {:0.3f}'.format(Prec, Rec))
 ```
 
+::: {.content-visible when-profile="web"}
+
 The example here is based on
 http://blog.yhathq.com/posts/logistic-regression-and-python.html
 where you can find additional details.
+
+:::
 
 ## Recap
 
