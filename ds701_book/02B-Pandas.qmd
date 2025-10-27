@@ -463,42 +463,328 @@ df.head()
 ```
 
 
-## Grouping
 
-A powerful DataFrame method is `groupby()`. 
+# Understanding pandas DataFrame.groupby()
 
-This is analagous to `GROUP BY` in SQL.
+## Introduction
 
-It will group the rows of a DataFrame by the values in one (or more) columns and let you iterate through each group.
+The `groupby()` function is one of the most powerful tools in pandas for data analysis. It implements the "split-apply-combine" pattern:
 
-Here we will look at the average gain among the categories of gains (negative, small, medium, and large) we defined above and stored in the column `gain`.
+1. **Split** your data into groups based on some criteria
+2. **Apply** a function to each group independently
+3. **Combine** the results back into a data structure
 
-```{python}
-gain_groups = df.groupby(by='cat_gain')
-```
+Think of it like organizing a deck of cards by suit, then counting how many cards are in each suit, then presenting those counts in a summary table.
 
----
+## Basic Concept
 
-Essentially, `gain_groups` behaves like a dictionary:
-
-* the keys are the unique values found in the `gain` column, and 
-* the values are DataFrames that contain only the rows having the corresponding unique values.
+Imagine you have a dataset of student grades:
 
 ```{python}
-for gain, gain_data in gain_groups:
-    print(gain)
-    print(gain_data[['close', 'daily_change']].head())
-    print('=============================')
-```
+import pandas as pd
 
-```{python}
-for gain, gain_data in df.groupby("cat_gain"):
-    print('The average daily change for the {} group is {}'.format(gain,
-                                                           gain_data.daily_change.mean()))
+data = {
+    'student': ['Alice', 'Bob', 'Alice', 'Bob', 'Charlie', 'Charlie'],
+    'subject': ['Math', 'Math', 'English', 'English', 'Math', 'English'],
+    'score': [85, 78, 92, 88, 95, 90]
+}
+
+df = pd.DataFrame(data)
+print(df)
 ```
 
 
-## Other Pandas Classes
+## Example 1: Simple Grouping
+
+Let's find the average score for each student:
+
+```{python}
+# Group by student and calculate mean
+result = df.groupby('student')['score'].mean()
+print(result)
+```
+
+
+**What happened?**
+
+- pandas split the data into 3 groups (one per student)
+- Applied the `mean()` function to each group's scores
+- Combined the results into a Series indexed by the student names
+
+## Example 2: Multiple Aggregations
+
+You can apply multiple functions at once:
+
+```{python}
+# Multiple aggregations
+result = df.groupby('student')['score'].agg(['mean', 'min', 'max', 'count'])
+print(result)
+```
+
+where the list in the `agg()` method is both a list of functions to apply to the column and a list of names for the columns in the resulting DataFrame.
+
+**What happened?**
+
+- pandas split the data into 3 groups (one per student)
+- Applied the `mean()`, `min()`, `max()`, and `count()` functions to each group's scores
+- Combined the results into a DataFrame indexed by the student names with the column names being the functions applied to the scores.
+
+## Example 3: Grouping by Multiple Columns
+
+What if we want to see scores grouped by both student AND subject?
+
+```{python}
+# Group by multiple columns
+result = df.groupby(['student', 'subject'])['score'].mean()
+print(result)
+```
+
+
+This creates a hierarchical index (MultiIndex) with two levels.
+
+## Example 4: Aggregating Multiple Columns
+
+Let's add more data:
+
+```{python}
+data = {
+    'student': ['Alice', 'Bob', 'Alice', 'Bob', 'Charlie', 'Charlie'],
+    'subject': ['Math', 'Math', 'English', 'English', 'Math', 'English'],
+    'score': [85, 78, 92, 88, 95, 90],
+    'hours_studied': [5, 3, 6, 4, 7, 5]
+}
+
+df = pd.DataFrame(data)
+
+# Group by student and get mean of all numeric columns
+result = df.groupby('student')[['score', 'hours_studied']].mean()
+print(result)
+```
+
+
+## Example 5: Different Aggregations for Different Columns
+
+You can apply different functions to different columns:
+
+```{python}
+# Different aggregations for different columns
+result = df.groupby('student').agg({
+    'score': ['mean', 'max'],
+    'hours_studied': 'sum'
+})
+print(result)
+```
+
+
+
+## Example 6: Using Custom Functions
+
+You can define your own aggregation functions:
+
+```{python}
+# Custom function: range (max - min)
+def score_range(x):
+    return x.max() - x.min()
+
+result = df.groupby('student')['score'].agg([
+    'mean',
+    ('range', score_range)
+])
+print(result)
+```
+
+where the argument `('range', score_range)` is a tuple with the name of the column in the resulting DataFrame and the function to apply to the column.
+
+**What happened?**
+
+- pandas split the data into 3 groups (one per student)
+- Applied the `mean()` function to the scores column
+- Applied the `score_range()` function to the scores column and named the column `range` in the resulting DataFrame
+- Combined the results into a DataFrame indexed by the student names with the column names being the functions applied to the scores.
+
+
+## Example 7: Filtering Groups
+
+You can filter out entire groups based on conditions:
+
+```{python}
+# Only keep students with average score above 85
+result = df.groupby('student').filter(lambda x: x['score'].mean() > 85)
+print(result)
+```
+
+
+
+## Example 8: Transform - Keeping Original Shape
+
+Sometimes you want to add group statistics to your original dataframe:
+
+```{python}
+# Add a column with each student's average score
+df['student_avg'] = df.groupby('student')['score'].transform('mean')
+print(df)
+```
+
+
+Notice how `transform()` returns a Series with the same length as the original DataFrame, broadcasting the group statistic to all rows in that group.
+
+## Example 9: Apply - Maximum Flexibility
+
+The `apply()` method gives you complete control and can return different shapes:
+
+```{python}
+# Use apply() to get multiple statistics per group
+def analyze_student(group):
+    return pd.Series({
+        'avg_score': group['score'].mean(),
+        'score_range': group['score'].max() - group['score'].min(),
+        'total_hours': group['hours_studied'].sum(),
+        'efficiency': group['score'].mean() / group['hours_studied'].mean()
+    })
+
+result = df.groupby('student').apply(analyze_student, include_groups=False)
+print(result)
+```
+
+
+Note: Unlike `transform()` which must return the same shape as the input, `apply()` can return aggregated results of any shape.
+
+
+## Example 10: Iterating Over Groups
+
+Sometimes you need to process each group separately:
+
+```{python}
+# Iterate over groups
+for name, group in df.groupby('student'):
+    print(f"\n{name}'s records:")
+    print(group)
+```
+
+
+
+## Common Aggregation Functions
+
+Here are the most commonly used aggregation functions:
+
+- `count()` - Number of non-null values
+- `sum()` - Sum of values
+- `mean()` - Average of values
+- `median()` - Median value
+- `min()` - Minimum value
+- `max()` - Maximum value
+- `std()` - Standard deviation
+- `var()` - Variance
+- `first()` - First value in group
+- `last()` - Last value in group
+- `size()` - Number of rows (including NaN)
+
+## Example 11: (Synthetic) Sales Data Analysis
+
+```{python}
+# Sample sales data
+sales_data = {
+    'date': pd.date_range('2024-01-01', periods=12, freq='ME'),
+    'region': ['North', 'South', 'North', 'South', 'North', 'South',
+               'North', 'South', 'North', 'South', 'North', 'South'],
+    'product': ['A', 'A', 'B', 'B', 'A', 'A', 'B', 'B', 'A', 'A', 'B', 'B'],
+    'sales': [100, 150, 200, 175, 110, 165, 210, 180, 120, 170, 220, 190],
+    'units': [10, 15, 20, 17, 11, 16, 21, 18, 12, 17, 22, 19]
+}
+
+sales_df = pd.DataFrame(sales_data)
+print(sales_df)
+
+# Comprehensive analysis by region
+analysis = sales_df.groupby('region').agg({
+    'sales': ['sum', 'mean', 'max'],
+    'units': 'sum',
+    'product': 'count'  # Count of transactions
+})
+
+print("\nAnalysis:")
+print(analysis)
+```
+
+
+## Tips and Best Practices
+
+1. **Reset Index**: After groupby operations, you often want to reset the index:
+   ```{python}
+   result = df.groupby('student')['score'].mean().reset_index()
+   print("\nResult:")
+   print(result)
+   
+   result2 = df.groupby('student')['score'].mean().reset_index()
+   print("\nResult2:")
+   print(result2)
+   ```
+
+2. **Naming Aggregations**: Give your aggregated columns meaningful names:
+   ```{python}
+   result = df.groupby('student').agg(
+       avg_score=('score', 'mean'),
+       total_hours=('hours_studied', 'sum')
+   )
+   ```
+
+3. **Performance**: For large datasets, groupby is highly optimized in pandas. It's usually faster than writing loops.
+
+4. **Missing Values**: By default, groupby excludes NaN values from groups. Use `dropna=False` to include them:
+   ```{python}
+   df.groupby('student', dropna=False)['score'].mean()
+   ```
+
+5. **Sort Results**: Control sorting with `sort=True/False`:
+   ```{python}
+   df.groupby('student', sort=False)['score'].mean()  # Preserve original order
+   ```
+
+## Visualizing Grouped Data
+
+Groupby works seamlessly with pandas plotting:
+
+```{python}
+# Create a bar chart of average scores by student
+df.groupby('student')['score'].mean().plot(kind='bar')
+```
+
+## `groupby()` Summary
+
+The `groupby()` function is essential for:
+
+- Calculating statistics by category
+- Finding patterns in subgroups
+- Data aggregation and summarization
+- Feature engineering (with transform)
+- Comparative analysis
+
+Master the split-apply-combine pattern, and you'll unlock powerful data analysis capabilities!
+
+## `groupby()` Practice Exercise
+
+Try this on your own:
+
+```{python}
+# Create sample data
+practice_data = {
+    'department': ['Sales', 'Sales', 'IT', 'IT', 'HR', 'HR', 'Sales', 'IT'],
+    'employee': ['John', 'Jane', 'Bob', 'Alice', 'Tom', 'Mary', 'Steve', 'Linda'],
+    'salary': [50000, 55000, 65000, 70000, 48000, 52000, 53000, 68000],
+    'experience': [2, 3, 5, 7, 1, 4, 3, 6]
+}
+
+practice_df = pd.DataFrame(practice_data)
+
+# Try to answer:
+# 1. What's the average salary by department?
+# 2. What's the total experience and max salary by department?
+# 3. Add a column showing each employee's salary as a percentage of their department's total?
+```
+
+
+
+# Other Pandas Classes
 
 A DataFrame is essentially an annotated 2-D array.
 
@@ -513,8 +799,7 @@ A 3-D array in Pandas is created using a
 For more information read the documentation.
 
 
-
-## In Class Activity
+# In Class Activity
 
 ### Iris Flower Analysis with Pandas
 **Duration:** 20-25 minutes | **Teams:** 3 students each
@@ -543,7 +828,7 @@ iris = sns.load_dataset('iris')
 1. Check the shape and column names
 2. Use `.head()`, `.info()`, and `.describe()` to explore the data
 
-```{python}
+```python
 
 # Replace 0 and '[]' with the correct methods on iris
 print(f"Dataset shape: {0}")
@@ -569,7 +854,7 @@ print("\nSummary Statistics:")
      - 'Medium' (petal_area 2-5) 
      - 'Large' (petal_area > 5)
 
-```{python}
+```python
 # Create petal area column
 iris['petal_area'] = ...
 
@@ -614,7 +899,7 @@ print(f"Flowers with sepal_length > 6: {len(long_sepal)} out of {len(iris)}")
    - Count flowers by species
    - Find average petal length by species
 
-```{python}
+```python
 # Count flowers by species
 species_counts = ...
 print("Flowers by species:")
@@ -688,7 +973,7 @@ plt.show()
 
 Execute all the cells, save and download the notebook and submit to Gradescope.
 
-## Recap
+# Recap
 
 In this section we got a first glimpse of the Pandas library.
 
