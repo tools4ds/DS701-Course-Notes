@@ -322,10 +322,68 @@ This is a **sigmoid function**; when $\beta_1 > 0$,
 ## Odds and Log-Odds
 :::
 
+Holding $\beta_0$ constant, we see that as $\beta_1$ increases, the logistic function becomes steeper.
+
 ```{python}
 #| code-fold: true
 alphas = [-4, -8,-12,-20]
-betas = [0.4,0.4,0.6,1]
+alphas = [-8, -8, -8, -8]
+betas = [0.2,0.4,0.6,1]
+x = np.arange(40)
+fig = plt.figure(figsize=(8, 6)) 
+ax = plt.subplot(111)
+
+for i in range(len(alphas)):
+    a = alphas[i]
+    b = betas[i]
+    y = np.exp(a+b*x)/(1+np.exp(a+b*x))
+#     plt.plot(x,y,label=r"$\frac{e^{%d + %3.1fx}}{1+e^{%d + %3.1fx}}\;\beta_0=%d, \beta_1=%3.1f$" % (a,b,a,b,a,b))
+    ax.plot(x,y,label=r"$\beta_0=%d,$    $\beta_1=%3.1f$" % (a,b))
+ax.tick_params(labelsize=12)
+ax.set_xlabel('x', fontsize = 14)
+ax.set_ylabel('$p(x)$', fontsize = 14)
+ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 16})
+ax.set_title('Logistic Functions', fontsize = 16);
+```
+
+::: {.content-visible when-profile="slides"}
+## Odds and Log-Odds
+:::
+
+Holding $\beta_1$ constant, we see that as $\beta_0$ increases, the logistic function shifts to the right.
+
+```{python}
+#| code-fold: true
+alphas = [-4, -8,-12,-20]
+betas = [0.4, 0.4, 0.4, 0.4]
+x = np.arange(40)
+fig = plt.figure(figsize=(8, 6)) 
+ax = plt.subplot(111)
+
+for i in range(len(alphas)):
+    a = alphas[i]
+    b = betas[i]
+    y = np.exp(a+b*x)/(1+np.exp(a+b*x))
+#     plt.plot(x,y,label=r"$\frac{e^{%d + %3.1fx}}{1+e^{%d + %3.1fx}}\;\beta_0=%d, \beta_1=%3.1f$" % (a,b,a,b,a,b))
+    ax.plot(x,y,label=r"$\beta_0=%d,$    $\beta_1=%3.1f$" % (a,b))
+ax.tick_params(labelsize=12)
+ax.set_xlabel('x', fontsize = 14)
+ax.set_ylabel('$p(x)$', fontsize = 14)
+ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 16})
+ax.set_title('Logistic Functions', fontsize = 16);
+```
+
+::: {.content-visible when-profile="slides"}
+## Odds and Log-Odds
+:::
+
+Varying both $\beta_0$ and $\beta_1$ gives us a more general logistic function.
+
+
+```{python}
+#| code-fold: true
+alphas = [-4, -8,-12,-20]
+betas = [0.2,0.4,0.6,1]
 x = np.arange(40)
 fig = plt.figure(figsize=(8, 6)) 
 ax = plt.subplot(111)
@@ -460,16 +518,39 @@ $$
 We can write this as a single expression:
 
 $$
-\text{P}(y_i \mid x_i) = \text{logit}^{-1}(\beta_0 + \beta_1 x_i)^{y_i} (1-\text{logit}^{-1}(\beta_0 + \beta_1 x_i))^{1-y_i}.
+\text{P}(y_i \mid x_i) = \text{logit}^{-1}(\beta_0 + \beta_1 x_i)^{y_i} (1-\text{logit}^{-1}(\beta_0 + \beta_1 x_i))^{1-y_i},
 $$
 
-We then use this to compute the __likelihood__ of parameters $\beta_0$, $\beta_1$:
+where we assume the parameters are fixed.
+
+We can reinterpret this to express the __likelihood__ of parameters $\beta_0$, $\beta_1$:
 
 $$
 L(\beta_0, \beta_1 \mid x_i, y_i) = \text{logit}^{-1}(\beta_0 + \beta_1 x_i)^{y_i} (1-\text{logit}^{-1}(\beta_0 + \beta_1 x_i))^{1-y_i},
 $$
 
-which is a function that we can maximize, for example, with gradient descent.
+given that we have observed the data $(x_i, y_i)$.
+
+**This is our objective function to maximize.**
+
+However, there is no closed-form solution so we optimize it numerically with gradient descent.
+
+
+## How Gradient Descent Works
+
+**Algorithm:**
+
+1. **Initialize** parameters: Start with random values $\beta^{(0)}$
+
+2. **Compute gradient**: Calculate $\nabla \ell(\beta^{(t)})$ - the direction of steepest increase
+
+3. **Update parameters**: Take a step in that direction:
+   $$\beta^{(t+1)} = \beta^{(t)} + \alpha \nabla \ell(\beta^{(t)})$$
+   where $\alpha$ is the **learning rate** (step size)
+
+4. **Repeat** steps 2-3 until convergence (gradient $\approx 0$ or max iterations reached)
+
+**Result:** Parameters that (locally) maximize the likelihood of the observed data.
 
 ## Logistic Regression In Practice
 
@@ -510,6 +591,8 @@ result = logit.fit()
 ::: {.content-visible when-profile="slides"}
 ## Logistic Regression in Practice
 :::
+
+Statsmodels gives us a summary of the model fit.
 
 ```{python}
 #| code-fold: true
@@ -716,7 +799,7 @@ $$
 $$
 
 ::: {.content-visible when-profile="slides"}
-## Logistic Regression in Perspective
+## F1 Score as a function of threshold
 :::
 
 Using this, we can evaluate other settings for the threshold.
@@ -743,7 +826,7 @@ f1vals = [evalThresh(df, tval)[0] for tval in tvals]
 ```{python}
 #| code-fold: true
 #| fig-align: center
-plt.figure(figsize=(6, 4))
+plt.figure(figsize=(6, 3))
 plt.plot(tvals,f1vals)
 plt.ylabel('F1 Score')
 plt.xlabel('Threshold for Classification')
@@ -765,6 +848,52 @@ The example here is based on
 http://blog.yhathq.com/posts/logistic-regression-and-python.html
 where you can find additional details.
 
+:::
+
+## ROC-AUC Curve
+
+::: {.columns}
+::: {.column width="50%"}
+
+<br><br>
+
+* The ROC-AUC curve is a plot of the true positive rate against the false positive rate at various threshold settings.
+
+* The AUC is the area under the ROC curve.
+
+* The AUC is a measure of the overall performance of the classifier.
+
+:::
+::: {.column width="50%"}
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+
+# Get predicted probabilities from the model
+y_pred_proba = result.predict(df[train_cols])
+
+# Compute ROC curve and AUC
+fpr, tpr, thresholds = metrics.roc_curve(df['admit'], y_pred_proba)
+auc_score = metrics.roc_auc_score(df['admit'], y_pred_proba)
+
+# Plot ROC curve
+fig, ax = plt.subplots(figsize=(4, 4))
+ax.plot(fpr, tpr, linewidth=2, label=f'ROC curve (AUC = {auc_score:.3f})')
+ax.plot([0, 1], [0, 1], 'k--', linewidth=1, label='Random classifier')
+ax.set_xlabel('False Positive Rate', fontsize=12)
+ax.set_ylabel('True Positive Rate', fontsize=12)
+ax.set_title('ROC Curve for Logistic Regression Model', fontsize=14)
+ax.legend(loc='lower right', fontsize=11)
+ax.grid(True, alpha=0.3)
+ax.tick_params(labelsize=11)
+plt.tight_layout()
+plt.show()
+
+print(f"AUC Score: {auc_score:.4f}")
+```
+
+:::
 :::
 
 ## Recap

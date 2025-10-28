@@ -819,7 +819,7 @@ To better understand __model selection__, we need a way to evaluate our differen
 How do we evaluate a classifier?
 ::::
 
-## Binary classification
+# Binary classification
 
 In the simple case of a binary classifier, we can call
 
