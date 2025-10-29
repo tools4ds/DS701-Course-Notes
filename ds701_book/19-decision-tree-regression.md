@@ -125,6 +125,193 @@ A decision tree might split like this:
 
 This captures the **non-linear** relationship (winter → spring → summer → fall) that linear regression would struggle with.
 
+## The Piecewise Constant Nature of Predictions
+
+### Understanding Discretized Outputs
+
+Here's a critical characteristic of decision tree regression: **outputs are always discretized**. 
+
+When you train a tree, each leaf node stores a single prediction value (the mean of all training samples in that leaf). No matter how many different inputs you provide, the model can only output as many distinct values as it has leaf nodes.
+
+**Key Insight**: If your tree has 10 leaf nodes, it can only produce 10 unique predictions - ever.
+
+### Example: Sweeping Through Input Values
+
+Let's see this in action with a simple example:
+
+```python
+import numpy as np
+from sklearn.tree import DecisionTreeRegressor
+import matplotlib.pyplot as plt
+
+# Simple quadratic relationship
+X_train = np.array([[1], [2], [3], [4], [5], [6], [7], [8]])
+y_train = np.array([10, 15, 25, 40, 60, 85, 115, 150])  # roughly x^2
+
+# Shallow tree with only 4 leaf nodes
+tree = DecisionTreeRegressor(max_depth=2, random_state=42)
+tree.fit(X_train, y_train)
+
+# Sweep through 100 input values
+X_test = np.linspace(0, 10, 100).reshape(-1, 1)
+predictions = tree.predict(X_test)
+
+print(f"Number of unique predictions: {len(np.unique(predictions))}")
+print(f"Unique values: {np.unique(predictions)}")
+
+# Output:
+# Number of unique predictions: 4
+# Unique values: [12.5, 32.5, 72.5, 132.5]
+```
+
+### Visualizing the Step Function
+
+When you plot predictions from a decision tree, you see a **step function**:
+
+```python
+plt.figure(figsize=(10, 6))
+
+# Plot the step function
+plt.plot(X_test, predictions, 'r-', linewidth=2, label='Decision Tree', drawstyle='steps-post')
+
+# Plot training data
+plt.scatter(X_train, y_train, s=100, alpha=0.6, edgecolors='black', label='Training Data')
+
+# Plot the true function for comparison
+y_true = X_test**2
+plt.plot(X_test, y_true, 'g--', alpha=0.5, linewidth=2, label='True Function (x²)')
+
+plt.xlabel('Input (x)', fontsize=12)
+plt.ylabel('Prediction (y)', fontsize=12)
+plt.title('Decision Tree Creates Step Functions', fontsize=14)
+plt.legend(fontsize=11)
+plt.grid(alpha=0.3)
+plt.show()
+```
+
+**What You'll See**:
+- The red line jumps at specific thresholds (decision boundaries)
+- Between jumps, the prediction is constant
+- The output can never smoothly interpolate between values
+
+### Why Does This Happen?
+
+The tree partitions the input space into regions:
+
+```
+Region 1: x < 2.5  →  predict 12.5  (avg of x=1,2)
+Region 2: 2.5 ≤ x < 5.5  →  predict 32.5  (avg of x=3,4)
+Region 3: 5.5 ≤ x < 7.5  →  predict 72.5  (avg of x=5,6,7)
+Region 4: x ≥ 7.5  →  predict 132.5  (avg of x=8)
+```
+
+All inputs falling into Region 1 get the **exact same prediction**, regardless of whether x = 0.5 or x = 2.4.
+
+### Critical Implications
+
+This discretization has several important consequences:
+
+1. **No True Extrapolation**: The model can't predict outside the range of training targets
+   ```python
+   print(f"Min training value: {y_train.min()}")  # 10
+   print(f"Max training value: {y_train.max()}")  # 150
+   print(f"Min prediction: {predictions.min()}")  # 12.5 (close to 10)
+   print(f"Max prediction: {predictions.max()}")  # 132.5 (close to 150)
+   # Can NEVER predict 200, even if x=20!
+   ```
+
+2. **Step Functions Only**: Predictions jump discontinuously at decision boundaries
+   - Input: x = 2.49 → output: 12.5
+   - Input: x = 2.51 → output: 32.5
+   - A tiny change in input causes a large jump in output
+
+3. **Limited Resolution**: With k leaf nodes, you get exactly k possible outputs
+   - Shallow tree (depth=2): ~4 leaves → 4 unique predictions
+   - Medium tree (depth=5): ~32 leaves → 32 unique predictions
+   - Deep tree (depth=10): ~1024 leaves → up to 1024 unique predictions
+
+4. **Can't Capture Smooth Trends**: Even if the true function is smooth (like sin(x) or x²), the prediction will be jagged
+
+### How Random Forests Help
+
+Random forests partially address this limitation by **averaging many step functions**:
+
+```python
+from sklearn.ensemble import RandomForestRegressor
+
+# Random forest with 100 trees
+rf = RandomForestRegressor(n_estimators=100, max_depth=2, random_state=42)
+rf.fit(X_train, y_train)
+rf_predictions = rf.predict(X_test)
+
+print(f"Decision Tree - unique values: {len(np.unique(predictions))}")  # 4
+print(f"Random Forest - unique values: {len(np.unique(rf_predictions))}")  # ~47
+```
+
+**Why More Unique Values?**
+- Each of the 100 trees has its own 4 leaf values (different due to bootstrapping)
+- Averaging different combinations creates many more possible outputs
+- With 100 trees × 4 leaves = 400 individual predictions to combine
+- Result: Much smoother predictions (though still technically discrete)
+
+### Visualization: Tree vs Forest
+
+```python
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+# Single tree
+axes[0].plot(X_test, predictions, 'r-', linewidth=2, drawstyle='steps-post')
+axes[0].scatter(X_train, y_train, s=100, alpha=0.6, edgecolors='black')
+axes[0].plot(X_test, y_true, 'g--', alpha=0.5, linewidth=2)
+axes[0].set_title('Single Decision Tree (4 unique values)', fontsize=12)
+axes[0].set_xlabel('x')
+axes[0].set_ylabel('y')
+axes[0].grid(alpha=0.3)
+
+# Random forest
+axes[1].plot(X_test, rf_predictions, 'b-', linewidth=2)
+axes[1].scatter(X_train, y_train, s=100, alpha=0.6, edgecolors='black')
+axes[1].plot(X_test, y_true, 'g--', alpha=0.5, linewidth=2)
+axes[1].set_title('Random Forest (47 unique values)', fontsize=12)
+axes[1].set_xlabel('x')
+axes[1].set_ylabel('y')
+axes[1].grid(alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+**Observation**: The random forest curve is much smoother but still not perfectly continuous like the true x² function.
+
+### When Does This Matter?
+
+The discretized nature is more problematic when:
+- ✗ You need smooth, continuous predictions (e.g., for derivatives or integration)
+- ✗ You're extrapolating far beyond training data
+- ✗ Small input changes shouldn't cause output jumps (some physical systems)
+- ✗ You have very few training samples (creating very few leaf nodes)
+
+It's less problematic when:
+- ✓ You have lots of training data (enabling many leaf nodes)
+- ✓ You use random forests (averaging smooths the steps)
+- ✓ Prediction accuracy matters more than smoothness
+- ✓ You're interpolating within the training range
+
+### Comparison with Linear Regression
+
+```python
+from sklearn.linear_model import LinearRegression
+
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+lr_predictions = lr.predict(X_test)
+
+print(f"Linear Regression - unique values: {len(np.unique(lr_predictions))}")
+# 100 (every input gets a unique output on the fitted line)
+```
+
+Linear regression produces a **truly continuous** function - infinitely many possible outputs along the fitted line. This is fundamentally different from tree-based methods.
+
 ## Advantages and Disadvantages of Decision Trees
 
 ### Advantages ✓
