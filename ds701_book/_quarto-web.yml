@@ -31,6 +31,8 @@ project:
     - "!12-Anomaly-Detection-SVD-III.qmd"
     - 17-Regression-I-Linear.qmd
     - 18-Regression-II-Logistic.qmd
+    - 18A-decision-tree-regression.qmd
+    - 18B-gradient-boosting-methods.qmd
     - 19-Regression-III-More-Linear.qmd
     - 23-NN-I-Gradient-Descent.qmd
     - 24-NN-II-Backprop.qmd
