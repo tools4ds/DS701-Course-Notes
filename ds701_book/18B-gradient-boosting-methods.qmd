@@ -1,5 +1,5 @@
 ---
-title: Gradient Boosting Methods: XGBoost, LightGBM, and CatBoost
+title: "Gradient Boosting Methods"
 jupyter: python3
 ---
 
@@ -528,14 +528,14 @@ xgb_model = xgb.XGBRegressor(
     n_estimators=1000,  # Set high
     learning_rate=0.05,
     max_depth=5,
-    random_state=42
+    random_state=42,
+    early_stopping_rounds=50
 )
 
 # Fit with early stopping
 xgb_model.fit(
     X_train_sub, y_train_sub,
     eval_set=[(X_val, y_val)],
-    early_stopping_rounds=50,  # Stop if no improvement for 50 rounds
     verbose=10
 )
 
@@ -713,11 +713,10 @@ model = xgb.XGBRegressor(n_estimators=1000)
 model.fit(X_train, y_train)
 
 # ✅ GOOD: Early stopping prevents overfitting
-model = xgb.XGBRegressor(n_estimators=1000)
+model = xgb.XGBRegressor(n_estimators=1000, early_stopping_rounds=50)
 model.fit(
     X_train, y_train,
-    eval_set=[(X_val, y_val)],
-    early_stopping_rounds=50
+    eval_set=[(X_val, y_val)]
 )
 ```
 
@@ -735,7 +734,7 @@ model = xgb.XGBRegressor(n_estimators=500, learning_rate=0.05)
 
 **Good news**: Gradient boosting doesn't require feature scaling!
 
-```{python}
+```python
 # No need to scale for tree-based methods
 from sklearn.preprocessing import StandardScaler
 
