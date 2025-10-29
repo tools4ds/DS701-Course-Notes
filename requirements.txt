@@ -33,6 +33,11 @@ pydotplus
 # 17-Regression-I-Linear
 statsmodels
 
+# 18B-gradient-boosting-methods
+xgboost
+lightgbm
+catboost
+
 # 20-Recommender-Systems
 gdown
 
