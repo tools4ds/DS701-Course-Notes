@@ -1,4 +1,7 @@
-
+---
+title: Gradient Boosting Methods: XGBoost, LightGBM, and CatBoost
+jupyter: python3
+---
 
 <!--
 AI-GENERATED CODE
@@ -135,7 +138,7 @@ Let's add a **learning rate** (η = 0.5) to prevent overfitting:
 
 ## Example 3: Visualizing Sequential Learning
 
-```python
+```{python}
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.ensemble import GradientBoostingRegressor
@@ -272,7 +275,7 @@ All three implement gradient boosting but with different optimizations and featu
 
 ## Example 4: Comparing All Methods
 
-```python
+```{python}
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -467,7 +470,7 @@ print("="*60)
 
 ## Example 5: Hyperparameter Tuning with Cross-Validation
 
-```python
+```{python}
 from sklearn.model_selection import GridSearchCV
 import xgboost as xgb
 
@@ -511,7 +514,7 @@ print(f"Test R²: {r2_score(y_test, y_pred):.4f}")
 
 Prevent overfitting by stopping when validation performance stops improving:
 
-```python
+```{python}
 from sklearn.model_selection import train_test_split
 import xgboost as xgb
 
@@ -577,7 +580,7 @@ cat_model.fit(
 
 ## Example 7: Feature Importance
 
-```python
+```{python}
 import matplotlib.pyplot as plt
 
 # Train XGBoost
@@ -613,7 +616,7 @@ plt.show()
 
 ## Example 8: Handling Categorical Features with CatBoost
 
-```python
+```{python}
 from catboost import CatBoostRegressor
 import pandas as pd
 
@@ -704,7 +707,7 @@ print(f"Predicted price: ${prediction[0]:.0f}K")
 
 ### Pitfall 1: Not Using Early Stopping
 
-```python
+```{python}
 # ❌ BAD: Fixed number of trees, might overfit
 model = xgb.XGBRegressor(n_estimators=1000)
 model.fit(X_train, y_train)
@@ -720,7 +723,7 @@ model.fit(
 
 ### Pitfall 2: High Learning Rate with Few Trees
 
-```python
+```{python}
 # ❌ BAD: Fast learning, few trees → underfitting
 model = xgb.XGBRegressor(n_estimators=10, learning_rate=0.3)
 
@@ -732,7 +735,7 @@ model = xgb.XGBRegressor(n_estimators=500, learning_rate=0.05)
 
 **Good news**: Gradient boosting doesn't require feature scaling!
 
-```python
+```{python}
 # No need to scale for tree-based methods
 from sklearn.preprocessing import StandardScaler
 
@@ -746,7 +749,7 @@ model.fit(X, y)  # Works great!
 
 ### Pitfall 4: Not Encoding Categorical Features (except CatBoost)
 
-```python
+```{python}
 import pandas as pd
 
 # Data with categorical feature
