@@ -13,7 +13,7 @@ We now consider applications of the Singular Value Decomposition (SVD).
 
 Dianne O’Leary, MMDS ’06 (Workshop on Algorithms for Modern Massive Data Sets)
 
----
+## Applications
 
 We will see how the SVD is used for
 
@@ -25,15 +25,25 @@ We will see how the SVD is used for
 
 ## Singular Vectors and Values
 
-For $A\in\mathbb{R}^{m\times n}$ with $m>n$ and rank $k$,
-there exists a set of orthogonal vectors $\{\mathbf{v}_1, \mathbf{v}_2, \dots, \mathbf{v}_n\}$ 
-and a set of orthogonal vectors $\{\mathbf{u}_1, \mathbf{u}_2, \dots, \mathbf{u}_m\}$ such that
+For 
 
 $$
-A\mathbf{v}_1 = \sigma_1 \mathbf{u}_1 \cdots A\mathbf{v}_k = \sigma_k \mathbf{u}_k \quad\quad A\mathbf{v}_{k+1} = 0 \cdots A\mathbf{v}_n = 0.
+A\in\mathbb{R}^{m\times n} \text{ with } m>n \text{ and rank } k,
 $$
 
-:::: {.fragment}
+there exists a set of orthogonal vectors $\{\mathbf{v}_1, \mathbf{v}_2, \dots, \mathbf{v}_n\}$
+
+and a set of orthogonal vectors $\{\mathbf{u}_1, \mathbf{u}_2, \dots, \mathbf{u}_m\}$
+
+such that
+
+$$
+A\mathbf{v}_1 = \sigma_1 \mathbf{u}_1 \quad\cdots\quad A\mathbf{v}_k = \sigma_k \mathbf{u}_k, \quad A\mathbf{v}_{k+1} = 0 \quad\cdots\quad A\mathbf{v}_n = 0.
+$$
+
+where $\sigma_1, \sigma_2, \dots, \sigma_k$ are the _singular values_ of $A$.
+
+## Singular Value Decomposition
 
 We can collect the vectors $\mathbf{v}_i$ into a matrix $V$ and the vectors $\mathbf{u}_i$ into a matrix $U$.
 $$
@@ -67,9 +77,9 @@ $$
 
 We call the $\mathbf{v}_i$ the __right singular vectors__ and the $\mathbf{u}_i$ the __left singular vectors__.
 
-::::
 
-:::: {.fragment}
+## Singular Value Decomposition
+
 
 And because $V$ is an orthogonal matrix, we have $V V^T = I$, so we can right multiply both sides by $V^T$ to get
 
@@ -102,16 +112,14 @@ A
 \end{bmatrix}^T.
 $$
 
-::::
 
-:::: {.fragment}
 
 We can write this as
 
 $$
 A = U\Sigma V^{T}.
 $$
-::::
+
 
 ## Singular Value Decomposition
 
@@ -129,7 +137,7 @@ where
 - $V$ has dimension $n \times n$. The columns of $V$ are orthogonal. The columns of $V$ are the __right singular vectors__.
 ::::
 
----
+## SVD Matrix Shapes
 
 ```{python}
 #| fig-align: center
@@ -175,15 +183,18 @@ ax.axis('off')
 plt.show()
 ```
 
----
 
-The SVD of a matrix always exists.
+## SVD Properties
 
-The existence of the SVD was proven in 1936 by Carl Eckart and Gale Young.
+<br><br>
 
-The singular values are uniquely determined.
+* The SVD of a matrix always exists.
 
-The left and right singular vectors are uniquely determined up to a complex sign (complex factor of modulus 1).
+    * The existence of the SVD was proven in 1936 by [Carl Eckart and Gale Young](https://www.cambridge.org/core/journals/psychometrika/article/abs/approximation-of-one-matrix-by-another-of-lower-rank/B29672E1EDD0FA1B7611D4DFAFC321B3?utm_campaign=shareaholic&utm_medium=copy_link&utm_source=bookmark).
+
+* The singular values are uniquely determined.
+
+* The left and right singular vectors are uniquely determined up to $\pm 1$.
 
 ## Outer Products
 
@@ -195,20 +206,29 @@ $$
 
 where $\mathbf{u}_i, \mathbf{v}_{i}$ are the $i$-th columns of $U$ and $V$, respectively.
 
----
+## Outer Products, continued
 
 An outer product of a $m\times 1$ vector and a $1\times n$ vector is a $m\times n$ matrix.
 
 $$\mathbf{u}_i\mathbf{v}_{i}^{T}=
 \begin{bmatrix}
+u_{i1} \\
+u_{i2} \\
+\vdots \\
+u_{im} \\
+\end{bmatrix}
+\begin{bmatrix}
+v_{i1} & v_{i2} & \cdots & v_{in} \\
+\end{bmatrix} = 
+\begin{bmatrix}
 u_{i1}v_{i1} & u_{i1}v_{i2} & \cdots & u_{i1}v_{in} \\
 u_{i2}v_{i1} & u_{i2}v_{i2}  & \cdots & u_{i2}v_{in} \\
 \vdots & \vdots & \ddots & \vdots \\
-u_{im}v_{i1} &  u_{i2}v_{in}  & \cdots & u_{im}v_{in} \\
+u_{im}v_{i1} &  u_{im}v_{i2}  & \cdots & u_{im}v_{in} \\
 \end{bmatrix}
 $$
 
-is a rank-1 matrix.
+It is a rank-1 matrix.  How can you tell?
 
 :::: {.fragment}
 **Alternate Interpretation:**
@@ -218,21 +238,22 @@ The SVD decomposes $A$ into a linear combination of rank-1 matrices.
 The singular value tells us the weight (contribution) of each rank-1 matrix to the matrix $A$.
 ::::
 
-## Topics Covered
+# Lecture Organization
 
 In this lecture we first discuss:
 
-Theoretical properties of the SVD related to
-    
-- matrix rank
-- determining the best low rank approximations to a matrix
+* Theoretical properties of the SVD related to
+    * matrix rank
+    * determining the best low rank approximations to a matrix
 
-We will then apply these results when we consider data matrices from the following applications 
+:::: {.fragment}
+* We will then apply these results when we consider data matrices from the following applications 
+    * internet traffic data
+    * social media data
+    * image data
+    * movie data
 
-- internet traffic data
-- social media data
-- image data
-- movie data
+:::
 
 # SVD Properties
 
@@ -253,26 +274,25 @@ The largest value that a matrix rank can take is $\min(m,n)$. Since we assumed $
 ::::
 
 :::: {.fragment}
-If the matrix $A$ has rank equal to $n$, then we say it is full rank.
+If the matrix $A$ has rank equal to $n$, then we say it is **full rank**.
 ::::
 
 :::: {.fragment}
-However, it can happen that the rank of a matrix is __less__ than $\min(m,n)$. In this case we say that $A$ is rank-deficient.
+However, it can happen that the rank of a matrix is __less__ than $\min(m,n)$. In this case we say that $A$ is **rank-deficient**.
 ::::
 
----
+## Matrix Rank and Column Space
 
-::: {.content-visible when-profile="web"}
-Recall that the dimension of a vector space is the smallest number of linearly independent vectors needed to span the space.
-:::
+The dimension of the column space of $A$ is the **smallest number of vectors that suffice to construct the columns of $A$.**
 
-The dimension of the column space of $A$ is the __smallest number of vectors that suffice to construct the columns of $A$.__
+And it is equal to the rank of the matrix.
 
 :::: {.fragment}
 If the dimension of the column spaces is $k$, then there exists a set of vectors $\{\mathbf{c}_1, \mathbf{c}_2, \dots, \mathbf{c}_k\}$ such that every column $\mathbf{a}_i$ of $A$ can be expressed as:
 
 $$\mathbf{a}_i = r_{1i}\mathbf{c}_1 + r_{2i}\mathbf{c}_2 + \dots + r_{ki}\mathbf{c}_k\quad i=1,\ldots,n.$$
 ::::
+
 
 ---
 
@@ -295,7 +315,9 @@ $$
 
 where $C \in \mathbb{R}^{m\times k}$ and $R \in \mathbb{R}^{k \times n}$.
 
-This only requires $k(m+n)$ values, which could be much smaller than $mn$.
+This requires $k(m+n)$ values, which could be much smaller than $mn$ when $k$ is small, e.g. $k < \frac{mn}{m+n}$.
+
+
 
 ## Low Effective Rank
 
@@ -360,9 +382,72 @@ where
 :::: {.incremental}
 * $U'$ are the $k$ leftmost columns of $U$, 
 * $\Sigma'$ is the $k\times k$ upper left sub-matrix of $\Sigma$, and 
-* $V'$ is the $k$ leftmost columns of $V$.
+* $V'$ is the $k$ leftmost columns of $V$ (or the $k$ topmost rows of $V^T$)
 ::::
 
+---
+
+Full SVD:
+
+$$
+A =
+\begin{bmatrix}
+\vert & \vert &   & \vert \\
+\mathbf{u}_1   & \mathbf{u}_2  & \dots  & \mathbf{u}_m  \\
+\vert & \vert &  & \vert
+\end{bmatrix}
+\left[
+\begin{array}{c|c}
+\begin{matrix}
+\sigma_1 & \cdots & 0 \\
+\vdots & \ddots & \vdots \\
+0 & \cdots & \sigma_k
+\end{matrix}
+&
+\mathbf{0}
+\\
+\hline
+\mathbf{0} & \mathbf{0}
+\end{array}
+\right]
+\begin{bmatrix}
+- & \mathbf{v}_1^T & - \\
+- & \mathbf{v}_2^T & - \\
+  & \vdots &   \\
+- & \mathbf{v}_n^T & -
+\end{bmatrix}
+$$
+
+Rank-$k$ SVD:
+
+$$
+A =
+\begin{bmatrix}
+\vert & \vert &   & \vert \\
+\mathbf{u}_1   & \mathbf{u}_2  & \dots  & \mathbf{u}_k  \\
+\vert & \vert &  & \vert
+\end{bmatrix}
+\left[
+\begin{array}{c|c}
+\begin{matrix}
+\sigma_1 & \cdots & 0 \\
+\vdots & \ddots & \vdots \\
+0 & \cdots & \sigma_k
+\end{matrix}
+&
+\mathbf{0}
+\\
+\hline
+\mathbf{0} & \mathbf{0}
+\end{array}
+\right]
+\begin{bmatrix}
+- & \mathbf{v}_1^T & - \\
+- & \mathbf{v}_2^T & - \\
+  & \vdots &   \\
+- & \mathbf{v}_k^T & -
+\end{bmatrix}
+$$
 
 ---
 
@@ -376,22 +461,33 @@ This means that the distance (in Frobenius norm) of the best rank-$k$ approximat
 
 ## Models are simplifications
 
+::: {.fragment}
 One way of thinking about modeling or clustering is that we are building a 
 __simplification__ of the data. 
+:::
 
+:::: {.fragment}
 That is, a model is a description of the data, that is simpler than the data.
+:::
 
+:::: {.fragment}
 In particular, instead of thinking of the data as thousands or millions of 
 individual data points, we might think of it in terms of a small number of 
 clusters, or a parametric distribution, etc.
+:::
 
+:::: {.fragment}
 From this simpler description, we hope to gain __insight.__
+:::
 
+:::: {.fragment}
 There is an interesting question here:  __why__ does this process often lead to insight?   
+:::
 
+:::: {.fragment}
 That is, why does it happen so often that a large dataset can be described in
 terms of a much simpler model?
-
+:::
 
 ## William of Ockham
 
@@ -463,7 +559,7 @@ Let's see how this theory can be used in practice  and investigate some real dat
 
 We'll look at data traffic on the Abilene network:
 
-![](figs/L10-Abilene-map.png)
+![](figs/L10-Abilene-map.png){fig-align="center" width="200px}
 
 Source: Internet2, circa 2005
 
@@ -479,7 +575,7 @@ with open('data/net-traffic/AbileneFlows/odnames','r') as f:
 dates = pd.date_range('9/1/2003', freq = '10min', periods = 1008)
 Atraf = pd.read_table('data/net-traffic/AbileneFlows/X', sep='  ', header=None, names=odnames, engine='python')
 Atraf.index = dates
-Atraf
+Atraf.head(4)
 ```
 
 ---
@@ -510,6 +606,7 @@ u, s, vt = np.linalg.svd(Atraf)
 Now let's look at the singular values of `Atraf` to see if it can be usefully approximated as a low-rank matrix:
 
 ```{python}
+#| fig-align: center
 fig = plt.figure(figsize=(5, 3))
 plt.plot(range(1, 1+len(s)), s)
 plt.xlabel(r'$k$', size=20)
@@ -527,6 +624,7 @@ This classic, sharp-elbow tells us that a few singular values are very large, an
 Zooming in for just small $k$ values, we can see that the elbow is around 4 - 6 singular values:
 
 ```{python}
+#| fig-align: center
 fig = plt.figure(figsize=(5, 3))
 Anorm = np.linalg.norm(Atraf)
 plt.plot(range(1, 21), s[0:20]/Anorm, '.-')
@@ -546,6 +644,7 @@ This pattern of singular values suggests __low effective rank.__
 Let's use the formula above to compute the relative error of a rank-$k$ approximation to $A$:
 
 ```{python}
+#| fig-align: center
 fig = plt.figure(figsize=(5, 3))
 Anorm = np.linalg.norm(Atraf)
 err = np.cumsum(s[::-1]**2)
@@ -582,7 +681,7 @@ We consider the following examples:
 
 :::: {.incremental}
 * Likes on Facebook,
-* Yelp reviews and Tweets (the site formerly known as twitter),
+* Yelp reviews and Tweets (the site formerly known as Twitter),
 * User preferences over time,
 * Images.
 ::::
@@ -598,7 +697,7 @@ Here, the matrices are
 ::::
 
 :::: {.fragment}
-![](figs/L10-facebook.png){fig-align="center"}
+![](figs/L10-facebook.png){fig-align="center" width="50%"}
 
 Source: [Viswanath et al., Usenix Security, 2014]
 ::::
@@ -614,7 +713,7 @@ Here, the matrices are
 ::::
 
 :::: {.fragment}
-![](figs/L10-yelp-twitter.png)
+![](figs/L10-yelp-twitter.png){fig-align="center" width="50%"}
 
 Source: [Viswanath et al., Usenix Security, 2014]
 ::::
@@ -622,7 +721,11 @@ Source: [Viswanath et al., Usenix Security, 2014]
 
 ## Netflix
 
-Example: the Netflix prize worked with partially-observed matrices like this:
+Example: the Netflix prize worked with partially-observed (sparse) rating matrices like this:
+
+::: {.columns}
+::: {.column width="50%"}
+
 
 $$
 \begin{bmatrix}
@@ -636,6 +739,11 @@ $$
 \end{bmatrix},
 $$
 
+:::
+::: {.column width="50%"}
+
+
+
 :::: {.fragment}
 where the rows correspond to users, the columns to movies, and the entries are ratings.
 ::::
@@ -646,14 +754,17 @@ Although the problem matrix was of size 500,000 $\times$ 18,000, the winning app
 Source: [Koren et al, IEEE Computer, 2009]
 ::::
 
+:::
+::: 
 
 ## Images
 
 Image data often shows low effective rank.
 
-For example, here is an original photo:
+For example, here is an original $512 \times 512$ photo:
 
 ```{python}
+#| fig-align: center
 boat = np.loadtxt('data/images/boat/boat.dat')
 import matplotlib.cm as cm
 plt.figure()
@@ -664,9 +775,10 @@ plt.show()
 
 ---
 
-Let's look at the singular values.
+Treat the image as a matrix and then compute the singular values.
 
 ```{python}
+#| fig-align: center
 u, s, vt = np.linalg.svd(boat, full_matrices=False)
 plt.plot(s)
 plt.xlabel('$k$', size=16)
@@ -693,6 +805,7 @@ boatApprox = u @ np.diag(s) @ vt
 ```
 
 ```{python}
+#| fig-align: center
 plt.figure(figsize=(9, 6))
 plt.subplot(1, 2, 1)
 plt.imshow(boatApprox, cmap=cm.Greys_r)
@@ -701,7 +814,7 @@ plt.title('Rank 40 Boat')
 plt.subplot(1, 2, 2)
 plt.imshow(boat, cmap=cm.Greys_r)
 plt.axis('off')
-plt.title('Rank 512 Boat')
+plt.title('Full Rank 512 Boat')
 plt.show()
 ```
 
@@ -755,6 +868,7 @@ How can this be helpful?
 Consider the set of traffic traces. There are clearly some common patterns. How can we find them?
 
 ```{python}
+#| fig-align: center
 with open('data/net-traffic/AbileneFlows/odnames','r') as f:
     odnames = [line.strip() for line in f]
 dates = pd.date_range('9/1/2003', freq='10min', periods=1008)
@@ -776,7 +890,7 @@ Let's use as our example $\mathbf{a}_1,$ the first column of $A$.
 
 This happens to be the ATLA-CHIN flow.
 
-The equation above tells us that
+The earlier SVD equation tells us that
 
 $$\mathbf{a}_1 \approx v_{11}\sigma_1\mathbf{u}_1 + v_{12}\sigma_2\mathbf{u}_2 + \dots + v_{1k}\sigma_k\mathbf{u}_k.$$
 
@@ -884,7 +998,7 @@ Here is a figure from the paper that described the winning strategy in the Netfl
 
 It shows a hypothetical __latent space__ in which each user, and each movie, is represented by a latent vector.
 
-![](figs/L10-Movie-Latent-Space.png)
+![](figs/L10-Movie-Latent-Space.png){fig-align="center" width="45%"}
 
 Source: Koren et al, IEEE Computer, 2009 
 
@@ -896,7 +1010,7 @@ Here are some representations of movies in that space (reduced to 2-D).
 
 Notice how the space seems to capture similarity among movies!
 
-![](figs/L10-Netflix-Latent-Factors.png)
+![](figs/L10-Netflix-Latent-Factors.png){fig-align="center" width="55%"}
 
 Source: Koren et al, IEEE Computer, 2009 
 
