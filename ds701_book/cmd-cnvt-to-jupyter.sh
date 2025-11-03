@@ -20,6 +20,8 @@ qmd_files=(
   "11-Dimensionality-Reduction-SVD-II.qmd"
   "17-Regression-I-Linear.qmd"
   "18-Regression-II-Logistic.qmd"
+  "18A-decision-tree-regression.qmd"
+  "18B-gradient-boosting-methods.qmd"
   "19-Regression-III-More-Linear.qmd"
   "24-NN-II-Backprop.qmd"
   "25-NN-III-CNNs.qmd"
