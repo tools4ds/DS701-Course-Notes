@@ -103,6 +103,8 @@ This will create a new file `11-Dimensionality-Reduction-SVD-II-stripped.qmd` in
 
 Then add the new file to the `_quarto-slides.yml` file and render the stripped slides for presentation.
 
+TODO: The script for jupyter notebook creation could run this first so all the divs don't get put in the jupyter notebooks.
+
 ### Creating PDFs from the Slides
 
 To create PDFs from the reveal.js slides, you can use
