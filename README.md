@@ -91,6 +91,18 @@ You can render just one slide with a command like
 quarto render 05-Distances-Timeseries.qmd --profile slides
 ```
 
+### Stripping Slides for Presentation
+
+To strip the slides for presentation, run
+
+```sh
+./strip-tags-with-profile.py 11-Dimensionality-Reduction-SVD-II.qmd --profile slides
+```
+
+This will create a new file `11-Dimensionality-Reduction-SVD-II-stripped.qmd` in the same directory.
+
+Then add the new file to the `_quarto-slides.yml` file and render the stripped slides for presentation.
+
 ### Creating PDFs from the Slides
 
 To create PDFs from the reveal.js slides, you can use
