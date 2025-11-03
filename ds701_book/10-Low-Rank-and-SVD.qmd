@@ -31,9 +31,9 @@ $$
 A\in\mathbb{R}^{m\times n} \text{ with } m>n \text{ and rank } k,
 $$
 
-there exists a set of orthogonal vectors $\{\mathbf{v}_1, \mathbf{v}_2, \dots, \mathbf{v}_n\}$
+there exists a set of orthogonal vectors $\{\mathbf{v}_1, \mathbf{v}_2, \dots, \mathbf{v}_n\}$ with $\mathbf{v}_i \in \mathbb{R}^n$
 
-and a set of orthogonal vectors $\{\mathbf{u}_1, \mathbf{u}_2, \dots, \mathbf{u}_m\}$
+and a set of orthogonal vectors $\{\mathbf{u}_1, \mathbf{u}_2, \dots, \mathbf{u}_n\}$ with $\mathbf{u}_i \in \mathbb{R}^m$
 
 such that
 
@@ -42,6 +42,11 @@ A\mathbf{v}_1 = \sigma_1 \mathbf{u}_1 \quad\cdots\quad A\mathbf{v}_k = \sigma_k 
 $$
 
 where $\sigma_1, \sigma_2, \dots, \sigma_k$ are the _singular values_ of $A$.
+
+::: {.fragment}
+* $\mathbf{u}_{k+1}, \ldots, \mathbf{u}_n$ are any orthonormal vectors that complete the orthonormal basis for $\mathbb{R}^m$ and 
+* $\mathbf{v}_{k+1}, \ldots, \mathbf{v}_n$ are any orthonormal vectors that complete the orthonormal basis for $\mathbb{R}^n$ and are in the null space of $A$.
+:::
 
 ## Singular Value Decomposition
 
