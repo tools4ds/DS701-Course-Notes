@@ -88,7 +88,7 @@ The data for each individual consisted of approximately 500k SNPs. This means th
 
 The authors performed PCA and plotted 1387 of the individuals in the reduced dimensions. 
 
-![Image Credit @novembre2008genes](figs/PCA_genes_Europe.png)
+![Image Credit @novembre2008genes](figs/PCA_genes_Europe.png){width=50% fig-align="center"}
 
 For comparison, a color coded map of western Europe is added and the same color coding was applied to the data samples by country of origin.
 
@@ -108,13 +108,17 @@ Would a similar study in the USA be effective?
 
 ## PCA Overview
 
-The following describes the process to perform PCA and obtain your reduced data set. The goal is given
+The following describes the process to perform PCA and obtain your reduced data set. 
+
+The goal is given:
 
 Input: $X_0\in\mathbb{R}^{m\times n}$, produce
 
 Output: $Y\in\mathbb{R}^{m\times d}$ with $d << n$.
 
-The first step is to center the data (subtract the mean across rows): $X_0 \rightarrow X$.
+## PCA Step 1: Center the Data
+
+The first step is to center the data (subtract the mean of each column): $X_0 \rightarrow X$.
 
 Example:
 $$
@@ -137,9 +141,8 @@ X = \begin{bmatrix}
 -5 & 0 & 5 \end{bmatrix} 
 $$ 
 
-The next step is to determine the directions of the data that correspond to the largest variances. These are the principal components.
 
----
+The next step is to determine the directions of the data that correspond to the largest variances. These are the principal components.
 
 ## Least Squares Interpretation
 
@@ -147,11 +150,13 @@ Centered data often clusters along a line (or other low-dimensional subspace of 
 
 :::: {.columns}
 ::: {.column width="50%"}
-![](figs/PCA_variance.png)
+![](figs/PCA_variance.png){width=65% fig-align="center"}
+
 The sum of **variances** (squared distances to the mean) of the projected points is a **maximum**.
 :::
 ::: {.column width="50%"}
-![](figs/PCA_residual.png)
+![](figs/PCA_residual.png){width=65% fig-align="center"}
+ 
 The sum of **residuals** (squared distances from the points to the line) is a **minimum**.
 :::
 ::::
@@ -166,7 +171,7 @@ Answer: the covariance matrix.
 
 ## Covariance Matrix
 
-Let $X\in\mathbb{R}^{m\times n}$ contained the centered data. Recall that the sample covariance matrix is defined by
+Let $X\in\mathbb{R}^{m\times n}$ contain the centered data. The sample covariance matrix for zero-mean data is:
 
 $$
 S = \frac{1}{m-1}X^{T}X
@@ -197,13 +202,70 @@ $$
 
 The matrix $S$ is symmetric, i.e., $S = S^{T}.$ 
 
+
+::: {.content-visible when-profile="web"}
+## Understanding the Formula
+
+The formula is:
+$$S = \frac{1}{m-1}X^{T}X$$
+
+where $X\in\mathbb{R}^{m\times n}$ contains **centered data**.
+
+#### Key Setup
+
+First, let's understand what $X$ represents:
+
+- **$m$ rows** = number of observations/samples
+- **$n$ columns** = number of features/variables
+- **Centered data** means each column has mean 0 (we've subtracted the column mean from each entry)
+
+So if we denote the columns of $X$ as vectors, we have:
+$$X = \begin{bmatrix} | & | & & | \\ \mathbf{x}_1 & \mathbf{x}_2 & \cdots & \mathbf{x}_n \\ | & | & & | \end{bmatrix}$$
+
+where each $\mathbf{x}_j \in \mathbb{R}^m$ is a centered column vector (mean = 0).
+
+#### What Does $X^T X$ Compute?
+
+When we compute $X^T X$:
+
+- Dimensions: $(n \times m) \cdot (m \times n) = n \times n$
+- The $(i,j)$ entry of $X^T X$ is: $(\mathbf{x}_i)^T \mathbf{x}_j = \sum_{k=1}^{m} x_{ki} \cdot x_{kj}$
+
+This is the **dot product** between column $i$ and column $j$ of $X$.
+
+#### Why This Gives Covariance
+
+The sample covariance between features $i$ and $j$ is defined as:
+$$\text{Cov}(i,j) = \frac{1}{m-1}\sum_{k=1}^{m}(x_{ki} - \bar{x}_i)(x_{kj} - \bar{x}_j)$$
+
+But since the data is **centered**, we have $\bar{x}_i = 0$ and $\bar{x}_j = 0$, so:
+$$\text{Cov}(i,j) = \frac{1}{m-1}\sum_{k=1}^{m}x_{ki} \cdot x_{kj} = \frac{1}{m-1}(\mathbf{x}_i)^T \mathbf{x}_j$$
+
+This is exactly the $(i,j)$ entry of $\frac{1}{m-1}X^T X$!
+
+#### The Result
+
+Therefore, $S = \frac{1}{m-1}X^{T}X$ is an $n \times n$ matrix where:
+
+- **Diagonal entries** $S_{ii}$ = variance of feature $i$
+- **Off-diagonal entries** $S_{ij}$ = covariance between features $i$ and $j$
+
+This is precisely the **sample covariance matrix**.
+
+**Note:** The factor of $(m-1)$ instead of $m$ gives us the unbiased sample estimator (Bessel's correction).
+
+:::
+
+
 ## Spectral Decomposition
 
-We use the fact that $S$ is symmetric to apply the Spectral Decomposition, which states:
+We use the fact that the covariance matrix $S$ is symmetric to apply the Spectral Decomposition, which states:
 
 > Every real symmetric matrix $S$ has the factorization $V\Lambda V^{T}$, where $\Lambda$ is a diagonal matrix that contains the eigenvalues of S and the columns of $V$ are orthogonal eigenvectors of $S$.
 
-You can refresh your memory about this in the [Linear Algebra Refresher](04-Linear-Algebra-Refresher.qmd).
+This is a special case of eigendecomposition for symmetric matrices.
+
+You can refresh your memory about this in the [Linear Algebra Refresher](04-Linear-Algebra-Refresher.qmd#eigendecomposition).
 
 ---
 
@@ -252,13 +314,13 @@ $$
 \end{bmatrix}.
 $$
 
-----
+## PCA Interpretation
 
-The direction $\mathbf{v}_i$ is the $i$-th principal component and the corresponding $\lambda_i$ accounts for the $i$-th largest variance in the dataset.
+* The direction $\mathbf{v}_i$ is the $i$-th principal component and the corresponding $\lambda_i$ accounts for the $i$-th largest variance in the dataset.
 
-In other words, $\mathbf{v}_1$ is the first principal component and is the direction that accounts for the most variance in the dataset. 
+  * In other words, $\mathbf{v}_1$ is the first principal component and is the direction that accounts for the most variance in the dataset. 
 
-The vector $\mathbf{v}_d$ is the $d$-th principal component and is the direction that accounts for the $d$-th most variance in the dataset. 
+  * The vector $\mathbf{v}_d$ is the $d$-th principal component and is the direction that accounts for the $d$-th most variance in the dataset. 
 
 The reduced data matrix is obtained by computing
 
@@ -303,7 +365,7 @@ What is the value of the total variance in the data?
 :::: {.fragment}
 Total variance: $T = 100$.
 
-The first principal component accounts for all the variance in the dataset.
+The first principal component accounts for all the variance in this example dataset.
 ::::
 
 ## PCA Summary
@@ -314,7 +376,7 @@ The first principal component accounts for all the variance in the dataset.
 - The first eigenvector $\mathbf{v}_1$ points in the most significant direction of the data. This direction explains the largest fraction $\lambda_1/T$ of the total variance.
 - The second eigenvector $\mathbf{v}_2$ accounts for a smaller fraction $\lambda_2/T$.
 - The **explained variance** of component $i$ is the value $\lambda_i/T$. As $i\rightarrow n$ the explained variance gets smaller and approaches $\lambda_n/T$.
-- The **cumulative (total) explained variance** is the sum of the explained variances. The total explained variance for all eigenvalues is 1.
+- The **cumulative (total) explained variance** is the sum of the explained variances up to component $k$, e.g. $\sum_{i=1}^{k} \frac{\lambda_i}{T}$. The total explained variance for all eigenvalues is 1.
 
 
 ## Case Study: Random Data
@@ -389,7 +451,7 @@ Let's consider another example using the MNIST dataset.
 from sklearn import datasets
 digits = datasets.load_digits()
 
-plt.figure(figsize=(8, 8),)
+plt.figure(figsize=(6, 6),)
 for i in range(8):
     plt.subplot(2, 4, i + 1)
     plt.imshow(digits.images[i], cmap='gray_r')
@@ -411,25 +473,28 @@ from sklearn.decomposition import PCA
 X = digits.data
 y = digits.target
 
+import warnings
+warnings.filterwarnings("ignore")
+
 pca = PCA()
 X_pca = pca.fit_transform(X)
 
 # Create subplots
-fig, axs = plt.subplots(2, 1, figsize=(6, 5))
+fig, axs = plt.subplots(2, 1, figsize=(6, 4))
 
 # Scree plot (graph of eigenvalues corresponding to PC number)
 # This shows the explained variance ratio
 axs[0].plot(np.arange(1, len(pca.explained_variance_ratio_) + 1), pca.explained_variance_ratio_, marker='o', linestyle='--')
 axs[0].set_title('Scree Plot')
 axs[0].set_xlabel('Principal Component')
-axs[0].set_ylabel('Explained Variance Ratio')
+axs[0].set_ylabel('Explained Variance\n Ratio')
 axs[0].grid(True)
 
 # Cumulative explained variance plot
 axs[1].plot(np.arange(1, len(pca.explained_variance_ratio_) + 1), np.cumsum(pca.explained_variance_ratio_), marker='o', linestyle='--')
 axs[1].set_title('Cumulative Explained Variance Plot')
 axs[1].set_xlabel('Principal Component')
-axs[1].set_ylabel('Cumulative Explained Variance')
+axs[1].set_ylabel('Cumulative Explained\n Variance')
 axs[1].grid(True)
 
 # Adjust layout
@@ -443,7 +508,7 @@ Let's plot the data in the first 2 principal component directions. We'll use the
 
 ```{python}
 #| fig-align: center
-plt.figure(figsize=(7, 7))
+plt.figure(figsize=(5, 5))
 scatter = plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y, cmap='tab20', edgecolor='k', s=50)
 plt.title('Digits in PC1 and PC2 Space')
 plt.xlabel('Principal Component 1')
@@ -452,7 +517,7 @@ plt.ylabel('Principal Component 2')
 # Create a legend with discrete labels
 legend_labels = np.unique(y)
 handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=plt.cm.tab20(i / 9), markersize=10) for i in legend_labels]
-plt.legend(handles, legend_labels, title="Digit Label", loc="best")
+plt.legend(handles, legend_labels, title="Digit Label", bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
 
 plt.show()
 ```
@@ -482,7 +547,7 @@ Consider a situation where we have age (years) and height (feet) data for 4 peop
 
 :::
 ::: {.column width="50%"}
-![](figs/Scaling_feet.png)
+![](figs/Scaling_feet.png){width=75% fig-align="center"}
 :::
 ::::
 
@@ -503,7 +568,7 @@ What if the height is in cm?
 
 :::
 ::: {.column width="50%"}
-![](figs/Scaling_cm.png)
+![](figs/Scaling_cm.png){width=75% fig-align="center"}
 :::
 ::::
 
@@ -524,7 +589,7 @@ Let's standardize our data.
 
 :::
 ::: {.column width="50%"}
-![](figs/Scaling.png)
+![](figs/Scaling.png){width=75% fig-align="center"}
 :::
 ::::
 
@@ -532,10 +597,11 @@ When we normalize our data, we observe an equal distribution of the variance.
 
 --- 
 
-What quantity is represented by $\frac{Cov(X, Y)}{\sigma_X\sigma_Y}$, where $X$ and $Y$ represent the random variables associated to sampling a person with that Age and Height?
+What quantity is represented by $\frac{Cov(X, Y)}{\sigma_X\sigma_Y}$, where $X$ and $Y$ represent the random variables of
+a person's age and height, respectively?
 
 :::: {.fragment}
-This is the correlation matrix. When you standardize your data you are no longer working with the covariance matrix but the correlation matrix.
+This is the correlation matrix. When you _standardize_ your data you are no longer working with the covariance matrix but the correlation matrix.
 ::::
 
 :::: {.fragment}
@@ -547,7 +613,7 @@ PCA identifies the directions with the maximum variance and large scale data can
 
 ## Relationship to the SVD
 
-Recall that the SVD of a mean-centered data matrix $X\in\mathbb{R}^{m\times n}$ ($m>n$) is
+Recall that the SVD of a (mean-centered) data matrix $X\in\mathbb{R}^{m\times n}$ ($m>n$) is
 
 $$
 X = U\Sigma V^T.
@@ -645,7 +711,7 @@ Reasons to compute PCA this way are
 
 ## Pros and Cons
 
-Here are some advantages (left column) and disadvantages (right column) of PCA.
+Here are some advantages and disadvantages of using PCA.
 
 :::: {.columns}
 ::: {.column width="50%"}
@@ -669,21 +735,46 @@ Here are some advantages (left column) and disadvantages (right column) of PCA.
 
 ## What is t-SNE?
 
-- t-SNE stands for **t-Distributed Stochastic Neighbor Embedding**.
-- It is a **non-linear dimensionality reduction technique**.
-- Primarily used for **visualizing high-dimensional data** in 2 or 3 dimensions.
+**t-SNE** stands for **t-distributed Stochastic Neighbor Embedding**
+
+- A dimensionality reduction technique specifically designed for visualization
+- Transforms high-dimensional data (hundreds or thousands of features) into 2D or 3D
+- Goal: Preserve the local structure of your data while making it viewable
 - Developed by Laurens van der Maaten and Geoffrey Hinton in 2008, see @van2008visualizing.
 
+Think of it as creating a "map" of your data where similar points stay close together.
 
-## How t-SNE Works
+## Why Do We Need t-SNE?
 
-- t-SNE converts high-dimensional Euclidean distances into **conditional probabilities**.
-- It aims to preserve the **local structure** of the data.
-- Uses a **heavy-tailed Student-t distribution** in the low-dimensional space to prevent crowding. This is where the $t$ in $t$-SNE comes from.
+**The Curse of Dimensionality**
 
+- Real datasets often have many features (dimensions)
+- Impossible to visualize data with 100+ dimensions
+- Traditional methods (like PCA) can lose important patterns
 
-We will describe how this process works.
+**What t-SNE offers:**
 
+- Reveals clusters and patterns in complex data
+- Preserves neighborhood relationships between points
+- Creates intuitive, interpretable visualizations
+
+## How Does t-SNE Work?
+
+### The Big Picture
+
+**Step 1: Measure Similarity in High Dimensions**
+
+- Calculate how "similar" each pair of points is in the original space
+- Similar points get high probability, distant points get low probability
+
+**Step 2: Create a Random Low-Dimensional Map**
+
+- Start with random positions for all points in 2D/3D
+
+**Step 3: Optimize the Map**
+
+- Iteratively move points around to match the high-dimensional similarities
+- Points that were neighbors in high-D should be neighbors in low-D
 
 ## Step 1: Compute Pairwise Similarities
 
@@ -693,9 +784,28 @@ We will describe how this process works.
   $$
   p_{j\vert i} = \frac{\exp(-\|x_i - x_j\|^2 / 2\sigma_i^2)}{\sum_{k \neq i} \exp(-\|x_i - x_k\|^2 / 2\sigma_i^2)}.
   $$
- - The $p_{j\vert i}$ value represents the conditional probability that point $x_i$ would choose $x_j$ as its neighbor. 
- - Note that we set $p_{i\vert i} = 0$ -- we don't consider a point to be its own neighbor.
- - The t-SNE defines the joint probability $p_{ij} = \frac{p_{j\vert i} + p_{i\vert j}}{2d}$ where $d$ is the dimension of the point. This is because the probabilities $p_{j\vert i}$ and $p_{i\vert j}$ are different. Using this value of $p_{ij}$ is called symmetric t-SNE.
+
+- The $p_{j\vert i}$ value represents the conditional probability that point $x_i$ would choose $x_j$ as its neighbor. 
+- Note that we set $p_{i\vert i} = 0$ -- we don't consider a point to be its own neighbor.
+- The t-SNE defines the joint probability $p_{ij} = \frac{p_{j\vert i} + p_{i\vert j}}{2d}$ where $d$ is the dimension of the point. This is because the probabilities $p_{j\vert i}$ and $p_{i\vert j}$ are different. Using this value of $p_{ij}$ is called symmetric t-SNE.
+
+## Step 1: Choosing $\sigma$
+
+- The variance is calculated within a neighborhood of a point $x_i$ determined by a hyperparameter called the **perplexity**.
+- As a result the perplexity controls the effective number of neighbors. 
+- A high perplexity means more neighbors for each point. A low perplexity means less neighbors are considered for each point.
+
+::: {.content-visible when-profile="slides"}
+> See notes for more information on perplexity.
+:::
+
+::: {.content-visible when-profile="web"}
+- The perplexity is defined as $\operatorname{Perp}(P_i) = 2^{H(P_i)}$, where $H(P_i)$ is the entropy of $P_i$. $P_i$ is the probability distribution induced by $\sigma_i$.
+- The entropy $H(P_i) = -\sum_j p_{j\vert i} \log_2{(p_{j\vert i})}$.
+- The value for $\sigma_i$ is computed to produce a distribution $P_i$ which equals the chosen value of the perplexity. 
+:::
+
+The perplexity commonly ranges  between 5 and 50.
 
 ## Visualizing the Pairwise Similarities
 
@@ -703,64 +813,15 @@ The Gaussian distribution is centered at point $x_i$ and the points $x_j$ that a
 
 ```{python}
 #| fig-align: center
-mean = 0
-std_dev = 1
-x = np.linspace(-5, 5, 1000)
-y = (1/(std_dev * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((x - mean) / std_dev)**2)
-
-# Points on the x-axis
-points_x = [0, 1, 4, 4.5]
-points_y = [0, 0, 0, 0]
-colors = ['#009E73', '#009E73', '#CC79A7', '#CC79A7']
-
-# Create the plot
-plt.plot(x, y, label='Gaussian Distribution')
-plt.scatter(points_x, points_y, color=colors, zorder=5)
-
-# Add labels and title
-plt.xlabel('X-axis')
-plt.ylabel('Probability Density')
-plt.title('Gaussian Distribution with Individual Points')
-plt.legend()
-
-# Show the plot
-plt.show()
-```
-
-## Choosing $\sigma$
-
-How do we determine the variance for the Gaussian?
-
-- The variance is determined by a hyperparameter called the **perplexity**.
-- As a result the perplexity controls the effective number of neighbors. 
-- A high perplexity means more neighbors for each point. A low perplexity means less neighbors are considered for each point.
-- The perplexity is defined as $\operatorname{Perp}(P_i) = 2^{H(P_i)}$, where $H(P_i)$ is the entropy of $P_i$. $P_i$ is the probability distribution induced by $\sigma_i$.
-- The entropy $H(P_i) = -\sum_j p_{j\vert i} \log_2{(p_{j\vert i})}$.
-- The value for $\sigma_i$ is computed to produce a distribution $P_i$ which equals the chosen value of the perplexity. 
-
-The perplexity commonly ranges  between 5 and 50.
-
-
-## Step 2: Define Low-Dimensional Map
-
-- Initialize points randomly in the low-dimensional space.
-- Define a similar probability distribution using a Student-t distribution:
-  $$
-  q_{ij} = \frac{(1 + \|y_i - y_j\|^2)^{-1}}{\sum_{k \neq l} (1 + \|y_k - y_l\|^2)^{-1}}.
-  $$
-- The heavy tails of the Student-t distribution help to spread out the points and prevent crowding of the points in the lower dimensional space.
-
----
-
-```{python}
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import t
 
-# Generate data for Gaussian distribution
 mean = 0
 std_dev = 1
-x = np.linspace(-5, 5, 1000)
+
+x = np.linspace(-4, 4, 100)
+
 gaussian_y = (1/(std_dev * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((x - mean) / std_dev)**2)
 
 # Generate data for Student's t-distribution with 10 degrees of freedom
@@ -782,6 +843,13 @@ plt.show()
 
 ```
 
+## Step 2: Define Low-Dimensional Map
+
+- Initialize points randomly in the low-dimensional space.
+- Define a similar probability distribution using a Student-t distribution:
+  $$
+  q_{ij} = \frac{(1 + \|y_i - y_j\|^2)^{-1}}{\sum_{k \neq l} (1 + \|y_k - y_l\|^2)^{-1}}.
+  $$
 
 ## Step 3: Minimize Kullback-Leibler Divergence
 
@@ -791,20 +859,9 @@ plt.show()
   $$
 - The KL divergence measures how different distribution $P$ is from distribution $Q$. In other words, how different are each of the higher dimensional $P_i$ point distributions from the lower dimensional $Q_i$ distributions.
 - By minimizing this function, we ensure that the lower dimensional point clusters are similar to the higher dimensional clusters.
-- To minimize the KL divergence we use gradient descent to iteratively adjust the positions of points in the low-dimensional space.
+- To minimize the KL divergence we use gradient descent on $\partial KL / \partial y_i$ to iteratively adjust the positions of points, $y_i$, in the low-dimensional space.
 
 
-## Pros of t-SNE
-
-- **Excellent for visualizing complex datasets**: Reveals clusters and patterns that are not visible in high-dimensional space.
-- **Captures non-linear relationships**: Preserves local structure and relationships between points.
-- **Preserves local structure effectively**: Ensures that similar points in high-dimensional space remain close in the low-dimensional representation.
-
-## Cons of t-SNE
-
-- **Computationally intensive**: Requires significant computational resources, especially for large datasets.
-- **Results can vary depending on hyperparameters**: Parameters like perplexity and learning rate can significantly affect the outcome.
-- **Not suitable for all types of data analysis**: Primarily used for visualization, not for tasks like feature extraction or predictive modeling.
 
 ## Case Study: Digits
 
@@ -822,7 +879,7 @@ y = digits.target
 tsne = TSNE(n_components=2, random_state=42)
 X_tsne = tsne.fit_transform(X)
 
-plt.figure(figsize=(7, 7))
+plt.figure(figsize=(5, 5))
 scatter = plt.scatter(X_tsne[:, 0], X_tsne[:, 1], c=y, cmap='tab20', edgecolor='k', s=50)
 plt.title('Digits in t-SNE Space')
 plt.xlabel('tSNE Component 1')
@@ -831,52 +888,147 @@ plt.ylabel('tSNE Component 2')
 # Create a legend with discrete labels
 legend_labels = np.unique(y)
 handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=plt.cm.tab20(i / 9), markersize=10) for i in legend_labels]
-plt.legend(handles, legend_labels, title="Digit Label", loc="best")
+plt.legend(handles, legend_labels, title="Digit Label", bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
 
 plt.show()
 
 ```
 
-## t-SNE vs PCA: Dimensionality Reduction
 
-- **PCA**: Linear method, reduces dimensions by maximizing variance along principal components.
-- **t-SNE**: Non-linear method, focuses on preserving local structure and relationships between points.
+## The Key Insight
 
+**t-SNE uses different probability distributions for each step:**
 
-## t-SNE vs PCA: Visualization
+- **High dimensions**: Gaussian (normal) distribution
+  - Measures similarity based on Euclidean distance
+  
+- **Low dimensions**: Student's t-distribution
+  - Has "heavier tails" than Gaussian
+  - Allows moderate distances in low-D to represent larger distances in high-D
+  - Helps prevent crowding and creates better separation
 
-- **PCA**: Good for understanding global structure and variance in the data.
-- **t-SNE**: Superior for visualizing clusters, local relationships, and non-linear structures.
+This asymmetry is what makes t-SNE effective!
 
+## When to Use t-SNE
 
-## t-SNE vs PCA: Computational Complexity
+**Great for:**
 
-- **PCA**: Faster and less computationally intensive, suitable for large datasets.
-- **t-SNE**: Slower, requires more computational resources, but provides more detailed visualizations.
+- Exploratory data analysis
+- Visualizing clusters in labeled data
+- Understanding complex datasets (images, text, genomics)
+- Finding patterns you didn't know existed
 
-# Recap
+**Common applications:**
 
-Today we discussed two dimensionality reduction techniques: PCA and t-SNE.
+- Image datasets (like MNIST digits)
+- Single-cell RNA sequencing data
+- Word embeddings
+- Customer segmentation
 
-We considered both on the MNIST digits dataset.
+## Important Limitations
 
-In summary
+::: {.columns}
+::: {.column width="50%"}
 
-- PCA is a faster, linear dimensionality reduction technique.
-- PCA captures the maximum amount of variance in each principal direction.
-- No parameter adjustments are needed for the SVD.
-- t-SNE is a powerful tool for reducing and visualizing high-dimensional data.
-- Choose t-SNE for detailed visualizations of local structures and clusters.
-- t-SNE is sensitive to changes in it's parameters.
-- Both methods have their own strengths and are chosen based on the specific needs of the analysis.
+**1. It's for visualization only**
 
+- Cannot use for dimensionality reduction before modeling
+- The low-dimensional representation changes each run
 
-::: {.content-visible when-profile="slides"}
+**2. Computationally expensive**
 
-## Course Feedback
+- Slow on large datasets (>10,000 points)
+- Consider using approximations or sampling
+:::
+::: {.column width="50%"}
 
-![](figs/qrcode_course_feedback.png){width="50%" fig-align="center" }
+**3. Hyperparameters matter**
+
+- Perplexity (neighborhood size) significantly affects results
+- Typical range: 5-50, default: 30
+
+**4. Distances are not meaningful**
+
+- Size of clusters doesn't mean anything
+- Distance between clusters is not interpretable
+- Only focus on local neighborhoods
 
 :::
+:::
+
+## Key Hyperparameter: Perplexity
+
+**Perplexity** controls how t-SNE balances local vs. global structure
+
+- Think of it as "how many neighbors to consider"
+- Low perplexity (5-10): Focuses on very local structure
+- High perplexity (30-50): Considers broader neighborhood
+
+**Rule of thumb:**
+- Should be less than the number of points
+- Try multiple values to see which reveals the best structure
+- Default of 30 often works well
+
+
+
+
+## Practical Tips
+
+::: {.columns}
+::: {.column}
+
+**1. Preprocessing matters**
+
+- Scale/normalize your features first
+- Consider PCA preprocessing for high dimensions
+
+**2. Try different perplexities**
+
+- Run 3-5 different values
+- Look for consistent patterns across runs
+
+:::
+::: {.column}
+
+**3. Run multiple times**
+
+- Results vary due to random initialization
+- Look for stable structures
+
+**4. Don't over-interpret**
+
+- Focus on local clusters, not global geometry
+- Use alongside other analysis methods
+
+:::
+:::
+
+## Summary
+
+**t-SNE is a powerful visualization tool that:**
+
+- Makes high-dimensional data visible
+- Preserves local neighborhood structure
+- Reveals clusters and patterns effectively
+
+**Remember:**
+
+- Only for visualization, not for modeling
+- Computationally intensive
+- Hyperparameters (especially perplexity) matter
+- Always complement with other analysis methods
+
+## Recap: t-SNE vs PCA
+
+| Feature | PCA | t-SNE |
+|---------|-----|-------|
+| **Speed** | Fast | Slow |
+| **Purpose** | Dimensionality reduction | Visualization |
+| **Preserves** | Global variance | Local neighborhoods |
+| **Deterministic?** | Yes | No (random initialization) |
+| **Distances** | Meaningful | Not meaningful |
+| **Further analysis?** | Yes | No |
+
+**Best practice**: Use PCA first to reduce to ~50 dimensions, then apply t-SNE
 
 ---
