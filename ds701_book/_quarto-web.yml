@@ -93,6 +93,7 @@ website:
       contents:
         - 17-Regression-I-Linear.qmd
         - 18-Regression-II-Logistic.qmd
+        - 18A-decision-tree-regression.qmd
         - 19-Regression-III-More-Linear.qmd    
     - section: "Dimensionality Reduction"
       contents:

@@ -26,6 +26,7 @@ project:
     - 16-Classification-III-NB-SVM.qmd
     - 17-Regression-I-Linear.qmd
     - 18-Regression-II-Logistic.qmd
+    - 18A-decision-tree-regression.qmd
     - 19-Regression-III-More-Linear.qmd
     - 20-Recommender-Systems.qmd
     - 21-Networks-I.qmd
