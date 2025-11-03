@@ -12,20 +12,24 @@ import sys
 from pathlib import Path
 
 
-def check_conditional_block(div_attrs, profile):
+def check_special_block(div_attrs, profile):
     """
-    Check if a content block is conditional and whether it should be removed.
+    Check if a content block has special handling (conditional, fragment, or incremental).
     
     Args:
         div_attrs: The attributes string from a div tag (e.g., '{.content-visible when-profile="web"}')
         profile: The selected profile ('web' or 'slides')
     
     Returns:
-        Tuple of (is_conditional, should_remove_content, should_remove_wrapper)
-        - is_conditional: True if this is a content-visible/content-hidden block
+        Tuple of (is_special, should_remove_content, should_remove_wrapper)
+        - is_special: True if this block has special handling
         - should_remove_content: True if the content should be removed
         - should_remove_wrapper: True if the div wrapper tags should be removed
     """
+    # Check for fragment or incremental - remove wrapper, keep content
+    if re.search(r'\.fragment\b', div_attrs) or re.search(r'\.incremental\b', div_attrs):
+        return (True, False, True)
+    
     # Check for content-visible
     visible_match = re.search(r'\.content-visible\s+when-profile="(\w+)"', div_attrs)
     if visible_match:
@@ -49,39 +53,6 @@ def check_conditional_block(div_attrs, profile):
             return (True, False, True)
     
     return (False, False, False)
-
-
-def strip_fragment_incremental(line):
-    """
-    Remove {.fragment} and {.incremental} from a line while preserving other attributes.
-    """
-    # Preserve the original line ending
-    line_ending = '\n' if line.endswith('\n') else ''
-    line_content = line.rstrip('\n\r')
-    
-    # Handle standalone {.fragment} or {.incremental}
-    line_content = re.sub(r'^(\s*:{3,})\s*\{\.fragment\}\s*$', r'\1', line_content)
-    line_content = re.sub(r'^(\s*:{3,})\s*\{\.incremental\}\s*$', r'\1', line_content)
-    
-    # Handle mixed attributes - remove .fragment and .incremental from attribute blocks
-    def clean_attrs(match):
-        colons = match.group(1)
-        attrs = match.group(2)
-        # Remove .fragment and .incremental
-        attrs = re.sub(r'\.fragment\s*', '', attrs)
-        attrs = re.sub(r'\.incremental\s*', '', attrs)
-        # Clean up extra whitespace
-        attrs = re.sub(r'\s+', ' ', attrs).strip()
-        
-        if attrs:
-            return colons + ' {' + attrs + '}'
-        else:
-            # If no attributes left, just return the colons
-            return colons
-    
-    line_content = re.sub(r'^(\s*:{3,})\s*\{([^}]+)\}', clean_attrs, line_content)
-    
-    return line_content + line_ending
 
 
 def process_file(input_file, profile):
@@ -150,21 +121,19 @@ def process_file(input_file, profile):
                 currently_skipping = any(skip_content for _, skip_content, _ in skip_stack)
                 
                 if attrs and not currently_skipping:
-                    # Check if this is a conditional block
-                    is_conditional, should_remove_content, should_remove_wrapper = check_conditional_block(attrs, profile)
+                    # Check if this block has special handling
+                    is_special, should_remove_content, should_remove_wrapper = check_special_block(attrs, profile)
                     
-                    if is_conditional:
-                        # Track this conditional block
+                    if is_special:
+                        # Track this special block
                         skip_stack.append((colon_count, should_remove_content, should_remove_wrapper))
                         # Don't output the opening tag if we're removing the wrapper
                         if not should_remove_wrapper:
-                            line = strip_fragment_incremental(line)
+                            # This shouldn't happen for our use cases, but keep it for safety
                             output_lines.append(line)
                     else:
-                        # Not a conditional block - keep it
+                        # Normal block - keep it
                         skip_stack.append((colon_count, False, False))
-                        # Remove fragment/incremental tags and add to output
-                        line = strip_fragment_incremental(line)
                         output_lines.append(line)
                 elif currently_skipping:
                     # We're inside a skip block, track nesting and skip
@@ -172,14 +141,12 @@ def process_file(input_file, profile):
                 else:
                     # No attributes, track the div and output it
                     skip_stack.append((colon_count, False, False))
-                    line = strip_fragment_incremental(line)
                     output_lines.append(line)
             continue
         
         # Regular line - add to output if not skipping content
         currently_skipping = any(skip_content for _, skip_content, _ in skip_stack)
         if not currently_skipping:
-            line = strip_fragment_incremental(line)
             output_lines.append(line)
     
     return output_lines
