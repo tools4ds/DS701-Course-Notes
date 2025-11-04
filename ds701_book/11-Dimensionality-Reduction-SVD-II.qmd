@@ -1031,4 +1031,8 @@ This asymmetry is what makes t-SNE effective!
 
 **Best practice**: Use PCA first to reduce to ~50 dimensions, then apply t-SNE
 
+## In-Class Exercise: Dimensionality Reduction with PCA and t-SNE
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/class_activity_notebooks/11-InClass-Exercise-Dimensionality-Reduction.ipynb)
+
 ---
