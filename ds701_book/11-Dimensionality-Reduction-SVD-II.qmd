@@ -128,7 +128,7 @@ X_0 =
 80 & 60 & 70 \end{bmatrix}
 $$
 
-The mean across rows is:
+The mean, per column, across rows is:
 $$
 \boldsymbol{\mu} = \begin{bmatrix} 85 & 60 & 65 \end{bmatrix}
 $$
@@ -176,6 +176,10 @@ Let $X\in\mathbb{R}^{m\times n}$ contain the centered data. The sample covarianc
 $$
 S = \frac{1}{m-1}X^{T}X
 $$
+
+::: {.content-visible when-profile="slides"}
+_(See [notes](./11-Dimensionality-Reduction-SVD-II.qmd#understanding-the-formula) for derivation.)_
+:::
 
 Example:   
 $$
@@ -327,6 +331,29 @@ The reduced data matrix is obtained by computing
 $$
 Y = XV'.
 $$
+
+
+## Spatial Interpretation -- Dimensions
+
+The operation $Y = XV'$ performs a **change of basis** and **projection** of your data:
+
+- $X \in \mathbb{R}^{m \times n}$: each of the $m$ rows is a data point in the original $n$-dimensional feature space
+- $V' \in \mathbb{R}^{n \times d}$: contains the first $d$ principal components as columns (these are orthogonal vectors)
+- $Y \in \mathbb{R}^{m \times d}$: each row is now a data point in the new $d$-dimensional space
+
+## Geometric Interpretation
+
+1. **Rotation**: The multiplication by $V'$ rotates your coordinate system. The columns of $V'$ define a new set of $d$ orthogonal axes that point in the directions of maximum variance.
+
+2. **Projection**: Each data point in $X$ is projected onto this new coordinate system. For each row vector $\mathbf{x}_i$ (a point in $\mathbb{R}^n$):
+   $$\mathbf{y}_i = \mathbf{x}_i V' = \begin{bmatrix} \mathbf{x}_i \cdot \mathbf{v}_1 & \mathbf{x}_i \cdot \mathbf{v}_2 & \cdots & \mathbf{x}_i \cdot \mathbf{v}_d \end{bmatrix}$$
+
+3. **Dimensionality Reduction**: You're effectively taking each point in $n$-dimensional space and expressing it using only $d$ coordinates - the coordinates along the principal component directions. You're discarding the components along directions with low variance.
+
+#### Intuitive View
+
+Think of it as finding the "best viewing angle" for your data. If you have data in 3D that's mostly flat (like a pancake), PCA finds that the data lies approximately in a 2D plane. $V'$ defines that plane's orientation, and $Y$ gives you the coordinates of each point within that plane.
+
 
 ----
 
@@ -787,7 +814,7 @@ Think of it as creating a "map" of your data where similar points stay close tog
 
 - The $p_{j\vert i}$ value represents the conditional probability that point $x_i$ would choose $x_j$ as its neighbor. 
 - Note that we set $p_{i\vert i} = 0$ -- we don't consider a point to be its own neighbor.
-- The t-SNE defines the joint probability $p_{ij} = \frac{p_{j\vert i} + p_{i\vert j}}{2d}$ where $d$ is the dimension of the point. This is because the probabilities $p_{j\vert i}$ and $p_{i\vert j}$ are different. Using this value of $p_{ij}$ is called symmetric t-SNE.
+- To create symmetric joint probabilities, t-SNE combines these two conditional probabilities into a single joint probability $p_{ij} = \frac{p_{j\vert i} + p_{i\vert j}}{2d}$ where $d$ is the dimension of the point. This is because the probabilities $p_{j\vert i}$ and $p_{i\vert j}$ are different. Using this value of $p_{ij}$ is called symmetric t-SNE.
 
 ## Step 1: Choosing $\sigma$
 
@@ -796,7 +823,7 @@ Think of it as creating a "map" of your data where similar points stay close tog
 - A high perplexity means more neighbors for each point. A low perplexity means less neighbors are considered for each point.
 
 ::: {.content-visible when-profile="slides"}
-> See notes for more information on perplexity.
+> See notes for definition of perplexity.
 :::
 
 ::: {.content-visible when-profile="web"}
@@ -846,7 +873,7 @@ plt.show()
 ## Step 2: Define Low-Dimensional Map
 
 - Initialize points randomly in the low-dimensional space.
-- Define a similar probability distribution using a Student-t distribution:
+- Define a similar probability distribution using a simplified Student-t distribution:
   $$
   q_{ij} = \frac{(1 + \|y_i - y_j\|^2)^{-1}}{\sum_{k \neq l} (1 + \|y_k - y_l\|^2)^{-1}}.
   $$
