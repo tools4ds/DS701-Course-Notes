@@ -1,0 +1,861 @@
+---
+title: 'NN IV -- Neural Networks in Scikit-Learn'
+jupyter: python3
+---
+
+## Introduction
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/29-NN-IV-Scikit-Learn.ipynb)
+
+```{python}
+#| code-fold: true
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from IPython.display import Image, HTML
+import warnings
+warnings.filterwarnings('ignore')
+
+%matplotlib inline
+```
+
+In previous lectures, we built neural networks from scratch and used PyTorch. Now we'll explore scikit-learn's neural network capabilities, which provide a simpler, high-level interface for many common tasks.
+
+::: {.callout-note}
+While PyTorch and TensorFlow are more powerful for complex deep learning tasks, scikit-learn's `MLPClassifier` and `MLPRegressor` are excellent for:
+
+* Rapid prototyping
+* Small to medium-sized datasets
+* Integration with scikit-learn pipelines
+* Cases where you need a simple, fast neural network solution
+:::
+
+# Multi-Layer Perceptron in Scikit-Learn
+
+## MLPClassifier and MLPRegressor
+
+Scikit-learn provides two main classes for neural networks:
+
+* **`MLPClassifier`**: Multi-layer Perceptron classifier
+* **`MLPRegressor`**: Multi-layer Perceptron regressor
+
+Both use the same underlying architecture but differ in their output layer and loss function.
+
+::: {.content-visible when-profile="slides"}
+## MLPClassifier and MLPRegressor
+:::
+
+Key features:
+
+* **Multiple hidden layers**: Specify architecture with a tuple
+* **Various activation functions**: `'relu'`, `'tanh'`, `'logistic'`, `'identity'`
+* **Multiple solvers**: `'adam'`, `'sgd'`, `'lbfgs'`
+* **Regularization**: L2 penalty parameter `alpha`
+* **Early stopping**: Automatic validation-based stopping
+
+## Basic Architecture
+
+The architecture is specified as a tuple of hidden layer sizes:
+
+```python
+# Single hidden layer with 100 neurons
+hidden_layer_sizes=(100,)
+
+# Two hidden layers with 100 and 50 neurons
+hidden_layer_sizes=(100, 50)
+
+# Three hidden layers
+hidden_layer_sizes=(128, 64, 32)
+```
+
+The input and output layers are automatically determined from the data.
+
+# Classification Example: MNIST Digits
+
+## Load and Explore the Data
+
+Let's classify handwritten digits using the MNIST dataset.
+
+```{python}
+#| code-fold: false
+from sklearn.datasets import fetch_openml
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# Load MNIST data (this may take a moment)
+print("Loading MNIST dataset...")
+X, y = fetch_openml('mnist_784', version=1, return_X_y=True, as_frame=False, parser='auto')
+
+# Convert labels to integers (they come as strings from fetch_openml)
+y = y.astype(int)
+
+# Use a subset for faster training in this demo
+# Remove this line to use the full dataset
+X, _, y, _ = train_test_split(X, y, train_size=10000, stratify=y, random_state=42)
+
+print(f"Dataset shape: {X.shape}")
+print(f"Number of classes: {len(np.unique(y))}")
+print(f"Label type: {y.dtype}")
+```
+
+::: {.content-visible when-profile="slides"}
+## Load and Explore the Data
+:::
+
+Split into training and test sets:
+
+```{python}
+#| code-fold: false
+# Split the data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+print(f"Training set size: {X_train.shape[0]}")
+print(f"Test set size: {X_test.shape[0]}")
+```
+
+::: {.content-visible when-profile="slides"}
+## Load and Explore the Data
+:::
+
+Visualize some examples:
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+fig, axes = plt.subplots(2, 5, figsize=(12, 5))
+for i, ax in enumerate(axes.flat):
+    ax.imshow(X_train[i].reshape(28, 28), cmap='gray')
+    ax.set_title(f'Label: {y_train[i]}')
+    ax.axis('off')
+plt.tight_layout()
+plt.show()
+```
+
+## Preprocessing
+
+Neural networks work best with normalized data:
+
+```{python}
+#| code-fold: false
+# Scale features to [0, 1] range (pixels are already in [0, 255])
+X_train_scaled = X_train / 255.0
+X_test_scaled = X_test / 255.0
+
+print(f"Feature range: [{X_train_scaled.min():.2f}, {X_train_scaled.max():.2f}]")
+```
+
+::: {.callout-tip}
+Alternatively, you could use `StandardScaler()` to normalize to zero mean and unit variance, which is often preferred for neural networks.
+:::
+
+## Create and Train the MLP
+
+```{python}
+#| code-fold: false
+from sklearn.neural_network import MLPClassifier
+
+# Create MLP with 2 hidden layers
+mlp = MLPClassifier(
+    hidden_layer_sizes=(128, 64),  # Two hidden layers
+    activation='relu',              # ReLU activation
+    solver='adam',                  # Adam optimizer
+    alpha=0.0001,                   # L2 regularization
+    batch_size=64,                  # Mini-batch size
+    learning_rate_init=0.001,       # Initial learning rate
+    max_iter=20,                    # Number of epochs
+    random_state=42,
+    verbose=True                    # Print progress
+)
+
+# Train the model
+print("Training MLP...")
+mlp.fit(X_train_scaled, y_train)
+```
+
+::: {.content-visible when-profile="slides"}
+## Create and Train the MLP
+:::
+
+The `verbose=True` parameter shows the loss at each iteration, similar to what we saw in our custom implementation and PyTorch.
+
+## Evaluate the Model
+
+```{python}
+#| code-fold: false
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Make predictions
+y_pred = mlp.predict(X_test_scaled)
+
+# Calculate accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print(f"\nTest Accuracy: {accuracy:.4f}")
+```
+
+::: {.content-visible when-profile="slides"}
+## Evaluate the Model
+:::
+
+Detailed classification report:
+
+```{python}
+#| code-fold: false
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+```
+
+::: {.content-visible when-profile="slides"}
+## Evaluate the Model
+:::
+
+Visualize the confusion matrix:
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+from sklearn.metrics import ConfusionMatrixDisplay
+
+fig, ax = plt.subplots(figsize=(10, 8))
+cm = confusion_matrix(y_test, y_pred)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=mlp.classes_)
+disp.plot(ax=ax, cmap='Blues', values_format='d')
+plt.title('Confusion Matrix for MNIST Classification')
+plt.show()
+```
+
+## Visualize Training Progress
+
+Scikit-learn's MLP stores the loss at each iteration:
+
+```{python}
+#| code-fold: false
+#| fig-align: center
+plt.figure(figsize=(10, 6))
+plt.plot(mlp.loss_curve_)
+plt.xlabel('Iteration')
+plt.ylabel('Loss')
+plt.title('Training Loss Curve')
+plt.grid(True)
+plt.show()
+```
+
+::: {.callout-note}
+The loss curve shows how the model's error decreases during training. A smooth decreasing curve indicates good convergence.
+:::
+
+## Visualize Predictions
+
+Let's look at some predictions and their confidence:
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+# Get prediction probabilities
+y_pred_proba = mlp.predict_proba(X_test_scaled)
+
+# Visualize some predictions
+fig, axes = plt.subplots(2, 5, figsize=(15, 6))
+for i, ax in enumerate(axes.flat):
+    ax.imshow(X_test[i].reshape(28, 28), cmap='gray')
+    pred_label = y_pred[i]
+    true_label = y_test[i]
+    confidence = y_pred_proba[i].max()
+    
+    color = 'green' if pred_label == true_label else 'red'
+    ax.set_title(f'True: {true_label}, Pred: {pred_label}\nConf: {confidence:.2f}', 
+                 color=color)
+    ax.axis('off')
+plt.tight_layout()
+plt.show()
+```
+
+# Regression Example: California Housing
+
+## Load and Prepare Data
+
+Now let's use `MLPRegressor` for a regression task:
+
+```{python}
+#| code-fold: false
+from sklearn.datasets import fetch_california_housing
+from sklearn.preprocessing import StandardScaler
+
+# Load California housing dataset
+housing = fetch_california_housing()
+X_housing = housing.data
+y_housing = housing.target
+
+print(f"Dataset shape: {X_housing.shape}")
+print(f"Features: {housing.feature_names}")
+print(f"Target: Median house value (in $100,000s)")
+```
+
+::: {.content-visible when-profile="slides"}
+## Load and Prepare Data
+:::
+
+```{python}
+#| code-fold: false
+# Split the data
+X_train_h, X_test_h, y_train_h, y_test_h = train_test_split(
+    X_housing, y_housing, test_size=0.2, random_state=42
+)
+
+# Scale the features (important for neural networks!)
+scaler = StandardScaler()
+X_train_h_scaled = scaler.fit_transform(X_train_h)
+X_test_h_scaled = scaler.transform(X_test_h)
+```
+
+## Train MLP Regressor
+
+```{python}
+#| code-fold: false
+from sklearn.neural_network import MLPRegressor
+
+mlp_reg = MLPRegressor(
+    hidden_layer_sizes=(100, 50),
+    activation='relu',
+    solver='adam',
+    alpha=0.001,
+    batch_size=32,
+    learning_rate_init=0.001,
+    max_iter=100,
+    random_state=42,
+    verbose=False,
+    early_stopping=True,        # Use validation set for early stopping
+    validation_fraction=0.1,    # 10% of training data for validation
+    n_iter_no_change=10         # Stop if no improvement for 10 iterations
+)
+
+print("Training MLP Regressor...")
+mlp_reg.fit(X_train_h_scaled, y_train_h)
+print("Training complete!")
+```
+
+::: {.content-visible when-profile="slides"}
+## Train MLP Regressor
+:::
+
+The `early_stopping=True` parameter automatically reserves some training data for validation and stops training when the validation score stops improving.
+
+## Evaluate Regression Model
+
+```{python}
+#| code-fold: false
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+
+# Make predictions
+y_pred_h = mlp_reg.predict(X_test_h_scaled)
+
+# Calculate metrics
+mse = mean_squared_error(y_test_h, y_pred_h)
+rmse = np.sqrt(mse)
+mae = mean_absolute_error(y_test_h, y_pred_h)
+r2 = r2_score(y_test_h, y_pred_h)
+
+print(f"Mean Squared Error: {mse:.4f}")
+print(f"Root Mean Squared Error: {rmse:.4f}")
+print(f"Mean Absolute Error: {mae:.4f}")
+print(f"R² Score: {r2:.4f}")
+```
+
+::: {.content-visible when-profile="slides"}
+## Evaluate Regression Model
+:::
+
+Visualize predictions vs actual values:
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+# Scatter plot
+axes[0].scatter(y_test_h, y_pred_h, alpha=0.5)
+axes[0].plot([y_test_h.min(), y_test_h.max()], 
+             [y_test_h.min(), y_test_h.max()], 'r--', lw=2)
+axes[0].set_xlabel('Actual Values')
+axes[0].set_ylabel('Predicted Values')
+axes[0].set_title('Predicted vs Actual House Prices')
+axes[0].grid(True)
+
+# Residual plot
+residuals = y_test_h - y_pred_h
+axes[1].scatter(y_pred_h, residuals, alpha=0.5)
+axes[1].axhline(y=0, color='r', linestyle='--', lw=2)
+axes[1].set_xlabel('Predicted Values')
+axes[1].set_ylabel('Residuals')
+axes[1].set_title('Residual Plot')
+axes[1].grid(True)
+
+plt.tight_layout()
+plt.show()
+```
+
+::: {.content-visible when-profile="slides"}
+## Evaluate Regression Model
+:::
+
+Training and validation loss curves:
+
+```{python}
+#| code-fold: false
+#| fig-align: center
+plt.figure(figsize=(10, 6))
+plt.plot(mlp_reg.loss_curve_, label='Training Loss')
+plt.plot(mlp_reg.validation_scores_, label='Validation Score (R²)')
+plt.xlabel('Iteration')
+plt.ylabel('Value')
+plt.title('Training Progress with Early Stopping')
+plt.legend()
+plt.grid(True)
+plt.show()
+```
+
+# Hyperparameter Tuning
+
+## Grid Search
+
+One of the advantages of scikit-learn is easy integration with hyperparameter tuning tools:
+
+```{python}
+#| code-fold: false
+#| warning: false
+from sklearn.model_selection import GridSearchCV
+
+# Define parameter grid (simplified for faster execution)
+param_grid = {
+    'hidden_layer_sizes': [(50,), (100,), (50, 50)],
+    'activation': ['relu'],
+    'alpha': [0.0001, 0.001]
+}
+
+# Create MLP with fewer iterations for faster grid search
+mlp_grid = MLPClassifier(
+    max_iter=20,
+    random_state=42,
+    early_stopping=True,
+    validation_fraction=0.1,
+    n_iter_no_change=5,
+    verbose=False
+)
+
+print("Running Grid Search (this may take a while)...")
+# Use a smaller subset for the grid search demo
+X_grid = X_train_scaled[:1500]
+y_grid = y_train[:1500]
+
+grid_search = GridSearchCV(
+    mlp_grid, 
+    param_grid, 
+    cv=3,           # 3-fold cross-validation
+    n_jobs=2,       # Limit parallel jobs for better stability
+    verbose=0
+)
+
+grid_search.fit(X_grid, y_grid)
+print("\nBest parameters:", grid_search.best_params_)
+print(f"Best cross-validation score: {grid_search.best_score_:.4f}")
+```
+
+::: {.content-visible when-profile="slides"}
+## Grid Search
+:::
+
+Visualize grid search results:
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+#| warning: false
+results_df = pd.DataFrame(grid_search.cv_results_)
+
+# Get top configurations
+n_configs = min(10, len(results_df))
+top_results = results_df.nlargest(n_configs, 'mean_test_score')
+
+plt.figure(figsize=(12, 6))
+plt.barh(range(len(top_results)), top_results['mean_test_score'])
+plt.yticks(range(len(top_results)), 
+           [f"Config {i+1}" for i in range(len(top_results))])
+plt.xlabel('Mean CV Score')
+plt.title('Top Hyperparameter Configurations')
+plt.grid(True, axis='x')
+plt.tight_layout()
+plt.show()
+
+print("\nTop configurations:")
+print(top_results[['params', 'mean_test_score', 'std_test_score']].head())
+```
+
+# Comparison: Scikit-Learn vs PyTorch
+
+## When to Use Each
+
+:::: {.columns}
+::: {.column width="50%"}
+### Scikit-Learn MLP
+
+**Advantages:**
+* Simple, high-level API
+* Easy integration with scikit-learn pipelines
+* Built-in cross-validation and grid search
+* Good for small to medium datasets
+* Minimal boilerplate code
+
+**Best for:**
+* Rapid prototyping
+* Standard ML workflows
+* Small to medium datasets (< 100K samples)
+* When you need scikit-learn compatibility
+:::
+
+::: {.column width="50%"}
+### PyTorch
+
+**Advantages:**
+* Full control over architecture
+* GPU acceleration
+* Advanced architectures (CNNs, RNNs, Transformers)
+* Dynamic computation graphs
+* Production deployment tools
+
+**Best for:**
+* Large datasets (> 100K samples)
+* Complex architectures
+* GPU-accelerated training
+* Research and experimentation
+* Production deep learning systems
+:::
+::::
+
+## Code Comparison
+
+Let's compare the code for creating a simple MLP:
+
+:::: {.columns}
+::: {.column width="50%"}
+### Scikit-Learn
+
+```python
+from sklearn.neural_network import MLPClassifier
+
+# Define and train
+mlp = MLPClassifier(
+    hidden_layer_sizes=(128, 64),
+    activation='relu',
+    max_iter=100
+)
+mlp.fit(X_train, y_train)
+
+# Predict
+predictions = mlp.predict(X_test)
+```
+:::
+
+::: {.column width="50%"}
+### PyTorch
+
+```python
+import torch
+import torch.nn as nn
+
+class MLP(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(784, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, 10)
+        )
+    
+    def forward(self, x):
+        return self.layers(x)
+
+# Training loop required...
+```
+:::
+::::
+
+::: {.callout-tip}
+For most standard tasks with moderate-sized datasets, scikit-learn's MLP is perfectly adequate and much simpler to use. Save PyTorch for when you need more power and flexibility.
+:::
+
+# Advanced Features
+
+## Learning Rate Schedules
+
+Scikit-learn supports adaptive learning rates:
+
+```{python}
+#| code-fold: false
+# Adaptive learning rate
+mlp_adaptive = MLPClassifier(
+    hidden_layer_sizes=(100, 50),
+    learning_rate='adaptive',      # Decrease learning rate when loss plateaus
+    learning_rate_init=0.01,
+    max_iter=50,
+    random_state=42,
+    verbose=False
+)
+
+mlp_adaptive.fit(X_train_scaled[:5000], y_train[:5000])
+print(f"Final accuracy: {mlp_adaptive.score(X_test_scaled, y_test):.4f}")
+```
+
+## Warm Start
+
+You can continue training from where you left off:
+
+```{python}
+#| code-fold: false
+# Initial training
+mlp_warm = MLPClassifier(
+    hidden_layer_sizes=(100,),
+    max_iter=10,
+    warm_start=True,    # Allow continued training
+    random_state=42,
+    verbose=False
+)
+
+print("Initial training (10 iterations)...")
+mlp_warm.fit(X_train_scaled[:5000], y_train[:5000])
+print(f"Accuracy after 10 iterations: {mlp_warm.score(X_test_scaled, y_test):.4f}")
+
+# Continue training
+print("\nContinued training (10 more iterations)...")
+mlp_warm.set_params(max_iter=20)
+mlp_warm.fit(X_train_scaled[:5000], y_train[:5000])
+print(f"Accuracy after 20 iterations: {mlp_warm.score(X_test_scaled, y_test):.4f}")
+```
+
+## Partial Fit for Online Learning
+
+For large datasets that don't fit in memory, use `partial_fit`:
+
+```{python}
+#| code-fold: false
+from sklearn.neural_network import MLPClassifier
+
+# Create model
+mlp_online = MLPClassifier(
+    hidden_layer_sizes=(100,),
+    random_state=42,
+    warm_start=True
+)
+
+# Train in batches
+batch_size = 1000
+n_batches = len(X_train_scaled) // batch_size
+
+print("Training with partial_fit...")
+for i in range(min(n_batches, 5)):  # Just 5 batches for demo
+    start_idx = i * batch_size
+    end_idx = start_idx + batch_size
+    
+    X_batch = X_train_scaled[start_idx:end_idx]
+    y_batch = y_train[start_idx:end_idx]
+    
+    # For first batch, need to specify classes
+    if i == 0:
+        mlp_online.partial_fit(X_batch, y_batch, classes=np.unique(y_train))
+    else:
+        mlp_online.partial_fit(X_batch, y_batch)
+    
+    if (i + 1) % 2 == 0:
+        score = mlp_online.score(X_test_scaled, y_test)
+        print(f"  Batch {i+1}/{n_batches}: Test accuracy = {score:.4f}")
+```
+
+# Best Practices
+
+## 1. Data Preprocessing
+
+Always scale your features:
+
+```{python}
+#| code-fold: false
+from sklearn.pipeline import Pipeline
+
+# Create a pipeline with scaling and MLP
+pipeline = Pipeline([
+    ('scaler', StandardScaler()),
+    ('mlp', MLPClassifier(hidden_layer_sizes=(100,), random_state=42))
+])
+
+# The pipeline handles scaling automatically
+pipeline.fit(X_train[:1000], y_train[:1000])
+accuracy = pipeline.score(X_test, y_test)
+print(f"Pipeline accuracy: {accuracy:.4f}")
+```
+
+## 2. Cross-Validation
+
+Use cross-validation to get robust performance estimates:
+
+```{python}
+#| code-fold: false
+from sklearn.model_selection import cross_val_score
+
+mlp_cv = MLPClassifier(
+    hidden_layer_sizes=(50,),
+    max_iter=20,
+    random_state=42,
+    verbose=False
+)
+
+# 5-fold cross-validation
+cv_scores = cross_val_score(
+    mlp_cv, 
+    X_train_scaled[:2000], 
+    y_train[:2000],
+    cv=5,
+    n_jobs=-1
+)
+
+print(f"CV Scores: {cv_scores}")
+print(f"Mean CV Score: {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
+```
+
+## 3. Monitor for Overfitting
+
+Use early stopping and regularization:
+
+```{python}
+#| code-fold: false
+# With early stopping and regularization
+mlp_reg = MLPClassifier(
+    hidden_layer_sizes=(100, 50),
+    alpha=0.01,              # L2 regularization
+    early_stopping=True,
+    validation_fraction=0.2,
+    n_iter_no_change=10,
+    max_iter=100,
+    random_state=42,
+    verbose=False
+)
+
+mlp_reg.fit(X_train_scaled[:5000], y_train[:5000])
+print(f"Training stopped at iteration: {mlp_reg.n_iter_}")
+print(f"Best validation score: {mlp_reg.best_validation_score_:.4f}")
+print(f"Test accuracy: {mlp_reg.score(X_test_scaled, y_test):.4f}")
+```
+
+# Practical Tips
+
+## Architecture Selection
+
+::: {.callout-tip}
+### Rules of Thumb
+
+1. **Start simple**: Try a single hidden layer first
+2. **Layer size**: Start with layer sizes between input and output dimensions
+3. **Deeper vs wider**: More layers can learn more complex patterns, but may overfit
+4. **Typical architectures**:
+   - Small datasets: (100,) or (50, 50)
+   - Medium datasets: (100, 50) or (128, 64, 32)
+   - Large datasets: Consider PyTorch instead
+:::
+
+## Solver Selection
+
+Different solvers work better in different scenarios:
+
+| Solver | Best For | Notes |
+|--------|----------|-------|
+| `'adam'` | Most cases | Good default, fast convergence |
+| `'sgd'` | Large datasets | Need to tune learning rate carefully |
+| `'lbfgs'` | Small datasets | Faster for small datasets, more memory |
+
+```{python}
+#| code-fold: false
+# Example comparing solvers
+solvers = ['adam', 'sgd', 'lbfgs']
+results = {}
+
+for solver in solvers:
+    mlp = MLPClassifier(
+        hidden_layer_sizes=(50,),
+        solver=solver,
+        max_iter=50,
+        random_state=42,
+        verbose=False
+    )
+    mlp.fit(X_train_scaled[:2000], y_train[:2000])
+    score = mlp.score(X_test_scaled, y_test)
+    results[solver] = score
+    print(f"{solver:10s}: {score:.4f}")
+```
+
+## Common Issues and Solutions
+
+::: {.callout-warning}
+### Convergence Warnings
+
+If you see `ConvergenceWarning`, try:
+1. Increase `max_iter`
+2. Decrease `learning_rate_init`
+3. Enable `early_stopping=True`
+4. Check if data is properly scaled
+:::
+
+::: {.callout-warning}
+### Poor Performance
+
+If accuracy is low, check:
+1. Is the data scaled/normalized?
+2. Is the architecture appropriate for the problem?
+3. Is the learning rate too high or low?
+4. Do you need more training iterations?
+5. Is regularization (`alpha`) too strong?
+:::
+
+# Summary
+
+## Recap
+
+We covered:
+
+* Scikit-learn's `MLPClassifier` and `MLPRegressor`
+* Classification example with MNIST
+* Regression example with California Housing
+* Hyperparameter tuning with Grid Search
+* Comparison with PyTorch
+* Advanced features: adaptive learning, warm start, partial fit
+* Best practices and practical tips
+
+::: {.content-visible when-profile="slides"}
+## Recap
+:::
+
+**Key Takeaways:**
+
+1. Scikit-learn's MLP is great for standard ML tasks with moderate data
+2. Always preprocess/scale your data
+3. Use cross-validation and early stopping to avoid overfitting
+4. Start with simple architectures and gradually increase complexity
+5. For large-scale or complex tasks, consider PyTorch
+
+## Resources
+
+* [Scikit-learn Neural Network Documentation](https://scikit-learn.org/stable/modules/neural_networks_supervised.html)
+* [MLPClassifier API Reference](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html)
+* [MLPRegressor API Reference](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html)
+* [Neural Network Models in Scikit-learn](https://scikit-learn.org/stable/modules/neural_networks_supervised.html)
+
+## Exercise
+
+Try the following on your own:
+
+1. Train an MLP on the Iris dataset and compare with other classifiers
+2. Experiment with different architectures on MNIST
+3. Use Grid Search to find optimal hyperparameters for a regression task
+4. Build a pipeline that includes feature engineering and MLP
+5. Compare training time and accuracy between scikit-learn and PyTorch on the same task
+
