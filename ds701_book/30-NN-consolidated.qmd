@@ -1,0 +1,1114 @@
+---
+title: 'Neural Networks -- From Theory to Practice'
+jupyter: python3
+---
+
+## Introduction
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/30-NN-consolidated.ipynb)
+
+```{python}
+#| code-fold: true
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from IPython.display import Image, HTML
+import warnings
+warnings.filterwarnings('ignore')
+
+%matplotlib inline
+```
+
+In this lecture, we'll build an understanding of neural networks, starting from the foundations and moving to practical implementation using scikit-learn.
+
+::: {.callout-note}
+We'll cover:
+
+* How neural networks extend linear and logistic regression
+* The Multi-Layer Perceptron (MLP) architecture
+* Gradient descent and optimization
+* Practical implementation with scikit-learn's `MLPClassifier` and `MLPRegressor`
+:::
+
+## Effectiveness of Neural Networks
+
+
+![](figs/NN-figs/IntroModels.svg){width="50%" fig-align="center"}
+
+<!--
+From [Understanding Deep Learning, Simon J.D. Prince, MIT Press, 2023](http://udlbook.com)
+-->
+
+## Applications Across Domains
+
+![](figs/NN-figs/IntroModels2a.svg){width="50%" fig-align="center"}
+
+# From Regression to Neural Networks
+
+## Linear Regression Revisited
+
+Recall linear regression predicts a continuous output:
+
+$$
+\hat{y} = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_p x_p = \mathbf{x}^T\boldsymbol{\beta}
+$$
+
+Or in matrix form for multiple samples:
+
+$$
+\hat{\mathbf{y}} = \mathbf{X}\boldsymbol{\beta}
+$$
+
+<br>
+
+<details>
+<summary><b>Question:</b> What's the main limitation of linear regression?</summary>
+<b>Answer:</b> It can only model linear relationships between inputs and outputs!
+</details>
+
+## Logistic Regression 
+
+* Adds Non-linearity
+
+* For binary classification, logistic regression applies a **sigmoid function**:
+
+$$
+P(y=1|\mathbf{x}) = \sigma(\mathbf{x}^T\boldsymbol{\beta}) = \frac{1}{1 + e^{-\mathbf{x}^T\boldsymbol{\beta}}}
+$$
+
+## Logistic Regression, cont.
+
+The sigmoid function introduces non-linearity:
+
+```{python}
+#| echo: false
+#| fig-align: center
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+x = np.linspace(-10, 10, 100)
+y = sigmoid(x)
+
+plt.figure(figsize=(6,4))
+plt.plot(x, y)
+plt.title('Sigmoid function')
+plt.xlabel('x')
+plt.ylabel('sigmoid(x)')
+plt.grid(True)
+plt.show()
+```
+
+## The Key Insight
+
+> A single neuron with a sigmoid activation is essentially logistic regression!
+
+Neural networks extend this by:
+
+::: {.incremental}
+1. **Multiple neurons** in parallel (learning different features)
+    - Universal Approximation Theorem guarantees that a network with a single hidden layer can approximate any continuous function to any desired accuracy.
+2. **Multiple layers** in sequence (learning hierarchical representations)
+    - Representational capacity is more efficiient
+3. **Various activation functions** (ReLU, tanh, etc.)
+    - Required to not collapse to a single linear transformation
+:::
+
+::: {.fragment}
+This allows neural networks to learn complex, non-linear decision boundaries.
+:::
+
+# Artificial Neurons
+
+## The Artificial Neuron
+
+An artificial neuron is loosely modeled on biological neurons:
+
+![](figs/NN-figs/neuron_model.jpeg){width="75%" fig-align="center"}
+
+From [cs231n](https://cs231n.github.io/neural-networks-1/)
+
+## Neuron Components
+
+A neuron performs the following operation:
+
+$$
+\text{output} = f\left(\sum_{i=1}^n w_i x_i + b\right)
+$$
+
+Where:
+
+* $x_i$ are the **inputs**
+* $w_i$ are the **weights** (parameters to learn)
+* $b$ is the **bias** (another parameter)
+* $f$ is the **activation function** (introduces non-linearity)
+
+## Activation Functions
+
+**ReLU (Rectified Linear Unit)** - most popular today:
+$$
+\text{ReLU}(x) = \max(0, x)
+$$
+
+```{python}
+#| echo: false
+#| fig-align: center
+plt.figure(figsize=(5,3))
+plt.plot(np.arange(-5,5,0.2), np.maximum(0,np.arange(-5,5,0.2)))
+plt.title('ReLU(x)')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.grid()
+plt.show()
+```
+
+<details>
+<summary><b>Why activation functions?</b></summary>
+<b>Answer:</b> Without non-linearity, multiple layers collapse to a single linear transformation!
+
+</details>
+
+# Multi-Layer Perceptron (MLP)
+
+## MLP Architecture
+
+A Multi-Layer Perceptron stacks multiple layers of neurons:
+
+![](figs/NN-figs/neural_net2.jpeg){width="55%" fig-align="center"}
+
+From [cs231n](https://cs231n.github.io/convolutional-networks/)
+
+* **Input layer**: Raw features
+* **Hidden layers**: Learn intermediate representations
+* **Output layer**: Final prediction
+
+## Matrix Formulation
+
+![FCN from UDL.](figs/NN-figs/L24-fcn-dag.png){width="75%" fig-align="center"}
+
+**Key property:** Every neuron in layer $i$ connects to every neuron in layer $i+1$.
+
+This is also called a **Fully Connected Network (FCN)** or **Dense Network**.
+
+## MLP Mathematical Formulation
+
+For a network with $K$ hidden layers:
+
+$$
+\begin{aligned}
+\mathbf{h}_1 &= f(\boldsymbol{\beta}_0 + \boldsymbol{\Omega}_0 \mathbf{x}) \\
+\mathbf{h}_2 &= f(\boldsymbol{\beta}_1 + \boldsymbol{\Omega}_1 \mathbf{h}_1) \\
+&\vdots \\
+\mathbf{h}_K &= f(\boldsymbol{\beta}_{K-1} + \boldsymbol{\Omega}_{K-1} \mathbf{h}_{K-1}) \\
+\mathbf{\hat{y}} &= \boldsymbol{\beta}_K + \boldsymbol{\Omega}_K \mathbf{h}_K
+\end{aligned}
+$$
+
+Where:
+
+* $\mathbf{h}_k$ = hidden layer activations
+* $\boldsymbol{\Omega}_k$ = weight matrices
+* $\boldsymbol{\beta}_k$ = bias vectors
+* $f$ = activation function (e.g., ReLU)
+
+# Training Neural Networks
+
+## The Loss Function
+
+Training means finding weights that minimize a **loss function**:
+
+**For regression** (e.g., predicting house prices):
+$$
+L = \frac{1}{N}\sum_{i=1}^N (\hat{y}_i - y_i)^2 \quad \text{(Mean Squared Error)}
+$$
+
+**For classification** (e.g., digit recognition):
+$$
+L = -\frac{1}{N}\sum_{i=1}^N \sum_{c=1}^C y_{ic} \log(\hat{y}_{ic}) \quad \text{(Cross-Entropy)}
+$$
+
+**Goal:** Find parameters $\theta = \{\boldsymbol{\Omega}_k, \boldsymbol{\beta}_k\}$ that minimize $L$.
+
+## Visualizing the Loss Surface
+
+The loss function creates a surface over the parameter space:
+
+![](figs/L23-convex_cost_function.jpeg){width="55%" fig-align="center"}
+
+* Left: **Convex** loss surface (e.g., linear regression)
+* Right: **Non-convex** loss surface (e.g., neural networks)
+
+For neural networks, we can't solve analytically—we need **gradient descent**!
+
+# Gradient Descent
+
+## The Gradient Descent Intuition
+
+Imagine you're lost in foggy mountains and want to reach the valley:
+
+:::: {.columns}
+::: {.column width="30%"}
+![](figs/L23-fog-in-the-mountains.jpeg){width="100%"}
+:::
+::: {.column width="70%"}
+What would you do?
+
+1. Look around 360 degrees
+2. Find the direction sloping **downward most steeply**
+3. Take a few steps in that direction
+4. Repeat until the ground is level
+
+This is **gradient descent**!
+:::
+::::
+
+## The Gradient
+
+For a function $L(\mathbf{w})$ where $\mathbf{w} = (w_1, \ldots, w_n)$, the **gradient** is:
+
+$$
+\nabla_\mathbf{w} L(\mathbf{w}) = 
+\begin{bmatrix}
+\frac{\partial L}{\partial w_1}\\
+\frac{\partial L}{\partial w_2}\\
+\vdots \\
+\frac{\partial L}{\partial w_n}
+\end{bmatrix}
+$$
+
+* The gradient points in the direction of **steepest increase**
+* The negative gradient points toward **steepest decrease**
+
+## Gradient Descent Algorithm
+
+Start with random weights $\mathbf{w}^{(0)}$, then iterate:
+
+$$
+\mathbf{w}^{(t+1)} = \mathbf{w}^{(t)} - \eta \nabla_\mathbf{w} L(\mathbf{w}^{(t)})
+$$
+
+Where:
+
+* $\eta$ is the **learning rate** (step size)
+* $\nabla_\mathbf{w} L$ is the **gradient** of the loss
+
+**Stop when:**
+
+* Loss stops decreasing (convergence)
+* Maximum iterations reached
+
+## Learning Rate Matters
+
+The learning rate $\eta$ is crucial:
+
+**Too small:** Slow convergence
+
+**Too large:** May fail to converge or even diverge!
+
+```{python}
+#| echo: false
+#| fig-align: center
+# Simulate gradient descent with different learning rates
+def f(x):
+    return 3*x**2 - 4*x + 5
+
+def df(x):
+    return 6*x - 4
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+# Good learning rate
+x_good = -3.0
+trajectory_good = [x_good]
+for _ in range(20):
+    x_good = x_good - 0.1 * df(x_good)
+    trajectory_good.append(x_good)
+
+xs = np.linspace(-4, 3, 100)
+axes[0].plot(xs, f(xs), 'b-')
+axes[0].plot(trajectory_good, [f(x) for x in trajectory_good], 'ro-', markersize=4)
+axes[0].set_title('Good Learning Rate (η=0.1)')
+axes[0].set_xlabel('Parameter w')
+axes[0].set_ylabel('Loss L(w)')
+axes[0].grid(True)
+
+# Too large learning rate
+x_bad = -3.0
+trajectory_bad = [x_bad]
+for _ in range(20):
+    x_bad = x_bad - 0.34 * df(x_bad)
+    trajectory_bad.append(x_bad)
+    if abs(x_bad) > 10:
+        break
+
+xs = np.linspace(-5, 8, 100)
+axes[1].plot(xs, f(xs), 'b-')
+axes[1].plot(trajectory_bad[:min(8, len(trajectory_bad))], 
+             [f(x) for x in trajectory_bad[:min(8, len(trajectory_bad))]], 
+             'ro-', markersize=4)
+axes[1].set_title('Learning Rate Too Large (η=0.4)')
+axes[1].set_xlabel('Parameter w')
+axes[1].set_ylabel('Loss L(w)')
+axes[1].grid(True)
+axes[1].set_ylim([0, 100])
+
+plt.tight_layout()
+plt.show()
+```
+
+# Stochastic Gradient Descent
+
+## Full Batch vs Stochastic GD
+
+**Full Batch Gradient Descent:** Compute gradient using ALL training samples:
+
+$$
+\nabla_\mathbf{w} L = \frac{1}{N}\sum_{i=1}^N \nabla_\mathbf{w} \ell_i(\mathbf{w})
+$$
+
+**Problems:**
+
+* Slow for large datasets (millions of samples!)
+* Memory intensive
+* Can get stuck in local minima
+
+## Stochastic Gradient Descent (SGD)
+
+**Stochastic Gradient Descent:** Historically meant using ONE random sample at a time:
+
+$$
+\mathbf{w}^{(t+1)} = \mathbf{w}^{(t)} - \eta \nabla_\mathbf{w} \ell_i(\mathbf{w}^{(t)})
+$$
+
+**Advantages:**
+
+* Much faster per iteration
+* Can escape local minima (due to noise)
+* Enables online learning
+
+**Disadvantage:**
+
+* _Extremely_ noisy gradient estimates
+* May not converge exactly to minimum
+
+## Mini-Batch Gradient Descent
+
+**Mini-Batch GD:** Best of both worlds—use a small batch of samples:
+
+$$
+\nabla_\mathbf{w} L \approx \frac{1}{B}\sum_{i \in \text{batch}} \nabla_\mathbf{w} \ell_i(\mathbf{w})
+$$
+
+Typical batch sizes: 32, 64, 128, 256
+
+**Advantages:**
+
+* Balances speed and stability
+* Efficient GPU parallelization
+* Better gradient estimates than pure SGD
+
+**This is what most modern neural network training uses!**
+
+## Visualizing Batch Strategies
+
+```{python}
+#| echo: false
+#| fig-align: center
+# Create a simple visualization
+fig, ax = plt.subplots(figsize=(10, 5))
+
+# Sample trajectory data (simulated)
+np.random.seed(42)
+iterations = np.arange(0, 50, 1)
+
+# Full batch - smooth
+full_batch = 100 * np.exp(-iterations/15) + 2
+
+# Mini-batch - some oscillation
+mini_batch = 100 * np.exp(-iterations/15) + 5 * np.random.randn(len(iterations)) * np.exp(-iterations/20) + 2
+
+# SGD - more noise
+sgd = 100 * np.exp(-iterations/18) + 15 * np.random.randn(len(iterations)) * np.exp(-iterations/25) + 2
+
+ax.plot(iterations, full_batch, 'b-', linewidth=2, label='Full Batch GD', alpha=0.8)
+ax.plot(iterations, mini_batch, 'g-', linewidth=2, label='Mini-Batch GD (B=32)', alpha=0.8)
+ax.plot(iterations, sgd, 'r-', linewidth=1, label='Stochastic GD (B=1)', alpha=0.6)
+
+ax.set_xlabel('Iteration', fontsize=12)
+ax.set_ylabel('Loss', fontsize=12)
+ax.set_title('Convergence Comparison: Different Batch Sizes', fontsize=14)
+ax.legend(fontsize=10)
+ax.grid(True, alpha=0.3)
+ax.set_ylim([0, 120])
+plt.tight_layout()
+plt.show()
+```
+
+(For illustration purposes only -- not a real training curve.)
+
+# Neural Networks in Scikit-Learn
+
+## MLPClassifier and MLPRegressor
+
+Scikit-learn provides simple, high-level interfaces:
+
+* **`MLPClassifier`**: Multi-layer Perceptron classifier
+* **`MLPRegressor`**: Multi-layer Perceptron regressor
+
+**Key features:**
+
+* Multiple hidden layers with various activation functions
+* Multiple solvers: `'adam'`, `'sgd'`, `'lbfgs'`
+* Built-in regularization (L2 penalty)
+* Early stopping support
+* Easy integration with scikit-learn pipelines
+
+## Architecture Specification
+
+Specify architecture as a tuple:
+
+```python
+# Single hidden layer with 100 neurons
+hidden_layer_sizes=(100,)
+
+# Two hidden layers: 100 and 50 neurons
+hidden_layer_sizes=(100, 50)
+
+# Three hidden layers
+hidden_layer_sizes=(128, 64, 32)
+```
+
+Input and output layers are automatically determined from your data!
+
+## Scikit-Learn vs PyTorch/TensorFlow
+
+<br>
+
+:::: {.columns}
+::: {.column width="50%"}
+
+### Use Scikit-Learn for:
+
+* Small to medium datasets (< 100K samples)
+* Standard feedforward architectures
+* Rapid prototyping needed
+* Integration with scikit-learn pipelines
+* CPU training is sufficient
+:::
+
+::: {.column width="50%"}
+
+### Use PT/TF for:
+
+* Large datasets (> 100K samples)
+* Complex architectures (CNNs, RNNs)
+* GPU acceleration required
+* Production deployment
+* Research and experimentation
+:::
+::::
+
+# Classification Example: MNIST
+
+## Load the MNIST Dataset
+
+Let's classify handwritten digits (0-9):
+
+```{python}
+#| code-fold: false
+from sklearn.datasets import fetch_openml
+from sklearn.model_selection import train_test_split
+
+# Load MNIST data
+print("Loading MNIST dataset...")
+X, y = fetch_openml('mnist_784', version=1, return_X_y=True, 
+                    as_frame=False, parser='auto')
+
+# Convert labels to integers
+y = y.astype(int)
+
+# Use subset for faster demo
+X, _, y, _ = train_test_split(X, y, train_size=10000, 
+                               stratify=y, random_state=42)
+
+print(f"Dataset shape: {X.shape}")
+print(f"Number of classes: {len(np.unique(y))}")
+```
+
+## Visualize the Data
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+fig, axes = plt.subplots(2, 5, figsize=(12, 4))
+for i, ax in enumerate(axes.flat):
+    ax.imshow(X[i].reshape(28, 28), cmap='gray')
+    ax.set_title(f'Label: {y[i]}')
+    ax.axis('off')
+plt.tight_layout()
+plt.show()
+```
+
+Each image is 28×28 pixels = 784 features
+
+## Prepare the Data
+
+```{python}
+#| code-fold: false
+# Split into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Scale features to [0, 1]
+X_train_scaled = X_train / 255.0
+X_test_scaled = X_test / 255.0
+
+print(f"Training set: {X_train.shape[0]} samples")
+print(f"Test set: {X_test.shape[0]} samples")
+print(f"Feature range: [{X_train_scaled.min():.2f}, {X_train_scaled.max():.2f}]")
+```
+
+::: {.callout-important}
+**Always scale/normalize your features for neural networks!** This helps gradient descent converge faster.
+:::
+
+## Create the MLP
+
+```{python}
+#| code-fold: false
+from sklearn.neural_network import MLPClassifier
+
+# Create MLP with 2 hidden layers
+mlp = MLPClassifier(
+    hidden_layer_sizes=(128, 64),  # Architecture
+    activation='relu',              # Activation function
+    solver='adam',                  # Optimizer (uses mini-batches)
+    alpha=0.0001,                   # L2 regularization
+    batch_size=64,                  # Mini-batch size
+    learning_rate_init=0.001,       # Initial learning rate
+    max_iter=20,                    # Number of epochs
+    random_state=42,
+    verbose=True                    # Show progress
+)
+```
+
+
+## Train the model
+
+```{python}
+#| code-fold: false
+print("Training MLP...")
+mlp.fit(X_train_scaled, y_train)
+print(f"Training completed in {mlp.n_iter_} iterations")
+```
+
+## Training Loss Curve
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+plt.figure(figsize=(10, 4))
+plt.plot(mlp.loss_curve_)
+plt.xlabel('Iteration (Epoch)')
+plt.ylabel('Loss')
+plt.title('Training Loss Curve')
+plt.grid(True)
+plt.show()
+```
+
+The loss decreases smoothly—our model is learning.
+
+## Evaluate Performance
+
+```{python}
+#| code-fold: true
+from sklearn.metrics import accuracy_score, classification_report
+
+# Make predictions
+y_pred = mlp.predict(X_test_scaled)
+
+# Calculate accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Test Accuracy: {accuracy:.4f}")
+
+# Detailed report
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+```
+
+## Confusion Matrix
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
+fig, ax = plt.subplots(figsize=(8, 6))
+cm = confusion_matrix(y_test, y_pred)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=mlp.classes_)
+disp.plot(ax=ax, cmap='Blues', values_format='d')
+plt.title('Confusion Matrix for MNIST Classification')
+plt.show()
+```
+
+## Visualize Predictions
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+# Get prediction probabilities
+y_pred_proba = mlp.predict_proba(X_test_scaled)
+
+fig, axes = plt.subplots(2, 5, figsize=(12, 5))
+for i, ax in enumerate(axes.flat):
+    ax.imshow(X_test[i].reshape(28, 28), cmap='gray')
+    pred_label = y_pred[i]
+    true_label = y_test[i]
+    confidence = y_pred_proba[i].max()
+    
+    color = 'green' if pred_label == true_label else 'red'
+    ax.set_title(f'True: {true_label}, Pred: {pred_label}\nConf: {confidence:.2f}', 
+                 color=color)
+    ax.axis('off')
+plt.tight_layout()
+plt.show()
+```
+
+# Regression Example
+
+## California Housing Dataset
+
+Let's predict house prices using MLP regression:
+
+```{python}
+#| code-fold: false
+from sklearn.datasets import fetch_california_housing
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPRegressor
+
+# Load housing data
+housing = fetch_california_housing()
+X_housing = housing.data
+y_housing = housing.target
+
+print(f"Dataset shape: {X_housing.shape}")
+print(f"Features: {housing.feature_names}")
+```
+
+**Target:** Median house value (in $100,000s)
+
+## Prepare Data and Define Model
+
+```{python}
+#| code-fold: false
+# Split and scale
+X_train_h, X_test_h, y_train_h, y_test_h = train_test_split(
+    X_housing, y_housing, test_size=0.2, random_state=42
+)
+
+scaler = StandardScaler()
+X_train_h_scaled = scaler.fit_transform(X_train_h)
+X_test_h_scaled = scaler.transform(X_test_h)
+
+# Train MLP Regressor with early stopping
+mlp_reg = MLPRegressor(
+    hidden_layer_sizes=(100, 50),
+    activation='relu',
+    solver='adam',
+    alpha=0.001,
+    batch_size=32,
+    max_iter=100,
+    early_stopping=True,
+    validation_fraction=0.1,
+    n_iter_no_change=10,
+    random_state=42,
+    verbose=False
+)
+```
+
+## Train the model
+
+```{python}
+#| code-fold: false
+print("Training MLP Regressor...")
+mlp_reg.fit(X_train_h_scaled, y_train_h)
+print(f"Training stopped at iteration: {mlp_reg.n_iter_}")
+```
+
+## Training Loss Curve
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+plt.figure(figsize=(10, 4))
+plt.plot(mlp_reg.loss_curve_)
+plt.xlabel('Iteration (Epoch)')
+plt.ylabel('Loss')
+plt.title('Training Loss Curve')
+plt.grid(True)
+plt.show()
+```
+
+## Evaluate Regression Model
+
+```{python}
+#| code-fold: false
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+
+# Make predictions
+y_pred_h = mlp_reg.predict(X_test_h_scaled)
+
+# Calculate metrics
+mse = mean_squared_error(y_test_h, y_pred_h)
+rmse = np.sqrt(mse)
+mae = mean_absolute_error(y_test_h, y_pred_h)
+r2 = r2_score(y_test_h, y_pred_h)
+
+print(f"Root Mean Squared Error: {rmse:.4f}")
+print(f"Mean Absolute Error: {mae:.4f}")
+print(f"R² Score: {r2:.4f}")
+```
+
+An $R^2$ of ~0.8 means our model explains 80% of the variance in house prices!
+
+## Predictions vs Actual
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+
+# Scatter plot
+axes[0].scatter(y_test_h, y_pred_h, alpha=0.5)
+axes[0].plot([y_test_h.min(), y_test_h.max()], 
+             [y_test_h.min(), y_test_h.max()], 'r--', lw=2)
+axes[0].set_xlabel('Actual Values')
+axes[0].set_ylabel('Predicted Values')
+axes[0].set_title('Predicted vs Actual House Prices')
+axes[0].grid(True)
+
+# Residual plot
+residuals = y_test_h - y_pred_h
+axes[1].scatter(y_pred_h, residuals, alpha=0.5)
+axes[1].axhline(y=0, color='r', linestyle='--', lw=2)
+axes[1].set_xlabel('Predicted Values')
+axes[1].set_ylabel('Residuals')
+axes[1].set_title('Residual Plot')
+axes[1].grid(True)
+
+plt.tight_layout()
+plt.show()
+```
+
+# Hyperparameter Tuning
+
+## Grid Search for Optimal Architecture
+
+scikit-learn provides [`GridSearchCV`](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html) for hyperparameter tuning:
+
+Create a model without certain hyperparameters.
+
+```{python}
+#| code-fold: false
+# Create MLP
+mlp_grid = MLPClassifier(
+    max_iter=20,
+    random_state=42,
+    early_stopping=True,
+    validation_fraction=0.1,
+    n_iter_no_change=5,
+    verbose=False
+)
+
+# Use subset for faster demo
+X_grid = X_train_scaled[:1500]
+y_grid = y_train[:1500]
+```
+
+## Grid Search, cont.
+
+Define the parameter grid and run the grid search.
+
+```{python}
+#| code-fold: false
+#| warning: false
+from sklearn.model_selection import GridSearchCV
+
+# Define parameter grid
+param_grid = {
+    'hidden_layer_sizes': [(50,), (100,), (50, 50)],
+    'activation': ['relu'],
+    'alpha': [0.0001, 0.001]
+}
+
+print("Running Grid Search...")
+grid_search = GridSearchCV(mlp_grid, param_grid, cv=3, n_jobs=2, verbose=0)
+grid_search.fit(X_grid, y_grid)
+
+print(f"\nBest parameters: {grid_search.best_params_}")
+print(f"Best CV score: {grid_search.best_score_:.4f}")
+```
+
+## Grid Search Results
+
+```{python}
+#| code-fold: true
+#| fig-align: center
+results_df = pd.DataFrame(grid_search.cv_results_)
+print(results_df.columns)
+
+n_configs = min(10, len(results_df))
+top_results = results_df.nlargest(n_configs, 'mean_test_score')
+
+# plt.figure(figsize=(10, 5))
+# plt.barh(range(len(top_results)), top_results['mean_test_score'])
+# plt.yticks(range(len(top_results)), 
+#            [f"Config {i+1}" for i in range(len(top_results))])
+# plt.xlabel('Mean CV Score')
+# plt.title('Top Hyperparameter Configurations')
+# plt.grid(True, axis='x')
+# plt.tight_layout()
+# plt.show()
+
+print("\nTop configurations:")
+print(top_results[['params']])
+print(top_results[['mean_test_score', 'std_test_score']].head())
+```
+
+# Best Practices
+
+## Data Preprocessing
+
+::: {.callout-tip}
+### Always preprocess your data!
+
+1. **Scale features:** Use `StandardScaler` or normalize to [0, 1]
+2. **Handle missing values:** Impute or remove
+3. **Encode categorical variables:** One-hot encoding
+4. **Use pipelines:** Ensures consistent preprocessing
+
+```python
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline([
+    ('scaler', StandardScaler()),
+    ('mlp', MLPClassifier(hidden_layer_sizes=(100,)))
+])
+
+pipeline.fit(X_train, y_train)
+```
+:::
+
+## Architecture Selection
+
+::: {.callout-tip}
+### Rules of thumb for architecture:
+
+1. **Start simple:** Try single hidden layer first
+2. **Layer sizes:** Between input and output dimensions
+3. **Depth vs width:** 
+   - More layers → learn complex patterns
+   - But risk overfitting on small data
+4. **Typical architectures:**
+   - Small data: `(100,)` or `(50, 50)`
+   - Medium data: `(100, 50)` or `(128, 64, 32)`
+   - Large data: Consider PyTorch
+:::
+
+## Preventing Overfitting
+
+Three key techniques:
+
+**1. Regularization:** Add L2 penalty (`alpha` parameter)
+
+```python
+mlp = MLPClassifier(alpha=0.01)  # Stronger regularization
+```
+
+**2. Early Stopping:** Stop when validation performance plateaus
+
+```python
+mlp = MLPClassifier(early_stopping=True, 
+                    validation_fraction=0.2,
+                    n_iter_no_change=10)
+```
+
+**3. Cross-Validation:** Get robust performance estimates
+
+```python
+from sklearn.model_selection import cross_val_score
+scores = cross_val_score(mlp, X_train, y_train, cv=5)
+```
+
+## Solver Selection
+
+Different solvers for different scenarios:
+
+| Solver | Best For | Notes |
+|--------|----------|-------|
+| `'adam'` | Most cases | Good default, adaptive learning rate |
+| `'sgd'` | Large datasets | Classic mini-batch SGD |
+| `'lbfgs'` | Small datasets | Faster for small data, more memory |
+
+```{python}
+#| code-fold: false
+# Compare solvers
+solvers = ['adam', 'sgd', 'lbfgs']
+results = {}
+
+for solver in solvers:
+    mlp = MLPClassifier(
+        hidden_layer_sizes=(50,),
+        solver=solver,
+        max_iter=50,
+        random_state=42,
+        verbose=False
+    )
+    mlp.fit(X_train_scaled[:2000], y_train[:2000])
+    score = mlp.score(X_test_scaled, y_test)
+    results[solver] = score
+    print(f"{solver:10s}: {score:.4f}")
+```
+
+## Common Issues
+
+::: {.callout-warning}
+### Convergence Warnings
+
+If you see `ConvergenceWarning`:
+
+1. **Increase** `max_iter`
+2. **Decrease** `learning_rate_init`
+3. **Enable** `early_stopping=True`
+4. **Check** if data is properly scaled
+:::
+
+::: {.callout-warning}
+### Poor Performance
+
+If accuracy is low:
+
+1. Is data scaled/normalized?
+2. Is architecture appropriate?
+3. Is learning rate too high/low?
+4. Do you need more iterations?
+5. Is regularization too strong?
+:::
+
+# Summary
+
+## What We Learned
+
+**Theory:**
+
+* Neural networks extend linear/logistic regression with multiple layers and non-linearity
+* MLPs learn hierarchical representations through hidden layers
+* Gradient descent optimizes the loss function
+* Mini-batch GD balances speed and stability
+
+**Practice:**
+
+* Scikit-learn's `MLPClassifier` and `MLPRegressor` for easy implementation
+* Always preprocess/scale your data
+* Use early stopping and regularization to prevent overfitting
+* Grid search helps find optimal hyperparameters
+
+## When to Use What
+
+```{python}
+#| echo: false
+#| fig-align: center
+import matplotlib.patches as mpatches
+
+fig, ax = plt.subplots(figsize=(12, 6))
+ax.set_xlim(0, 10)
+ax.set_ylim(0, 10)
+ax.axis('off')
+
+# Title
+ax.text(5, 9, 'Choosing Your Neural Network Framework', 
+        ha='center', fontsize=16, fontweight='bold')
+
+# Scikit-learn box
+sklearn_box = mpatches.FancyBboxPatch((0.5, 5), 4, 3, 
+                                      boxstyle="round,pad=0.1", 
+                                      edgecolor='blue', facecolor='lightblue', linewidth=2)
+ax.add_patch(sklearn_box)
+ax.text(2.5, 7.2, 'Scikit-Learn MLP', ha='center', fontsize=12, fontweight='bold')
+ax.text(2.5, 6.5, '• Dataset < 100K', ha='center', fontsize=9)
+ax.text(2.5, 6.1, '• Standard architectures', ha='center', fontsize=9)
+ax.text(2.5, 5.7, '• CPU training', ha='center', fontsize=9)
+ax.text(2.5, 5.3, '• Quick prototyping', ha='center', fontsize=9)
+
+# PyTorch box
+pytorch_box = mpatches.FancyBboxPatch((5.5, 5), 4, 3, 
+                                       boxstyle="round,pad=0.1", 
+                                       edgecolor='red', facecolor='lightcoral', linewidth=2)
+ax.add_patch(pytorch_box)
+ax.text(7.5, 7.2, 'PyTorch / TensorFlow', ha='center', fontsize=12, fontweight='bold')
+ax.text(7.5, 6.5, '• Dataset > 100K', ha='center', fontsize=9)
+ax.text(7.5, 6.1, '• Complex architectures', ha='center', fontsize=9)
+ax.text(7.5, 5.7, '• GPU acceleration', ha='center', fontsize=9)
+ax.text(7.5, 5.3, '• Production systems', ha='center', fontsize=9)
+
+# Key principles box
+principles_box = mpatches.FancyBboxPatch((1, 1), 8, 2.5, 
+                                          boxstyle="round,pad=0.1", 
+                                          edgecolor='green', facecolor='lightgreen', linewidth=2)
+ax.add_patch(principles_box)
+ax.text(5, 3, 'Key Principles (Apply to Both)', ha='center', fontsize=12, fontweight='bold')
+ax.text(5, 2.4, '✓ Always scale your features', ha='center', fontsize=9)
+ax.text(5, 2.0, '✓ Start simple, then increase complexity', ha='center', fontsize=9)
+ax.text(5, 1.6, '✓ Use validation sets and early stopping', ha='center', fontsize=9)
+ax.text(5, 1.2, '✓ Monitor training curves to diagnose issues', ha='center', fontsize=9)
+
+plt.tight_layout()
+plt.show()
+```
+
+## Resources
+
+**Scikit-learn Documentation:**
+
+* [Neural Networks](https://scikit-learn.org/stable/modules/neural_networks_supervised.html)
+* [MLPClassifier API](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html)
+* [MLPRegressor API](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html)
+
+**Books:**
+
+* [Understanding Deep Learning](https://udlbook.github.io/udlbook/) by Simon J.D. Prince
+* [Hands-On Machine Learning](https://www.oreilly.com/library/view/hands-on-machine-learning/9781492032632/) by Aurélien Géron
+
+**Online Courses:**
+
+* [Stanford CS231n](https://cs231n.github.io/) - Convolutional Neural Networks
+* [Fast.ai](https://www.fast.ai/) - Practical Deep Learning
+
+## Practice Exercises
+
+Try these on your own:
+
+1. **Iris Classification:** Train an MLP on the Iris dataset and compare with logistic regression
+
+2. **Architecture Comparison:** Try different hidden layer configurations on MNIST and plot accuracy vs. number of parameters
+
+3. **Learning Rate Experiment:** Train the same model with different learning rates and visualize convergence
+
+4. **Pipeline Creation:** Build a complete pipeline with feature engineering, scaling, and MLP training
+
+5. **Compare Frameworks:** Implement the same architecture in both scikit-learn and PyTorch, compare training time and accuracy
+
+## Next Steps
+
+To go deeper with neural networks:
+
+* **Convolutional Neural Networks (CNNs):** For image data
+* **Recurrent Neural Networks (RNNs):** For sequential data
+* **Transformers:** For language and more
+* **PyTorch/TensorFlow:** For production systems
+* **Transfer Learning:** Leverage pre-trained models
+* **Model Interpretation:** Understand what your networks learn
+
+The journey from simple MLPs to state-of-the-art models builds on these foundations!
+
