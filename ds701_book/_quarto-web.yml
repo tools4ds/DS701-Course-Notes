@@ -44,6 +44,7 @@ project:
     - 27-RNN.qmd
     - 28-NLP.qmd
     - 29-NN-IV-Scikit-Learn.qmd
+    - 30-NN-consolidated.qmd
 
 resources:
   - figs/NN-figs/conv-demo/index.html
@@ -107,6 +108,7 @@ website:
         - 24-NN-II-Backprop.qmd
         - 25-NN-III-CNNs.qmd
         - 29-NN-IV-Scikit-Learn.qmd
+        - 30-NN-consolidated.qmd
     - section: "Selected Topics"
       contents:
         - 21-Networks-I.qmd

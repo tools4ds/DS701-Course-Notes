@@ -37,6 +37,8 @@ project:
     - 26-TimeSeries.qmd
     - 27-RNN.qmd
     - 28-NLP.qmd
+    - 29-NN-IV-Scikit-Learn.qmd
+    - 30-NN-consolidated.qmd
 
 resources:
   - figs/NN-figs/conv-demo/index.html

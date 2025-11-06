@@ -35,7 +35,7 @@ title: Lecture Schedule
 | Oct 30 | 17  -- SVD Low Rank Approximations | [SVD](./10-Low-Rank-and-SVD.qmd)  |  |
 | **Week 10**  | --- | --- | --- |
 | Nov 4 | 18 -- Dimensionality Reduction: PCA and t-SNE | [PCA and t-SNE](./11-Dimensionality-Reduction-SVD-II.qmd)  | |
-| Nov 6 | 19 -- Neural Networks: Gradient Descent & Backpropagation | [NN I](./23-NN-I-Gradient-Descent.qmd), [NN II](./24-NN-II-Backprop.qmd) | |
+| Nov 6 | 19 -- Neural Networks | [Neural Networks](./30-NN-consolidated.qmd) | |
 | **Week 11**  | --- | --- | --- |
 | Nov 11 | 20 -- Intro to NLP | [NLP](./28-NLP.qmd) 
 | Nov 13 | 21 -- Recommender Systems | [Recommender Systems](./20-Recommender-Systems.qmd)  | |

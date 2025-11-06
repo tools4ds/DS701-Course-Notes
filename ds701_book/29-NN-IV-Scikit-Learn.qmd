@@ -501,6 +501,7 @@ print(top_results[['params', 'mean_test_score', 'std_test_score']].head())
 ### Scikit-Learn MLP
 
 **Advantages:**
+
 * Simple, high-level API
 * Easy integration with scikit-learn pipelines
 * Built-in cross-validation and grid search
@@ -508,6 +509,7 @@ print(top_results[['params', 'mean_test_score', 'std_test_score']].head())
 * Minimal boilerplate code
 
 **Best for:**
+
 * Rapid prototyping
 * Standard ML workflows
 * Small to medium datasets (< 100K samples)
@@ -518,6 +520,7 @@ print(top_results[['params', 'mean_test_score', 'std_test_score']].head())
 ### PyTorch
 
 **Advantages:**
+
 * Full control over architecture
 * GPU acceleration
 * Advanced architectures (CNNs, RNNs, Transformers)
@@ -525,6 +528,7 @@ print(top_results[['params', 'mean_test_score', 'std_test_score']].head())
 * Production deployment tools
 
 **Best for:**
+
 * Large datasets (> 100K samples)
 * Complex architectures
 * GPU-accelerated training
