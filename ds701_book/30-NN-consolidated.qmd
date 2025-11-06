@@ -22,14 +22,14 @@ warnings.filterwarnings('ignore')
 
 In this lecture, we'll build an understanding of neural networks, starting from the foundations and moving to practical implementation using scikit-learn.
 
-::: {.callout-note}
+
 We'll cover:
 
 * How neural networks extend linear and logistic regression
 * The Multi-Layer Perceptron (MLP) architecture
 * Gradient descent and optimization
 * Practical implementation with scikit-learn's `MLPClassifier` and `MLPRegressor`
-:::
+
 
 ## Effectiveness of Neural Networks
 
@@ -856,7 +856,7 @@ print(f"Best CV score: {grid_search.best_score_:.4f}")
 #| code-fold: true
 #| fig-align: center
 results_df = pd.DataFrame(grid_search.cv_results_)
-print(results_df.columns)
+
 
 n_configs = min(10, len(results_df))
 top_results = results_df.nlargest(n_configs, 'mean_test_score')
@@ -872,7 +872,12 @@ top_results = results_df.nlargest(n_configs, 'mean_test_score')
 # plt.show()
 
 print("\nTop configurations:")
-print(top_results[['params']])
+for idx, row in top_results.iterrows():
+    print(f"\nConfiguration {idx + 1}:")
+    for key, value in row['params'].items():
+        print(f"  {key}: {value}")
+
+print("\nMean CV Score:")
 print(top_results[['mean_test_score', 'std_test_score']].head())
 ```
 
@@ -952,7 +957,7 @@ Different solvers for different scenarios:
 | `'lbfgs'` | Small datasets | Faster for small data, more memory |
 
 ```{python}
-#| code-fold: false
+#| code-fold: true
 # Compare solvers
 solvers = ['adam', 'sgd', 'lbfgs']
 results = {}
@@ -998,7 +1003,7 @@ If accuracy is low:
 
 # Summary
 
-## What We Learned
+## Summary
 
 **Theory:**
 
@@ -1014,6 +1019,22 @@ If accuracy is low:
 * Use early stopping and regularization to prevent overfitting
 * Grid search helps find optimal hyperparameters
 
+## To Dig Deeper
+
+Other modules in the course notes:
+
+* [NN I -- Gradient Descent](./23-NN-I-Gradient-Descent.qmd)
+* [NN II -- Compute Graph and Backpropagation](./24-NN-II-Backprop.qmd)
+* [NN III -- SGD and CNNs](./25-NN-III-CNNs.qmd)
+* [NN IV -- NNs with Scikit-Learn](./29-NN-IV-Scikit-Learn.qmd)
+
+Additional resources:
+
+* [Understanding Deep Learning, Simon J.D. Prince, MIT Press, 2023](http://udlbook.com)
+* DS542, Deep Learning for Data Science
+
+
+<!--
 ## When to Use What
 
 ```{python}
@@ -1066,49 +1087,7 @@ ax.text(5, 1.2, '✓ Monitor training curves to diagnose issues', ha='center', f
 plt.tight_layout()
 plt.show()
 ```
+-->
 
-## Resources
 
-**Scikit-learn Documentation:**
-
-* [Neural Networks](https://scikit-learn.org/stable/modules/neural_networks_supervised.html)
-* [MLPClassifier API](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html)
-* [MLPRegressor API](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html)
-
-**Books:**
-
-* [Understanding Deep Learning](https://udlbook.github.io/udlbook/) by Simon J.D. Prince
-* [Hands-On Machine Learning](https://www.oreilly.com/library/view/hands-on-machine-learning/9781492032632/) by Aurélien Géron
-
-**Online Courses:**
-
-* [Stanford CS231n](https://cs231n.github.io/) - Convolutional Neural Networks
-* [Fast.ai](https://www.fast.ai/) - Practical Deep Learning
-
-## Practice Exercises
-
-Try these on your own:
-
-1. **Iris Classification:** Train an MLP on the Iris dataset and compare with logistic regression
-
-2. **Architecture Comparison:** Try different hidden layer configurations on MNIST and plot accuracy vs. number of parameters
-
-3. **Learning Rate Experiment:** Train the same model with different learning rates and visualize convergence
-
-4. **Pipeline Creation:** Build a complete pipeline with feature engineering, scaling, and MLP training
-
-5. **Compare Frameworks:** Implement the same architecture in both scikit-learn and PyTorch, compare training time and accuracy
-
-## Next Steps
-
-To go deeper with neural networks:
-
-* **Convolutional Neural Networks (CNNs):** For image data
-* **Recurrent Neural Networks (RNNs):** For sequential data
-* **Transformers:** For language and more
-* **PyTorch/TensorFlow:** For production systems
-* **Transfer Learning:** Leverage pre-trained models
-* **Model Interpretation:** Understand what your networks learn
-
-The journey from simple MLPs to state-of-the-art models builds on these foundations!
 
