@@ -811,50 +811,9 @@ In this sequence of lectures we covered
 
 - historical roots of natural language processing
 - the Transformer architecture
-- example language translation -->
-
-# Course Recap, Evaluations, and References
-
-
-## DS701 Recap 
-
-In this course we introduced you to the Tools for Data Science. 
-
-We covered:
-
-- Important Python packages like Pandas, Scikit-Learn, Torch, statsmodel, and others.
-- Mathematical foundations of data science, including linear algebra, probability and statistics, and optimization
-- Unsupervised learning
-  - Clustering
-  - Dimensionality reduction
-- Supervised learning
-  - Classification
-  - Regression
-- Neural Networks and NLP
-  - CNNs, RNNs, Transformers
-- Graphs
-- Recommender systems
+- example language translation 
+-->
 
 
-## Course Evaluations
-
-Please be sure to fill out the course evaluations. They can be found at the following links:
-
-:::: {.columns}
-::: {.column width="50%"}
-### Section A1
-
-Follow this [link](https://go.blueja.io/tggejlP2zUuNRiyt28XZjQ) to submit a course evaluation for lecture section A1.
-
-Follow this [link](https://go.blueja.io/qOvwpG0d60CCqxXt0g-Pgg) to submit a course evaluation for discussion section A2.
-
-:::
-::: {.column width="50%"}
-### Section C1
-
-Follow this [link](https://go.blueja.io/LLmzBnmznEuK22KOgKjfnA) to submit a course evaluation for Section C1.
-
-:::
-::::
 
 ## References
