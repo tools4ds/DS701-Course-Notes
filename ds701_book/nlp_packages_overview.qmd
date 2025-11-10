@@ -1,0 +1,491 @@
+---
+title: 'NLP Packages Overview'
+jupyter: python3
+---
+
+This document provides an overview of three powerful Python packages for Natural Language Processing: NLTK, spaCy, and BERTopic.
+
+# NLTK (Natural Language Toolkit)
+
+## Overview
+
+**NLTK** is one of the oldest and most comprehensive Python libraries for NLP, originally created for teaching and research.
+
+**Key Features:**
+
+- Extensive collection of text processing tools
+- Access to over 50 corpora and lexical resources (WordNet, TreeBank)
+- Text classification, tokenization, stemming, tagging, parsing
+- Educational focus with extensive documentation
+
+**Best For:**
+
+- Learning NLP concepts
+- Prototyping and research
+- Working with linguistic data structures
+- Academic projects and teaching
+
+**Limitations:**
+
+- Slower than modern alternatives
+- Less suited for production environments
+- Requires more manual pipeline construction
+
+## NLTK Example: Basic Text Processing
+
+```{python}
+#| code-fold: true
+import nltk
+from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+
+# Download required data (run once)
+# nltk.download('punkt')
+# nltk.download('stopwords')
+# nltk.download('wordnet')
+# nltk.download('averaged_perceptron_tagger')
+
+text = """Natural language processing (NLP) is a fascinating field. 
+It enables computers to understand and process human language. 
+NLTK provides excellent tools for learning NLP concepts."""
+
+# Tokenization
+sentences = sent_tokenize(text)
+words = word_tokenize(text)
+
+print("Sentences:", len(sentences))
+print("Words:", len(words))
+print("\nFirst sentence tokens:", word_tokenize(sentences[0]))
+
+# Remove stopwords
+stop_words = set(stopwords.words('english'))
+filtered_words = [w for w in words if w.lower() not in stop_words and w.isalpha()]
+print("\nFiltered words:", filtered_words)
+
+# Stemming vs Lemmatization
+stemmer = PorterStemmer()
+lemmatizer = WordNetLemmatizer()
+
+words_to_process = ['running', 'runs', 'ran', 'easily', 'fairly']
+print("\n{:<15} {:<15} {:<15}".format("Original", "Stemmed", "Lemmatized"))
+print("-" * 45)
+for word in words_to_process:
+    stemmed = stemmer.stem(word)
+    lemmatized = lemmatizer.lemmatize(word, pos='v')  # v = verb
+    print("{:<15} {:<15} {:<15}".format(word, stemmed, lemmatized))
+```
+
+## NLTK Example: Part-of-Speech Tagging
+
+```{python}
+#| code-fold: true
+from nltk import pos_tag
+
+sentence = "The quick brown fox jumps over the lazy dog"
+tokens = word_tokenize(sentence)
+pos_tags = pos_tag(tokens)
+
+print("Part-of-Speech Tags:")
+for word, tag in pos_tags:
+    print(f"  {word:10} -> {tag}")
+```
+
+## NLTK Example: Sentiment Analysis
+
+```{python}
+#| code-fold: true
+from nltk.sentiment import SentimentIntensityAnalyzer
+
+# Download required data
+# nltk.download('vader_lexicon')
+
+sia = SentimentIntensityAnalyzer()
+
+texts = [
+    "I absolutely love this product! It's amazing!",
+    "This is terrible. I hate it.",
+    "It's okay, nothing special.",
+    "The weather is nice today."
+]
+
+print("Sentiment Analysis Results:")
+print("-" * 60)
+for text in texts:
+    scores = sia.polarity_scores(text)
+    print(f"Text: {text}")
+    print(f"  Negative: {scores['neg']:.3f}, Neutral: {scores['neu']:.3f}, Positive: {scores['pos']:.3f}")
+    print(f"  Compound Score: {scores['compound']:.3f}\n")
+```
+
+# spaCy
+
+## Overview
+
+**spaCy** is a modern, industrial-strength NLP library designed for production use.
+
+**Key Features:**
+
+- Fast and efficient (Cython-optimized)
+- Pre-trained statistical models for multiple languages
+- Built-in support for NER, POS tagging, dependency parsing
+- Easy integration with deep learning frameworks (PyTorch, TensorFlow)
+- Beautiful visualization tools (displaCy)
+
+**Best For:**
+
+- Production NLP pipelines
+- Real-time processing
+- Named Entity Recognition
+- Document similarity and classification
+- Information extraction at scale
+
+**Limitations:**
+
+- Less flexible than NLTK for research
+- Fewer resources for learning basic concepts
+- Model-dependent (needs pre-trained models)
+
+## spaCy Example: Basic Text Analysis
+
+```{python}
+#| code-fold: true
+import spacy
+
+# Load English model (run: python -m spacy download en_core_web_sm)
+nlp = spacy.load("en_core_web_sm")
+
+text = """Apple Inc. is planning to open a new store in San Francisco next month. 
+The CEO, Tim Cook, announced this during a press conference."""
+
+doc = nlp(text)
+
+# Tokenization and linguistic features
+print("Tokens and their attributes:")
+print("{:<15} {:<10} {:<10} {:<10}".format("Token", "Lemma", "POS", "Is Stop?"))
+print("-" * 50)
+for token in doc[:10]:  # First 10 tokens
+    print("{:<15} {:<10} {:<10} {:<10}".format(
+        token.text, 
+        token.lemma_, 
+        token.pos_, 
+        str(token.is_stop)
+    ))
+```
+
+## spaCy Example: Named Entity Recognition
+
+```{python}
+#| code-fold: true
+# Named Entity Recognition
+print("\n\nNamed Entities:")
+print("{:<20} {:<15} {:<30}".format("Entity", "Type", "Explanation"))
+print("-" * 70)
+for ent in doc.ents:
+    print("{:<20} {:<15} {:<30}".format(
+        ent.text, 
+        ent.label_, 
+        spacy.explain(ent.label_)
+    ))
+
+# Visualize entities
+from spacy import displacy
+
+displacy.render(doc, style="ent", jupyter=True)
+```
+
+## spaCy Example: Dependency Parsing
+
+```{python}
+#| code-fold: true
+
+sentence = nlp("The quick brown fox jumps over the lazy dog")
+
+print("\nDependency Parse:")
+print("{:<10} {:<10} {:<10} {:<10}".format("Token", "Dependency", "Head", "Children"))
+print("-" * 50)
+for token in sentence:
+    children = ", ".join([child.text for child in token.children])
+    print("{:<10} {:<10} {:<10} {:<10}".format(
+        token.text,
+        token.dep_,
+        token.head.text,
+        children if children else "-"
+    ))
+
+# Visualize dependency tree
+displacy.render(
+    sentence,
+    style="dep",
+    jupyter=True,
+    options={
+        "compact": False,
+        "color": "blue",
+        "bg": "#fff",
+        "distance": 120,
+        "width": 700,
+        "height": 300,
+        "font": "10px Arial"    # Reduce font size
+    }
+)
+```
+
+## spaCy Example: Document Similarity
+
+```{python}
+#| code-fold: true
+# Document similarity using word vectors
+doc1 = nlp("I love programming in Python")
+doc2 = nlp("I enjoy coding with Python")
+doc3 = nlp("The weather is nice today")
+
+print("\nDocument Similarity (using word vectors):")
+print(f"doc1 <-> doc2: {doc1.similarity(doc2):.3f}")
+print(f"doc1 <-> doc3: {doc1.similarity(doc3):.3f}")
+print(f"doc2 <-> doc3: {doc2.similarity(doc3):.3f}")
+
+# Word similarity
+word1 = nlp("king")
+word2 = nlp("queen")
+word3 = nlp("apple")
+
+print("\nWord Similarity:")
+print(f"king <-> queen: {word1.similarity(word2):.3f}")
+print(f"king <-> apple: {word1.similarity(word3):.3f}")
+```
+
+# BERTopic
+
+## Overview
+
+**BERTopic** is a modern topic modeling technique that leverages transformer-based embeddings.
+
+**Key Features:**
+
+- Uses BERT embeddings for semantic understanding
+- Automatically determines optimal number of topics
+- UMAP for dimensionality reduction
+- HDBSCAN for clustering
+- Class-based TF-IDF (c-TF-IDF) for topic representation
+- Interactive visualizations
+
+**Best For:**
+
+- Topic discovery in document collections
+- Short text analysis (tweets, reviews, articles)
+- Dynamic topic modeling over time
+- High-quality, interpretable topics
+- Modern alternative to LDA
+
+**Limitations:**
+
+- Computationally expensive (needs embeddings)
+- Requires more memory than classical methods
+- Slower than LDA for very large corpora
+- GPU recommended for large datasets
+
+## BERTopic Example: Basic Topic Modeling
+
+```{python}
+#| code-fold: true
+from bertopic import BERTopic
+from sklearn.datasets import fetch_20newsgroups
+
+# Load sample data
+categories = ['sci.space', 'rec.sport.baseball', 'talk.politics.guns']
+newsgroups = fetch_20newsgroups(
+    subset='train', 
+    categories=categories, 
+    remove=('headers', 'footers', 'quotes')
+)
+docs = newsgroups.data[:500]  # Use subset for speed
+
+# Create and fit BERTopic model
+print("Training BERTopic model...")
+topic_model = BERTopic(verbose=False, language="english", min_topic_size=10)
+topics, probabilities = topic_model.fit_transform(docs)
+
+print(f"\nDiscovered {len(set(topics)) - 1} topics (excluding outliers)")
+print(f"Outlier documents (topic -1): {sum(1 for t in topics if t == -1)}")
+```
+
+## BERTopic Example: Explore Topics
+
+```{python}
+#| code-fold: true
+# Get topic information
+topic_info = topic_model.get_topic_info()
+print("\nTopic Information:")
+print(topic_info[['Topic', 'Count', 'Name']].head(10))
+
+# Show representative words for each topic
+print("\n\nTop Words per Topic:")
+print("=" * 80)
+for topic_id in range(min(5, len(set(topics)) - 1)):  # Show first 5 topics
+    topic_words = topic_model.get_topic(topic_id)
+    if topic_words:
+        words = [word for word, score in topic_words[:8]]
+        print(f"\nTopic {topic_id}: {', '.join(words)}")
+```
+
+## BERTopic Example: Topic Visualization
+
+```python
+#| code-fold: false
+# Visualize topics
+fig = topic_model.visualize_topics()
+fig.show()
+
+# Visualize topic hierarchy
+fig_hierarchy = topic_model.visualize_hierarchy(top_n_topics=10)
+fig_hierarchy.show()
+
+# Visualize barchart for top topics
+fig_barchart = topic_model.visualize_barchart(top_n_topics=5, n_words=10)
+fig_barchart.show()
+```
+
+## BERTopic Example: Find Similar Documents
+
+```{python}
+#| code-fold: true
+# Find documents similar to a query
+similar_docs, similarity_scores = topic_model.find_topics(
+    "space exploration and satellites", 
+    top_n=3
+)
+
+print("\nTopics similar to 'space exploration and satellites':")
+for topic_id, score in zip(similar_docs, similarity_scores):
+    print(f"\nTopic {topic_id} (similarity: {score:.3f}):")
+    words = [word for word, _ in topic_model.get_topic(topic_id)[:5]]
+    print(f"  Key words: {', '.join(words)}")
+```
+
+## BERTopic Example: Dynamic Topic Modeling
+
+```{python}
+#| code-fold: true
+# Topic modeling over time (if you have timestamps)
+import pandas as pd
+import numpy as np
+
+# Create fake timestamps for demonstration
+timestamps = pd.date_range('2020-01-01', periods=len(docs), freq='D')
+
+# Fit dynamic topic model
+topics_over_time = topic_model.topics_over_time(
+    docs, 
+    timestamps, 
+    nr_bins=10
+)
+
+print("\nTopics Over Time:")
+print(topics_over_time.head(15))
+
+# Visualize topics over time
+fig_timeline = topic_model.visualize_topics_over_time(topics_over_time, top_n_topics=5)
+fig_timeline.show()
+```
+
+# Package Comparison
+
+## Quick Comparison Table
+
+| Feature | NLTK | spaCy | BERTopic |
+|---------|------|-------|----------|
+| **Primary Use** | Education, Research | Production NLP | Topic Modeling |
+| **Speed** | Slow | Fast | Moderate |
+| **Ease of Use** | Moderate | Easy | Easy |
+| **Pre-trained Models** | Limited | Excellent | Uses transformer embeddings |
+| **Customization** | High | Moderate | Moderate |
+| **Memory Usage** | Low | Low-Moderate | High |
+| **Best For** | Learning, Prototyping | NER, Pipelines, Real-time | Topic Discovery |
+| **Visualization** | Limited | Excellent (displaCy) | Excellent (interactive) |
+| **GPU Support** | No | Yes (for training) | Recommended |
+| **Community** | Large, Academic | Large, Industry | Growing |
+
+## When to Use Each Package
+
+**Use NLTK when:**
+
+- Learning NLP concepts
+- Need access to linguistic resources (WordNet, TreeBank)
+- Working on academic research
+- Prototyping ideas
+- Need maximum flexibility
+
+**Use spaCy when:**
+
+- Building production systems
+- Need fast, accurate NER
+- Processing large volumes of text
+- Want beautiful visualizations
+- Need dependency parsing
+- Building information extraction pipelines
+
+**Use BERTopic when:**
+
+- Discovering topics in document collections
+- Working with short texts (tweets, reviews)
+- Need interpretable, coherent topics
+- Want to avoid specifying number of topics
+- Have access to GPU resources
+- Analyzing topic evolution over time
+
+## Combining Packages
+
+These packages can be used together effectively:
+
+```{python}
+#| code-fold: true
+# Example: Use NLTK for preprocessing, spaCy for NER, BERTopic for topics
+
+import nltk
+import spacy
+from bertopic import BERTopic
+
+nlp = spacy.load("en_core_web_sm")
+
+documents = [
+    "Apple Inc. announced new products in Cupertino yesterday.",
+    "Google is developing AI technology in Mountain View.",
+    "Microsoft released a new version of Windows in Seattle."
+]
+
+# Step 1: Use NLTK for basic preprocessing
+from nltk.corpus import stopwords
+stop_words = set(stopwords.words('english'))
+
+# Step 2: Use spaCy for NER and lemmatization
+processed_docs = []
+for doc in documents:
+    spacy_doc = nlp(doc)
+    
+    # Extract entities
+    entities = [(ent.text, ent.label_) for ent in spacy_doc.ents]
+    print(f"\nDocument: {doc}")
+    print(f"Entities: {entities}")
+    
+    # Lemmatize and remove stopwords
+    lemmatized = [token.lemma_ for token in spacy_doc 
+                  if not token.is_stop and not token.is_punct]
+    processed_docs.append(" ".join(lemmatized))
+
+print("\n\nProcessed documents:")
+for i, doc in enumerate(processed_docs, 1):
+    print(f"{i}. {doc}")
+
+# Step 3: Use BERTopic for topic modeling (would need more documents in practice)
+# topic_model = BERTopic()
+# topics, probs = topic_model.fit_transform(processed_docs)
+```
+
+# Summary
+
+- **NLTK**: Comprehensive, educational, flexible but slower
+- **spaCy**: Fast, production-ready, excellent for NER and pipelines
+- **BERTopic**: Modern topic modeling with transformer embeddings
+
+Choose based on your specific needs: learning (NLTK), production (spaCy), or topic discovery (BERTopic). Often, combining these tools yields the best results!
+

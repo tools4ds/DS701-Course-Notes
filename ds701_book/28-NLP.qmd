@@ -12,10 +12,34 @@ Natural language processing (NLP) is a subfield of artificial intelligence that 
 
 ## NLP Evolution Timeline
 
-- **1950s-1970s**: Rule-based systems (Turing Test, formal grammars)
-- **1980s-2000s**: Statistical methods (n-grams, machine learning)
-- **2006-2017**: Deep learning (RNNs, LSTMs, attention mechanisms)
-- **2017-Present**: Transformers and LLMs (BERT, GPT, modern NLP)
+::: {.columns}
+::: {.column width="50%"}
+**1950s-1970s: Rule-Based Era**
+
+- Turing Test (1950), formal grammars, hand-crafted rules
+- Systems like ELIZA (1966) - pattern matching chatbot
+- Limitations: brittle, didn't scale, couldn't handle ambiguity
+
+**1980s-2000s: Statistical Revolution**
+
+- Shift from rules to learning from data
+- N-grams, Hidden Markov Models, machine learning
+- IBM alignment models for machine translation
+:::
+::: {.column width="50%"}
+**2006-2017: Deep Learning**
+
+- Neural networks applied to NLP
+- Word2Vec (2013), RNNs, LSTMs for sequence modeling
+- Attention mechanism (2014) - precursor to Transformers
+
+**2017-Present: Transformer Era**
+
+- Attention is All You Need (2017) - Transformer architecture
+- BERT (2018), GPT-2/3 (2019/2020), ChatGPT (2022)
+- LLMs with billions of parameters, human-level performance
+:::
+:::
 
 # Lecture Outline
 
