@@ -8,106 +8,34 @@ bibliography: references.bib
 
 Natural language processing (NLP) is a subfield of artificial intelligence that allows computers to understand, process, and manipulate human language.
 
-# History of NLP
+# Brief History of NLP
 
-- The Dawn of NLP (1950-1970s)
-- The Statistical Revolution (1980s-2000s)
-- The Deep Learning Era (2000s-present)
+## NLP Evolution Timeline
 
-## The Dawn of NLP
-
-NLP has its origin ins the 1950s. Two important figures in the development of computational NLP.
-
-:::: {.columns}
-::: {.column width="60%"}
-- **Alan Turing**. British mathematician, logician, and computer scientist. Considered the father of modern computer science.
-  - *Computing Machinery and Intelligence*. Turing proposed a criterion for determining a machine's intelligence. 
-  - This criterion is know as the **Turing Test**. 
-  - This test involves the interpretation and generation of natural language by a computer.
-:::
-::: {.column width="40%"}
-![](figs/AlanTuring.png){fig-align="center"}
-:::
-::::
-
----
-
-## Turing Test
-
-:::: {.columns}
-::: {.column width="50%"}
-- An interrogator communicates with a computer and a human. 
-- The computer and human attempt to convince the interrogator that they are human. 
-- If the interrogator cannot determine who is human, the computer wins the test. 
-:::
-::: {.column width=50"%"}
-![](figs/TuringTestDiagram.png)
-:::
-::::
-
-:::: {.fragment}
-Do you think LLMs are able to pass the Turing Test?
-::::
-
----
-
-:::: {.columns}
-::: {.column width="50%"}
-- **Noam Chomsky**. Is an American professor and public intellectual known for his work in linguistics, political activism and social criticism. He worked at MIT (retiring in 2002).
-  - His book, *Syntactic Structures*, revolutionized the scientific study of language.
-  - He proposed a mathematical theory of language that introduces a generative model which enumerates the sentences in a language.
-  - This work helped lay the foundation for modern NLP techniques.
-:::
-::: {.column width="50%"}
-![](figs/NoamChomsky.png){fig-align="center"}
-:::
-::::
-
-## Rule-Based Systems
-
-The NLP research of the 1950's focused on rules-based systems. Linguists would craft large sets of rules to capture the grammatical syntax and vocabulary of specific languages.
-
-Though important at the time, these systems were quite limited. They weren't able to capture the nuances and many exceptions in languages. They were poor at capturing slang.
-
-The creation and maintenance of such rule based systems for every language was not scalable.
-
-These systems focused predominantly on syntax and vocabulary. They were not able to capture the deeper meaning and context of the texts they were analyzing.
-
-:::: {.fragment}
-See for example [WordNet](https://wordnet.princeton.edu/), ([Wikpedia:WordNet](https://en.wikipedia.org/wiki/WordNet)).
-::::
-
-
-## The Statistical Revolution
-
-Due to the limitations or rule-based systems coupled with a steady increase in computational power and large collections of data, this period of time saw the advent of machine learning algorithms applied to language processing.
-
-In contrast to rule-based systems, these statistical models learned patterns from data. This allowed them to better handle the variations and complexities of natural language. IBM research developed a set of important machine translation models, called the [IBM alignment models](http://www2.statmt.org/survey/Topic/IBMModels).  
-
-The concepts of Recurrent Neural Networks were introduced in 1986 in the paper, "Learning Representations by Back-Propagating Errors," by [@rumelhart1986learning].
-
-In addition, the use of n-gram models became more formalized and widely adopted. An n-gram language model predicts the probability of a word based on the previous n-1 words in a sequence, making it a fundamental tool in natural language processing for tasks like text prediction and speech recognition.
-
-## The Deep Learning Era
-
-The 2000s ushered in the era of deep learning. This is when we saw the application of neural networks to NLP.
-
-Here are some of the notable developments.
-
-- **@bengio2000neural**. Used feed-forward neural networks as a language model. Significantly outperformed n-gram models.
-- **@sutskever2014sequence** Used LSTMs with an encoder-decoder architecture which produced (at the time) state-of-the-art results for machine translation.
-- **@bahdanau2014neural** Proposed the concept of attention in RNNs. Attention is a mechanism that allows models to focus on specific parts of the input sequence when generating each part of the output sequence, improving the handling of long-range dependencies and context.
-- **@vaswani2017attention** Introduce the Transformer architecture. This allows for parallelization of sequential data with attention. Transformers become the basis for LLMs.
+- **1950s-1970s**: Rule-based systems (Turing Test, formal grammars)
+- **1980s-2000s**: Statistical methods (n-grams, machine learning)
+- **2006-2017**: Deep learning (RNNs, LSTMs, attention mechanisms)
+- **2017-Present**: Transformers and LLMs (BERT, GPT, modern NLP)
 
 # Lecture Outline
 
 For the rest of this lecture we will cover:
 
+- Text preprocessing and tokenization
 - Numerical representations of words
-- Language models
+  - Sparse representations (One-Hot, BoW, TF-IDF)
+  - Word2Vec and static embeddings
+  - Contextual embeddings
+- Language models overview
   - N-gram models
-  - Transformers
-- Transformer Architectures
+  - Transformers (high-level)
+- **Named Entity Recognition (NER)**
+  - NER with NLTK
+  - NER with spaCy
+  - NER with BERT
+- **Topic Modeling**
+  - Latent Dirichlet Allocation (LDA)
+  - BERTopic
 
 
 # Numerical Representation of Words
@@ -192,62 +120,20 @@ There are different ways to achieve this. One encoding technique that we already
 
 ## Sparse Representations
 
-We have previously considered the following sparse representations of textual data.
+Sparse representations encode text as high-dimensional vectors with mostly zeros.
 
-### One-Hot Encoding
-- Each word is represented as a vector of zeros and a single one.
-- Simple but inefficient for large vocabularies.
+**Common approaches:**
 
-**Example**
+- **One-Hot Encoding**: Each word is a vector with a single 1 and rest 0s
+  - Example: cat = [1,0,0], dog = [0,1,0], emu = [0,0,1]
+- **Bag of Words (BoW)**: Count word frequencies, ignore order
+- **TF-IDF**: Weight words by importance across documents
 
-Given the words cat, dog, and emu here are sample one-hot encodings
+**Limitations:**
 
-$$
-\begin{align*}
-\text{cat} &= [1, 0, 0]^{T}, \\
-\text{dog} &= [0, 1, 0]^{T}, \\
-\text{emu} &= [0, 0, 1]^{T}. \\
-\end{align*}
-$$
-
----
-
-### Bag of Words (BoW)
-- Represents text as a collection of word counts.
-- Ignores grammar and word order.
-
-**Example**
-
-Suppose we have the following sentences
-
-1. The cat sat on the mat.
-1. The dog sat on the log.
-1. The emu sat on the mat.
-
-| Sentence                              | the | cat | sat | on | mat | dog | log | emu |
-|---------------------------------------|-----|-----|-----|----|-----|-----|-----|----------|
-| "The cat sat on the mat."             |  2  |  1  |  1  | 1  |  1  |  0  |  0  |    0     |
-| "The dog sat on the log."             |  2  |  0  |  1  | 1  |  0  |  1  |  1  |    0     |
-| "The emu sat on the mat."        |  2  |  0  |  1  | 1  |  1  |  0  |  0  |    1     |
-
----
-
-### TF-IDF (Term Frequency-Inverse Document Frequency)
-
-- Adjusts word frequency by its importance across documents.
-- Highlights unique words in a document.
-- See [Course Notes: Feature Extraction](https://tools4ds.github.io/DS701-Course-Notes/07-Clustering-II-in-practice.html#feature-extraction) 
-  for more details.
-
-**Example**
-
-The TF-IDF representations corresponding to the previous sentences.
-
-|       | cat       | dog       | log       | mat       | on        | emu  | sat       | the       |
-|-------|-----------|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
-| Sentence 1 | 0.4698    | 0.0000    | 0.0000    | 0.4698    | 0.3546    | 0.0000    | 0.3546    | 0.7093    |
-| Sentence 2 | 0.0000    | 0.4698    | 0.4698    | 0.0000    | 0.3546    | 0.0000    | 0.3546    | 0.7093    |
-| Sentence 3 | 0.0000    | 0.0000    | 0.0000    | 0.4698    | 0.3546    | 0.4698    | 0.3546    | 0.7093    |
+- High dimensionality (vocabulary size)
+- No semantic meaning (cat and kitten are equally distant)
+- Cannot capture word relationships
 
 ## Word Embeddings
 
@@ -267,6 +153,47 @@ $$
 
 Word embeddings can be static or contextual. A static embedding is when each word has a single embedding, e.g., Word2Vec. A contextual embedding (used by more complex language model embedding algorithms) allows the embedding for a word to change depending on its context in a sentence.
 
+## Word2Vec: Static Embeddings
+
+**Word2Vec** [@mikolov2013efficient] is a technique to learn static word embeddings from large text corpora.
+
+**Key characteristics:**
+
+- Each word has a **single fixed vector** representation
+- Trained to predict context (CBOW) or predict word from context (Skip-gram)
+- Captures semantic relationships: *king - man + woman ≈ queen*
+- Fast to train and use
+- Popular pre-trained models: Google News (300d), GloVe
+
+**Advantages:**
+
+- Efficient for large vocabularies
+- Good for similarity tasks, clustering
+- Pre-trained embeddings available
+
+## Contextual vs Static Embeddings
+
+| Feature | Static (Word2Vec, GloVe) | Contextual (BERT, GPT) |
+|---------|--------------------------|------------------------|
+| **Representation** | One vector per word | Different vectors per context |
+| **Example** | "bank" always same vector | "bank" differs in "river bank" vs "bank account" |
+| **Model Type** | Shallow neural network | Deep transformer model |
+| **Training** | Fast, lightweight | Slow, resource-intensive |
+| **Best For** | Similarity, clustering, simple tasks | Complex understanding, ambiguity resolution |
+| **Dimensionality** | 100-300 dimensions | 768-1024+ dimensions |
+
+**When to use Word2Vec:**
+
+- Limited computational resources
+- Task doesn't require deep context understanding
+- Working with domain-specific corpora (train custom embeddings)
+
+**When to use Contextual Embeddings:**
+
+- Need to handle polysemy (words with multiple meanings)
+- Complex NLP tasks (NER, question answering, translation)
+- Have access to GPU resources
+
 # Language Models
 
 
@@ -282,7 +209,7 @@ A language model is a statistical tool that predicts the probability of a sequen
    - Use neural networks to capture more complex patterns.
    - Examples include *RNNs*, *LSTMs*, and **Transformers**.
 
-We previously covered [RNNs and LSTMs](#27-RNN.qmd).
+See [RNNs and LSTMs](#27-RNN.qmd) for more details.
 
 We'll discuss N-grams briefly followed by a deep dive on Transformers.
 
@@ -329,369 +256,62 @@ We'll discuss N-grams briefly followed by a deep dive on Transformers.
 # Transformers
 
 
-## Transformers
+## Transformers: High-Level Overview
 
-Transformers are a deep learning model for processing sequential (text) data @vaswani2017attention.
+Transformers [@vaswani2017attention] are the foundation of modern NLP systems.
 
-- Rely on a mechanism called *Attention*.
-- Revolutionized the field of natural language processing (NLP) and artificial intelligence (AI).
-- The model is easy to scale across GPUs.
-- The building blocks for large language models (LLMs) such as:
-  - ChatGPT (OpenAI),
-  - LLama (Meta),
-  - BERT (Google),
-  - Megatron (NVIDIA).
+**Key innovations:**
 
-To introduce the Transformer architecture we will consider machine translation. This is an application of sequence-to-sequence modeling. 
+- Use **attention mechanism** to process entire sequences in parallel
+- Revolutionized NLP and enabled LLMs (ChatGPT, BERT, GPT-4)
+- Scalable across GPUs for massive models
 
 ## Transformer Architecture
 
-![](drawio/Transformer.png){fig-align="center"}
-
----
-
 ![](drawio/Transformer_Enc_Dec.png){fig-align="center"}
 
----
+**Components:**
 
-![](drawio/TransformerOriginal.png){fig-align="center"}
+- **Encoder**: Processes input text, creates rich representations
+- **Decoder**: Generates output text using encoder representations
+- **Attention**: Allows model to focus on relevant parts of input
 
-## Encoder-Decoder Blocks
+## The Attention Mechanism
 
-### Encoder
-- **Function**: Processes input data (e.g., text) and converts it into a set of continuous representations.
+Attention allows models to understand which words are most relevant to each other.
 
-### Decoder
-- **Function**: Generates output sequences (e.g., translated text) from the encoded representations.
+**Example sentence:**
 
-The encoder and decoder work together to transform input sequences into meaningful output sequences.
+> "The elephant didn't cross the river because **it** was tired."
 
-## Encoder Input 
+**Question:** What does "it" refer to?
 
-The input to the encoder are word embeddings.
+- Attention helps the model determine that **"it" = "elephant"** (not "river")
+- The model "attends" more strongly to "elephant" when processing "it"
 
-:::: {.columns}
-::: {.column width="70%"}
+## How Attention Works (Simplified)
 
-- Words are embedded into a n-dimensional space, To establish the order of the words, we use positional encodings. .
-- The length $n$ of the vector is the *embedding dimension*.
-- Let $m$ denote the number of words in a sentence.
+For each word in a sentence:
 
-:::
-::: {.column width="30%"}
-![](drawio/InputVectors.png)
-:::
-::::
+1. **Calculate relevance scores** with all other words
+2. **Apply softmax** to get attention weights (sum to 1)
+3. **Compute weighted sum** of word representations
+4. Result: each word's representation includes context from relevant words
 
-## Positional Encodings
-
-To establish the order of the words, we use positional encodings. 
-
-:::: {.columns}
-::: {.column width="70%"}
-- This is achieved by adding a vector $\mathbf{t}^{(i)}$ to the word embedding $\mathbf{x}^{(i)}$.
-- The positionally encoded word embeddings are the inputs to the transformer.
-:::
-::: {.column width="30%"}
-![](drawio/PositionalEncodings.png)
-:::
-::::
-
-## Generating Position Vectors
-
-The authors of @vaswani2017attention proposed the following function for positional encodings
-$$
-\mathbf{t}_{j}^{(i)} = 
-\begin{cases} 
-\sin{\left(\frac{i}{10000^{2j/n}}\right)} & \text{for~$j$~even}, \\ 
-\cos{\left(\frac{i}{10000^{2j/n}}\right)} & \text{for~$j$~odd}. \\
-\end{cases}
-$$
-
----
-
-Here is sample code to generate an illustration of the positional encodings for
-embedding dimension $n=64$ and $m=10$ tokens.
-
-```{python}
-#| fig-align: center
-import numpy as np
-import matplotlib.pyplot as plt
-
-def get_angles(pos, i, d_model):
-  angle_rates = 1 / np.power(10000, (2 * (i//2)) / np.float32(d_model))
-  return pos * angle_rates
-
-def positional_encoding(position, d_model):
-  angle_rads = get_angles(np.arange(position)[:, np.newaxis],
-                          np.arange(d_model)[np.newaxis, :],
-                          d_model)
-  
-  # apply sin to even indices in the array; 2i
-  angle_rads[:, 0::2] = np.sin(angle_rads[:, 0::2])
-  
-  # apply cos to odd indices in the array; 2i+1
-  angle_rads[:, 1::2] = np.cos(angle_rads[:, 1::2])
-    
-  pos_encoding = angle_rads[np.newaxis, ...]
-    
-  return pos_encoding
-
-
-tokens = 10
-dimensions = 64
-
-pos_encoding = positional_encoding(tokens, dimensions)
-
-plt.figure(figsize=(7, 5))
-plt.pcolormesh(pos_encoding[0], cmap='viridis')
-plt.xlabel('Embedding Dimensions', fontsize=16)
-plt.xlim((0, dimensions))
-plt.ylim((tokens, 0))
-plt.ylabel('Token Position', fontsize=16)
-plt.colorbar()
-plt.show()
-
-```
-
-## From Inputs to the Encoder
-
-The positionally encoded vectors are transposed and stacked to form an input matrix. This input matrix is fed into the bottom of the encoder block.
-
-:::: {.columns}
-::: {.column width="70%"}
-The number of rows $m$ is the number of words in the sentence an the number of columns $n$ is the embedding dimension.
-$$
-X =
-\begin{bmatrix}
-& & {\mathbf{x}^{(1)}}^{T} &  & \\
-& & {\mathbf{x}^{(2)}}^{T} & &\\
-& & \vdots & & \\
-& & {\mathbf{x}^{(m)}}^{T} & & \\
-\end{bmatrix}
-\in\mathbb{R}^{m\times n}.
-$$
-:::
-::: {.column width="30%"}
-![](drawio/Encoder.png)
-:::
-::::
-
-# Attention
-
-
-## Attention
-
-Attention in language models is a mechanism that allows the model to focus on relevant parts of the input sequence by assigning different weights to different words, enabling it to capture long-range dependencies and context more effectively.
-
-Attention is needed in order to understand sentences such as, 
-
-```
-The elephant didn't cross the river because it was tired.
-```
-
-Attention allows a language model to understand correctly that *it* refers to the elephant and not the river.
-
-## Queries, Keys, and Values
-
-The building blocks of the attention mechanism are query $\mathbf{q}$, key $\mathbf{k}$, and value $\mathbf{v}$ vectors.
-
-The query and key vectors $\mathbf{k}, \mathbf{q}\in\mathbb{R}^{d}$ and the value vector $\mathbf{v}\in\mathbb{R}^{n}$.
-
-At a high level
-
-- query vectors determine which parts of the input to focus on, 
-- key vectors represent the input features, and 
-- value vectors contain the actual data to be attended to.
-
----
-
-:::: {.columns}
-::: {.column width="60%"}
-Each $\mathbf{q}^{(i)}$, $\mathbf{k}^{(i)}$, and $\mathbf{v}^{(i)}$ is associated with $\mathbf{x}^{(i)}$. To compute the query, key, and value vectors, compute
-$$
-\begin{align*}
-\mathbf{q}^{(i)} &= {\mathbf{x}^{(i)}}^{T}W^{Q}, \\
-\mathbf{k}^{(i)} &= {\mathbf{x}^{(i)}}^{T}W^{K}, \\
-\mathbf{v}^{(i)} &= {\mathbf{x}^{(i)}}^{T}W^{V}, \\
-\end{align*}
-$$
-
-where $W^{Q}, W^{K}\in\mathbb{R}^{n\times d}$ and $W^{V}\in\mathbb{R}^{n\times n}$ are trainable matrices of weights.
-:::
-::: {.column width="40%"}
-![](drawio/QueriesKeysValues.png)
-:::
-::::
-
----
-
-:::: {.columns}
-::: {.column width="60%"}
-This operation can be vectorized to compute
-$$
-\begin{align*}
-Q &= XW^{Q}, \\
-K &= XW^{K}, \\
-V &= XW^{V}. \\
-\end{align*}
-$$
-:::
-::: {.column width="40%"}
-![](drawio/VectorizedQKV.png)
-:::
-::::
-
-
-
-## Computing Attention
-
-Given a query, key, and value vector, we compute attention in the following sequence of operations
-
-:::: {.columns}
-::: {.column width="60%"}
-1. Compute $\mathbf{q}^{(i)}\cdot \mathbf{k}^{(j)} = s_{i,j}$ for each $j$.
-1. Compute $s_{i,j}=s_{i,j}/\sqrt{d}$.
-1. Compute $\tilde{s}_{i,:} = \operatorname{softmax}(s_{i,:})$.
-1. Compute $\mathbf{\tilde{v}}^{(j)}=\tilde{s}_{i, j} \mathbf{v}^{(j)}$ for each $j$.
-1. Compute $\mathbf{z}^{(i)} = \sum_{j} \mathbf{\tilde{v}}^{(j)}$.
-:::
-::: {.column width="40%"}
-![](drawio/ComputingAttention.png)
-:::
-::::
-
-::: aside
-Let $\mathbf{s}\in\mathbb{R}^{n}$, recall $softmax(\mathbf{s})_i = \frac{e^{s_i}}{\sum e^{s_{j}}}$.
-:::
-
-## Vectorized Attention
-
-Attention can be easily vectorized. The procedure is then
-
-:::: {.columns}
-::: {.column width="60%"}
-1. Compute $QK^T = S$.
-1. Compute $S=\frac{1}{\sqrt{d}}S$.
-1. Compute the softmax across rows $\tilde{S} = \operatorname{softmax}(S)$.
-1. Compute $Z = \tilde{S}V$.
-:::
-::: {.column width="40%"}
-![](drawio/ComputingVectorizedAttention.png)
-:::
-::::
+**Multi-head attention**: Run multiple attention operations in parallel to capture different types of relationships
 
 ## Attention Visualized
 
 :::: {.columns}
 ::: {.column width="60%"}
-Recall the original sentence to be translated, "The elephant did not cross the river because it was tired."
+Darker connections show stronger attention.
 
-A hypothetical visualization would demonstrate the links of the original sentence to the word *it*.
+When processing "it", the model attends most to "elephant".
 
-The darker the color, the more this word **attends** to the word *it*.
-
+This is how transformers handle long-range dependencies and ambiguity.
 :::
 ::: {.column width="40%"}
 ![](drawio/VisualizedAttention.png)
-:::
-::::
-
-## Attention Summary
-
-1. Compute an attention score matrix $S_{ij} = \mathbf{q}^{(i)}\cdot \mathbf{k}^{(j)}/\sqrt{d}$.
-1. The softmax function is applied to each row of the matrix $S$.
-1. For a given row, the values in the columns of this matrix are the weights of the linear combination of the values vectors $\mathbf{v}^{(i)}$. 
-1. These weights tell us how much (or how little) each value vector contributes in the output $\mathbf{z}^{(i)}$.
-1. When there is only one set of $W^{Q}, W^{K},$ and $W^{V}$ matrices this process is called self-attention.
-
-# Layer Normalization and Feed-Forward Neural Network
-
-## Layer Normalization
-
-:::: {.columns}
-::: {.column width="60%"}
-- Training with features on different scales takes longer and is the potential cause of exploding gradients.
-- Layer normalization ensures all values along the embedding dimension have the same distribution.
-- Layer normalization is calculated by a modified Z-score equation.
-:::
-::: {.column width="40%"}
-![](drawio/LayerNormalization.png)
-:::
-::::
-
-
-::: aside
-Proposed in @ba2016layernormalization.
-:::
-
----
-
-- Sum $\mathbf{x}+\mathbf{z}= \mathbf{u}$.
-- Compute mean $\mu$ and the variance $\sigma^{2}$ of $\mathbf{u}$.
-- Compute
-$$
-\bar{\mathbf{u}} = \frac{\mathbf{u}-\mu}{\sqrt{\sigma^{2}+\varepsilon}} \odot \boldsymbol{\gamma} + \boldsymbol{\beta}.
-$$
-- $\varepsilon$ is a small number.
-- $\boldsymbol{\gamma}, \boldsymbol{\beta}$ are trainable parameter vectors of length $n$.
-- The notation $\odot$ indicates entry-wise multiplication.
-- Layer normalization can be vectorized to produce $\bar{U}$.
-
-## Feed-Forward Neural Network (FFNN)
-
-- The vectorized output of the layer normalization layer is $\bar{U}$.
-- The tensor $\bar{U}$ is the input to the neural network.
-- There is 1 hidden layer.
-- $FFNN(\bar{U}) = W_2\operatorname{max}(0, W_1\bar{U} + b_1) + b_2$.
-- The nonlinearity introduced by activation function of this layer allows the model to further differentiate the attention of each word.
-
-## Encoder Output
-
-- A 2nd layer normalization is applied to the output of the FFNN.
-- There is a residual connection to the output of the 1st layer normalization layer.
-- The output from the 2nd layer normalization is the output of the encoder.
-- At this stage, attention has been incorporated into the output.
-- The output is then sent to the decoder blocks.
-
-## Decoder Blocks
-
-The architecture of a decoder block (in an encoder-decoder transformer) is nearly identical to than of an encoder block. 
-
-:::: {.columns}
-::: {.column width="60%"}
-The decoder blocks consists of
-
-- self-attention layer
-- layer normalization
-- feed-forward neural network
-- layer normalization
-
-:::
-::: {.column width="40%"}
-![](drawio/Decoder.png)
-:::
-::::
-
-The major differences in the decoder
-
-1. An encoder-decoder attention layer. This layer attends to the output of the encoder with *cross attention* (e.g. keys and values come from the encoder and queries come from the decoder).
-1. The self-attention layer only attends to earlier positions (not future) in the output sequence.
-
-## Decoder Output
-
-The final output of the decoder blocks is a linear layer followed by a softmax layer.
-
-:::: {.columns}
-::: {.column width="60%"}
-The linear layer outputs a vector that is fed into a softmax layer.
-
-The softmax layer outputs the probability of a potential word being generated. 
-
-The word with the maximum probability is chosen and output by the model.
-:::
-::: {.column width="40%"}
-![](drawio/DecoderOutput.png)
 :::
 ::::
 
@@ -699,121 +319,420 @@ The word with the maximum probability is chosen and output by the model.
 
 ## 3 Types of Transformer Models
 
-1. **Encoder-Decoder** – used in sequence-to-sequence tasks, where one text string is converted to another (e.g., machine translation)
+1. **Encoder-Decoder** – Sequence-to-sequence tasks (e.g., machine translation)
+   - Example: Original Transformer, T5
 
-1. **Encoder** – transforms text embeddings into representations that support variety of tasks (e.g., sentiment analysis, classification)
- Model Example: BERT
+2. **Encoder-Only** – Understanding and classification tasks
+   - Example: **BERT** (sentiment analysis, NER, classification)
 
-1. **Decoder** – predicts the next token to continue the input text (e.g., ChatGPT, AI assistants)
- Model Example: GPT4, GPT4
+3. **Decoder-Only** – Text generation and completion
+   - Example: **GPT** (ChatGPT, text generation, AI assistants)
 
-## Encoder Model Example: BERT (2019)
+## BERT: Encoder Model
 
-### Bidirectional Encoder Representations from Transformers
+**BERT** (Bidirectional Encoder Representations from Transformers) [@devlin2019bert]
 
-- Hyperparameters
-  - 30,000 token vocabulary
-  - 1024-dimensional word embeddings
-  - 24x transformer layers
-  - 16 heads in self-attention mechanism
-  - 4096 hidden units in middle of MLP
-- ~340 million parameters
-- Pre-trained in a self-supervised manner
-- Can be adapted to task with one additional layer and fine-tuned
+**Key features:**
 
-::: aside
-Proposed in @devlin2019bert.
-:::
+- Reads text **bidirectionally** (considers context from both directions)
+- Pre-trained on masked language modeling (predict hidden words)
+- 340M parameters (BERT-Large), 110M (BERT-Base)
+- Fine-tuned for specific tasks with one additional layer
 
-## Encoder Pre-Training
+**Common uses:** Text classification, NER, question answering, sentiment analysis
 
-![](figs/EncoderPretraining.png){fig-align="center"}
+## GPT: Decoder Model
 
-- A small percentage of input embedding replaced with a generic <mask> token
-- Predict missing token from output embeddings
-- Added linear layer and softmax to generate probabilities over vocabulary
-- Trained on BooksCorpus (800M words) and English Wikipedia (2.5B words)
+**GPT** (Generative Pre-trained Transformer) [@brown2020language]
 
+**Key features:**
 
-## Encoder Fine-Tuning
+- Reads text **left-to-right** (autoregressive)
+- Predicts next token: $P(t_1, t_2, \ldots, t_N) = P(t_1)\prod_{n=2}^{N} P(t_n | t_1, \ldots t_{n-1})$
+- GPT-3: 175 billion parameters
+- Excellent at text generation
 
-[](figs/EncoderFinetuning.png){fig-align="center"}
+**Common uses:** Text completion, creative writing, chatbots, code generation
 
-- Extra layer(s) appended to convert output vectors to desired output format.
-- 3rd Example: Text span prediction -- predict start and end location of answer to a question in passage of Wikipedia, see this [link](https://rajpurkar.github.io/SQuAD-explorer/).
+## Transformer Applications
 
+Transformers enable powerful NLP applications:
 
-## Decoder Model Example: GPT3 (2020)
+- **Machine Translation**: Translate between languages
+- **Text Summarization**: Generate concise summaries
+- **Question Answering**: Answer questions from context
+- **Named Entity Recognition**: Identify entities in text
+- **Sentiment Analysis**: Determine sentiment/emotion
+- **Text Generation**: Create human-like text
 
-### Generative Pre-trained Transformer
+# Named Entity Recognition (NER)
 
-- One purpose: generate the next token in a sequence.
-- This is an autoregressive model.
-- Factors the probability of a sentence of tokens $t_1, t_2, \ldots t_N$ as
-$$
-P(t_1, t_2, \ldots, t_N) = P(t_1)\prod_{n=2}^{N}
-P(t_n | t_1, t_2, \ldots t_{n-1}).
-$$
+## What is Named Entity Recognition?
 
-::: aside
-Proposed in @brown2020language.
-:::
+**Named Entity Recognition (NER)** is the task of identifying and classifying named entities in text into predefined categories.
 
-## Decoder: Masked Self-Attention
+**Common entity types:**
 
-![](figs/DecoderMaskedAttention.png)
+- **PERSON**: Names of people (e.g., "Barack Obama")
+- **ORGANIZATION**: Companies, agencies (e.g., "Google", "FBI")
+- **LOCATION**: Cities, countries, landmarks (e.g., "Paris", "Mount Everest")
+- **DATE**: Dates and times (e.g., "January 1, 2024")
+- **MONEY**: Monetary values (e.g., "$100")
+- **GPE**: Geopolitical entities (countries, cities, states)
 
-- During training we want to maximize the log probability of the input text under the autoregressive model.
-- We want to make sure the model doesn’t “cheat” during training by looking ahead at the next token.
-- Therefore, we mask the self attention weights corresponding to current and right context to negative infinity.
+**Applications:** Information extraction, content classification, question answering, knowledge graphs
 
+## NER with NLTK
 
-## Decoder: Text Generation
+NLTK (Natural Language Toolkit) provides basic NER capabilities using the `ne_chunk()` function.
 
-![](figs/DecoderTextGen.png)
+```{python}
+#| code-fold: false
+import nltk
+from nltk import word_tokenize, pos_tag, ne_chunk
 
-- Prompt with token string “<start> It takes great”
-- Generate next token for the sequence by 
-  - picking most likely token
-  - sample from the probability distribution
-  - beam search – select the most likely sentence rather than picking in a greedy fashion
+# Download required NLTK data (run once)
+# nltk.download('punkt')
+# nltk.download('averaged_perceptron_tagger')
+# nltk.download('maxent_ne_chunker')
+# nltk.download('words')
 
-<!-- 
-# Applications
+text = "Apple Inc. was founded by Steve Jobs in Cupertino, California. In 2024, the company is worth over $3 trillion dollars."
 
-We will now build our own code to translate English sentences to Dutch sentences.
+# Tokenize, POS tag, then NER
+tokens = word_tokenize(text)
+pos_tags = pos_tag(tokens)
+named_entities = ne_chunk(pos_tags)
 
-## Overview
+print(named_entities)
+```
 
-We will use the following Python packages to achieve this
+## NLTK NER Results
 
-- Pytorch
-- Datasets
-- Transformers
+NLTK uses a **rule-based and statistical approach** trained on Penn Treebank corpus.
 
-You will need to execute this code on a computer with a GPU.
+**Advantages:**
 
-## Data
+- Easy to use, no GPU required
+- Good for simple, well-formed text
+- Lightweight
 
-## AutoModelForSeq2SeqLM
+**Limitations:**
 
-## Training
+- Lower accuracy than modern methods
+- Limited entity types
+- Requires POS tagging first
+- Poor with informal text or domain-specific entities
 
-## Evaluation
+## NER with spaCy
 
-## Inference
+spaCy is a modern, production-ready NLP library with excellent NER capabilities.
 
-# Review
+```{python}
+#| code-fold: false
+import spacy
 
-## NLP Recap
+# Load pre-trained model (run: python -m spacy download en_core_web_sm)
+nlp = spacy.load("en_core_web_sm")
 
-In this sequence of lectures we covered 
+text = "Apple Inc. was founded by Steve Jobs in Cupertino, California. In 2024, the company is worth over $3 trillion dollars."
 
-- historical roots of natural language processing
-- the Transformer architecture
-- example language translation 
--->
+# Process text
+doc = nlp(text)
 
+# Extract named entities
+print("Entities found:")
+for ent in doc.ents:
+    print(f"  {ent.text:20} -> {ent.label_:15} ({spacy.explain(ent.label_)})")
+```
 
+## spaCy NER Visualization
+
+spaCy provides built-in visualization with `displacy`:
+
+```{python}
+#| code-fold: false
+from spacy import displacy
+
+text = "Apple Inc. was founded by Steve Jobs in Cupertino, California. In 2024, the company is worth over $3 trillion dollars."
+doc = nlp(text)
+
+# Visualize entities
+displacy.render(doc, style="ent", jupyter=True)
+```
+
+**spaCy advantages:**
+
+- Fast and accurate
+- Multiple pre-trained models (small, medium, large)
+- Easy visualization
+- Production-ready
+
+## NER with BERT
+
+BERT-based NER models achieve state-of-the-art results using Hugging Face transformers.
+
+```{python}
+#| code-fold: false
+from transformers import pipeline
+
+# Load pre-trained BERT NER model
+ner_pipeline = pipeline("ner", model="dslim/bert-base-NER", aggregation_strategy="simple")
+
+text = "Apple Inc. was founded by Steve Jobs in Cupertino, California. In 2024, the company is worth over $3 trillion dollars."
+
+# Perform NER
+entities = ner_pipeline(text)
+
+# Display results
+print("BERT NER Results:")
+for entity in entities:
+    print(f"  {entity['word']:20} -> {entity['entity_group']:10} (score: {entity['score']:.3f})")
+```
+
+## BERT NER Details
+
+**How BERT NER works:**
+
+- Pre-trained BERT model fine-tuned on labeled NER datasets (e.g., CoNLL-2003)
+- Predicts entity label for each token
+- Aggregation combines sub-word tokens into complete entities
+
+**Advantages:**
+
+- State-of-the-art accuracy
+- Handles context and ambiguity well
+- Multiple pre-trained models available
+- Can be fine-tuned on custom data
+
+**Limitations:**
+
+- Requires GPU for fast inference
+- Larger model size
+- More complex setup
+
+## NER Tools Comparison
+
+| Feature | NLTK | spaCy | BERT (Transformers) |
+|---------|------|-------|---------------------|
+| **Accuracy** | Moderate | High | Very High |
+| **Speed** | Fast | Very Fast | Moderate (needs GPU) |
+| **Ease of Use** | Moderate | Easy | Moderate |
+| **GPU Required** | No | No | Recommended |
+| **Model Size** | Small | Small-Medium | Large |
+| **Customization** | Limited | Good | Excellent |
+| **Best For** | Simple tasks, learning | Production, most use cases | Highest accuracy, custom domains |
+
+**Recommendation:** Start with spaCy for most applications, use BERT when accuracy is critical.
+
+# Topic Modeling
+
+## What is Topic Modeling?
+
+**Topic modeling** is an unsupervised learning technique that discovers abstract "topics" in a collection of documents.
+
+**Key concepts:**
+
+- **Topic**: A distribution over words (e.g., "sports" → {game, team, player, score, ...})
+- **Document**: A mixture of topics
+- **Goal**: Automatically discover topics and their distributions
+
+**Applications:**
+
+- Content recommendation
+- Document organization
+- Trend analysis
+- Search and discovery
+- Summarization
+
+## Latent Dirichlet Allocation (LDA)
+
+**LDA** [@blei2003latent] is the most popular classical topic modeling algorithm.
+
+**How LDA works (simplified):**
+
+1. Assume each document is a mixture of topics
+2. Assume each topic is a mixture of words
+3. Use statistical inference to discover these mixtures
+
+**Key hyperparameters:**
+
+- `n_topics`: Number of topics to discover
+- `alpha`: Document-topic density (higher = more topics per document)
+- `beta`: Topic-word density (higher = more words per topic)
+
+## LDA with Scikit-Learn
+
+```{python}
+#| code-fold: false
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.decomposition import LatentDirichletAllocation
+
+# Load sample data (subset for speed)
+categories = ['sci.space', 'rec.sport.baseball', 'comp.graphics']
+newsgroups = fetch_20newsgroups(subset='train', categories=categories, remove=('headers', 'footers', 'quotes'))
+documents = newsgroups.data[:300]  # Use subset for demo
+
+# Convert to document-term matrix
+vectorizer = CountVectorizer(max_features=1000, stop_words='english', max_df=0.7)
+doc_term_matrix = vectorizer.fit_transform(documents)
+
+# Train LDA model
+n_topics = 3
+lda_model = LatentDirichletAllocation(n_components=n_topics, random_state=42, max_iter=20)
+lda_model.fit(doc_term_matrix)
+
+print(f"LDA model trained with {n_topics} topics")
+```
+
+## LDA Topics Visualization
+
+```{python}
+#| code-fold: false
+import numpy as np
+
+# Display top words for each topic
+feature_names = vectorizer.get_feature_names_out()
+n_top_words = 10
+
+print("\nTop words per topic:")
+for topic_idx, topic in enumerate(lda_model.components_):
+    top_words_idx = topic.argsort()[-n_top_words:][::-1]
+    top_words = [feature_names[i] for i in top_words_idx]
+    print(f"\nTopic {topic_idx}: {', '.join(top_words)}")
+
+# Show topic distribution for a sample document
+doc_idx = 0
+topic_dist = lda_model.transform(doc_term_matrix[doc_idx:doc_idx+1])[0]
+print(f"\n\nSample document topic distribution:")
+for i, prob in enumerate(topic_dist):
+    print(f"  Topic {i}: {prob:.3f}")
+```
+
+## LDA Strengths and Limitations
+
+**Strengths:**
+
+- Interpretable topics (distributions over words)
+- Well-established, proven method
+- Fast training on moderate-sized corpora
+- Works well on homogeneous documents
+
+**Limitations:**
+
+- Bag-of-words assumption (loses word order, context)
+- Requires careful hyperparameter tuning
+- Struggles with short documents
+- Topics can be noisy or incoherent
+- Doesn't leverage modern pre-trained embeddings
+
+## BERTopic
+
+**BERTopic** [@grootendorst2022bertopic] is a modern topic modeling technique using transformer embeddings.
+
+**How BERTopic works:**
+
+1. **Embed** documents using BERT (contextual embeddings)
+2. **Reduce** dimensionality with UMAP
+3. **Cluster** documents with HDBSCAN
+4. **Extract** topic words using class-based TF-IDF (c-TF-IDF)
+
+**Advantages over LDA:**
+
+- Uses semantic embeddings (better captures meaning)
+- No need to specify number of topics upfront
+- Better with short documents
+- More coherent topics
+
+## BERTopic Implementation
+
+```{python}
+#| code-fold: false
+from bertopic import BERTopic
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.feature_extraction.text import CountVectorizer
+
+# Load data
+categories = ['sci.space', 'rec.sport.baseball', 'comp.graphics']
+newsgroups = fetch_20newsgroups(subset='train', categories=categories, remove=('headers', 'footers', 'quotes'))
+documents = newsgroups.data[:300]
+
+# Configure vectorizer to remove stop words
+vectorizer_model = CountVectorizer(stop_words="english")
+
+# Train BERTopic model with proper configuration
+topic_model = BERTopic(vectorizer_model=vectorizer_model, verbose=False, language="english")
+topics, probabilities = topic_model.fit_transform(documents)
+
+print(f"BERTopic discovered {len(set(topics))} topics (including -1 for outliers)")
+```
+
+## BERTopic Results
+
+```{python}
+#| code-fold: false
+# Show topic information
+topic_info = topic_model.get_topic_info()
+print("\nTopic Overview:")
+print(topic_info.head(10))
+
+# Show top words for each topic
+print("\n\nTop words per topic:")
+for topic_num in sorted(set(topics)):
+    if topic_num == -1:  # Skip outlier topic
+        continue
+    words = topic_model.get_topic(topic_num)
+    if words:
+        top_words = ', '.join([word for word, score in words[:10]])
+        print(f"\nTopic {topic_num}: {top_words}")
+```
+
+## BERTopic Visualization
+
+```python
+#| code-fold: false
+# Visualize topics (interactive plot)
+fig = topic_model.visualize_topics()
+fig.show()
+
+# Visualize topic hierarchy
+fig_hierarchy = topic_model.visualize_hierarchy()
+fig_hierarchy.show()
+```
+
+## LDA vs BERTopic
+
+| Feature | LDA | BERTopic |
+|---------|-----|----------|
+| **Embeddings** | Bag-of-words (TF-IDF) | Contextual (BERT) |
+| **Num Topics** | Must specify | Auto-detected |
+| **Interpretability** | Good (probability distributions) | Excellent (semantic coherence) |
+| **Speed** | Fast | Slower (embeddings + clustering) |
+| **Short Documents** | Poor | Good |
+| **Computational Cost** | Low | High (needs embeddings) |
+| **Tunability** | Many hyperparameters | Fewer hyperparameters |
+| **Best For** | Large corpora, speed matters | Quality topics, semantic understanding |
+
+**Recommendation:** Use BERTopic for better quality topics when resources allow; use LDA for speed and large-scale applications.
+
+# Summary
+
+## NLP Tools and Applications Recap
+
+**What we covered:**
+
+1. **Text representation**: Sparse (TF-IDF) vs embeddings (Word2Vec vs BERT)
+2. **Language models**: N-grams → Transformers
+3. **Transformers**: Attention mechanism, BERT (encoder), GPT (decoder)
+4. **Named Entity Recognition**: NLTK → spaCy → BERT NER
+5. **Topic Modeling**: LDA → BERTopic
+
+**Key takeaways:**
+
+- Modern NLP relies heavily on transformers and contextual embeddings
+- Choose tools based on accuracy needs, resources, and task complexity
+- spaCy is excellent for production NER; BERT for highest accuracy
+- BERTopic produces better topics than LDA but requires more resources
 
 ## References
