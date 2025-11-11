@@ -58,3 +58,7 @@ pretty_midi
 
 # 28-NLP
 transformers
+nltk
+spacy
+hf_xet
+bertopic
