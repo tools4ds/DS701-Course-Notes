@@ -30,6 +30,7 @@ qmd_files=(
   "22-Networks-II-Centrality-Clustering.qmd"
   "26-TimeSeries.qmd"
   "27-RNN.qmd"
+  "28-NLP.qmd"
   "29-NN-IV-Scikit-Learn.qmd"
   "30-NN-consolidated.qmd"
 )
