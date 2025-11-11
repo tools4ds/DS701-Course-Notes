@@ -820,28 +820,60 @@ topics, probs = topic_model.fit_transform(documents)
 #| code-fold: false
 from bertopic import BERTopic
 from sklearn.datasets import fetch_20newsgroups
-from sklearn.feature_extraction.text import CountVectorizer
 
-# Load data
 categories = ['sci.space', 'rec.sport.baseball', 'comp.graphics']
-newsgroups = fetch_20newsgroups(subset='train', categories=categories, remove=('headers', 'footers', 'quotes'))
-documents = newsgroups.data[:300]
+docs = fetch_20newsgroups(subset='all', categories=categories, remove=('headers', 'footers', 'quotes'))['data']
 
-# Configure vectorizer to remove stop words
-vectorizer_model = CountVectorizer(stop_words="english")
+topic_model = BERTopic()
 
-# Train BERTopic model
-topic_model = BERTopic(
-    vectorizer_model=vectorizer_model,
-    verbose=False,
-    language="english",
-    min_topic_size=10  # Minimum documents per topic
-)
-topics, probabilities = topic_model.fit_transform(documents)
+topics, probs = topic_model.fit_transform(docs)
 
-print(f"Discovered {len(set(topics)) - 1} topics (excluding outliers)")
+print(f"Number of topics found: {len(set(topics)) - (1 if -1 in topics else 0)}")
 print(f"Outlier documents: {sum(1 for t in topics if t == -1)}")
 ```
+
+## BERTopic: Visualize Topics
+
+```{python}
+#| fig-align: center
+fig = topic_model.visualize_topics()
+fig.update_layout(width=600, height=400)
+fig.show()
+```
+
+## BERTopic: Visualize Topic Hierarchy
+
+```{python}
+#| fig-align: center
+fig = topic_model.visualize_hierarchy()
+fig.update_layout(width=800, height=550)
+fig.show()
+```
+
+
+## BERTopic: Visualize Topic Bar Chart
+
+```{python}
+fig = topic_model.visualize_barchart(top_n_topics=8)
+fig.show()
+```
+
+## BERTopic: Visualize Topic Heatmap
+
+```{python}
+fig = topic_model.visualize_heatmap()
+fig.update_layout(width=800, height=600)
+fig.show()
+```
+
+## BERTopic: Find Similar Topics
+
+```{python}
+#| code-fold: false
+similar_topics, similarity = topic_model.find_topics("space exploration and satellites", top_n=3)
+print(f"Topics similar to 'space exploration and satellites': {similar_topics}")
+```
+
 
 ## BERTopic: Exploring Topics
 
@@ -854,9 +886,9 @@ print(topic_info[['Topic', 'Count', 'Name']].head(10))
 
 # Get representative documents for a topic
 topic_id = 0
-docs = topic_model.get_representative_docs(topic_id)
+rep_docs = topic_model.get_representative_docs(topic_id)
 print(f"\nRepresentative documents for Topic {topic_id}:")
-for i, doc in enumerate(docs[:2], 1):
+for i, doc in enumerate(rep_docs[:2], 1):
     print(f"{i}. {doc[:100]}...")
 ```
 
@@ -876,27 +908,6 @@ for topic_num in sorted(set(topics)):
         print(f"Topic {topic_num}: {top_words}")
 ```
 
-## BERTopic: Visualizations
-
-BERTopic provides multiple built-in visualizations:
-
-```python
-# 1. Visualize topics in 2D space
-fig = topic_model.visualize_topics()
-fig.show()
-
-# 2. Visualize topic hierarchy
-fig = topic_model.visualize_hierarchy()
-fig.show()
-
-# 3. Visualize topic bar chart
-fig = topic_model.visualize_barchart(top_n_topics=5)
-fig.show()
-
-# 4. Visualize topic similarity
-fig = topic_model.visualize_heatmap()
-fig.show()
-```
 
 ## BERTopic: Finding Similar Topics
 
@@ -918,14 +929,14 @@ for topic_id, score in zip(similar_topics, similarity):
 
 BERTopic can track how topics evolve over time:
 
-```python
+```{python}
 # Prepare timestamps
 import pandas as pd
-timestamps = pd.date_range('2020-01-01', periods=len(documents), freq='D')
+timestamps = pd.date_range('2020-01-01', periods=len(docs), freq='D')
 
 # Track topics over time
 topics_over_time = topic_model.topics_over_time(
-    docs=documents,
+    docs=docs,
     timestamps=timestamps,
     nr_bins=10
 )
@@ -998,13 +1009,5 @@ topic_model = BERTopic(
 5. **NLP Tools**: NLTK (learning) vs spaCy (production)
 6. **Named Entity Recognition**: spaCy for production-ready NER
 7. **Topic Modeling**: BERTopic with transformer embeddings
-
-**Key takeaways:**
-
-- Modern NLP relies on transformers and contextual embeddings
-- spaCy is the go-to tool for production NLP pipelines
-- BERTopic automatically discovers coherent topics without hyperparameter tuning
-- Choose tools based on task requirements: NLTK (learning), spaCy (production)
-- Transformer attention mechanism enables understanding of context and relationships
 
 ## References
