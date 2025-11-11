@@ -69,7 +69,7 @@ However, prior to creating a numerical representation of text, we need to **toke
 
 ## Tokenization
 
-* Tokenization is the process of splitting raw text into smaller pieces, called (drum-roll please), *tokens*. 
+* Tokenization is the process of splitting raw text into smaller pieces, called *tokens*. 
 
 * Tokens can be individual characters, words, subwords, or sentences.
 
@@ -138,6 +138,8 @@ tokens2 = tokenizer.tokenize(sentence2)
 print(tokens2)
 ```
 
+
+
 ## Tokens, Token IDs, and Vocabulary
 
 * Associated to each token is a unique token ID. 
@@ -153,6 +155,12 @@ print(tokens2)
   - One encoding technique that we already considered is one-hot encodings. 
 
   - Another more powerful encoding method, is the creation of word embeddings.
+
+## tiktokenizer
+
+![tiktokenizer](figs/tiktokenizer.png){fig-align="center" width="50%"}
+
+[Tiktokenizer demo](https://tiktokenizer.vercel.app/)
 
 ## Sparse Representations
 
@@ -308,11 +316,7 @@ A contextual embedding (used by more complex language model embedding algorithms
 :::
 ::: 
  
-## tiktokenizer
 
-![tiktokenizer](figs/tiktokenizer.png){fig-align="center" width="50%"}
-
-[Tiktokenizer demo](https://tiktokenizer.vercel.app/)
 
 # Language Models
 
