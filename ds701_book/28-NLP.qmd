@@ -4,7 +4,7 @@ jupyter: python3
 bibliography: references.bib
 ---
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/27-RNN.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/28-NLP.ipynb)
 
 Natural language processing (NLP) is a subfield of artificial intelligence that allows computers to understand, process, and manipulate human language.
 
@@ -771,7 +771,7 @@ BERTopic uses a modular pipeline with four main steps:
 - Each document → 768-dimensional vector (or higher)
 - Captures semantic meaning and context
 
-**2. Dimensionality Reduction (UMAP)**
+**2. Dimensionality Reduction ([UMAP](https://umap-learn.readthedocs.io/en/latest/))**
 
 - Reduce from 768 dimensions to ~5 dimensions
 - Preserves local and global structure
@@ -780,13 +780,13 @@ BERTopic uses a modular pipeline with four main steps:
 :::
 ::: {.column}
 
-**3. Clustering (HDBSCAN)**
+**3. Clustering ([HDBSCAN](https://hdbscan.readthedocs.io/en/latest/))**
 
 - Density-based clustering algorithm
 - Automatically determines number of clusters
 - Assigns outliers to -1 topic
 
-**4. Topic Representation (c-TF-IDF)**
+**4. Topic Representation ([c-TF-IDF](https://maartengr.github.io/BERTopic/api/ctfidf.html))**
 
 - Class-based TF-IDF weights words by topic
 - Extracts most representative words per topic
