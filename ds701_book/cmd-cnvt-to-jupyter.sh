@@ -51,7 +51,7 @@ for file in "${qmd_files[@]}"; do
     
     if [ ! -f "$ipynb_file" ] || [ "$qmd_file" -nt "$ipynb_file" ]; then
       # echo "Converting $file"
-      quarto convert "$qmd_file"
+      quarto convert "$qmd_file" --profile slides
       mv "${qmd_file%.qmd}.ipynb" "$ipynb_file"
     else
       echo "Skipping $file (up to date)"
