@@ -347,7 +347,8 @@ Transformers [@vaswani2017attention] are the foundation of modern NLP systems.
 
 **Key innovations:**
 
-- Use **attention mechanism** to process entire sequences in parallel
+- Use **attention mechanism** to process entire sequences (e.g. context window) in parallel
+  - Although optimizations exist, given huge context window sizes, e.g. [Flash Attention](https://arxiv.org/abs/2205.14135) (chunking), sparse attention.
 - Revolutionized NLP and enabled LLMs (ChatGPT, BERT, GPT-4)
 - Scalable across GPUs for massive models
 
@@ -437,6 +438,9 @@ Darker connections show stronger attention.
 When processing "it", the model attends most to "elephant".
 
 This is how transformers handle long-range dependencies and ambiguity.
+
+See also [BertViz](https://github.com/jessevig/bertviz) for a visual exploration of the attention mechanism.
+
 :::
 ::: {.column width="40%"}
 ![](drawio/VisualizedAttention.png)
@@ -502,7 +506,7 @@ Transformers enable powerful NLP applications:
 **Key Features:**
 
 - Extensive text processing tools (tokenization, stemming, tagging, parsing)
-- Access to 50+ corpora and lexical resources (WordNet, TreeBank)
+- Access to 50+ corpora and lexical resources ([WordNet](https://wordnet.princeton.edu/), [TreeBank](https://catalog.ldc.upenn.edu/LDC99T42))
 - Sentiment analysis, text classification, and chunking
 
 ::: {.columns}
@@ -682,6 +686,8 @@ for name, component in nlp.pipeline:
     print(f"  - {name}")
 ```
 
+
+
 :::
 ::: {.column width="50%"}
 
@@ -698,6 +704,8 @@ for name, component in nlp.pipeline:
 
 :::
 :::
+
+![](figs/spacy-pipeline.svg)
 
 ## spaCy -- Dive Deeper
 
