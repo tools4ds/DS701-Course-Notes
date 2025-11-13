@@ -26,21 +26,23 @@ import laUtilities as ut
 %matplotlib inline
 ```
 
-Today, we look at a topic that has become enormously important in society: recommender systems.
+Today, we look at a topic that has become enormously important: recommender systems.
 
 :::: {.columns}
 ::: {.column width="50%"}
 
 
-We will
+In Part I, we will:
 
 * Define recommender systems
 * Review the challenges they pose
 * Discuss two classic methods:
     * Collaborative Filtering
     * Matrix Factorization
-* And one modern method:
-    * Deep Learning Recommender Model (DLRM)
+
+In Part II, we will:
+
+* Delve into more recent deep learning methods.
 
 :::
 ::: {.column width="50%"}
@@ -51,10 +53,10 @@ This section draws heavily on
 * These [slides](http://alex.smola.org/teaching/berkeley2012/slides/8_Recommender.pdf) by Alex Smola
 * _Matrix Factorization Techniques for Recommender Systems_, [@koren2009matrix]
 * _Collaborative Filtering with Temporal Dynamics_, [@koren2009collaborative]
-* _Deep Learning Recommender Model for Personalization and Recommendation Systems_, [@naumov2019deep]
 
 :::
 ::::
+
 
 
 ## What are Recommender Systems?
@@ -85,7 +87,7 @@ An enormous need has emerged for systems to help sort through products, services
 
 This often goes by the term __personalization.__
 
-Some examples:
+Some examples (as of Fall 2024):
     
 * Movie recommendation (Netflix ~6.5K movies and shows, YouTube ~14B videos)
 * Related product recommendation (Amazon ~600M products)
@@ -102,7 +104,7 @@ A more formal view:
     
 * User - requests content
 * Objects - instances of content
-* Context - device, location, time, history
+* Context - ratings, purchases, views, device, location, time, history
 * Interface - browser, mobile
 
 ![](figs/L20-recsys-abstractly.png){fig-align="center"}
@@ -181,11 +183,18 @@ elapsed_time = time.time() - start_time
 print(f"Elapsed read time: {elapsed_time:.2f} seconds")
 ```
 
+---
+
 Run `df.info()` to see the column names and data types.
 
 ```{python}
 df.info()
 ```
+
+where
+
+* HelpfulnessNumerator: The number of users who found the review helpful (the "yes" votes)
+* HelpfulnessDenominator: The total number of users who voted on whether the review was helpful (both "yes" and "no" votes)
 
 ---
 
@@ -226,6 +235,8 @@ Although on average a movie receives 34 reviews, __almost all movies have even
 fewer reviews.__
 
 ```{python}
+#| fig-align: center
+plt.figure(figsize=(10, 4))  # Set the figure size
 reviews_per_movie = df.groupby('ProductId').count()['Id'].values
 frac_below_mean = np.sum(reviews_per_movie < (n_reviews/n_movies))/len(reviews_per_movie)
 plt.plot(sorted(reviews_per_movie, reverse=True), '.-')
@@ -243,6 +254,8 @@ plt.title(f'Amazon Movie Reviews\nNumber of Ratings Per Movie\n' +
 Likewise, although the average user writes 14 reviews, almost all users write even fewer reviews.
 
 ```{python}
+#| fig-align: center
+plt.figure(figsize=(10, 4))  # Set the figure size
 reviews_per_user = df.groupby('UserId').count()['Id'].values
 frac_below_mean = np.sum(reviews_per_user < (n_reviews/n_users))/len(reviews_per_user)
 plt.plot(sorted(reviews_per_user, reverse=True), '.-')
@@ -397,10 +410,9 @@ $$
 How should we assess similarity of items?
 
 A reasonable approach is to consider items similar if their ratings are
-__correlated__, for example using the Pearson correlation coefficient
-$r$[^pearson].
+__correlated:__, i.e., 
 
-[^pearson]: See the [Course Notes](#pearson-correlation-coefficient) for the definition of Pearson correlation coefficient.
+$$\rho(X,Y) = \frac{E\left[(X-\mu_X)(Y-\mu_Y)\right]}{\sigma_X \sigma_Y}.$$
 
 However, note that two items will not have ratings in the same positions.
 
@@ -414,7 +426,7 @@ So we want to compute correlation only over the users who rated both the items.
 ![](figs/L20-corr-support.png){width="60%" fig-align="center"}
 :::
 
-Let's compute the Pearson correlation coefficient for the above two items:
+Let's put the ratings in python lists:
 
 ```{python}
 import numpy as np
@@ -427,7 +439,7 @@ display(Markdown(f'Ratings for item $i$:\n\n{ratings_item_i}'))
 display(Markdown(f'Ratings for item $j$:\n\n{ratings_item_j}'))
 ```
 
----
+## Example, continued
 
 ::: {.content-visible when-profile="slides"}
 ![](figs/L20-corr-support.png){width="60%" fig-align="center"}
@@ -444,11 +456,21 @@ display(Markdown(f'Common ratings for item $i$: {filtered_ratings_item_i}'))
 display(Markdown(f'Common ratings for item $j$: {filtered_ratings_item_j}'))
 ```
 
+## Example, continued
+
+```{python}
+display(Markdown(f'Common ratings for item $i$: {filtered_ratings_item_i}'))
+display(Markdown(f'Common ratings for item $j$: {filtered_ratings_item_j}'))
+```
+
 Now we can compute the Pearson correlation coefficient:
 
 ```{python}
-display(Markdown(f'Pearson correlation coefficient: {np.corrcoef(filtered_ratings_item_i, filtered_ratings_item_j)[0, 1]:0.2f}'))
+rho = np.corrcoef(filtered_ratings_item_i, filtered_ratings_item_j)[0,1]
+display(Markdown(f'Pearson correlation coefficient: {rho:0.2f}'))
 ```
+
+Which is a _moderate negative correlation_, meaning that as item $i$ gets rated higher, item $j$ gets rated lower.
 
 ::: {.content-visible when-profile="web"}
 ## Pearson Correlation Coefficient
@@ -518,6 +540,7 @@ $$
 
 where 
 
+* $b_{ui}$ is the bias of user $u$ for item $i$.
 * $\mu$ is the global average rating across all items and users.
 * $\alpha_u$ is the offset of user $u$ and 
 * $\beta_i$ is the offset of item $i$.
@@ -534,28 +557,42 @@ If we gather all these elements together we can form:
 $$ 
 b_{ui} = \mu + \alpha_u + \beta_i 
 $$
+
 :::
 
 How can we estimate the parameters $\boldsymbol{\alpha}$, $\boldsymbol{\beta}$, and $\mu$?
 
 Let's assume for a minute that we had a fully-dense matrix of ratings $R$.
 
-Each of the $m$ rows of $R$ represents an item and each of the $n$ columns a user.
+Recall that each of the $m$ rows of $R$ represents an item and each of the $n$ columns represents a user.
 
-Then what we want to estimate is
+![](figs/L20-u-u-cf-1.png){width="40%" fig-align="center"}
+
+## Estimating biases, continued
+
+One way to do this is to minimize the squared error between the ratings and the biases:
 
 $$
-\min_{\alpha,\beta,\mu} 
-\Vert R - \mathbf{1}\alpha^T + \beta\mathbf{1}^T + \mu1\Vert^2 
-+ \lambda(\Vert\alpha\Vert^2 + \Vert\beta\Vert^2).
+\min_{\boldsymbol{\alpha},\boldsymbol{\beta},\mu} 
+\Vert R - \mathbf{1}\boldsymbol{\alpha}^T + \boldsymbol{\beta}\mathbf{1}^T + \mu1\Vert^2 
++ \lambda(\Vert\boldsymbol{\alpha}\Vert^2 + \Vert\boldsymbol{\beta}\Vert^2).
 $$
 
-Here, bold-faced $\mathbf{1}$ represents appropriately sized vectors of ones,
+and include a regularization term to minimize the magnitude of the biases.
+
+* Here, bold-faced $\mathbf{1}$ represents appropriately sized vectors of ones,
 and non-boldfaced $1$ is an $m\times n$ matrix of ones.
 
----
+* So $\mathbf{1}\boldsymbol{\alpha}^T$ is an $m\times n$ matrix where each row is the bias for a user.
+
+* Similarly, $\boldsymbol{\beta}\mathbf{1}^T$ is an $m\times n$ matrix where each column is the bias for an item.
+
+* And $\mu1$ is an $m\times n$ matrix where each element is $\mu$.
 
 ::: {.content-visible when-profile="slides"}
+
+## Estimating biases, continued
+
 $$
 \min_{\alpha,\beta,\mu} 
 \Vert R - \mathbf{1}\alpha^T + \beta\mathbf{1}^T + \mu1\Vert^2 
@@ -565,7 +602,7 @@ $$
 
 While this is not a simple ordinary least squares problem, there is a strategy for solving it.
 
-Assume we hold $\beta\mathbf{1}^T + \mu1$ constant.  
+Assume we hold $\beta\mathbf{1}^T$ and $\mu1$ constant.  
 
 Then the remaining problem is 
 
@@ -594,9 +631,9 @@ The last issue is that the matrix $R$ is not dense - in reality we only have a s
 
 We simply need to adapt the least-squares solution to only consider the entries in $R$ that we know.
 
----
+As a result, the actual calculation is as follows...
 
-As a result, the actual calculation is:
+---
 
 Step 1:
 
@@ -825,6 +862,8 @@ The entire Amazon reviews dataset is too large to work with easily, and it is to
 Hence, we will take the densest rows and columns of the matrix.
 
 ```{python}
+print(df.shape)
+
 # The densest columns: products with more than 50 reviews
 pids = df.groupby('ProductId').count()['Id']
 hi_pids = pids[pids > 50].index
@@ -859,7 +898,7 @@ R = good_df.pivot_table(columns = 'ProductId', index = 'UserId', values = 'Score
 And we can look at a small part of the matrix:
 
 ```{python}
-R.iloc[900:910, 1000:1010]
+R.iloc[900:905, 1000:1004]
 ```
 
 ---
@@ -869,6 +908,7 @@ We'll use code from the [Antidote Data Framework](https://github.com/rastegarpan
 and [recommender_lmafit.py](recommender_lmafit.py) in our repository.
 
 ```{python}
+#| code-fold: false
 # Import local python package MF.py
 import recommender_MF as MF
 
@@ -877,18 +917,27 @@ import recommender_MF as MF
 RS = MF.als_MF(rank = 20, lambda_ = 1)
 ```
 
+<br>
+
 ```{python}
+#| code-fold: false
 %time pred, error = RS.fit_model(R)
 ```
 
+<br>
+
 ```{python}
+#| code-fold: false
 print(f'RMSE on visible entries (training data): {np.sqrt(error/R.count().sum()):0.3f}')
 ```
 
-And we can look at the predicted ratings matrix and see that it is a dense matrix:
+---
+
+And we can look at a small part of the predicted ratings matrix and see that it is a dense matrix:
 
 ```{python}
-pred
+print(f'Shape of predicted ratings matrix: {pred.shape}')
+pred.iloc[900:905, 1000:1004]
 ```
 
 ---
@@ -963,6 +1012,8 @@ $$
 + \lambda(\Vert U\Vert^2 + \Vert V\Vert^2 + \Vert \alpha\Vert^2 + \Vert \beta \Vert^2) 
 $$
 
+---
+
 we see improvements in accuracy:
 
 ![Matrix factorization models’ accuracy. The plots show the root-mean-square error of each of four individual factor models (lower is better). Accuracy improves when the factor model’s dimensionality (denoted by numbers on the charts) increases. In addition, the more refined factor models, whose descriptions involve more distinct sets of parameters, are more accurate.](figs/L20-netflix-1.png){width="70%" fig-align="center" #fig-mf}
@@ -975,13 +1026,15 @@ Take note of which users rated the same movies (ala CF) and use this information
 
 ![](figs/L20-netflix-2.png){width="70%" fig-align="center"}
 
+---
+
 ![](figs/L20-netflix-3.png){width="70%" fig-align="center"}
 
 ## 3. Ratings Change Over Time
 
 Older movies tend to get higher ratings!
 
-![](figs/L20-netflix-4.png){width="70%" fig-align="center"}
+![](figs/L20-netflix-4.png){width="60%" fig-align="center"}
 
 ---
 
@@ -992,237 +1045,16 @@ $$
 + \lambda(\Vert U\Vert^2 + \Vert V\Vert^2 + \Vert \alpha\Vert^2 + \Vert \beta \Vert^2) 
 $$
 
+---
+
 we see further improvements in accuracy:
 
-![](figs/L20-netflix-5.png){width="70%" fig-align="center"}
+![](figs/L20-netflix-5.png){width="50%" fig-align="center"}
 
 To estimate these billions of parameters, we cannot use alternating least squares or any linear algebraic method.
 
 We need to use gradient descent (which we covered previously).
 
-# Deep Learning for Recommender Systems
-
-## Deep Learning for Recommender Systems
-
-Besides the Collaborative Filtering and Matrix Factorization models, other popular
-approaches to building recommender systems use Deep Learning.
-
-We'll look at the Deep Learning Recommender Model (DLRM) proposed by Facebook in
-2019 [@naumov2019deep] with [GitHub repository](https://github.com/facebookresearch/dlrm).
-
-## DLRM Architecture
-
-
-:::: {.columns}
-::: {.column width="50%"}
-
-- Components (@fig-dlrm-model):
-  1. **Embeddings**: Dense representations for categorical data.
-  2. **Bottom MLP**: Transforms dense continuous features.
-  3. **Feature Interaction**: Dot-product of embeddings and dense features.
-  4. **Top MLP**: Processes interactions and outputs probabilities.
-
-:::
-::: {.column width="50%"}
-
-![DLRM Architecture](figs/RecSys-figs/dlrm-model.png){.lightbox width=80% fig-align="center" #fig-dlrm-model}
-
-:::
-::::
-
-Let's look at each of these components in turn.
-
-## Embeddings
-
-**Embeddings**: Map categorical inputs to latent factor space.
-
-:::: {.columns}
-::: {.column width="65%"}
-- A learned embedding matrix $W \in \mathbb{R}^{m \times d}$ for each category of input
-- One-hot vector $e_i$ with $i\text{-th}$ entry 1 and rest are 0s
-- Embedding of $e_i$ is $i\text{-th}$ row of $W$, i.e., $w_i^T = e_i^T W$
-
-We can also use weighted combination of multiple items with a multi-hot vector
-of weights $a^T = [0, ..., a_{i_1}, ..., a_{i_k}, ..., 0]$.
-
-The embedding of this multi-hot vector is then $a^T W$.
-
-:::
-::: {.column width="35%"}
-![DLRM Architecture](figs/RecSys-figs/dlrm-model01.png){.lightbox width=100% fig-align="center"}
-:::
-::::
-
----
-
-PyTorch has a convenient way to do this using `EmbeddingBag`, which besides summing
-can combine embeddings via mean or max pooling.
-
-Here's an example with 5 embeddings of dimension 3:
-
-```{python}
-import torch
-import torch.nn as nn
-
-# Example embedding matrix: 5 embeddings, each of dimension 3
-embedding_matrix = nn.EmbeddingBag(num_embeddings=5, embedding_dim=3, mode='mean')
-
-# Input: Indices into the embedding matrix
-input_indices = torch.tensor([1, 2, 3, 4])  # Flat list of indices
-offsets = torch.tensor([0, 2])  # Start new bag at position 0 and 2 in input_indices
-
-# Forward pass
-output = embedding_matrix(input_indices, offsets)
-
-print("Embedding Matrix:\n", embedding_matrix.weight)
-print("Output:\n", output)
-```
-
-## Dense Features
-
-:::: {.columns}
-::: {.column width="65%"}
-The advantage of the DLRM architecture is that it can take continuous features
-as input such as the user's age, time of day, etc.
-
-There is a bottom MLP that transforms these dense features into a latent space of
-the same dimension $d$.
-:::
-::: {.column width="35%"}
-![DLRM Architecture](figs/RecSys-figs/dlrm-model02.png){.lightbox width=100% fig-align="center"}
-:::
-::::
-
-## Optional Sparse Feature MLPs
-
-:::: {.columns}
-::: {.column width="65%"}
-Optionally, one can add MLPs to transform the sparse features as well.
-
-:::
-::: {.column width="35%"}
-![DLRM Architecture](figs/RecSys-figs/dlrm-model03.png){.lightbox width=100% fig-align="center"}
-:::
-::::
-
-## Feature Interactions
-
-:::: {.columns}
-::: {.column width="65%"}
-The 2nd order interactions are modeled via dot-products of all pairs from the
-collections of embedding vectors and processed dense features.
-
-The results of the dot-product interactions are concatenated with the processed
-dense vectors.
-
-:::
-::: {.column width="35%"}
-![DLRM Architecture](figs/RecSys-figs/dlrm-model04.png){.lightbox width=100% fig-align="center"}
-:::
-::::
-
-## Top MLP
-
-:::: {.columns}
-::: {.column width="65%"}
-The concatenated vector is then passed to a final MLP and then to a sigmoid
-function to produce the final prediction (e.g., probability score of recommendation)
-
-This entire model is trained end-to-end using standard deep learning techniques.
-
-:::
-::: {.column width="35%"}
-![DLRM Architecture](figs/RecSys-figs/dlrm-model05.png){.lightbox width=100% fig-align="center"}
-:::
-::::
-
-## Training Results
-
-![DLRM Training Results](figs/RecSys-figs/dlrm-training-results.png){width="70%" fig-align="center" #fig-dlrm-training-results}
-
-@fig-dlrm-training-results shows the training (solid) and validation (dashed)
-accuracies of DLRM on the [Criteo Ad Kaggle dataset](https://www.kaggle.com/competitions/criteo-display-ad-challenge/overview).
-
-Accuracy is compared with Deep and Cross network (DCN) [@wang2017deep].
-
-## Other Modern Approaches
-
-There are many other modern approaches to recommender systems for example:
-
-1. **Graph-Based Recommender Systems**:
-   - Leverage graph structures to capture relationships between users and items.
-   - Use techniques like Graph Neural Networks (GNNs) to enhance recommendation accuracy.
-
-2. **Context-Aware Recommender Systems**:
-   - Incorporate contextual information such as time, location, and user mood to provide more personalized recommendations.
-   - Contextual data can be integrated using various machine learning models.
-
-3. **Hybrid Recommender Systems**:
-   - Combine multiple recommendation techniques, such as collaborative filtering and content-based filtering, to improve performance.
-   - Aim to leverage the strengths of different methods while mitigating their weaknesses.
-
-4. **Reinforcement Learning-Based Recommender Systems**:
-   - Use reinforcement learning to optimize long-term user engagement and satisfaction.
-   - Models learn to make sequential recommendations by interacting with users and receiving feedback.
-
-These approaches often leverage advancements in machine learning and data processing to provide more accurate and personalized recommendations.
-
-See [@ricci2022recommender] for a comprehensive overview of recommender systems.
-
-# Assessing Recommender Systems
-
-## Assessing Recommender Systems
-
-There are a number of concerns with the widespread use of recommender systems and personalization in society.
-
-First, recommender systems are accused of creating __filter bubbles.__ 
-
-A filter bubble is the tendency for recommender systems to limit the variety of information presented to the user.
-
-The concern is that a user's past expression of interests will guide the algorithm in continuing to provide "more of the same."
-
-This is believed to increase polarization in society, and to reinforce confirmation bias.
-
----
-
-Second, recommender systems in modern usage are often tuned to __maximize engagement.__
-
-In other words, the objective function of the system is not to present the user's most favored content, but rather the content that will be most likely to keep the user on the site.
-
-The incentive to maximize engagement arises on sites that are supported by advertising revenue.   
-
-More engagement time means more revenue for the site.
-
----
-
-However, many studies have shown that sites that strive to __maximize 
-engagement__ do so in large part by guiding users toward __extreme content:__
-
-* content that is shocking, 
-* or feeds conspiracy theories, 
-* or presents extreme views on popular topics.
-
-Given this tendency of modern recommender systems, 
-for a third party to create "clickbait" content such as this, one of the easiest
-ways is to present false claims.
-
-Methods for addressing these issues are being very actively studied at present.
-
-Ways of addressing these issues can be:
-
-* via technology
-* via public policy
-
-# Recap and References
-
-## BU CS/CDS Research
-
-You can read about some of the work done in Professor Mark Crovella's group on
-this topic:
-
-* _How YouTube Leads Privacy-Seeking Users Away from Reliable Information_, [@spinelli2020youtube] 
-* _Closed-Loop Opinion Formation_, [@spinelli2017closed] 
-* _Fighting Fire with Fire: Using Antidote Data to Improve Polarization and Fairness of Recommender Systems_, [@rastegarpanah2019fighting] 
 
 ## Recap
 
@@ -1231,8 +1063,6 @@ this topic:
 * Discussion on the challenges of recommender systems, including scalability and data sparsity.
 * Introduction to matrix factorization (MF) as an improvement over CF, using latent vectors and alternating least squares (ALS) for optimization.
 * Practical implementation of ALS for matrix factorization on a subset of Amazon movie reviews.
-* Review of Deep Learning Recommender Model (DLRM) architecture and its components.
-* Discussion on the societal impact of recommender systems, including filter bubbles and engagement maximization.
 
 ## References
 

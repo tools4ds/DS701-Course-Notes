@@ -38,9 +38,9 @@ title: Lecture Schedule
 | Nov 6 | 19 -- Neural Networks | [Neural Networks](./30-NN-consolidated.qmd) | |
 | **Week 11**  | --- | --- | --- |
 | Nov 11 | 20 -- Intro to NLP | [NLP](./28-NLP.qmd) 
-| Nov 13 | 21 -- Recommender Systems | [Recommender Systems](./20-Recommender-Systems.qmd)  | |
+| Nov 13 | 21 -- Recommender Systems - I | [Recommender Systems - I](./20-Recommender-Systems-I.qmd)  | |
 | **Week 12**  | --- | --- | --- |
-| Nov 18 | 22  -- Graphs I| [Graphs I](./21-Networks-I.qmd) | |
+| Nov 18 | 22  -- Recommender Systems - II and Graphs I| [Recommender Systems II](./20-Recommender-Systems-II.qmd), [Graphs I](./21-Networks-I.qmd) | |
 | Nov 20 | 23 -- Graphs II | [Graphs II](./22-Networks-II-Centrality-Clustering.qmd)  | |
 | **Week 13**  | --- | --- | --- |
 | Nov 25 | 24 -- Time Series Analysis | [Time Series](./26-TimeSeries.qmd) | |
