@@ -613,7 +613,37 @@ $$
 which (for each column of $R$) is a standard regularized least squares problem
 solved via [Ridge regression](./19-Regression-III-More-Linear.qmd#ridge-regression).
 
+## Aside: Ridge Regression
+
+**Ridge Regression** is a regularized least squares method that adds a penalty term to prevent overfitting.
+
+**Standard Least Squares:**
+$$
+\min_{\boldsymbol{\beta}} \Vert X\boldsymbol{\beta} - \mathbf{y}\Vert_2^2
+$$
+
+**Ridge Regression:**
+$$
+\min_{\boldsymbol{\beta}} \Vert X\boldsymbol{\beta} - \mathbf{y}\Vert_2^2 + c\Vert\boldsymbol{\beta}\Vert_2^2
+$$
+
+The penalty term $c\Vert\boldsymbol{\beta}\Vert_2^2$ shrinks the coefficients $\boldsymbol{\beta}$ towards zero.
+
 ---
+
+**Why Ridge Regression?**
+
+- Addresses **multicollinearity** (when features are highly correlated)
+- Prevents coefficient magnitudes from becoming too large
+- Always has a unique solution: $\hat{\boldsymbol{\beta}} = (X^TX + cI)^{-1}X^T\mathbf{y}$
+
+**The hyperparameter $c$:**
+
+- When $c = 0$: ordinary least squares
+- When $c \rightarrow \infty$: all coefficients shrink to zero
+- Choose $c$ via cross-validation to balance fitting vs. regularization
+
+## Back to Solving the problem
 
 This sort of problem is called __jointly convex__ in that it is convex in each of the variables $\alpha$, $\beta$, and $\mu$.
 
