@@ -28,7 +28,8 @@ project:
     - 18-Regression-II-Logistic.qmd
     - 18A-decision-tree-regression.qmd
     - 19-Regression-III-More-Linear.qmd
-    - 20-Recommender-Systems.qmd
+    - 20-Recommender-Systems-I.qmd
+    - 20-Recommender-Systems-II.qmd
     - 21-Networks-I.qmd
     - 22-Networks-II-Centrality-Clustering.qmd
     - 23-NN-I-Gradient-Descent.qmd

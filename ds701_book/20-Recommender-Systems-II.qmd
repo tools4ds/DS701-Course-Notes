@@ -1,0 +1,283 @@
+---
+title: Recommender Systems -- II
+jupyter: python3
+bibliography: references.bib
+---
+
+## Introduction
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/20-Recommender-Systems-II.ipynb)
+
+Next
+
+:::: {.columns}
+::: {.column width="50%"}
+
+In Part II, we will:
+
+* And one modern method:
+    * Deep Learning Recommender Model (DLRM)
+* Reflect on the impact of recommender systems
+
+:::
+::: {.column width="50%"}
+
+
+This section draws heavily on
+
+* _Deep Learning Recommender Model for Personalization and Recommendation Systems_, [@naumov2019deep]
+
+:::
+::::
+
+# Deep Learning for Recommender Systems
+
+## Deep Learning for Recommender Systems
+
+Besides the Collaborative Filtering and Matrix Factorization models, other popular
+approaches to building recommender systems use Deep Learning.
+
+We'll look at the Deep Learning Recommender Model (DLRM) proposed by Facebook in
+2019 [@naumov2019deep] with [GitHub repository](https://github.com/facebookresearch/dlrm).
+
+## DLRM Architecture
+
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- Components (@fig-dlrm-model):
+  1. **Embeddings**: Dense representations for categorical data.
+  2. **Bottom MLP**: Transforms dense continuous features.
+  3. **Feature Interaction**: Dot-product of embeddings and dense features.
+  4. **Top MLP**: Processes interactions and outputs probabilities.
+
+:::
+::: {.column width="50%"}
+
+![DLRM Architecture](figs/RecSys-figs/dlrm-model.png){.lightbox width=80% fig-align="center" #fig-dlrm-model}
+
+:::
+::::
+
+Let's look at each of these components in turn.
+
+## Embeddings
+
+**Embeddings**: Map categorical inputs to latent factor space.
+
+:::: {.columns}
+::: {.column width="65%"}
+- A learned embedding matrix $W \in \mathbb{R}^{m \times d}$ for each category of input
+- One-hot vector $e_i$ with $i\text{-th}$ entry 1 and rest are 0s
+- Embedding of $e_i$ is $i\text{-th}$ row of $W$, i.e., $w_i^T = e_i^T W$
+
+We can also use weighted combination of multiple items with a multi-hot vector
+of weights $a^T = [0, ..., a_{i_1}, ..., a_{i_k}, ..., 0]$.
+
+The embedding of this multi-hot vector is then $a^T W$.
+
+:::
+::: {.column width="35%"}
+![DLRM Architecture](figs/RecSys-figs/dlrm-model01.png){.lightbox width=100% fig-align="center"}
+:::
+::::
+
+---
+
+PyTorch has a convenient way to do this using `EmbeddingBag`, which besides summing
+can combine embeddings via mean or max pooling.
+
+Here's an example with 5 embeddings of dimension 3:
+
+```{python}
+import torch
+import torch.nn as nn
+
+# Example embedding matrix: 5 embeddings, each of dimension 3
+embedding_matrix = nn.EmbeddingBag(num_embeddings=5, embedding_dim=3, mode='mean')
+
+# Input: Indices into the embedding matrix
+input_indices = torch.tensor([1, 2, 3, 4])  # Flat list of indices
+offsets = torch.tensor([0, 2])  # Start new bag at position 0 and 2 in input_indices
+
+# Forward pass
+output = embedding_matrix(input_indices, offsets)
+
+print("Embedding Matrix:\n", embedding_matrix.weight)
+print("Output:\n", output)
+```
+
+## Dense Features
+
+:::: {.columns}
+::: {.column width="65%"}
+The advantage of the DLRM architecture is that it can take continuous features
+as input such as the user's age, time of day, etc.
+
+There is a bottom MLP that transforms these dense features into a latent space of
+the same dimension $d$.
+:::
+::: {.column width="35%"}
+![DLRM Architecture](figs/RecSys-figs/dlrm-model02.png){.lightbox width=100% fig-align="center"}
+:::
+::::
+
+## Optional Sparse Feature MLPs
+
+:::: {.columns}
+::: {.column width="65%"}
+Optionally, one can add MLPs to transform the sparse features as well.
+
+:::
+::: {.column width="35%"}
+![DLRM Architecture](figs/RecSys-figs/dlrm-model03.png){.lightbox width=100% fig-align="center"}
+:::
+::::
+
+## Feature Interactions
+
+:::: {.columns}
+::: {.column width="65%"}
+The 2nd order interactions are modeled via dot-products of all pairs from the
+collections of embedding vectors and processed dense features.
+
+The results of the dot-product interactions are concatenated with the processed
+dense vectors.
+
+:::
+::: {.column width="35%"}
+![DLRM Architecture](figs/RecSys-figs/dlrm-model04.png){.lightbox width=100% fig-align="center"}
+:::
+::::
+
+## Top MLP
+
+:::: {.columns}
+::: {.column width="65%"}
+The concatenated vector is then passed to a final MLP and then to a sigmoid
+function to produce the final prediction (e.g., probability score of recommendation)
+
+This entire model is trained end-to-end using standard deep learning techniques.
+
+:::
+::: {.column width="35%"}
+![DLRM Architecture](figs/RecSys-figs/dlrm-model05.png){.lightbox width=100% fig-align="center"}
+:::
+::::
+
+## Training Results
+
+![DLRM Training Results](figs/RecSys-figs/dlrm-training-results.png){width="70%" fig-align="center" #fig-dlrm-training-results}
+
+@fig-dlrm-training-results shows the training (solid) and validation (dashed)
+accuracies of DLRM on the [Criteo Ad Kaggle dataset](https://www.kaggle.com/competitions/criteo-display-ad-challenge/overview).
+
+Accuracy is compared with Deep and Cross network (DCN) [@wang2017deep].
+
+::: {style="font-size: 70%"}
+## Other Modern Approaches
+
+There are many other modern approaches to recommender systems for example:
+
+::: {.columns}
+::: {.column}
+
+1. **Graph-Based Recommender Systems**:
+   - Leverage graph structures to capture relationships between users and items.
+   - Use techniques like Graph Neural Networks (GNNs) to enhance recommendation accuracy.
+
+2. **Context-Aware Recommender Systems**:
+   - Incorporate contextual information such as time, location, and user mood to provide more personalized recommendations.
+   - Contextual data can be integrated using various machine learning models.
+
+:::
+::: {.column}
+
+3. **Hybrid Recommender Systems**:
+   - Combine multiple recommendation techniques, such as collaborative filtering and content-based filtering, to improve performance.
+   - Aim to leverage the strengths of different methods while mitigating their weaknesses.
+
+4. **Reinforcement Learning-Based Recommender Systems**:
+   - Use reinforcement learning to optimize long-term user engagement and satisfaction.
+   - Models learn to make sequential recommendations by interacting with users and receiving feedback.
+
+:::
+:::
+
+These approaches often leverage advancements in machine learning and data processing to provide more accurate and personalized recommendations.
+
+See [@ricci2022recommender] for a comprehensive overview of recommender systems.
+
+:::
+
+# Impact of Recommender Systems
+
+## Filter Bubbles
+
+There are a number of concerns with the widespread use of recommender systems and personalization in society.
+
+First, recommender systems are accused of creating __filter bubbles.__ 
+
+A filter bubble is the tendency for recommender systems to limit the variety of information presented to the user.
+
+The concern is that a user's past expression of interests will guide the algorithm in continuing to provide "more of the same."
+
+This is believed to increase polarization in society, and to reinforce confirmation bias.
+
+## Maximizing Engagement
+
+Second, recommender systems in modern usage are often tuned to __maximize engagement.__
+
+In other words, the objective function of the system is not to present the user's most favored content, but rather the content that will be most likely to keep the user on the site.
+
+The incentive to maximize engagement arises on sites that are supported by advertising revenue.   
+
+More engagement time means more revenue for the site.
+
+## Extreme Content
+
+However, many studies have shown that sites that strive to __maximize 
+engagement__ do so in large part by guiding users toward __extreme content:__
+
+* content that is shocking, 
+* or feeds conspiracy theories, 
+* or presents extreme views on popular topics.
+
+Given this tendency of modern recommender systems, 
+for a third party to create "clickbait" content such as this, one of the easiest
+ways is to present false claims.
+
+Methods for addressing these issues are being very actively studied at present.
+
+Ways of addressing these issues can be:
+
+* via technology
+* via public policy
+
+# Recap and References
+
+## BU CS/CDS Research
+
+You can read about some of the work done in Professor Mark Crovella's group on
+this topic:
+
+* _How YouTube Leads Privacy-Seeking Users Away from Reliable Information_, [@spinelli2020youtube] 
+* _Closed-Loop Opinion Formation_, [@spinelli2017closed] 
+* _Fighting Fire with Fire: Using Antidote Data to Improve Polarization and Fairness of Recommender Systems_, [@rastegarpanah2019fighting] 
+
+## Recap
+
+* Introduction to recommender systems and their importance in modern society.
+* Explanation of collaborative filtering (CF) and its two main approaches: user-user similarity and item-item similarity.
+* Discussion on the challenges of recommender systems, including scalability and data sparsity.
+* Introduction to matrix factorization (MF) as an improvement over CF, using latent vectors and alternating least squares (ALS) for optimization.
+* Practical implementation of ALS for matrix factorization on a subset of Amazon movie reviews.
+* Review of Deep Learning Recommender Model (DLRM) architecture and its components.
+* Discussion on the societal impact of recommender systems, including filter bubbles and engagement maximization.
+
+## References
+
+::: {#refs}
+:::
+

@@ -171,3 +171,21 @@ bibliography: references.bib
 
 The WikiBook on [LaTeX Bibliography Management](https://en.wikibooks.org/wiki/LaTeX/Bibliography_Management#BibTeX)
 is a good reference on BibTeX format.
+
+## Formatting Tips
+
+### Display
+
+You can display text from a code cell in a much nicer format with the `display` and `Markdown` functions.
+
+```python
+from IPython.display import display, Markdown
+
+n_users = df["UserId"].unique().shape[0]
+n_movies = df["ProductId"].unique().shape[0]
+n_reviews = len(df)
+display(Markdown(f'There are:\n'))
+display(Markdown(f'* {n_reviews:,} reviews\n* {n_movies:,} movies\n* {n_users:,} users'))
+
+display(Markdown(f'There are {n_users * n_movies:,} potential reviews, meaning sparsity of {(n_reviews/(n_users * n_movies)):0.4%}'))
+```
