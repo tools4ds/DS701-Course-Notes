@@ -91,6 +91,27 @@ Recall from Part I that Matrix Factorization approximates $R \approx WV^T$:
 This is why DLRM uses dot products in the interaction layer—it's a principled way to 
 model feature interactions based on collaborative filtering theory.
 
+## Training and Evaluation Dataset
+
+Criteo Ad Click-Through Rate (CTR) challenge: 
+[Kaggle Challenge](https://www.kaggle.com/c/criteo-display-ad-challenge), 
+[Dataset on HF](https://huggingface.co/datasets/criteo/CriteoClickLogs)
+
+### 🏗️ Dataset Construction
+
+- Each row represents a **display ad** served by Criteo covering 24 days
+- The **first column** indicates whether the ad was **clicked (1)** or **not clicked (0)**.
+- Both **positive (clicked)** and **negative (non-clicked)** examples have been **subsampled**, though at **different rates** to keep business confidentiality.
+
+### 🧱 Features
+
+- **13 integer features**  
+  Mostly count-based; represent numerical properties of the ad, user, or context.
+  
+- **26 categorical features**  
+  Values are **hashed into 32-bit integers** for anonymization.  
+  The **semantic meaning** of these features is **undisclosed**.
+
 ## DLRM Architecture Overview
 
 DLRM is a **dual-path architecture** combining sparse and dense feature processing:
@@ -129,10 +150,14 @@ Let's examine each component to build intuition.
 - One-hot vector $e_i$ with $i\text{-th}$ entry 1 and rest are 0s
 - Embedding of $e_i$ is $i\text{-th}$ row of $W$, i.e., $w_i^T = e_i^T W$
 
+<!--
 We can also use weighted combination of multiple items with a multi-hot vector
 of weights $a^T = [0, ..., a_{i_1}, ..., a_{i_k}, ..., 0]$.
 
 The embedding of this multi-hot vector is then $a^T W$.
+-->
+
+**Criteo Dataset:** 26 categorical features, each embedded to dimension $d=128$.
 
 :::
 ::: {.column width="35%"}
@@ -140,6 +165,7 @@ The embedding of this multi-hot vector is then $a^T W$.
 :::
 ::::
 
+<!--
 ---
 
 PyTorch has a convenient way to do this using `EmbeddingBag`, which besides summing
@@ -165,6 +191,8 @@ print("Embedding Matrix:\n", embedding_matrix.weight)
 print("Output:\n", output)
 ```
 
+-->
+
 ## Dense Features
 
 :::: {.columns}
@@ -173,7 +201,14 @@ The advantage of the DLRM architecture is that it can take continuous features
 as input such as the user's age, time of day, etc.
 
 There is a bottom MLP that transforms these dense features into a latent space of
-the same dimension $d$.
+the same dimension $d$ as the embeddings.
+
+**Criteo Dataset Configuration:**
+
+* **Input:** 13 continuous (dense) features
+* **Bottom MLP layers:** 512 → 256 → 128
+* **Output:** 128-dimensional vector (matches embedding dimension)
+
 :::
 ::: {.column width="35%"}
 ![DLRM Architecture](figs/RecSys-figs/dlrm-model02.png){.lightbox width=100% fig-align="center"}
@@ -213,10 +248,17 @@ Then concatenate dot products with the original dense features.
 :::
 ::::
 
----
+## Feature Interactions, Continued
+
+<br>
 
 **Dimensionality reduction**: Using dot products between $d$-dimensional vectors yields 
 scalars, avoiding the explosion of treating each element separately.
+
+**Criteo Example:** 27 total vectors (1 from Bottom MLP + 26 embeddings)
+
+* Pairwise interactions: $\binom{27}{2} = \frac{27 \times 26}{2} = 351$ dot products
+* Each dot product is a scalar (interaction strength)
 
 ## Top MLP
 
@@ -227,11 +269,37 @@ function to produce the final prediction (e.g., probability score of recommendat
 
 This entire model is trained end-to-end using standard deep learning techniques.
 
+**Criteo Configuration:**
+
+* **Input:** 506-dimensional concatenated vector
+  - 128d processed dense features
+  - 351 pairwise dot products
+  - 27 embedding vectors (27 × 1 = 27 after pooling)
+* **Top MLP layers:** 512 → 256 → 1
+* **Output:** Sigmoid activation → click probability
+
 :::
 ::: {.column width="35%"}
 ![DLRM Architecture](figs/RecSys-figs/dlrm-model05.png){.lightbox width=100% fig-align="center"}
 :::
 ::::
+
+## DLRM Dimensions: Criteo Dataset Summary
+
+Putting it all together for the Criteo Ad Kaggle dataset configuration:
+
+| Component | Details |
+|:----------|:--------|
+| **Input Features** | 13 dense (continuous) + 26 sparse (categorical) |
+| **Bottom MLP** | 13 → 512 → 256 → **128** |
+| **Embeddings** | 26 categorical features × 128d each |
+| **Interaction Layer** | 27 vectors → $\binom{27}{2} = 351$ dot products |
+| **Concatenation** | 128 (dense) + 351 (interactions) + 27 (pooled embeddings) = **506** |
+| **Top MLP** | 506 → 512 → 256 → **1** |
+| **Output** | Sigmoid(1) → Click probability |
+
+**Key observation:** All vectors in interaction layer are 128-dimensional, enabling 
+efficient pairwise dot products.
 
 ## The Memory Challenge
 
@@ -353,10 +421,6 @@ The concern is that a user's past expression of interests will guide the algorit
 This is believed to increase polarization in society, and to reinforce confirmation bias.
 
 ## Maximizing Engagement
-
-> TODO: how does recommendation systems do that? What has been disclosed about 
-recommendation systems on Instagram, TikTok, X, YouTube, FaceBook. What about
-A/B testing to tweak ads and websites to improve click thru?
 
 Second, recommender systems in modern usage are often tuned to __maximize engagement.__
 
