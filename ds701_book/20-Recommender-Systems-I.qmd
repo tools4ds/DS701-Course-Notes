@@ -1035,7 +1035,7 @@ Again, this is only on the training data -- so overly optimistic for sure.
 And note that this is a subset of the full dataset -- the subset that is "easiest" to predict due to density.
 
 ```{python}
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error
 
 # Drop the columns that are not features
@@ -1045,7 +1045,7 @@ X_train = good_df.drop(columns=['Id', 'ProductId', 'UserId', 'Text', 'Summary'])
 y_train = good_df['Score']
 
 # Using k-NN on features HelpfulnessNumerator, HelpfulnessDenominator, Score, Time
-model = KNeighborsClassifier(n_neighbors=3).fit(X_train, y_train)
+model = KNeighborsRegressor(n_neighbors=3).fit(X_train, y_train)
 %time y_hat = model.predict(X_train)
 ```
 
