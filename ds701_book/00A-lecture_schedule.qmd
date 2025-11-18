@@ -40,13 +40,13 @@ title: Lecture Schedule
 | Nov 11 | 20 -- Intro to NLP | [NLP](./28-NLP.qmd) 
 | Nov 13 | 21 -- Recommender Systems - I | [Recommender Systems - I](./20-Recommender-Systems-I.qmd)  | |
 | **Week 12**  | --- | --- | --- |
-| Nov 18 | 22  -- Recommender Systems - II and Graphs I| [Recommender Systems II](./20-Recommender-Systems-II.qmd), [Graphs I](./21-Networks-I.qmd) | |
-| Nov 20 | 23 -- Graphs II | [Graphs II](./22-Networks-II-Centrality-Clustering.qmd)  | |
+| Nov 18 | 22  -- Recommender Systems - II and Graphs I| [Recommender Systems II](./20-Recommender-Systems-II.qmd)  | |
+| Nov 20 | 23 -- Graphs I | [Graphs I](./21-Networks-I.qmd) | |
 | **Week 13**  | --- | --- | --- |
-| Nov 25 | 24 -- Time Series Analysis | [Time Series](./26-TimeSeries.qmd) | |
+| Nov 25 | 24: Graphs II | [Graphs II](./22-Networks-II-Centrality-Clustering.qmd)  | |
 | Nov 27 | 🦃 _No Class -- Thanksgiving Recess_ 🌽 |  | |
 | **Week 14**  | --- | --- | --- |
-| Dec 2 | 25 -- Lecture to be announced |   | |
+| Dec 2 | 25: Time Series | [Time Series](./26-TimeSeries.qmd)  | |
 | Dec 4 | 📽️ _Project Presentation I_ 📽️| |  |
 | **Week 15**  | --- | --- | --- |
 | Dec 9 | 📽️ _Project Presentations II_ 📽️ |   | |
