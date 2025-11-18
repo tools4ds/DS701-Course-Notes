@@ -716,6 +716,44 @@ where
 * $n_k(i, u)$ are the $k$ nearest neighbors to $i$ that were rated by user $u$ and
 * $s_{ij}$ is the similarity between items $i$ and $j$, estimated as above.
 
+## Negative Similarity Scores?
+
+When using correlation coefficient as the similarity score, negative values have important implications for the weighted calculation.
+
+Looking at the weighted rating formula:
+
+$$ 
+\hat{r}_{ui} = b_{ui} + \frac{\sum_{j \in n_k(i, u)} s_{ij}(r_{uj} - b_{uj})}{\sum_{j \in n_k(i, u)} s_{ij}},
+$$
+
+
+## How Negative Similarity Scores Work
+
+When $s_{ij}$ is **negative** (negative correlation), here's what happens:
+
+1. **Numerator**: The term $s_{ij}(r_{uj} - b_{uj})$ becomes negative when $s_{ij} < 0$. This means:
+   - If user $u$ rated item $j$ **above** its bias ($r_{uj} - b_{uj} > 0$), the negative similarity will push the prediction for item $i$ **down**
+   - If user $u$ rated item $j$ **below** its bias ($r_{uj} - b_{uj} < 0$), the negative similarity will push the prediction for item $i$ **up**
+   
+   This makes intuitive sense: if items $i$ and $j$ are negatively correlated, then liking one means you're likely to dislike the other.
+
+2. **Denominator**: When $s_{ij}$ is negative, it contributes a negative value to the sum in the denominator. This can potentially lead to issues:
+   - If all similarities are negative, the denominator becomes negative
+   - If there's a mix of positive and negative similarities, they might partially cancel out, potentially making the denominator close to zero or even zero
+
+## Common Solutions
+
+To address these issues, practitioners typically use one of these approaches:
+
+1. **Use only positive similarities**: Filter out items with negative correlation (only use $k$-NN where $s_{ij} > 0$)
+
+2. **Use absolute values in denominator**: $\displaystyle\hat{r}_{ui} = b_{ui} + \frac{\sum_{j \in n_k(i, u)} s_{ij}(r_{uj} - b_{uj})}{\sum_{j \in n_k(i, u)} |s_{ij}|}$
+
+3. **Shift and scale similarities**: Transform correlation values from $[-1, 1]$ to $[0, 1]$ using $s'_{ij} = \frac{s_{ij} + 1}{2}$
+
+The first approach (filtering to positive similarities) is most common because negatively correlated items are typically less informative for prediction than positively correlated items in most domains.
+
+
 ## Assessing CF
 
 This completes the high level view of CF.
@@ -735,7 +773,7 @@ Weaknesses:
 * Accuracy can be a problem -- resulting in poor recommendations
 * Scalability can be a problem -- compute grows (think $k$-NN)
 
-# Matrix Factorization
+# Matrix Factorization Approaches
 
 ## Matrix Factorization
 
@@ -892,7 +930,7 @@ The entire Amazon reviews dataset is too large to work with easily, and it is to
 Hence, we will take the densest rows and columns of the matrix.
 
 ```{python}
-print(df.shape)
+# print(df.shape)
 
 # The densest columns: products with more than 50 reviews
 pids = df.groupby('ProductId').count()['Id']
@@ -921,6 +959,7 @@ Missing entries will be filled with NaNs.
 dense_df = df.loc[goodrec]
 good_df = dense_df.loc[~df['Score'].isnull()]
 R = good_df.pivot_table(columns = 'ProductId', index = 'UserId', values = 'Score')
+print(f"Review matrix shape: {R.shape}")
 ```
 
 ---
@@ -996,7 +1035,7 @@ Again, this is only on the training data -- so overly optimistic for sure.
 And note that this is a subset of the full dataset -- the subset that is "easiest" to predict due to density.
 
 ```{python}
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error
 
 # Drop the columns that are not features
@@ -1006,7 +1045,7 @@ X_train = good_df.drop(columns=['Id', 'ProductId', 'UserId', 'Text', 'Summary'])
 y_train = good_df['Score']
 
 # Using k-NN on features HelpfulnessNumerator, HelpfulnessDenominator, Score, Time
-model = KNeighborsClassifier(n_neighbors=3).fit(X_train, y_train)
+model = KNeighborsRegressor(n_neighbors=3).fit(X_train, y_train)
 %time y_hat = model.predict(X_train)
 ```
 
