@@ -47,7 +47,7 @@ title: Lecture Schedule
 | Nov 27 | 🦃 _No Class -- Thanksgiving Recess_ 🌽 |  | |
 | **Week 14**  | --- | --- | --- |
 | Dec 2 | 25: Time Series | [Time Series](./26-TimeSeries.qmd)  | |
-| Dec 4 | 📽️ _Project Presentation I_ 📽️| |  |
+| Dec 4 | 📽️ _Project Presentation I_ 📽️  | |  |
 | **Week 15**  | --- | --- | --- |
 | Dec 9 | 📽️ _Project Presentations II_ 📽️ |   | |
 | Dec 10 | 🎉 _Last Day of Classes_ 🎉 | 🔬 Projects Due 🔬  | |
@@ -56,3 +56,51 @@ title: Lecture Schedule
 <!-- | --- | 14 -- Classification III: Naive Bayes and SVM | [Naive Bayes and SVM](./16-Classification-III-NB-SVM.qmd) |  | -->
 <!-- | Nov 4 | 20 -- Neural Networks II: Backpropagation | [NN II](./24-NN-II-Backprop.qmd)   | | -->
 <!-- | Nov 6 | 21 -- Neural Networks III: CNNs | [NN III](./25-NN-III-CNNs.qmd) |  | -->
+
+## Project Presentations
+
+Each presentation will be strictly limited to 6 minutes, with up to 1 minute for questions.
+
+::: {.columns}
+::: {.column}
+
+**December 4 Presentations**
+
+- Project 1
+  - 11:00 -- 11:06: Team A
+  - 11:07 -- 11:13: Team B
+- Project 2
+  - 11:14 -- 11:20: Team A
+  - 11:21 -- 11:27: Team B
+- Project 3
+  - 11:28 -- 11:34: Team A
+  - 11:35 -- 11:41: Team B
+- Project 4
+  - 11:42 -- 11:48: Team A
+  - 11:49 -- 11:55: Team B
+- Project 5
+  - 11:56 -- 12:02: Team A
+  - 12:03 -- 12:09: Team B
+:::
+::: {.column}
+
+**December 9 Presentations**
+
+- Project 1
+  - 11:00 -- 11:06: Team A
+  - 11:07 -- 11:13: Team B
+- Project 2
+  - 11:14 -- 11:20: Team A
+  - 11:21 -- 11:27: Team B
+- Project 3
+  - 11:28 -- 11:34: Team A
+  - 11:35 -- 11:41: Team B
+- Project 4
+  - 11:42 -- 11:48: Team A
+  - 11:49 -- 11:55: Team B
+- Project 5
+  - 11:56 -- 12:02: Team A
+  - 12:03 -- 12:09: Team B
+
+:::
+:::
