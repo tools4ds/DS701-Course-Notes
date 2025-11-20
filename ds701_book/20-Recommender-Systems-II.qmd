@@ -6,7 +6,9 @@ bibliography: references.bib
 
 ## Introduction
 
+<!--
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/20-Recommender-Systems-II.ipynb)
+-->
 
 :::: {.columns}
 ::: {.column width="50%"}
@@ -272,7 +274,7 @@ This entire model is trained end-to-end using standard deep learning techniques.
 **Criteo Configuration:**
 
 * **Input:** 506-dimensional concatenated vector
-  - 128d processed dense features
+  - 128 processed dense features
   - 351 pairwise dot products
   - 27 embedding vectors (27 × 1 = 27 after pooling)
 * **Top MLP layers:** 512 → 256 → 1
