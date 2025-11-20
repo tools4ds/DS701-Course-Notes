@@ -47,8 +47,8 @@ ffmpeg
 
 # 24-NN-II-Backprop
 graphviz
-torch
-torchvision
+#torch
+#torchvision
 
 # 26-TimeSeries
 kagglehub
