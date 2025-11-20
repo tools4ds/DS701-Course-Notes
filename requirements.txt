@@ -54,11 +54,11 @@ torchvision
 kagglehub
 
 # 27-RNN
-pretty_midi
+#pretty_midi
 
 # 28-NLP
-transformers
-nltk
-spacy
-hf_xet
-bertopic
+#transformers
+#nltk
+#spacy
+#hf_xet
+#bertopic
