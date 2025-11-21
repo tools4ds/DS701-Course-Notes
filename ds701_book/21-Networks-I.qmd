@@ -65,6 +65,16 @@ The term __nodes__ is also used for vertices. The term __links__ or __connection
 
 We'll distinguish between __undirected__ graphs and __directed__ graphs.
 
+## NetworkX
+
+We'll use the [NetworkX](https://networkx.org/) library to create and manipulate graphs.
+
+![](figs/networkx_logo.png){width=70% fig-align="center"}
+
+```python
+import networkx as nx
+```
+
 ## Undirected Graphs
 
 In an undirected graph, an edge $(u, v)$ is an unordered pair. The edge $(v, u)$ is the same thing.
@@ -107,7 +117,7 @@ For example, the edge $(1, 2)$, is directed from node 1 to node 2.
 # Create a directed graph
 DG = nx.DiGraph()
 DG.add_edges_from([(1,2), (1,3), (2, 3), (3, 4), (3, 5)])
-pos = {
+pos = {  # positions for each node, defaults to spring layout
     1: [0, 0],
     2: [-1, -1],
     3: [1, -1],
@@ -483,6 +493,18 @@ $$
 
 We typically focus our attention on large values of $x$ -- nodes that are highly connected.
 
+::: {.fragment}
+This is technically a __complementary cumulative distribution function__ (CCDF)
+or sometimes called the __survival function__ of the distribution.
+
+$$
+P(X > x) = 1 - P(X \leq x).
+$$
+
+where $P(X \leq x)$ is the cumulative distribution function (CDF).
+
+:::
+
 ## Power Law Degree Distributions
 
 It's common for a degree distribution to __approximately__ follow a power-law.
@@ -499,7 +521,11 @@ $$ P(X > x) =
 $$
 
 where $k$ is the minimum value of $X$, sometimes called the __scale parameter__,
-and $\alpha$ is the exponent, sometimes called the __shape parameter__.
+meaning we can specify the _minimum_ number of neighbors a node can have.
+
+And $\alpha$ is the exponent, sometimes called the __shape parameter__.
+
+## Distribution Plot
 
 Here is a plot for different values of $\alpha$ and $k=1$.
 
@@ -560,6 +586,9 @@ x = np.linspace(1, 10, 1000)
 def pareto_pdf(x, alpha, xm=1):
     return (alpha * xm**alpha) / (x**(alpha + 1))
 
+# Set figure size
+plt.figure(figsize=(10, 4))
+
 # Plot the Pareto distribution for alpha values from 1 to 3
 alphas = [1, 2, 3]
 for alpha in alphas:
@@ -601,6 +630,8 @@ $$
 $$
 
 ```{python}
+#| fig-align: center
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import pareto
@@ -608,9 +639,10 @@ from scipy.stats import pareto
 # Define the range of x values
 x = np.linspace(pareto.ppf(0.005, 1), pareto.ppf(0.995, 3), 100)
 
+
 # Plot the log of the Pareto distribution for alpha values 1, 2, and 3
 alphas = [1, 2, 3]
-plt.figure(figsize=(7, 5))
+plt.figure(figsize=(8, 3.5))
 for alpha in alphas:
     plt.plot(np.log10(x), np.log10(pareto.pdf(x, alpha)), lw=2, alpha=0.6, label=f'pareto pdf $\\alpha={alpha}$')
 
@@ -688,6 +720,56 @@ The clustering coefficient $C^{(1)} = \frac{3}{1 + 1 + \binom{4}{2}} = \frac{3}{
 
 where $\binom{4}{2} = \frac{4!}{2!(4-2)!}.$
 
+
+## The Example Graph Calculation
+
+The graph has:
+
+- **Nodes**: 1, 2, 3, 4, 5
+- **Edges**: (1,2), (1,3), (2,3), (3,4), (3,5)
+
+This creates a triangle with nodes 1-2-3, and node 3 connects to two additional nodes (4 and 5).
+
+### Step-by-Step Calculation
+
+The clustering coefficient formula being used is:
+
+$$C^{(1)} = \frac{\sum_i \text{number of triangles that include node } i}{\sum_i \text{number of pairs of neighbors of node }i}$$
+
+Let's count for **each node**:
+
+### Node 1
+
+- **Neighbors**: {2, 3}
+- **Triangles**: 1 (the triangle 1-2-3, since all three are connected)
+- **Pairs of neighbors**: 1 (the pair {2,3})
+
+### Node 2  
+- **Neighbors**: {1, 3}
+- **Triangles**: 1 (same triangle 1-2-3)
+- **Pairs of neighbors**: 1 (the pair {1,3})
+
+### Node 3
+
+- **Neighbors**: {1, 2, 4, 5} (4 neighbors!)
+- **Triangles**: 1 (the triangle 1-2-3)
+- **Pairs of neighbors**: $\binom{4}{2} = 6$ (all possible pairs: {1,2}, {1,4}, {1,5}, {2,4}, {2,5}, {4,5})
+
+### Nodes 4 and 5
+
+- **Neighbors**: {3} (only 1 neighbor each)
+- **Triangles**: 0 (not part of any triangle)
+- **Pairs of neighbors**: 0 (can't make a pair from 1 neighbor)
+
+### Final Calculation
+
+- **Total triangles (numerator)**: 1 + 1 + 1 + 0 + 0 = **3**
+- **Total neighbor pairs (denominator)**: 1 + 1 + 6 + 0 + 0 = **8**
+
+Therefore: $C^{(1)} = \frac{3}{8} = 0.375$
+
+The binomial coefficient $\binom{4}{2} = \frac{4!}{2!(4-2)!} = \frac{24}{2 \times 2} = 6$ represents choosing 2 neighbors from node 3's 4 neighbors.
+
 ---
 
 The second way to measure the clustering coefficient is the mean of the ratios, i.e.,
@@ -724,7 +806,7 @@ How long is a typical shortest path between nodes?
     
 The average shortest path length between nodes is one way to measure a network's *diameter*.
 
-If $d(i, j)$ represents the shortest path length between nodes (i) and (j), and $n$ is the total number of nodes in the network, the average shortest path length $L$ can be expressed as
+If $d(i, j)$ represents the shortest path length between nodes (i) and (j), and $N$ is the total number of nodes in the network, the average shortest path length $L$ can be expressed as
 
 $$
 L = \frac{1}{\binom{N}{2}} \sum_{i \neq j} d_{\text{shortest}}(i, j).
@@ -932,7 +1014,9 @@ One way to visualize is to use a circular layout, which keeps all the edges in t
 This can make things easier to see sometimes.
 
 ```{python}
-plt.figure(figsize = (18, 8))
+#| fig-align: center
+
+plt.figure(figsize = (12, 5.5))
 ax1 = plt.subplot(121)
 nx.draw_networkx(football, ax = ax1,
                  node_size=35, 
@@ -972,7 +1056,7 @@ This is a kind of minimal distortion in a least-squares sense.
 
 ```{python}
 #| fig-align: center
-plt.figure(figsize = (18, 8))
+plt.figure(figsize = (12, 5.5))
 ax1 = plt.subplot(121)
 nx.draw_networkx(football, ax = ax1,
                  node_size=35, 
@@ -1000,7 +1084,7 @@ Finally, we can try the spectral layout. We will define the spectral layout in t
 
 ```{python}
 #| fig-align: center
-plt.figure(figsize = (18, 8))
+plt.figure(figsize = (12, 5.5))
 ax1 = plt.subplot(121)
 nx.draw_networkx(football, ax = ax1,
                  node_size=35, 
