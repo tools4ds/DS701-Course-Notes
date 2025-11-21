@@ -66,41 +66,52 @@ Each presentation will be strictly limited to 6 minutes, with up to 1 minute for
 
 **December 4 Presentations**
 
-- Project 1
+- WGBH Investigations, Medical Debt
   - 11:00 -- 11:06: Team A
+- CHAPA
   - 11:07 -- 11:13: Team B
-- Project 2
-  - 11:14 -- 11:20: Team A
+- MuckRock
+  - 11:14 -- 11:20: Team B
+- Voter Language Predictor Analysis
   - 11:21 -- 11:27: Team B
-- Project 3
+- ABCD
   - 11:28 -- 11:34: Team A
+- Senator Markey Grants
   - 11:35 -- 11:41: Team B
-- Project 4
+- Act on Mass
   - 11:42 -- 11:48: Team A
+- CAIR Media
   - 11:49 -- 11:55: Team B
-- Project 5
+- CISS Colombia
   - 11:56 -- 12:02: Team A
+- CZ 911
   - 12:03 -- 12:09: Team B
+
 :::
 ::: {.column}
 
 **December 9 Presentations**
 
-- Project 1
-  - 11:00 -- 11:06: Team A
-  - 11:07 -- 11:13: Team B
-- Project 2
+- WGBH Investigations, Medical Debt
+  - 11:00 -- 11:06: Team B
+- CHAPA
+  - 11:07 -- 11:13: Team A
+- MuckRock
   - 11:14 -- 11:20: Team A
-  - 11:21 -- 11:27: Team B
-- Project 3
-  - 11:28 -- 11:34: Team A
-  - 11:35 -- 11:41: Team B
-- Project 4
-  - 11:42 -- 11:48: Team A
-  - 11:49 -- 11:55: Team B
-- Project 5
-  - 11:56 -- 12:02: Team A
-  - 12:03 -- 12:09: Team B
+- Voter Language Predictor Analysis
+  - 11:21 -- 11:27: Team A
+- ABCD
+  - 11:28 -- 11:34: Team B
+- Senator Markey Grants
+  - 11:35 -- 11:41: Team A
+- Act on Mass
+  - 11:42 -- 11:48: Team B
+- CAIR Media
+  - 11:49 -- 11:55: Team A
+- CISS Colombia
+  - 11:56 -- 12:02: Team B
+- CZ 911
+  - 12:03 -- 12:09: Team A
 
 :::
 :::
