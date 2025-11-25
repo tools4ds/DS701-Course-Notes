@@ -78,7 +78,7 @@ While he was studying the club, a factional division led to a splitting of the c
 The club became split between those who rallied around the club president and those who rallied around the karate instructor.
 
 ::: aside
-You can read the story of the Karate club [here](http://www1.ind.ku.dk/complexLearning/zachary1977.pdf).  This dataset has become so famous that it has spawned [its own academic traditions](https://networkkarate.tumblr.com).
+You can read the story of the Karate club [here](https://www.jstor.org/stable/pdf/3629752.pdf).  This dataset has become so famous that it has spawned [its own academic traditions](https://networkkarate.tumblr.com).
 :::
 
 ---
@@ -118,10 +118,17 @@ $$
 
 ## Interpretation
 
-* **Large Closeness Centrality**: Indicates that a node is, on average, close to all other nodes in the network. This means it can quickly interact with or reach other nodes. Nodes with high closeness centrality are often considered central or influential because they can efficiently spread information or resources throughout the network.
+::: {.incremental}
+* **Large Closeness Centrality**: 
+    * Indicates that a node is, on average, close to all other nodes in the network. 
+    * This means it can quickly interact with or reach other nodes. 
+    * Nodes with high closeness centrality are often considered central or influential because they can efficiently spread information or resources throughout the network.
 
-* **Small Closeness Centrality**: Indicates that a node is, on average, farther away from all other nodes in the network. These nodes are less central and may take longer to interact with or reach other nodes. Nodes with low closeness centrality are often on the periphery of the network and are less influential in terms of spreading information or resources.
-
+* **Small Closeness Centrality**: 
+    * Indicates that a node is, on average, farther away from all other nodes in the network. 
+    * These nodes are less central and may take longer to interact with or reach other nodes. 
+    * Nodes with low closeness centrality are often on the periphery of the network and are less influential in terms of spreading information or resources.
+:::
 ---
 
 ```{python}
@@ -284,10 +291,21 @@ plt.show()
 
 The higher the betweenness centrality of a node, the more it is on many shortest paths.
 
+## Eigenvector Centrality
+
+Eigenvector centrality is a measure used in network analysis to determine the influence of a node within a network.
+
+The centrality score of a node is proportional to the sum of the centrality scores of its neighbors.
+
+The main idea of eigenvector (or status) centrality is that __*high status* nodes are connected to *high status* nodes__.
+
+We calculate this with some matrix algebra.
+
+
 
 ## Adjacency Matrices
 
-To define the next centrality, we need to represent graph as a __matrix__.
+First, represent the graphs by its __adjacency matrix__.
 
 Given an $n$-node undirected graph $G = (V, E)$, the adjacency matrix $A$ is defined as
 
@@ -299,7 +317,41 @@ A_{ij} =
 \end{cases}.
 $$
 
-## Adjacency Matrix Example
+<br>
+
+<!-- 3x3 adjacency matrix in HTML table format with bold first column and a vertical line divider -->
+
+<table>
+  <tr>
+    <th>ID</th>
+    <th>0</th>
+    <th>1</th>
+    <th>2</th>
+  </tr>
+  <tr>
+    <td><b>0</b></td>
+    <td style="border-left:2px solid #222;">0</td>
+    <td>1</td>
+    <td>0</td>
+  </tr>
+  <tr>
+    <td><b>1</b></td>
+    <td style="border-left:2px solid #222;">1</td>
+    <td>0</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td><b>2</b></td>
+    <td style="border-left:2px solid #222;">0</td>
+    <td>1</td>
+    <td>0</td>
+  </tr>
+</table>
+
+
+
+
+## Karate Club Adjacency Matrix
 
 ::: {.columns}
 ::: {.column}
@@ -354,6 +406,8 @@ A __nonnegative symmetric matrix__ $A$ has the following properties:
 This is a consequence of the [Perron-Frobenius Theorem](https://nhigham.com/2021/07/13/what-is-the-perron-frobenius-theorem/).
 
 ## Eigenvector Centrality
+
+Remember:
 
 * Eigenvector centrality is a measure used in network analysis to determine the influence of a node within a network. 
 * The centrality score of a node is proportional to the sum of the centrality scores of its neighbors. 
@@ -579,6 +633,8 @@ A weighted graph assigns a weight $w(e)$ to each edge $e\in E$.
 
 An $s$-$t$ cut $C$ of $G$ is a partition of $V$ into $(U, V-U)$ such that $s \in U$ and $t \in V-U$.
 
+:::: {.fragment}
+
 ::: {.columns}
 ::: {.column}
 The __cost__ of a cut is the total weight of the edges that go between the two parts:
@@ -593,6 +649,8 @@ $$
 :::
 :::
 > For unweighted graphs, we can set $w(e) = 1$ for all edges, so the cost becomes the number of edges that cross the cut.
+
+::::
 
 ## Min $s$-$t$ Cut Problem
 
@@ -845,6 +903,10 @@ $$
 
 then $\lambda$ is the __smallest eigenvalue of $L$__ and $\mathbf{x}$ is the corresponding eigenvector.
 
+::: {.aside}
+This is the standard eigenvalue equation with the constraint that $\mathbf{x}$ is a unit vector.
+:::
+
 We are connecting functions on the graph $G$ with eigenvectors of the matrix $L$. This is quite remarkable.
 
 ---
@@ -871,10 +933,12 @@ Then $L$ has a single eigenvalue of value $\lambda_1 = 0$.   The corresponding e
 It is easy to verify that
 
 $$
-L{\mathbf 1}={\mathbf 0}.
+L{\mathbf 1}=0 \cdot {\mathbf 1} = {\mathbf 0}.
 $$
 
 Recall that row $i$ of $L$ consists of $d_i$ on the diagonal, and $d_i$ -1s in other positions.
+
+---
 
 The second-smallest eigenvalue of $L$, $\lambda_2$, is called the __Fiedler value.__
 
@@ -967,9 +1031,9 @@ There are a number of options for how to split based on the Fiedler vector.
 If $\mathbf{w}_2$ is the Fiedler vector, then split nodes according to a value $s$:
     
 * bisection: $s$ is the median value in $\mathbf{w}_2$
-* ratio cut: $s$ is the value that maximizes $\alpha$
 * sign: separate positive and negative vaues ($s = 0$)
 * gap: separate according to the largest gap in the values of $\mathbf{w}_2$
+* ratio cut: $s$ is the value that maximizes $\alpha$
 
 
 ## Example: Bisection Method
@@ -983,6 +1047,7 @@ $$
 **Bisection approach:** Use $s = \text{median}(\mathbf{w}_2) = \frac{-0.1 + 0.15}{2} = 0.025$
 
 **Result:**
+
 - **Group 1** (values $< 0.025$): nodes 1, 2, 3, 4
 - **Group 2** (values $\geq 0.025$): nodes 5, 6, 7, 8
 
@@ -999,6 +1064,7 @@ $$
 **Sign approach:** Use $s = 0$ to separate positive from negative values
 
 **Result:**
+
 - **Group 1** (negative values): nodes 1, 2, 3, 4
 - **Group 2** (positive values): nodes 5, 6, 7, 8
 
@@ -1019,6 +1085,7 @@ Gaps: $0.2, 0.2, 0.1, 0.25, 0.15, 0.15, 0.05$
 Largest gap is $0.25$ (between $-0.1$ and $0.15$), so $s = 0.025$
 
 **Result:**
+
 - **Group 1** (values $< 0.025$): nodes 1, 2, 3, 4
 - **Group 2** (values $\geq 0.025$): nodes 5, 6, 7, 8
 
@@ -1029,14 +1096,16 @@ This identifies the most natural "break" in the data.
 Consider a different scenario where we try several cut values:
 
 For $s = -0.3$:
+
 - Group 1: nodes 1, 2 (size = 2)
 - Group 2: nodes 3, 4, 5, 6, 7, 8 (size = 6)
-- Cut edges: 5, so $\alpha = \frac{5}{\min(2,6)} = 2.5$
+- Cut edges: 5, so [isoperimetric ratio](#balanced-cuts) $\alpha = \frac{5}{\min(2,6)} = 2.5$
 
 For $s = 0.025$:
+
 - Group 1: nodes 1, 2, 3, 4 (size = 4)
 - Group 2: nodes 5, 6, 7, 8 (size = 4)
-- Cut edges: 8, so $\alpha = \frac{8}{\min(4,4)} = 2.0$
+- Cut edges: 8, so [isoperimetric ratio](#balanced-cuts)$\alpha = \frac{8}{\min(4,4)} = 2.0$
 
 **Ratio cut approach:** Choose $s$ that maximizes $\alpha$
 
