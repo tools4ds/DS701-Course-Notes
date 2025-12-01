@@ -18,10 +18,36 @@ bibliography: references.bib
 #| fig-align: center
 import pandas as pd
 import yfinance as yf
+import os
 
-# Load 10 years of AAPL stock prices into a dataframe
-aapl_data = yf.download('AAPL', start='2022-01-01', end='2024-11-01', progress=False)
-aapl_close_px = aapl_data['Close']
+# Create data directory if it doesn't exist
+if not os.path.exists('data'):
+    os.makedirs('data')
+
+# Define the file path for cached data
+aapl_file_path = os.path.join('data', 'aapl_stock_data.csv')
+
+# Check if the file exists and load it, otherwise download
+if os.path.exists(aapl_file_path):
+    # Load data from file
+    aapl_data = pd.read_csv(aapl_file_path, index_col=0, parse_dates=True)
+    aapl_close_px = aapl_data['Close']
+else:
+    # Download data from yfinance
+    try:
+        aapl_data = yf.download('AAPL', start='2022-01-01', end='2024-11-01', progress=False)
+        
+        # Check if download was successful (non-empty dataframe)
+        if aapl_data.empty:
+            raise ValueError("Downloaded data is empty. Please check the ticker symbol and date range.")
+        
+        # Save to file for future use
+        aapl_data.to_csv(aapl_file_path)
+        aapl_close_px = aapl_data['Close']
+        
+    except Exception as e:
+        raise RuntimeError(f"Error downloading data from yfinance: {str(e)}")
+
 # Plot the closing prices
 plt = aapl_close_px.plot(label='AAPL', figsize=(10 ,3), ylabel='Price', title='AAPL Stock Price')
 ```
