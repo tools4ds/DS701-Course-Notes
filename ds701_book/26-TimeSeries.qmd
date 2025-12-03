@@ -346,7 +346,7 @@ Let's look at the distribution across years and months:
 
 ```{python}
 #| fig-align: center
-#| echo: false
+#| echo: true
 # Add normalized column for later use
 import matplotlib.pyplot as plt
 air_passengers['Normalized_Passengers'] = air_passengers.groupby('Year')['Number of Passengers'].transform(lambda x: x / x.iloc[0])
@@ -370,6 +370,8 @@ plt.show()
 ```
 
 **Left**: Trend is obvious. **Right**: July-August are peak travel months.
+
+> Box plot: median, Q1-Q3 Interquartile Range, Whiskers: $1.5\times \text{IQR}$
 
 ## Autocorrelation: The Key Diagnostic
 
@@ -598,7 +600,9 @@ plt.show()
 
 **Why do we care?**
 
-Most forecasting models **assume stationarity**. If your data has:
+Most forecasting models **assume stationarity**. 
+
+If your data has:
 
 - 📈 Trend → mean is changing
 - 📊 Growing variance → variance is changing  
@@ -623,7 +627,22 @@ Two standard tests (both in `statsmodels`):
 | **ADF** | Has unit root (non-stationary) | Stationary ✓ |
 | **KPSS** | Is stationary | Non-stationary ✗ |
 
-Use both — if they agree, you can trust the result!
+**ADF (Augmented Dickey-Fuller)**: Tests whether a "unit root" is present — a mathematical property that causes non-stationarity. The test includes lagged differences to handle autocorrelation. If p-value < 0.05, reject the null → evidence the series is **stationary**.
+
+**KPSS (Kwiatkowski-Phillips-Schmidt-Shin)**: Flips the hypothesis — assumes stationarity and tests for evidence against it. Checks stats on residuals of the trend-stationary series. If p-value < 0.05, reject the null → evidence the series is **non-stationary**.
+
+## Stationarity Tests Continued
+
+**Why use both?** They have opposite null hypotheses, so using them together provides stronger evidence:
+
+| ADF Result | KPSS Result | Conclusion |
+|------------|-------------|------------|
+| Reject (p<0.05) | Fail to reject | Stationary ✓ |
+| Fail to reject | Reject (p<0.05) | Non-stationary ✗ |
+| Both reject | Both reject | Trend-stationary (difference needed) |
+| Neither rejects | Neither rejects | Inconclusive — gather more data |
+
+> See course notes for worked examples of ADF and KPSS tests
 
 ::: {.content-visible when-profile="web"}
 
@@ -828,6 +847,8 @@ The light pink area shows the 95% confidence interval for the forecast.
 **AIC & BIC**: Balance fit vs. complexity
 
 $$\text{AIC} = T\log\left(\frac{\text{SSE}}{T}\right) + 2k \quad \text{(lower is better)}$$
+
+where $k$ is the number of parameters in the model.
 
 | Criterion | Penalizes complexity... |
 |-----------|------------------------|
