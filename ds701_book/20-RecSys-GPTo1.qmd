@@ -1,0 +1,290 @@
+---
+title: "20-Recommender-Systems"
+---
+
+# Introduction to Recommender Systems
+
+## Motivating Examples
+
+•	Netflix: Suggesting new movies or TV shows based on user’s watch history and ratings.
+•	Amazon: Recommending products based on user’s browsing and purchase history.
+•	YouTube: Suggesting videos a user might like based on their viewing history.
+•	Spotify: Creating playlists and recommending songs based on user’s music preferences.
+
+Discussion Prompt: Think about the recommender systems you encounter daily (e.g., social media feeds, shopping recommendations). How do they influence your decision-making?
+
+## Why Recommender Systems Matter
+
+•	Information Overload: With vast amounts of content (products, movies, articles), recommender systems help users find what is relevant.
+•	Personalization: Tailor user experiences to individual preferences.
+•	Business Value: Increase engagement and sales. For instance, a large percentage of Netflix’s watched content is driven by recommendations.
+
+Question for Class: Can you name some other domains where recommender systems might be useful besides entertainment and shopping?
+
+## Goals of This Lecture
+
+1. Understand the basic types of recommender systems.
+2. Learn about content-based filtering and collaborative filtering.
+3. Explore example algorithms like Matrix Factorization and SVD.
+4. Work through an example dataset.
+5. Discuss advanced and hybrid approaches.
+6. Encourage critical thinking on how to evaluate and improve recommenders.
+
+# Basic Approaches to Recommender Systems
+
+## Content-Based Filtering: Introduction
+
+•	Definition: Recommend items similar to those a user has liked in the past.
+•	How It Works: Uses item features and user profiles. If a user liked a particular item, the system finds items with similar features.
+•	Example: If a user likes sci-fi movies, recommend other sci-fi movies.
+
+Example Dataset: Imagine a dataset with movies and their genres. If a user likes “Inception” (Sci-Fi/Thriller), the system might recommend “The Matrix” (Sci-Fi) based on overlapping genres.
+
+## Content-Based Filtering: Steps
+
+1. Profile each item using features (genres, actors, author, etc.).
+2. Profile the user based on items they’ve liked.
+3. Recommend items whose features match the user’s profile.
+
+Example:
+•	User’s watched and liked movies: “Inception” (Sci-Fi, Thriller), “Interstellar” (Sci-Fi, Drama).
+•	Derived user profile: Genre preference - Sci-Fi, Thriller.
+•	Recommend items with similar genres like “Matrix” (Sci-Fi) or “Shutter Island” (Thriller).
+
+Discussion Prompt: What are some limitations of content-based filtering?
+
+## Limitations of Content-Based Filtering
+
+•	Feature Engineering: Requires carefully identified and extracted features.
+•	Lack of Diversity: Tends to recommend items similar to those already liked, possibly leading to a “filter bubble.”
+•	Cold Start Problem (Item): For new items with no features or feedback, it’s challenging to make recommendations.
+
+# Collaborative Filtering: Introduction
+
+## What is Collaborative Filtering?
+
+•	Definition: Recommending items based on the past behavior of users who are similar to the target user.
+•	Key Idea: Similar users have similar preferences. If user A and user B have a high similarity in terms of preferences, items liked by user B might be recommended to user A.
+
+Example: In a movie recommendation scenario:
+
+•	User A likes “Interstellar” and “Inception.”
+•	User B likes “Interstellar” and “The Martian.”
+•	Since both users like “Interstellar,” the system might recommend “Inception” to user B and “The Martian” to user A.
+
+## Collaborative Filtering Approaches
+
+1.	User-Based Collaborative Filtering:
+    * Finds users similar to the target user and recommends items liked by those similar users.
+2.	Item-Based Collaborative Filtering:
+    * Finds items that are similar to the items the user likes, then recommends those similar items.
+
+Discussion Prompt: Which approach might work better in a situation with millions of users and thousands of items?
+
+## User-Based Collaborative Filtering
+
+* How It Works:
+	1. Calculate similarity between users based on ratings or behavior.
+	2. Select top N similar users.
+	3. Aggregate items from those similar users and recommend them.
+
+Example:
+
+* Suppose we have user ratings for movies. For a target user who has rated some movies, we find other users with similar rating patterns. Items highly rated by these similar users are recommended.
+
+Class Exercise: Using a small movie ratings matrix, try to identify which users are similar and which movies would be recommended.
+
+## Item-Based Collaborative Filtering
+
+* How It Works:
+	1. Calculate similarity between items based on user ratings.
+	2. For an item the user has shown interest in, find similar items.
+	3. Recommend items that are similar to the ones the user likes.
+
+Example:
+* If a user has rated “Inception” highly, the system looks at other items that have been rated similarly by other users who liked “Inception.”
+
+Discussion Prompt: What might be the advantages or disadvantages of item-based vs. user-based collaborative filtering?
+
+## Similarity Measures
+
+* Common similarity measures used in collaborative filtering:
+	* Cosine Similarity
+	* Pearson Correlation
+	* Jaccard Similarity (for implicit feedback)
+
+Example:
+* If we have vectors of user ratings for two items, we can compute the cosine similarity. This gives us how similar the items are in terms of user ratings patterns.
+
+Class Exercise: Given two rating vectors [5, 4, 0, 1] and [4, 5, 0, 2], compute the cosine similarity.
+
+# Advanced Collaborative Filtering Techniques
+
+## Matrix Factorization: Introduction
+
+* Definition: A technique that decomposes the user-item interaction matrix into lower-dimensional latent factors.
+* Motivation: Exploit underlying structure in user-item interactions.
+* Famous Example: Netflix Prize used matrix factorization methods for recommendation.
+
+## Matrix Factorization: How It Works
+
+* The user-item matrix R (where R_{u,i} is the rating of user u for item i) is approximated by two latent factor matrices P and Q:
+* R ≈ P * Q^T
+* P is a |U| x k matrix, representing k latent factors for each user.
+* Q is a |I| x k matrix, representing k latent factors for each item.
+* The ratings are predicted by the dot product of these latent factor vectors.
+
+Example:
+
+* If we have 1000 users and 500 movies, we might factor it into 20 latent factors. Each user and movie is represented in this 20-dimensional space, capturing aspects like genre preferences.
+
+## Singular Value Decomposition (SVD)
+
+* Definition: A factorization of a matrix into three matrices: R = U * Σ * V^T.
+* In the context of recommender systems, SVD can be used to identify latent factors capturing underlying preferences.
+* Truncated SVD: For recommendation, we often use a truncated version to reduce complexity.
+
+Class Exercise:
+
+* If the user-item matrix is:
+
+| User\Item | Item1 | Item2 | Item3 |
+| ------- | ------- | ------- | ------- |
+| User1   |  5    |   0   |   4   |
+| User2   |  4    |   0   |   5   |
+| User3   |  1    |   5   |   0   |
+
+Compute the truncated SVD for this small matrix.
+
+## Implementing Matrix Factorization
+
+* Optimization Problem: Minimize the squared error between actual ratings and predicted ratings.
+
+$$
+min_{P, Q} \sum_{(u,i) \in R} (R_{u,i} - P_u^T Q_i)^2 + \text{regularization terms}
+$$
+
+* Stochastic Gradient Descent (SGD): Commonly used method to learn P and Q.
+* Regularization: Important to avoid overfitting.
+
+Discussion Prompt: Why might matrix factorization perform better than user-based or item-based collaborative filtering in some cases?
+
+# Practical Example with a Dataset
+
+## Example Dataset: MovieLens
+
+* MovieLens: A commonly used dataset for building and testing recommender systems.
+* Dataset Details:
+	* Users, Movies, and Ratings from 1 to 5.
+	* Also includes movie metadata like genres.
+
+Plan:
+* We’ll explore how to apply both content-based and collaborative filtering on this dataset.
+
+Class Discussion: If you were to recommend a movie to a user who only watched “Star Wars”, how would you proceed using each method?
+
+## Applying Content-Based Filtering to MovieLens
+
+* Step 1: Represent movies by their genres (and possibly actors, directors).
+* Step 2: If a user liked a set of movies, compute the average feature vector of those movies.
+* Step 3: Recommend movies whose feature vectors are most similar to the user’s profile vector.
+
+Example:
+* If the user liked “The Empire Strikes Back” (Sci-Fi, Adventure), we recommend other Sci-Fi, Adventure movies like “Interstellar” or “Indiana Jones”.
+
+## Applying Collaborative Filtering to MovieLens
+
+* User-Based Approach:
+	1. Find users similar to the target user based on ratings.
+	2. Recommend movies highly rated by these similar users.
+* Item-Based Approach:
+1. Find movies similar to the movies the user has rated highly.
+2. Recommend these similar movies.
+
+Example:
+* If the user rated “Star Wars” and “The Matrix” highly, the system finds other movies that are commonly liked by users who liked these two movies, such as “Inception” or “Lord of the Rings.”
+
+Class Exercise: Use the user-item matrix from MovieLens to predict a missing rating using item-based collaborative filtering.
+
+## Evaluating Recommender Systems
+
+* Accuracy Metrics:
+	* Mean Absolute Error (MAE)
+	* Root Mean Square Error (RMSE)
+* Rank-based Metrics:
+	* Precision@k
+	* Recall@k
+* Mean Average Precision (MAP)
+* Normalized Discounted Cumulative Gain (nDCG)
+
+Discussion Prompt: Besides accuracy, what other factors might be important when evaluating recommender systems?
+
+## Practical Concerns
+
+* Scalability: Large datasets with millions of users and items require efficient algorithms.
+* Sparsity: Often user-item interaction matrices are very sparse.
+* Cold Start: Difficulty making recommendations for new users (User Cold Start) or new items (Item Cold Start) with no history.
+
+Class Discussion: How can we tackle the cold start problem?
+
+# Advanced and Hybrid Approaches
+
+## Hybrid Recommender Systems
+
+* Definition: Combine content-based and collaborative filtering methods.
+* Motivation: Overcome limitations of each approach.
+* Content-based can handle new items (solves cold start for items).
+* Collaborative filtering can learn more nuanced user preferences.
+
+Example:
+* A hybrid approach may start by recommending items similar to those the user liked before (content-based), and refine recommendations by observing user feedback (collaborative filtering).
+
+Discussion Prompt: Can you think of ways to combine the two methods effectively?
+
+## Neural Network-based Approaches
+
+* Autoencoders: Used to learn latent representations of user-item interactions.
+* Neural Collaborative Filtering: Deep neural networks to model complex user-item interactions.
+* Graph Neural Networks: Model relationships in user-item graphs.
+
+Example:
+* Using an autoencoder to predict missing ratings from known ratings by compressing user preferences into a latent space.
+
+Class Discussion: What might be the advantages of using neural networks over traditional matrix factorization?
+
+## Graph-based Approaches
+
+* Social Recommender Systems: Use relationships in a social graph.
+* Trust-based Recommendations: If user A trusts user B, we can use user B’s preferences to inform recommendations for user A.
+
+Example:
+* If your friend likes a certain product, the system might be more likely to recommend it to you in a social shopping platform.
+
+Discussion Prompt: How can network or graph analyses be integrated into recommender systems?
+
+# Summary and Wrap-up
+
+## Key Takeaways
+
+* Content-Based Filtering: Recommends items similar to those the user liked before.
+* Collaborative Filtering: Uses preferences of similar users to make recommendations.
+* Matrix Factorization: Finds latent factors in user-item interactions.
+* Hybrid Approaches: Combine multiple methods to overcome individual limitations.
+
+## Final Thoughts
+
+* Recommender systems are crucial in helping users navigate large volumes of information and product choices.
+* The choice of method depends on data availability, domain, and specific objectives (e.g., accuracy, diversity, or serendipity).
+* Ongoing research in deep learning and graph-based methods is pushing the field forward.
+
+Question for Class: Reflect on the methods covered. Which method (or combination of methods) do you think would be most effective for a streaming music service and why?
+
+## Further Reading
+
+* Books:
+	* “Recommender Systems: The Textbook” by Charu C. Aggarwal.
+* Papers:
+	* “Matrix Factorization Techniques for Recommender Systems” by Yehuda Koren, Robert Bell, and Chris Volinsky.
+	* “Deep Neural Networks for YouTube Recommendations” by Paul Covington, Jay Adams, Emre Sargin.
+
+Class Discussion: Any questions about the topics covered today or how these methods can be applied to real-world datasets?

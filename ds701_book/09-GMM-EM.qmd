@@ -1,0 +1,213 @@
+---
+title: "GMM EM Algorithm"
+jupyter: python3
+---
+
+## A GMM Example
+
+Imagine you’re running a coffee shop, and you have data on your customers’ preferences
+for coffee. 
+
+Each customer likes a different blend of beans, which you can represent
+as a point in two dimensions: 
+
+* sweetness (x-axis) and 
+* acidity (y-axis). 
+
+Your goal is to identify three most popular blends (clusters) from a pile of
+customer reviews that provide noisy measurements of these two characteristics.
+
+This data could be generated synthetically by sampling from three Gaussian
+distributions, each representing a different coffee blend that your customers
+might like. The task for the students would be to uncover these hidden coffee
+blends using a GMM.
+
+For an intuitive way to explain Expectation-Maximization (EM):
+
+You can describe it as a two-step process that alternates between two roles:
+
+1.	Expectation Step (E-step): The model takes a guess about the likelihood that each customer belongs to each blend. At this point, it might not be sure, so it assigns probabilities (soft assignments) based on how close the customers’ preferences are to the different blends.
+2.	Maximization Step (M-step): The model then updates its guess about the actual parameters of the coffee blends—essentially adjusting the mean, variance, and proportion of customers for each blend, based on the soft assignments from the previous step.
+
+The EM algorithm is like refining a recipe: each time you taste-test (E-step) and then tweak the ingredients (M-step), the blend becomes more representative of what customers want.
+
+Let’s continue with the Python code for generating synthetic data representing the coffee preferences of your customers. After generating the data, we’ll implement the EM algorithm step-by-step.
+
+## Step 1: Generate synthetic data
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Set seed for reproducibility
+np.random.seed(42)
+
+# Means and covariances for three Gaussian distributions (coffee blends)
+means = np.array([[2, 3], [8, 7], [5, 10]])  # sweetness and acidity means
+covariances = [np.array([[1, 0.5], [0.5, 1]]),  # covariance matrix for blend 1
+               np.array([[1, -0.3], [-0.3, 1]]),  # covariance matrix for blend 2
+               np.array([[1, 0], [0, 1]])]  # covariance matrix for blend 3
+
+# Number of points in each cluster (representing customers)
+points_per_cluster = 100
+
+# Generate points from each Gaussian distribution
+X1 = np.random.multivariate_normal(means[0], covariances[0], points_per_cluster)
+X2 = np.random.multivariate_normal(means[1], covariances[1], points_per_cluster)
+X3 = np.random.multivariate_normal(means[2], covariances[2], points_per_cluster)
+
+# Combine all points into one dataset
+X = np.vstack((X1, X2, X3))
+```
+
+
+## Plot the synthetic dataset
+
+```{python}
+# Plot the synthetic dataset
+plt.scatter(X[:, 0], X[:, 1], s=30, color='b', label="Customers' coffee preferences")
+plt.title('Synthetic Coffee Preferences Dataset')
+plt.xlabel('Sweetness')
+plt.ylabel('Acidity')
+plt.legend()
+plt.show()
+```
+
+## Step 2: Implement the EM Algorithm
+
+Now that we have the data, we’ll implement the EM algorithm for a Gaussian Mixture Model. The algorithm involves two steps:
+
+1. Expectation (E-step): Estimate the probability that each data point belongs to each cluster based on current parameters (mean, covariance, and mixture weights).
+2. Maximization (M-step): Update the parameters (means, covariances, and mixture weights) based on the probabilities from the E-step.
+
+Here is the Python code to implement this step-by-step:
+
+```{python}
+from scipy.stats import multivariate_normal
+
+# Initialize parameters for the EM algorithm
+# We'll randomly select data points as the initial means
+# and initialize the covariances as identity matrices
+# and the weights as equal.
+def initialize_params(X, n_clusters):
+    np.random.seed(42)
+    n_samples, n_features = X.shape
+
+    # Randomly initialize means from the data
+    means = X[np.random.choice(n_samples, n_clusters, False)]
+    
+    # Initialize covariances as identity matrices
+    covariances = [np.eye(n_features) for _ in range(n_clusters)]
+    
+    # Initialize equal weights for the mixture components
+    weights = np.ones(n_clusters) / n_clusters
+
+    return means, covariances, weights
+
+# E-step: compute the responsibility (posterior probability that a point belongs to a cluster)
+def expectation_step(X, means, covariances, weights):
+    n_samples, n_clusters = X.shape[0], len(means)
+    responsibilities = np.zeros((n_samples, n_clusters))
+    
+    for k in range(n_clusters):
+        responsibilities[:, k] = weights[k] * multivariate_normal.pdf(X, means[k], covariances[k])
+    
+    # Normalize the responsibilities
+    responsibilities /= responsibilities.sum(axis=1, keepdims=True)
+    
+    return responsibilities
+
+# M-step: update the parameters based on the current responsibilities
+def maximization_step(X, responsibilities):
+    n_samples, n_clusters = responsibilities.shape
+    n_features = X.shape[1]
+    
+    # Initialize parameters
+    means = np.zeros((n_clusters, n_features))
+    covariances = []
+    weights = np.zeros(n_clusters)
+    
+    for k in range(n_clusters):
+        # Effective number of points assigned to cluster k
+        Nk = responsibilities[:, k].sum()
+        
+        # Update the means
+        means[k] = (X * responsibilities[:, k][:, np.newaxis]).sum(axis=0) / Nk
+        
+        # Update the covariance matrices
+        covariance_k = np.zeros((n_features, n_features))
+        for i in range(n_samples):
+            diff = (X[i] - means[k]).reshape(-1, 1)
+            covariance_k += responsibilities[i, k] * (diff @ diff.T)
+        covariances.append(covariance_k / Nk)
+        
+        # Update the weights (mixture proportions)
+        weights[k] = Nk / n_samples
+    
+    return means, covariances, weights
+
+# Log-likelihood calculation
+def log_likelihood(X, means, covariances, weights):
+    n_samples, n_clusters = X.shape[0], len(means)
+    log_likelihood = 0
+    
+    for i in range(n_samples):
+        temp = 0
+        for k in range(n_clusters):
+            temp += weights[k] * multivariate_normal.pdf(X[i], means[k], covariances[k])
+        log_likelihood += np.log(temp)
+    
+    return log_likelihood
+
+# EM algorithm
+def em_algorithm(X, n_clusters, n_iters=100, tol=1e-4):
+    # Initialize parameters
+    means, covariances, weights = initialize_params(X, n_clusters)
+    
+    log_likelihoods = []
+    
+    for i in range(n_iters):
+        # E-step
+        responsibilities = expectation_step(X, means, covariances, weights)
+        
+        # M-step
+        means, covariances, weights = maximization_step(X, responsibilities)
+        
+        # Compute log-likelihood
+        log_likelihood_value = log_likelihood(X, means, covariances, weights)
+        log_likelihoods.append(log_likelihood_value)
+        
+        # Check for convergence
+        if i > 0 and np.abs(log_likelihoods[-1] - log_likelihoods[-2]) < tol:
+            break
+    
+    return means, covariances, weights, responsibilities, log_likelihoods
+```
+
+## Step 3: Run the EM algorithm
+
+```{python}
+# Run the EM algorithm
+n_clusters = 3
+means, covariances, weights, responsibilities, log_likelihoods = em_algorithm(X, n_clusters)
+
+# Plot the final clusters and means
+plt.scatter(X[:, 0], X[:, 1], s=30, color='b', label="Data points")
+plt.scatter(means[:, 0], means[:, 1], s=100, color='r', label="Estimated Means", marker='x')
+plt.title('Clusters Found by Gaussian Mixture Model')
+plt.xlabel('Sweetness')
+plt.ylabel('Acidity')
+plt.legend()
+plt.show()
+```
+
+## Explanation
+
+1. Data Generation: We generated synthetic data by sampling points from three distinct Gaussian distributions, each representing a different coffee blend.
+2. Expectation Step: The algorithm calculates the soft assignments (responsibilities) for each point to each cluster.
+3. Maximization Step: The algorithm updates the parameters (means, covariances, and weights) to maximize the likelihood given the responsibilities.
+4. Convergence: The algorithm stops when the log-likelihood improvement is below a certain threshold.
+
+This code should provide a clear step-by-step implementation of the EM algorithm, and the final plot will show the clusters found by the algorithm.
+
+Let me know if you need further clarifications!

@@ -1,0 +1,388 @@
+---
+jupyter: python3
+---
+
+<a href="https://colab.research.google.com/github/udlbook/udlbook/blob/main/Notebooks/Chap08/8_4_High_Dimensional_Spaces.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+
+From [notebook 8.4](https://github.com/udlbook/udlbook/blob/main/Notebooks/Chap08/8_4_High_Dimensional_Spaces.ipynb)
+
+# **Notebook 8.4: High-dimensional spaces**
+
+This notebook investigates the strange properties of high-dimensional spaces as discussed in the notes at the end of chapter 8.
+
+Work through the cells below, running each cell in turn. In various places you will see the words "TO DO". Follow the instructions at these places and make predictions about what is going to happen or write code to complete the functions.
+
+Contact me at udlbookmail@gmail.com if you find any mistakes or have any suggestions.
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.special as sci
+```
+
+# How close are points in high dimensions?
+
+In this part of the notebook, we investigate how close random points are in 2D, 100D, and 1000D.   In each case, we generate 1000 points and calculate the Euclidean distance between each pair.  
+
+```{python}
+# Fix the random seed so we all have the same random numbers
+np.random.seed(0)
+
+n_data = 1000
+
+# Create 1000 data examples (columns) each with 2 dimensions (rows)
+n_dim = 2
+x_2D = np.random.normal(size=(n_dim,n_data))
+
+# Create 1000 data examples (columns) each with 3 dimensions (rows)
+n_dim = 3
+x_3D = np.random.normal(size=(n_dim,n_data))
+
+# Create 1000 data examples (columns) each with 100 dimensions (rows)
+n_dim = 100
+x_100D = np.random.normal(size=(n_dim,n_data))
+
+# Create 1000 data examples (columns) each with 1000 dimensions (rows)
+n_dim = 1000
+x_1000D = np.random.normal(size=(n_dim,n_data))
+```
+
+```{python}
+print(x_2D.shape)
+print(x_3D.shape)
+print(x_100D.shape)
+print(x_1000D.shape)
+```
+
+```{python}
+# scatter plot of the 2D data
+plt.scatter(x_2D[0,:], x_2D[1,:])
+plt.title('2D data')
+plt.show()
+```
+
+```{python}
+# make an interactive scatter plot of the 3D data
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(x_3D[0,:], x_3D[1,:], x_3D[2,:])
+plt.title('3D data')
+plt.show()
+```
+
+```{python}
+from scipy.spatial import distance
+```
+
+```{python}
+def distance_ratio(x):
+  # TODO -- replace the two lines below to calculate the largest and smallest Euclidean distance between
+  # the data points in the columns of x.  DO NOT include the distance between the data point
+  # and itself (which is obviously zero)
+
+  ### BEGIN SOLUTION
+  smallest_dist = np.inf
+  largest_dist = 0
+  for i in range(x.shape[1]):
+    for j in range(x.shape[1]):
+      if i != j:
+        dist = np.linalg.norm(x[:,i] - x[:,j], ord=2) # ord=2 for Euclidean, ord=1 for Manhattan
+        # dist = distance.cosine(x[:,i].flatten(), x[:,j].flatten())
+        if dist < smallest_dist:
+          smallest_dist = dist
+        if dist > largest_dist:
+          largest_dist = dist
+  ### END SOLUTION
+
+  print(f"smallest_dist = {smallest_dist}, largest_dist = {largest_dist}")
+  # Calculate the ratio and return
+  dist_ratio = largest_dist / smallest_dist
+  return dist_ratio
+```
+
+```{python}
+dist_ratio_2d = distance_ratio(x_2D)
+print('Ratio of largest to smallest distance 2D: %3.3f'%(dist_ratio_2d))
+
+dist_ratio_3d = distance_ratio(x_3D)
+print('Ratio of largest to smallest distance 3D: %3.3f'%(dist_ratio_3d))
+
+dist_ratio_100d = distance_ratio(x_100D)
+print('Ratio of largest to smallest distance 100D: %3.3f'%(dist_ratio_100d))
+
+dist_ratio_1000d = distance_ratio(x_1000D)
+print('Ratio of largest to smallest distance 1000D: %3.3f'%(dist_ratio_1000d))
+```
+
+```{python}
+plt.scatter([2,3,100,1000], [dist_ratio_2d, dist_ratio_3d, dist_ratio_100d, dist_ratio_1000d])
+plt.plot([2,3,100,1000], [dist_ratio_2d, dist_ratio_3d, dist_ratio_100d, dist_ratio_1000d], '--', color='lightgray')
+plt.xscale('log')
+plt.title('Euclidean Distance ratio')
+plt.xlabel('Dimension')
+plt.ylabel('Distance ratio')
+plt.show()
+```
+
+If you did this right, you will see that the distance between the nearest and farthest two points in high dimensions is almost the same.  
+
+```{python}
+import numpy as np
+
+# Assuming x_1000D is your 2D array
+# For example:
+# x_1000D = np.random.rand(1000, 100)
+
+# Pick any two columns
+col1 = x_2D[:, 0]
+col2 = x_2D[:, 20]
+
+# Compute their dot product
+dot_product = np.dot(col1, col2)
+
+print(dot_product)
+```
+
+# Volume of a hypersphere
+
+In the second part of this notebook we calculate the volume of a hypersphere of radius 0.5 (i.e., of diameter 1) as a function of the radius.  Note that you you can check your answer by doing the calculation for 2D using the standard formula for the area of a circle and making sure it matches.
+
+The equation is
+
+$$
+V_n(R) = \frac{\pi^{n/2}}{\Gamma\bigl(\tfrac n2 + 1\bigr)}R^n,
+$$
+where $\Gamma$  is Euler's gamma function, $\Gamma(n) = (n - 1)!$ for all positive integers $n$. 
+
+```{python}
+def volume_of_hypersphere(diameter, dimensions):
+  # Formula given in Problem 8.7 of the book or see https://en.wikipedia.org/wiki/Volume_of_an_n-ball#Formulas
+  # You will need sci.gamma()
+  # Check out:    https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.gamma.html
+  # Also use this value for pi
+  pi = np.pi
+
+  ### BEGIN SOLUTION
+  radius = diameter / 2
+  #print("dimensions: ", dimensions)
+  #print("pi ** (dimensions / 2) = ", pi ** (dimensions / 2))
+  #print("sci.gamma(dimensions / 2 + 1) = ", sci.gamma(dimensions / 2 + 1))
+  #print("radius ** dimensions = ", radius ** dimensions)
+  volume = (pi ** (dimensions / 2)) / (sci.gamma(dimensions / 2 + 1)) * (radius ** dimensions)
+  ### END SOLUTION
+
+  return volume
+```
+
+```{python}
+diameter = 2.0
+vols = []
+for c_dim in range(1,21):
+  vols.append(volume_of_hypersphere(diameter, c_dim))
+  print("Volume of unit radius hypersphere in %d dimensions is %3.3f"%(c_dim, volume_of_hypersphere(diameter, c_dim)))
+```
+
+```{python}
+# plot vols
+plt.scatter(range(1,21), vols)
+plt.xlabel('Dimensions')
+plt.ylabel('Volume')
+plt.title('Volume of unit radius hypersphere')
+plt.show()
+```
+
+```{python}
+diameter = 1.0
+vols = []
+for c_dim in range(1,21):
+  vols.append(volume_of_hypersphere(diameter, c_dim))
+  print("Volume of unit radius hypersphere in %d dimensions is %3.3f"%(c_dim, volume_of_hypersphere(diameter, c_dim)))
+```
+
+```{python}
+# plot vols
+plt.scatter(range(1,21), vols)
+plt.xlabel('Dimensions')
+plt.ylabel('Volume')
+plt.title('Volume of unit diameter hypersphere')
+plt.show()
+```
+
+You should see that the volume decreases to almost nothing in high dimensions.  All of the volume is in the corners of the unit hypercube (which always has volume 1).
+
+# Proportion of hypersphere in outer shell
+
+In the third part of the notebook you will calculate what proportion of the volume of a hypersphere is in the outer 1% of the radius/diameter.  Calculate the volume of a hypersphere and then the volume of a hypersphere with 0.99 of the radius and then figure out the ratio.  
+
+```{python}
+def get_prop_of_volume_in_outer_1_percent(dimension):
+  
+  ### BEGIN SOLUTION
+  outer_diameter = 1.0
+  outer_volume = volume_of_hypersphere(outer_diameter, dimension)
+  inner_diameter = 0.99
+  inner_volume = volume_of_hypersphere(inner_diameter, dimension)
+  proportion = (outer_volume - inner_volume) / outer_volume
+  ### END SOLUTION
+
+  # print(f"Outer volume: {outer_volume}, Inner volume: {inner_volume}")
+  return proportion
+```
+
+```{python}
+# While we're here, let's look at how much of the volume is in the outer 1% of the radius
+propvols = []
+for c_dim in [1,2,10,20,50,100,150,200,250,300]:
+  propvols.append(get_prop_of_volume_in_outer_1_percent(c_dim))
+  print('Proportion of volume in outer 1 percent of radius in %d dimensions =%3.3f'%(c_dim, get_prop_of_volume_in_outer_1_percent(c_dim)))
+```
+
+```{python}
+# plot propvols
+plt.scatter([1,2,10,20,50,100,150,200,250,300], propvols)
+plt.xlabel('Dimensions')
+plt.ylabel('Proportion of volume in outer 1%')
+plt.title('Proportion of volume in outer 1% of diameter of hypersphere')
+plt.show()
+```
+
+You should see see that by the time we get to 300 dimensions most of the volume is in the outer 1 percent. <br><br>
+
+The conclusion of all of this is that in high dimensions you should be sceptical of your intuitions about how things work.  I have tried to visualize many things in one or two dimensions in the book, but you should also be sceptical about these visualizations!
+
+
+
+# Distance ratios
+
+Some experiments comparing the closest/farthest distance ratios for different metrics.
+
+## Closest/farthest distance ratios
+
+Define a function to calculate the ratio of the largest to smallest distance between points in a dataset.
+
+```{python}
+from scipy.spatial import distance
+def distance_ratio(x, metric='euclidean'):
+
+    if metric == 'euclidean':
+        ord = 2
+    elif metric == 'manhattan':
+        ord = 1
+    elif metric == 'cosine':
+        pass
+    else:
+        raise ValueError(f"Metric {metric} not supported")
+
+    smallest_dist = np.inf
+    largest_dist = 0
+    for i in range(x.shape[0]):
+        for j in range(i + 1, x.shape[0]): # start from i+1 to avoid redundant calcuations
+            if i != j:
+                if metric == 'euclidean' or metric == 'manhattan':
+                    dist = np.linalg.norm(x[i,:] - x[j,:], ord=ord) 
+                elif metric == 'cosine':
+                    dist = distance.cosine(x[i,:].flatten(), x[j,:].flatten())
+            if dist < smallest_dist:
+              smallest_dist = dist
+            if dist > largest_dist:
+              largest_dist = dist
+
+    print(f"smallest_dist = {smallest_dist}, largest_dist = {largest_dist}")
+
+    # Calculate the ratio and return
+    dist_ratio = largest_dist / smallest_dist
+    return dist_ratio
+```
+
+And then calculate the ratio for each dataset.
+
+```{python}
+dist_ratio_2d = distance_ratio(x_2D)
+print('Ratio of largest to smallest distance 2D: %3.3f'%(dist_ratio_2d))
+
+dist_ratio_3d = distance_ratio(x_3D)
+print('Ratio of largest to smallest distance 3D: %3.3f'%(dist_ratio_3d))
+
+dist_ratio_100d = distance_ratio(x_100D)
+print('Ratio of largest to smallest distance 100D: %3.3f'%(dist_ratio_100d))
+
+dist_ratio_1000d = distance_ratio(x_1000D)
+print('Ratio of largest to smallest distance 1000D: %3.3f'%(dist_ratio_1000d))
+```
+
+---
+
+```{python}
+plt.scatter([2,3,100,1000], [dist_ratio_2d, dist_ratio_3d, dist_ratio_100d, dist_ratio_1000d])
+plt.plot([2,3,100,1000], [dist_ratio_2d, dist_ratio_3d, dist_ratio_100d, dist_ratio_1000d], '--', color='lightgray')
+plt.xscale('log')
+plt.title('Euclidean Distance ratio')
+plt.xlabel('Dimension')
+plt.ylabel('Distance ratio')
+plt.show()
+```
+
+
+---
+```{python}
+euc_dist_ratios = []
+euc_dist_ratios.append(distance_ratio(x_2D))
+print('Ratio of largest to smallest distance 2D: %3.3f'%(euc_dist_ratios[0]))
+
+euc_dist_ratios.append(distance_ratio(x_3D))
+print('Ratio of largest to smallest distance 3D: %3.3f'%(euc_dist_ratios[1]))
+
+euc_dist_ratios.append(distance_ratio(x_100D))
+print('Ratio of largest to smallest distance 100D: %3.3f'%(euc_dist_ratios[2]))
+
+euc_dist_ratios.append(distance_ratio(x_1000D))
+print('Ratio of largest to smallest distance 1000D: %3.3f'%(euc_dist_ratios[3]))
+```
+
+```{python}
+man_dist_ratios = []
+man_dist_ratios.append(distance_ratio(x_2D, metric='manhattan'))
+print('Ratio of largest to smallest distance 2D: %3.3f'%(man_dist_ratios[0]))
+
+man_dist_ratios.append(distance_ratio(x_3D, metric='manhattan'))
+print('Ratio of largest to smallest distance 3D: %3.3f'%(man_dist_ratios[1]))
+
+man_dist_ratios.append(distance_ratio(x_100D, metric='manhattan'))
+print('Ratio of largest to smallest distance 100D: %3.3f'%(man_dist_ratios[2]))
+
+man_dist_ratios.append(distance_ratio(x_1000D, metric='manhattan'))
+print('Ratio of largest to smallest distance 1000D: %3.3f'%(man_dist_ratios[3]))
+```
+
+```{python}
+cos_dist_ratios = []
+cos_dist_ratios.append(distance_ratio(x_2D, metric='cosine'))
+print('Ratio of largest to smallest distance 2D: %3.3f'%(cos_dist_ratios[0]))
+
+cos_dist_ratios.append(distance_ratio(x_3D, metric='cosine'))
+print('Ratio of largest to smallest distance 3D: %3.3f'%(cos_dist_ratios[1]))
+
+cos_dist_ratios.append(distance_ratio(x_100D, metric='cosine'))
+print('Ratio of largest to smallest distance 100D: %3.3f'%(cos_dist_ratios[2]))
+
+cos_dist_ratios.append(distance_ratio(x_1000D, metric='cosine'))
+print('Ratio of largest to smallest distance 1000D: %3.3f'%(cos_dist_ratios[3]))
+```
+---
+
+```{python}
+import matplotlib.pyplot as plt
+
+plt.scatter([2,3,100,1000], euc_dist_ratios, label='Euclidean')
+plt.plot([2,3,100,1000], euc_dist_ratios, '--', color='lightgray')
+
+plt.scatter([2,3,100,1000], man_dist_ratios, label='Manhattan', color='orange')
+plt.plot([2,3,100,1000], man_dist_ratios, '--', color='orange')
+
+plt.xscale('log')
+plt.legend()
+plt.title('Distance ratio')
+plt.xlabel('Dimension')
+plt.ylabel('Distance ratio')
+plt.show()
+```
