@@ -1,0 +1,467 @@
+---
+title: "Causal Inference I: Correlation, Causation, and Counterfactuals"
+jupyter: python3
+bibliography: references.bib
+---
+
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/31-Causal-Inference-I.ipynb)
+
+So far in this course we have built tools that are very good at answering one kind of
+question: **given what I observe, what should I predict?** Clustering, regression,
+classification, and neural networks all learn associations in data.
+
+But many of the questions we actually care about as data scientists are of a different
+kind. They are questions about **what would happen if we acted**:
+
+::: {.incremental}
+* If we *change* the checkout button from blue to green, will more people buy?
+* If a patient *takes* this drug, will they recover faster?
+* If a student *enrolls* in the tutoring program, will their grade go up?
+* If the city *raises* the minimum wage, will employment fall?
+:::
+
+::: {.fragment}
+These are **causal** questions, and — as we will see — no amount of predictive accuracy
+answers them by itself.
+:::
+
+::: {.content-visible when-profile="slides"}
+## Lecture Overview
+
+In this first lecture on causal inference we cover:
+
+:::: {.incremental}
+- prediction vs. intervention: two different questions,
+- why *correlation is not causation*,
+- the potential outcomes (Neyman–Rubin) framework,
+- the fundamental problem of causal inference,
+- confounding and Simpson's paradox,
+- randomized controlled trials (the "gold standard").
+::::
+:::
+
+## A motivating example {.smaller}
+
+A hospital analytics team fits a model on patient records and finds a strong,
+statistically significant relationship:
+
+> Patients who **visit the hospital** are *more* likely to die within the year than
+> patients who do not.
+
+::: {.fragment}
+Should we conclude that hospitals *cause* death and recommend people avoid them?
+:::
+
+::: {.fragment}
+Of course not. Sick people go to hospitals. The hospital visit is **associated** with
+death because both are driven by a common cause — being sick.
+:::
+
+::: {.fragment}
+The model is a perfectly good *predictor* ("I see a hospital visit, I predict higher
+mortality") and a catastrophically bad *guide to action* ("close the hospitals").
+This gap between **prediction** and **intervention** is the entire subject of these two
+lectures. [@angrist2009mostly]
+:::
+
+## Two different questions
+
+::: {.content-hidden when-profile="slides"}
+It is worth being precise about the distinction.
+:::
+
+:::: {.columns}
+::: {.column width="50%"}
+**Prediction (association)**
+
+$$ P(Y \mid X = x) $$
+
+"Among people I *observe* to have $X = x$, what is the distribution of $Y$?"
+
+This is what supervised learning estimates.
+:::
+::: {.column width="50%"}
+**Intervention (causation)**
+
+$$ P(Y \mid do(X = x)) $$
+
+"If I *set* $X = x$ for everyone, what is the distribution of $Y$?"
+
+This is what a decision-maker needs. [@pearl2009causality]
+:::
+::::
+
+::: {.fragment}
+In general $P(Y \mid X=x) \neq P(Y \mid do(X=x))$. The whole game is figuring out when —
+and how — we can recover the second from data that only shows us the first.
+:::
+
+## The ladder of causation
+
+Judea Pearl describes three "rungs" of reasoning [@pearl2018why]:
+
+| Rung | Question | Example |
+|------|----------|---------|
+| 1. **Association** | What is? | *Seeing* — customers who buy diapers also buy beer |
+| 2. **Intervention** | What if I do? | *Doing* — if I discount diapers, will beer sales rise? |
+| 3. **Counterfactual** | What if I had? | *Imagining* — would this patient have recovered had they not taken the drug? |
+
+: {tbl-colwidths="[18,22,60]"}
+
+::: {.fragment}
+Standard machine learning lives almost entirely on **Rung 1**. Causal inference is about
+climbing to Rungs 2 and 3.
+:::
+
+## Correlation is not causation
+
+This slogan is famous, and yet the mistakes it warns about are everywhere.
+
+Consider two variables measured across the summer months:
+
+::: {.incremental}
+* **Ice cream sales** and
+* **drowning deaths**
+:::
+
+::: {.fragment}
+These are strongly, positively correlated. Does ice cream cause drowning?
+:::
+
+::: {.fragment}
+No — a third variable, **hot weather**, drives both. Hot days increase ice cream sales
+*and* send more people swimming. Temperature is a **confounder**.
+:::
+
+## Confounding, visualized
+
+```{python}
+#| echo: false
+#| fig-align: center
+import numpy as np
+import matplotlib.pyplot as plt
+
+rng = np.random.default_rng(701)
+n = 200
+
+# Temperature is the common cause (confounder)
+temp = rng.uniform(60, 100, n)                       # degrees F
+ice_cream = 2.0 * temp + rng.normal(0, 15, n)        # sales
+drownings = 0.10 * temp + rng.normal(0, 2.0, n)      # deaths
+# NOTE: ice cream does NOT appear in the equation for drownings.
+
+fig, ax = plt.subplots(1, 2, figsize=(10, 4))
+
+ax[0].scatter(ice_cream, drownings, c=temp, cmap="coolwarm", s=25)
+ax[0].set_xlabel("Ice cream sales")
+ax[0].set_ylabel("Drownings")
+ax[0].set_title("Naive view: strong positive correlation")
+
+# Look within a narrow temperature band ("hold temperature fixed")
+band = (temp > 78) & (temp < 82)
+ax[1].scatter(ice_cream[band], drownings[band], c="gray", s=35)
+ax[1].set_xlabel("Ice cream sales")
+ax[1].set_ylabel("Drownings")
+ax[1].set_title("Within 78–82°F: association vanishes")
+
+plt.tight_layout()
+plt.show()
+```
+
+::: {.fragment}
+Once we **hold the confounder fixed** (look only at days near 80°F), the relationship
+between ice cream and drowning disappears. There was never a causal link.
+:::
+
+## Where do spurious associations come from?
+
+A correlation between $X$ and $Y$ can arise for several reasons — only one of which is
+"$X$ causes $Y$":
+
+::: {.incremental}
+* **$X$ causes $Y$** (the thing we want),
+* **$Y$ causes $X$** (reverse causation),
+* **a confounder $Z$ causes both** $X$ and $Y$ (ice cream / drowning),
+* **selection / collider bias** — conditioning on a common effect (Lecture II),
+* **pure chance** — with enough variables, some will correlate by luck.[^spurious]
+:::
+
+[^spurious]: See Tyler Vigen's *Spurious Correlations* (<https://tylervigen.com/spurious-correlations>) for entertaining examples, e.g. US cheese consumption vs. deaths by bedsheet entanglement.
+
+## The potential outcomes framework
+
+To reason precisely, we use the **Neyman–Rubin potential outcomes** model
+[@splawa1990application; @rubin1974estimating].
+
+For each unit $i$ (a patient, user, student) and a binary **treatment** $T_i \in \{0,1\}$:
+
+::: {.incremental}
+* $Y_i(1)$ — the outcome we *would* see if unit $i$ were treated,
+* $Y_i(0)$ — the outcome we *would* see if unit $i$ were **not** treated.
+:::
+
+::: {.fragment}
+The **individual treatment effect** is
+$$ \tau_i = Y_i(1) - Y_i(0). $$
+:::
+
+::: {.fragment}
+These are called *potential* outcomes because, for any given unit, only **one** of them
+is ever realized.
+:::
+
+## The fundamental problem of causal inference
+
+We only ever observe the outcome corresponding to the treatment the unit actually received:
+
+$$ Y_i^{\text{obs}} = T_i\, Y_i(1) + (1 - T_i)\, Y_i(0). $$
+
+::: {.fragment}
+The other potential outcome — the **counterfactual** — is missing.
+:::
+
+| Unit | $T_i$ | $Y_i(0)$ | $Y_i(1)$ | $\tau_i$ |
+|:----:|:-----:|:--------:|:--------:|:--------:|
+| Ann  | 1 | **?** | 7 | ? |
+| Bob  | 0 | 4 | **?** | ? |
+| Cara | 1 | **?** | 9 | ? |
+| Dan  | 0 | 3 | **?** | ? |
+
+::: {.fragment}
+We can never compute $\tau_i$ for a single individual. Causal inference is fundamentally
+a **missing data problem** [@imbens2015causal].
+:::
+
+## From individuals to averages
+
+Since individual effects are unknowable, we target **population averages**. The key
+estimand is the **Average Treatment Effect**:
+
+$$ \text{ATE} = \mathbb{E}[\,Y(1) - Y(0)\,] = \mathbb{E}[Y(1)] - \mathbb{E}[Y(0)]. $$
+
+::: {.fragment}
+Related quantities you will meet:
+
+:::: {.incremental}
+- **ATT** — the effect *on the treated*, $\mathbb{E}[Y(1) - Y(0)\mid T=1]$,
+- **CATE** — the *conditional* effect for a subgroup, $\mathbb{E}[Y(1) - Y(0)\mid X=x]$
+  (the basis of "heterogeneous treatment effects" and uplift modeling).
+::::
+:::
+
+## Why we can't just compare treated vs. untreated
+
+The tempting estimator is the **naive difference in means**:
+
+$$ \underbrace{\mathbb{E}[Y \mid T=1] - \mathbb{E}[Y \mid T=0]}_{\text{what we can measure}}. $$
+
+::: {.fragment}
+Add and subtract the missing counterfactual $\mathbb{E}[Y(0)\mid T=1]$ to decompose it:
+
+$$
+\underbrace{\mathbb{E}[Y(1)\mid T{=}1] - \mathbb{E}[Y(0)\mid T{=}0]}_{\text{naive difference}}
+= \underbrace{\text{ATT}}_{\text{causal}}
++ \underbrace{\mathbb{E}[Y(0)\mid T{=}1] - \mathbb{E}[Y(0)\mid T{=}0]}_{\text{selection bias}}.
+$$
+:::
+
+::: {.fragment}
+The **selection bias** term is nonzero whenever treated and untreated units would have
+differed *even without treatment* — exactly the hospital example. Our job is to make that
+term vanish.
+:::
+
+## Confounding in numbers: a kidney stone study {.smaller}
+
+A famous real study compared two treatments for kidney stones
+[@charig1986comparison]. Here are the recovery rates:
+
+| | Treatment A (surgery) | Treatment B (less invasive) |
+|:--|:--:|:--:|
+| **Small stones** | 81/87 = **93%** | 234/270 = **87%** |
+| **Large stones** | 192/263 = **73%** | 55/80 = **69%** |
+| **Overall** | 273/350 = **78%** | 289/350 = **83%** |
+
+::: {.fragment}
+Treatment A wins for **small** stones **and** for **large** stones — yet Treatment B wins
+**overall**. This reversal is **Simpson's paradox**.
+:::
+
+## What is going on?
+
+```{python}
+#| echo: true
+# Recovery counts (successes, total) by treatment and stone size
+data = {
+    "A": {"small": (81, 87),  "large": (192, 263)},
+    "B": {"small": (234, 270), "large": (55, 80)},
+}
+
+for tx in ("A", "B"):
+    s_succ, s_tot = data[tx]["small"]
+    l_succ, l_tot = data[tx]["large"]
+    overall = (s_succ + l_succ) / (s_tot + l_tot)
+    print(f"Treatment {tx}: small={s_succ/s_tot:.0%}, "
+          f"large={l_succ/l_tot:.0%}, overall={overall:.0%}")
+```
+
+::: {.fragment}
+**Stone size is a confounder.** Doctors gave the risky Treatment A to the *hard* (large-stone)
+cases and Treatment B to the *easy* (small-stone) cases. The overall numbers mix effect
+with case-mix.
+:::
+
+## Which number should we trust?
+
+::: {.incremental}
+* The **within-stratum** comparisons hold the confounder (stone size) fixed, so they
+  reflect the treatment effect. **Treatment A is better.**
+* The **overall** comparison is contaminated by selection bias.
+:::
+
+::: {.fragment}
+The paradox is not a mathematical curiosity — it is a warning: **aggregated associations
+can point the opposite direction from the truth.** Deciding *which* variables to adjust
+for is itself a causal question (Lecture II).
+:::
+
+## A second real example: Berkeley admissions
+
+In 1973, UC Berkeley graduate admissions data showed [@bickel1975sex]:
+
+::: {.incremental}
+* **Overall:** men were admitted at a noticeably *higher* rate than women — suggesting bias.
+* **Within almost every department:** women were admitted at an equal or slightly *higher*
+  rate.
+:::
+
+::: {.fragment}
+The confounder was **department choice**: women applied disproportionately to more
+competitive departments with low admission rates. Same paradox, same lesson.
+:::
+
+## The gold standard: randomized experiments
+
+How do we break confounding by design? **Randomly assign** the treatment.
+
+::: {.fragment}
+If a coin flip decides $T_i$, then treatment is *statistically independent* of the
+potential outcomes:
+$$ \{Y_i(0), Y_i(1)\} \perp\!\!\!\perp T_i. $$
+:::
+
+::: {.fragment}
+Independence kills the selection-bias term, because the treated and untreated groups are —
+in expectation — identical in every respect (measured *and* unmeasured) except the treatment:
+$$ \mathbb{E}[Y(0)\mid T{=}1] = \mathbb{E}[Y(0)\mid T{=}0]. $$
+:::
+
+::: {.fragment}
+So the naive difference in means becomes an **unbiased estimate of the ATE**
+[@imbens2015causal].
+:::
+
+## Randomization removes confounding {.smaller}
+
+```{python}
+#| echo: false
+#| fig-align: center
+import numpy as np
+import matplotlib.pyplot as plt
+
+rng = np.random.default_rng(1)
+n = 2000
+severity = rng.uniform(0, 1, n)          # a confounder: how sick each patient is
+
+# TRUE treatment effect is +5 for everyone
+def outcomes(T, severity):
+    return 50 + 5 * T - 30 * severity + rng.normal(0, 3, len(T))
+
+# Observational: sicker patients are MORE likely to get the drug
+p_treat_obs = severity
+T_obs = (rng.uniform(0, 1, n) < p_treat_obs).astype(int)
+Y_obs = outcomes(T_obs, severity)
+naive_obs = Y_obs[T_obs == 1].mean() - Y_obs[T_obs == 0].mean()
+
+# Randomized: coin flip, independent of severity
+T_rct = (rng.uniform(0, 1, n) < 0.5).astype(int)
+Y_rct = outcomes(T_rct, severity)
+naive_rct = Y_rct[T_rct == 1].mean() - Y_rct[T_rct == 0].mean()
+
+fig, ax = plt.subplots(figsize=(7, 3.2))
+ax.bar(["True effect", "Observational\n(confounded)", "Randomized\n(RCT)"],
+       [5, naive_obs, naive_rct],
+       color=["#2c7fb8", "#d95f02", "#1b9e77"])
+ax.axhline(5, ls="--", c="gray")
+ax.set_ylabel("Estimated treatment effect")
+for i, v in enumerate([5, naive_obs, naive_rct]):
+    ax.text(i, v + 0.3, f"{v:.1f}", ha="center")
+plt.tight_layout()
+plt.show()
+```
+
+The true effect is $+5$. The **observational** estimate is badly biased (sick patients both
+got the drug *and* had worse outcomes). The **randomized** estimate recovers the truth.
+
+## RCTs in the wild
+
+Randomized experiments are everywhere once you look:
+
+::: {.incremental}
+* **Medicine** — randomized clinical trials for drug approval,
+* **Tech** — *A/B tests* are RCTs for product changes (button colors, ranking algorithms),
+* **Economics & policy** — randomized rollouts of cash transfers, job training,
+* **Agriculture** — R. A. Fisher's randomized field trials, where it all began.
+:::
+
+::: {.fragment}
+When you *can* randomize, do it. But often you cannot — for cost, ethics, or because the
+"treatment" already happened. That is the subject of **Lecture II**.
+:::
+
+::: {.content-visible when-profile="slides"}
+## 🎯 Quick check: think–pair–share (5 min)
+
+For each headline, name the most likely **confounder** and state the correct causal caveat.
+
+:::: {.incremental}
+1. "People who take vitamins live longer."
+2. "Students who own more books get higher test scores."
+3. "Cities with more police have more crime."
+4. "Coffee drinkers have higher rates of heart disease."
+::::
+
+**Turn to a neighbor**, pick the trickiest one, and be ready to share your reasoning.
+:::
+
+## Recap
+
+::: {.incremental}
+* **Prediction $\neq$ intervention**: $P(Y\mid X)$ is not $P(Y\mid do(X))$.
+* Correlation can arise from causation, reverse causation, **confounding**, selection, or chance.
+* **Potential outcomes** $Y(1), Y(0)$ define the individual effect $\tau_i$; we can never
+  observe both — the *fundamental problem of causal inference*.
+* We therefore estimate averages like the **ATE**, and the naive difference in means
+  $=$ causal effect $+$ **selection bias**.
+* **Confounding** produces Simpson's paradox; adjusting for the right variable can reverse
+  a conclusion.
+* **Randomization** makes treatment independent of potential outcomes, removing bias — the
+  gold standard.
+:::
+
+::: {.fragment}
+**Next:** when you cannot randomize, how do causal graphs tell you what to adjust for — and
+what *not* to?
+:::
+
+## References
+
+- [*Causal Inference: What If*](https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/) — Hernán & Robins (free PDF)
+- [*The Book of Why*](http://bayes.cs.ucla.edu/WHY/) — Pearl & Mackenzie (popular intro)
+- [*Causal Inference: The Mixtape*](https://mixtape.scunning.com/) — Cunningham (free online)
+- [*Mastering 'Metrics*](https://www.masteringmetrics.com/) — Angrist & Pischke
+
+## Bibliography
+
+::: {#refs}
+:::
