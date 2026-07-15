@@ -52,6 +52,8 @@
     user-select: none;
   }
   button:hover, .seg:hover { background: #2b3c66; }
+  input[type="range"] { width: 96px; accent-color: var(--accent); cursor: pointer; vertical-align: middle; }
+  .slider-val { width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
   .seg-wrap { display: inline-flex; border: 1px solid var(--panel-border); border-radius: 7px; overflow: hidden; }
   .seg-wrap .seg { border: none; border-radius: 0; background: #1b2540; }
   .seg-wrap .seg.active { background: var(--accent); color: #0b1220; font-weight: 700; }
@@ -114,6 +116,27 @@
         <div class="seg active" data-orient="TB">Top → Bottom</div>
         <div class="seg" data-orient="LR">Left → Right</div>
       </div>
+    </div>
+    <div class="sep"></div>
+    <div class="group">
+      <span class="hint">Spring</span>
+      <input type="range" id="springScale" min="0.3" max="2.5" step="0.05" value="1" />
+      <span class="hint slider-val" id="springVal">1.00×</span>
+    </div>
+    <div class="group">
+      <span class="hint">Repel · same area</span>
+      <input type="range" id="repelIntra" min="0.2" max="12" step="0.1" value="1" />
+      <span class="hint slider-val" id="repelIntraVal">1.00×</span>
+    </div>
+    <div class="group">
+      <span class="hint">Repel · diff area</span>
+      <input type="range" id="repelInter" min="0.2" max="16" step="0.1" value="1.9" />
+      <span class="hint slider-val" id="repelInterVal">1.90×</span>
+    </div>
+    <div class="group">
+      <span class="hint">Center gravity</span>
+      <input type="range" id="gravity" min="0" max="0.05" step="0.001" value="0.01" />
+      <span class="hint slider-val" id="gravityVal">0.010</span>
     </div>
     <div class="sep"></div>
     <div class="group">
@@ -455,8 +478,8 @@ edges.forEach(e => {
 // ============================================================
 let orient = "TB";
 const CFG = {
-  repel: 5200,       // node-node repulsion strength
-  spring: 0.045,     // edge spring stiffness
+  repel: 5200,       // base node-node repulsion strength
+  spring: 0.045,     // base edge spring stiffness
   restLen: 150,      // edge rest length
   hier: 0.65,        // hierarchical (orientation) alignment force
   layerGap: 130,     // desired separation along orientation axis per edge
@@ -465,6 +488,10 @@ const CFG = {
   maxV: 22,
   collidePad: 12,
 };
+let springScale = 1.0;  // global multiplier on all spring stiffness (slider-controlled)
+let repelIntra = 1.0;   // repulsion multiplier for nodes in the SAME curriculum area
+let repelInter = 1.9;   // repulsion multiplier for nodes in DIFFERENT areas (pushes areas apart)
+let gravity = 0.010;    // pull of every node toward the canvas center (slider-controlled)
 let alpha = 1.0;        // "temperature"; decays over time, reheats on interaction
 const ALPHA_DECAY = 0.992;
 const ALPHA_MIN = 0.02;
@@ -485,7 +512,9 @@ function step() {
       let d2 = dx * dx + dy * dy;
       if (d2 < 0.01) { dx = (i - j) * 0.1 + 0.5; dy = 0.3; d2 = dx*dx+dy*dy; }
       const d = Math.sqrt(d2);
-      const f = CFG.repel / d2;
+      // nodes in different curriculum areas repel each other more than same-area nodes
+      const areaScale = (a.section === b.section) ? repelIntra : repelInter;
+      const f = CFG.repel * areaScale / d2;
       const ux = dx / d, uy = dy / d;
       a.ax += ux * f; a.ay += uy * f;
       b.ax -= ux * f; b.ay -= uy * f;
@@ -512,7 +541,7 @@ function step() {
     const s = e.source, t = e.target;
     let dx = t.x - s.x, dy = t.y - s.y;
     let d = Math.sqrt(dx * dx + dy * dy) || 0.01;
-    const diff = (d - CFG.restLen) / d * CFG.spring;
+    const diff = (d - CFG.restLen) / d * (CFG.spring * springScale);
     const fx = dx * diff, fy = dy * diff;
     s.ax += fx; s.ay += fy;
     t.ax -= fx; t.ay -= fy;
@@ -544,8 +573,8 @@ function step() {
     }
     if (n.pinned) { n.vx = 0; n.vy = 0; continue; }
 
-    n.ax += (cx - n.x) * CFG.gravity;
-    n.ay += (cy - n.y) * CFG.gravity;
+    n.ax += (cx - n.x) * gravity;
+    n.ay += (cy - n.y) * gravity;
 
     n.vx = (n.vx + n.ax * alpha) * CFG.damping;
     n.vy = (n.vy + n.ay * alpha) * CFG.damping;
@@ -681,6 +710,21 @@ document.getElementById("orient").addEventListener("click", (ev) => {
   orient = seg.dataset.orient;
   reheat(1.0);
 });
+function bindSlider(id, valId, setter, fmt = v => v.toFixed(2) + "×") {
+  const s = document.getElementById(id), v = document.getElementById(valId);
+  const update = () => {
+    const val = parseFloat(s.value);
+    setter(val);
+    v.textContent = fmt(val);
+    reheat(0.7);
+  };
+  s.addEventListener("input", update);
+  update(); // sync label + state to initial slider value
+}
+bindSlider("springScale", "springVal", v => springScale = v);
+bindSlider("repelIntra", "repelIntraVal", v => repelIntra = v);
+bindSlider("repelInter", "repelInterVal", v => repelInter = v);
+bindSlider("gravity", "gravityVal", v => gravity = v, v => v.toFixed(3));
 document.getElementById("reheat").addEventListener("click", () => reheat(1.0));
 document.getElementById("unpinAll").addEventListener("click", () => {
   NODES.forEach(n => {
