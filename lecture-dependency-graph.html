@@ -35,11 +35,26 @@
     backdrop-filter: blur(6px);
     box-shadow: 0 6px 20px rgba(0,0,0,0.35);
     max-width: calc(100vw - 24px);
+    align-items: stretch;
   }
   #toolbar .group { display: flex; gap: 6px; align-items: center; }
-  #toolbar .sep { width: 1px; height: 22px; background: var(--panel-border); margin: 0 2px; }
-  .title { font-weight: 700; font-size: 14px; margin-right: 4px; letter-spacing: 0.2px; }
+  .title { font-weight: 700; font-size: 14px; margin-right: 2px; letter-spacing: 0.2px; align-self: center; }
   .hint { color: var(--muted); font-size: 11px; }
+
+  /* light grouping of related controls */
+  .section {
+    display: flex; flex-direction: column; gap: 5px;
+    padding: 5px 8px 6px;
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+  }
+  .section > .cap {
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.7px;
+    color: var(--muted); font-weight: 600; opacity: 0.85;
+  }
+  .section > .rows { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+  .slider { display: inline-flex; align-items: center; gap: 5px; }
 
   button, .seg {
     font: inherit; font-size: 12px;
@@ -110,39 +125,48 @@
 <div id="app">
   <div id="toolbar">
     <span class="title">DS701 · Lecture Dependencies</span>
-    <div class="group">
-      <span class="hint">Orient</span>
-      <div class="seg-wrap" id="orient">
-        <div class="seg active" data-orient="TB">Top → Bottom</div>
-        <div class="seg" data-orient="LR">Left → Right</div>
+
+    <div class="section">
+      <span class="cap">Orientation</span>
+      <div class="rows">
+        <div class="seg-wrap" id="orient">
+          <div class="seg active" data-orient="TB">Top → Bottom</div>
+          <div class="seg" data-orient="LR">Left → Right</div>
+        </div>
+        <label class="slider"><span class="hint">Hierarchy</span>
+          <input type="range" id="hierStrength" min="0" max="2" step="0.05" value="0.65" />
+          <span class="hint slider-val" id="hierStrengthVal">0.65×</span></label>
+        <label class="slider"><span class="hint">Flow spacing</span>
+          <input type="range" id="layerGap" min="40" max="400" step="5" value="130" />
+          <span class="hint slider-val" id="layerGapVal">130</span></label>
       </div>
     </div>
-    <div class="sep"></div>
-    <div class="group">
-      <span class="hint">Spring</span>
-      <input type="range" id="springScale" min="0.3" max="2.5" step="0.05" value="1" />
-      <span class="hint slider-val" id="springVal">1.00×</span>
+
+    <div class="section">
+      <span class="cap">Forces</span>
+      <div class="rows">
+        <label class="slider"><span class="hint">Spring</span>
+          <input type="range" id="springScale" min="0.3" max="2.5" step="0.05" value="1" />
+          <span class="hint slider-val" id="springVal">1.00×</span></label>
+        <label class="slider"><span class="hint">Repel · same area</span>
+          <input type="range" id="repelIntra" min="0.2" max="12" step="0.1" value="1" />
+          <span class="hint slider-val" id="repelIntraVal">1.00×</span></label>
+        <label class="slider"><span class="hint">Repel · diff area</span>
+          <input type="range" id="repelInter" min="0.2" max="16" step="0.1" value="1.9" />
+          <span class="hint slider-val" id="repelInterVal">1.90×</span></label>
+        <label class="slider"><span class="hint">Center gravity</span>
+          <input type="range" id="gravity" min="0" max="0.05" step="0.001" value="0.01" />
+          <span class="hint slider-val" id="gravityVal">0.010</span></label>
+      </div>
     </div>
-    <div class="group">
-      <span class="hint">Repel · same area</span>
-      <input type="range" id="repelIntra" min="0.2" max="12" step="0.1" value="1" />
-      <span class="hint slider-val" id="repelIntraVal">1.00×</span>
-    </div>
-    <div class="group">
-      <span class="hint">Repel · diff area</span>
-      <input type="range" id="repelInter" min="0.2" max="16" step="0.1" value="1.9" />
-      <span class="hint slider-val" id="repelInterVal">1.90×</span>
-    </div>
-    <div class="group">
-      <span class="hint">Center gravity</span>
-      <input type="range" id="gravity" min="0" max="0.05" step="0.001" value="0.01" />
-      <span class="hint slider-val" id="gravityVal">0.010</span>
-    </div>
-    <div class="sep"></div>
-    <div class="group">
-      <button id="reheat">Re-layout</button>
-      <button id="unpinAll">Unpin all</button>
-      <button id="fit">Fit view</button>
+
+    <div class="section">
+      <span class="cap">Actions</span>
+      <div class="rows">
+        <button id="reheat">Re-layout</button>
+        <button id="unpinAll">Unpin all</button>
+        <button id="fit">Fit view</button>
+      </div>
     </div>
   </div>
 
@@ -481,9 +505,6 @@ const CFG = {
   repel: 5200,       // base node-node repulsion strength
   spring: 0.045,     // base edge spring stiffness
   restLen: 150,      // edge rest length
-  hier: 0.65,        // hierarchical (orientation) alignment force
-  layerGap: 130,     // desired separation along orientation axis per edge
-  gravity: 0.010,    // pull toward center
   damping: 0.86,
   maxV: 22,
   collidePad: 12,
@@ -492,6 +513,8 @@ let springScale = 1.0;  // global multiplier on all spring stiffness (slider-con
 let repelIntra = 1.0;   // repulsion multiplier for nodes in the SAME curriculum area
 let repelInter = 1.9;   // repulsion multiplier for nodes in DIFFERENT areas (pushes areas apart)
 let gravity = 0.010;    // pull of every node toward the canvas center (slider-controlled)
+let hierStrength = 0.65; // how strongly edge orientation is enforced (0 = undirected layout)
+let layerGap = 130;     // desired prereq->dependent separation along the orientation axis (px)
 let alpha = 1.0;        // "temperature"; decays over time, reheats on interaction
 const ALPHA_DECAY = 0.992;
 const ALPHA_MIN = 0.02;
@@ -548,16 +571,16 @@ function step() {
 
     // orientation: target should sit ~layerGap "after" source along the axis.
     // err > 0 => too far apart; err < 0 => target is before/too close to source.
-    const hk = CFG.hier * 0.5;
+    const hk = hierStrength * 0.5;
     if (orient === "TB") {
-      const err = (t.y - s.y) - CFG.layerGap;
+      const err = (t.y - s.y) - layerGap;
       t.ay -= err * hk;   // pull target toward desired offset
       s.ay += err * hk;   // symmetric reaction on source
       // gentle cross-axis alignment (stack children under parents)
       const ex = (t.x - s.x) * 0.008;
       t.ax -= ex; s.ax += ex;
     } else {
-      const err = (t.x - s.x) - CFG.layerGap;
+      const err = (t.x - s.x) - layerGap;
       t.ax -= err * hk;
       s.ax += err * hk;
       const ey = (t.y - s.y) * 0.008;
@@ -725,6 +748,8 @@ bindSlider("springScale", "springVal", v => springScale = v);
 bindSlider("repelIntra", "repelIntraVal", v => repelIntra = v);
 bindSlider("repelInter", "repelInterVal", v => repelInter = v);
 bindSlider("gravity", "gravityVal", v => gravity = v, v => v.toFixed(3));
+bindSlider("hierStrength", "hierStrengthVal", v => hierStrength = v);
+bindSlider("layerGap", "layerGapVal", v => layerGap = v, v => v.toFixed(0));
 document.getElementById("reheat").addEventListener("click", () => reheat(1.0));
 document.getElementById("unpinAll").addEventListener("click", () => {
   NODES.forEach(n => {
