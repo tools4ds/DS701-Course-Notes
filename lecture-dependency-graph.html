@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DS701 Lecture Dependency Graph</title>
+<style>
+  :root {
+    --bg: #0f1420;
+    --panel: #182033;
+    --panel-border: #2a3550;
+    --text: #e7ecf5;
+    --muted: #9aa7c2;
+    --edge: #66748f;
+    --edge-hi: #ffd166;
+    --accent: #4da3ff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+  }
+  #app { position: relative; width: 100vw; height: 100vh; }
+
+  #toolbar {
+    position: absolute; top: 12px; left: 12px; z-index: 10;
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    background: rgba(24,32,51,0.92);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    max-width: calc(100vw - 24px);
+  }
+  #toolbar .group { display: flex; gap: 6px; align-items: center; }
+  #toolbar .sep { width: 1px; height: 22px; background: var(--panel-border); margin: 0 2px; }
+  .title { font-weight: 700; font-size: 14px; margin-right: 4px; letter-spacing: 0.2px; }
+  .hint { color: var(--muted); font-size: 11px; }
+
+  button, .seg {
+    font: inherit; font-size: 12px;
+    color: var(--text);
+    background: #223052;
+    border: 1px solid var(--panel-border);
+    border-radius: 7px;
+    padding: 5px 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  button:hover, .seg:hover { background: #2b3c66; }
+  .seg-wrap { display: inline-flex; border: 1px solid var(--panel-border); border-radius: 7px; overflow: hidden; }
+  .seg-wrap .seg { border: none; border-radius: 0; background: #1b2540; }
+  .seg-wrap .seg.active { background: var(--accent); color: #0b1220; font-weight: 700; }
+
+  #legend {
+    position: absolute; top: 12px; right: 12px; z-index: 10;
+    background: rgba(24,32,51,0.92);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    font-size: 12px;
+    max-height: calc(100vh - 24px);
+    overflow: auto;
+  }
+  #legend h3 { margin: 0 0 6px; font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; }
+  #legend .row { display: flex; align-items: center; gap: 8px; padding: 2px 0; cursor: default; }
+  #legend .swatch { width: 12px; height: 12px; border-radius: 3px; flex: 0 0 auto; }
+
+  #hintbar {
+    position: absolute; bottom: 10px; left: 12px; z-index: 10;
+    color: var(--muted); font-size: 11px;
+    background: rgba(24,32,51,0.7);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px; padding: 6px 10px;
+  }
+
+  svg { width: 100%; height: 100%; display: block; cursor: grab; }
+  svg.panning { cursor: grabbing; }
+
+  .edge { stroke: var(--edge); stroke-width: 1.6; fill: none; opacity: 0.75; }
+  .edge.hi { stroke: var(--edge-hi); stroke-width: 2.6; opacity: 1; }
+  .edge.dim { opacity: 0.12; }
+
+  .node-rect {
+    stroke: rgba(255,255,255,0.18);
+    stroke-width: 1.2;
+    rx: 9;
+  }
+  .node.pinned .node-rect { stroke: var(--edge-hi); stroke-width: 2.2; }
+  .node.dim { opacity: 0.25; }
+  .node-label { fill: #0d1526; font-size: 11px; font-weight: 600; pointer-events: none; }
+  .node-body { cursor: grab; }
+  .node.dragging .node-body { cursor: grabbing; }
+
+  .pin-btn { cursor: pointer; }
+  .pin-btn circle { fill: rgba(13,21,38,0.55); stroke: rgba(255,255,255,0.35); stroke-width: 1; }
+  .pin-btn:hover circle { fill: rgba(13,21,38,0.85); }
+  .pin-glyph { pointer-events: none; font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="toolbar">
+    <span class="title">DS701 · Lecture Dependencies</span>
+    <div class="group">
+      <span class="hint">Orient</span>
+      <div class="seg-wrap" id="orient">
+        <div class="seg active" data-orient="TB">Top → Bottom</div>
+        <div class="seg" data-orient="LR">Left → Right</div>
+      </div>
+    </div>
+    <div class="sep"></div>
+    <div class="group">
+      <button id="reheat">Re-layout</button>
+      <button id="unpinAll">Unpin all</button>
+      <button id="fit">Fit view</button>
+    </div>
+  </div>
+
+  <div id="legend"><h3>Curriculum area</h3></div>
+  <div id="hintbar">Drag a node to move it · connected nodes follow with spring · click the ○ pin (top-right) to lock a node · scroll to zoom · drag background to pan</div>
+
+  <svg id="svg">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#66748f"></path>
+      </marker>
+      <marker id="arrow-hi" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#ffd166"></path>
+      </marker>
+    </defs>
+    <g id="viewport">
+      <g id="edges"></g>
+      <g id="nodes"></g>
+    </g>
+  </svg>
+</div>
+
+<script>
+/* ============================================================
+   DS701 lecture dependency graph
+   Self-contained: hand-rolled force (spring) simulation + SVG.
+   ============================================================ */
+
+// ---- Curriculum sections (color coded) ----
+const SECTIONS = {
+  "Introduction":            "#8892a6",
+  "Preliminaries":           "#4da3ff",
+  "Clustering":              "#39c07a",
+  "Dimensionality Reduction":"#c792ea",
+  "Classification":          "#ffab5e",
+  "Regression":              "#ff6b8b",
+  "Neural Networks":         "#f25c5c",
+  "Selected Topics":         "#5ad1d1",
+  "Causal Inference":        "#e6c84a",
+};
+
+// ---- Nodes: id, label (lecture title), section ----
+const NODES = [
+  { id: "00-Class-Introduction", label: "Course Overview", section: "Introduction" },
+
+  { id: "01-Intro-to-Python", label: "Introduction to Python", section: "Preliminaries" },
+  { id: "02A-Git", label: "Essential Tools: Git", section: "Preliminaries" },
+  { id: "02B-Pandas", label: "Essential Tools: Pandas", section: "Preliminaries" },
+  { id: "02C-Sklearn", label: "Essential Tools: Scikit-Learn", section: "Preliminaries" },
+  { id: "03-Probability-and-Statistics-Refresher", label: "Probability & Statistics Refresher", section: "Preliminaries" },
+  { id: "04-Linear-Algebra-Refresher", label: "Linear Algebra Refresher", section: "Preliminaries" },
+  { id: "05-Distances-Timeseries", label: "Distances and Time Series", section: "Preliminaries" },
+  { id: "05A-Learning", label: "Machine Learning (Intro)", section: "Preliminaries" },
+
+  { id: "06-Clustering-I-kmeans", label: "Clustering I: k-Means", section: "Clustering" },
+  { id: "07-Clustering-II-in-practice", label: "Clustering II: In Practice", section: "Clustering" },
+  { id: "08-Clustering-III-hierarchical", label: "Clustering III: Hierarchical", section: "Clustering" },
+  { id: "09-Clustering-IV-GMM-EM", label: "Clustering IV: GMM & EM", section: "Clustering" },
+  { id: "09A-Appendix-Derive-MLE-params-for-gaussian", label: "GMM Appx A: MLE for Gaussian", section: "Clustering" },
+  { id: "09B-Appendix-Cov-Matrix-in-MV-Gaussians", label: "GMM Appx B: Covariance Matrix", section: "Clustering" },
+  { id: "09C-Appendix-complete-data-likelihood", label: "GMM Appx C: Complete-Data Likelihood", section: "Clustering" },
+  { id: "09D-Appendix-Derive-the-E-step", label: "GMM Appx D: Deriving the E-Step", section: "Clustering" },
+
+  { id: "10-Low-Rank-and-SVD", label: "SVD: Low-Rank Approximation", section: "Dimensionality Reduction" },
+  { id: "11-Dimensionality-Reduction-SVD-II", label: "Dim. Reduction: PCA + t-SNE", section: "Dimensionality Reduction" },
+  { id: "12-Anomaly-Detection-SVD-III", label: "Anomaly Detection (SVD III)", section: "Dimensionality Reduction" },
+
+  { id: "13-Learning-From-Data", label: "Learning From Data", section: "Classification" },
+  { id: "14-Classification-I-Decision-Trees", label: "Classification I: Decision Trees", section: "Classification" },
+  { id: "15-Classification-II-kNN", label: "Classification II: k-NN & Model Selection", section: "Classification" },
+  { id: "16-Classification-III-NB-SVM", label: "Classification III: Naive Bayes & SVM", section: "Classification" },
+
+  { id: "17-Regression-I-Linear", label: "Regression I: Linear", section: "Regression" },
+  { id: "18-Regression-II-Logistic", label: "Regression II: Logistic", section: "Regression" },
+  { id: "18A-decision-tree-regression", label: "Decision Tree & Random Forest Regression", section: "Regression" },
+  { id: "18B-gradient-boosting-methods", label: "Gradient Boosting Methods", section: "Regression" },
+  { id: "19-Regression-III-More-Linear", label: "Regression III: Regularization", section: "Regression" },
+
+  { id: "20-Recommender-Systems-I", label: "Recommender Systems I", section: "Selected Topics" },
+  { id: "20-Recommender-Systems-II", label: "Recommender Systems II", section: "Selected Topics" },
+  { id: "21-Networks-I", label: "Networks I: Introduction", section: "Selected Topics" },
+  { id: "22-Networks-II-Centrality-Clustering", label: "Networks II: Centrality & Clustering", section: "Selected Topics" },
+  { id: "26-TimeSeries", label: "Time Series Analysis", section: "Selected Topics" },
+  { id: "28-NLP", label: "Natural Language Processing", section: "Selected Topics" },
+  { id: "nlp_packages_overview", label: "NLP Packages Overview", section: "Selected Topics" },
+
+  { id: "23-NN-I-Gradient-Descent", label: "NN I: Gradient Descent", section: "Neural Networks" },
+  { id: "24-NN-II-Backprop", label: "NN II: Backprop & Training", section: "Neural Networks" },
+  { id: "25-NN-III-CNNs", label: "NN III: SGD, Batches & CNNs", section: "Neural Networks" },
+  { id: "27-RNN", label: "Recurrent Neural Networks", section: "Neural Networks" },
+  { id: "29-NN-IV-Scikit-Learn", label: "NN IV: Neural Nets in Scikit-Learn", section: "Neural Networks" },
+  { id: "30-NN-consolidated", label: "Neural Networks: Theory to Practice", section: "Neural Networks" },
+
+  { id: "31-Causal-Inference-I", label: "Causal Inference I", section: "Causal Inference" },
+  { id: "32-Causal-Inference-II", label: "Causal Inference II", section: "Causal Inference" },
+];
+
+// ---- Edges: [prerequisite, dependent]  (arrow points prereq -> dependent) ----
+// Derived from lecture content: explicit "recall/previously" references, reused
+// concepts, and curricular prerequisites. Direct prerequisites only (no transitive).
+const EDGES = [
+  // Preliminaries
+  ["01-Intro-to-Python", "02A-Git"],
+  ["01-Intro-to-Python", "02B-Pandas"],
+  ["01-Intro-to-Python", "02C-Sklearn"],
+  ["02B-Pandas", "02C-Sklearn"],
+  ["04-Linear-Algebra-Refresher", "05-Distances-Timeseries"],
+
+  // Clustering
+  ["05-Distances-Timeseries", "06-Clustering-I-kmeans"],
+  ["05A-Learning", "06-Clustering-I-kmeans"],
+  ["06-Clustering-I-kmeans", "07-Clustering-II-in-practice"],
+  ["02C-Sklearn", "07-Clustering-II-in-practice"],
+  ["06-Clustering-I-kmeans", "08-Clustering-III-hierarchical"],
+  ["05-Distances-Timeseries", "08-Clustering-III-hierarchical"],
+  ["06-Clustering-I-kmeans", "09-Clustering-IV-GMM-EM"],
+  ["03-Probability-and-Statistics-Refresher", "09-Clustering-IV-GMM-EM"],
+  ["09-Clustering-IV-GMM-EM", "09A-Appendix-Derive-MLE-params-for-gaussian"],
+  ["09-Clustering-IV-GMM-EM", "09B-Appendix-Cov-Matrix-in-MV-Gaussians"],
+  ["09-Clustering-IV-GMM-EM", "09C-Appendix-complete-data-likelihood"],
+  ["09-Clustering-IV-GMM-EM", "09D-Appendix-Derive-the-E-step"],
+  ["09C-Appendix-complete-data-likelihood", "09D-Appendix-Derive-the-E-step"],
+
+  // Dimensionality Reduction
+  ["04-Linear-Algebra-Refresher", "10-Low-Rank-and-SVD"],
+  ["10-Low-Rank-and-SVD", "11-Dimensionality-Reduction-SVD-II"],
+  ["04-Linear-Algebra-Refresher", "11-Dimensionality-Reduction-SVD-II"],
+  ["10-Low-Rank-and-SVD", "12-Anomaly-Detection-SVD-III"],
+  ["11-Dimensionality-Reduction-SVD-II", "12-Anomaly-Detection-SVD-III"],
+
+  // Classification
+  ["05A-Learning", "13-Learning-From-Data"],
+  ["13-Learning-From-Data", "14-Classification-I-Decision-Trees"],
+  ["03-Probability-and-Statistics-Refresher", "14-Classification-I-Decision-Trees"],
+  ["14-Classification-I-Decision-Trees", "15-Classification-II-kNN"],
+  ["05-Distances-Timeseries", "15-Classification-II-kNN"],
+  ["03-Probability-and-Statistics-Refresher", "15-Classification-II-kNN"],
+  ["14-Classification-I-Decision-Trees", "16-Classification-III-NB-SVM"],
+  ["03-Probability-and-Statistics-Refresher", "16-Classification-III-NB-SVM"],
+
+  // Regression
+  ["04-Linear-Algebra-Refresher", "17-Regression-I-Linear"],
+  ["17-Regression-I-Linear", "18-Regression-II-Logistic"],
+  ["14-Classification-I-Decision-Trees", "18A-decision-tree-regression"],
+  ["17-Regression-I-Linear", "18A-decision-tree-regression"],
+  ["18A-decision-tree-regression", "18B-gradient-boosting-methods"],
+  ["14-Classification-I-Decision-Trees", "18B-gradient-boosting-methods"],
+  ["17-Regression-I-Linear", "19-Regression-III-More-Linear"],
+  ["11-Dimensionality-Reduction-SVD-II", "19-Regression-III-More-Linear"],
+  ["14-Classification-I-Decision-Trees", "19-Regression-III-More-Linear"],
+
+  // Selected topics: recommenders & networks
+  ["10-Low-Rank-and-SVD", "20-Recommender-Systems-I"],
+  ["11-Dimensionality-Reduction-SVD-II", "20-Recommender-Systems-I"],
+  ["20-Recommender-Systems-I", "20-Recommender-Systems-II"],
+  ["03-Probability-and-Statistics-Refresher", "21-Networks-I"],
+  ["21-Networks-I", "22-Networks-II-Centrality-Clustering"],
+  ["04-Linear-Algebra-Refresher", "22-Networks-II-Centrality-Clustering"],
+
+  // Neural networks
+  ["17-Regression-I-Linear", "23-NN-I-Gradient-Descent"],
+  ["23-NN-I-Gradient-Descent", "24-NN-II-Backprop"],
+  ["18-Regression-II-Logistic", "24-NN-II-Backprop"],
+  ["24-NN-II-Backprop", "25-NN-III-CNNs"],
+  ["23-NN-I-Gradient-Descent", "25-NN-III-CNNs"],
+  ["24-NN-II-Backprop", "29-NN-IV-Scikit-Learn"],
+  ["25-NN-III-CNNs", "29-NN-IV-Scikit-Learn"],
+  ["02C-Sklearn", "29-NN-IV-Scikit-Learn"],
+  ["18-Regression-II-Logistic", "30-NN-consolidated"],
+  ["23-NN-I-Gradient-Descent", "30-NN-consolidated"],
+  ["24-NN-II-Backprop", "30-NN-consolidated"],
+  ["29-NN-IV-Scikit-Learn", "30-NN-consolidated"],
+
+  // Time series & NLP
+  ["02B-Pandas", "26-TimeSeries"],
+  ["05-Distances-Timeseries", "26-TimeSeries"],
+  ["24-NN-II-Backprop", "27-RNN"],
+  ["26-TimeSeries", "27-RNN"],
+  ["05-Distances-Timeseries", "28-NLP"],
+  ["07-Clustering-II-in-practice", "28-NLP"],
+  ["27-RNN", "28-NLP"],
+  ["28-NLP", "nlp_packages_overview"],
+
+  // Causal inference
+  ["17-Regression-I-Linear", "31-Causal-Inference-I"],
+  ["31-Causal-Inference-I", "32-Causal-Inference-II"],
+];
+
+// ============================================================
+//  Everything below is generic; data above drives it.
+// ============================================================
+const SVG = document.getElementById("svg");
+const VIEWPORT = document.getElementById("viewport");
+const EDGE_LAYER = document.getElementById("edges");
+const NODE_LAYER = document.getElementById("nodes");
+const SVGNS = "http://www.w3.org/2000/svg";
+
+let W = window.innerWidth, H = window.innerHeight;
+
+// ---- Build node index ----
+const nodeById = new Map();
+NODES.forEach((n, i) => {
+  n.index = i;
+  // deterministic-ish initial spread (no Math.random dependence for reproducibility)
+  const ang = (i * 2.399963); // golden angle
+  const rad = 40 + 26 * Math.sqrt(i);
+  n.x = W / 2 + rad * Math.cos(ang);
+  n.y = H / 2 + rad * Math.sin(ang);
+  n.vx = 0; n.vy = 0;
+  n.pinned = false;
+  n.fx = null; n.fy = null; // fixed (drag) target
+  nodeById.set(n.id, n);
+});
+
+// filter edges to those with valid endpoints (ignore placeholder)
+let edges = EDGES
+  .filter(e => nodeById.has(e[0]) && nodeById.has(e[1]))
+  .map(e => ({ source: nodeById.get(e[0]), target: nodeById.get(e[1]) }));
+
+// adjacency for hover highlight
+const neighbors = new Map();
+NODES.forEach(n => neighbors.set(n.id, new Set()));
+edges.forEach(e => {
+  neighbors.get(e.source.id).add(e.target.id);
+  neighbors.get(e.target.id).add(e.source.id);
+});
+
+// ---- Text wrapping + node sizing ----
+const NODE_W = 158;
+const PAD_X = 10, PAD_Y = 8, LINE_H = 14;
+function wrapLabel(text, maxChars) {
+  const words = text.split(/\s+/);
+  const lines = [];
+  let cur = "";
+  for (const w of words) {
+    if (!cur) { cur = w; }
+    else if ((cur + " " + w).length <= maxChars) { cur += " " + w; }
+    else { lines.push(cur); cur = w; }
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+NODES.forEach(n => {
+  n.lines = wrapLabel(n.label, 22);
+  n.w = NODE_W;
+  n.h = n.lines.length * LINE_H + PAD_Y * 2;
+  n.hw = n.w / 2;
+  n.hh = n.h / 2;
+});
+
+// ---- Build legend ----
+const legend = document.getElementById("legend");
+Object.entries(SECTIONS).forEach(([name, color]) => {
+  const row = document.createElement("div");
+  row.className = "row";
+  row.innerHTML = `<span class="swatch" style="background:${color}"></span><span>${name}</span>`;
+  legend.appendChild(row);
+});
+
+// ---- Render node DOM ----
+const nodeEls = new Map();
+NODES.forEach(n => {
+  const g = document.createElementNS(SVGNS, "g");
+  g.setAttribute("class", "node");
+  g.dataset.id = n.id;
+
+  const body = document.createElementNS(SVGNS, "g");
+  body.setAttribute("class", "node-body");
+
+  const rect = document.createElementNS(SVGNS, "rect");
+  rect.setAttribute("class", "node-rect");
+  rect.setAttribute("width", n.w);
+  rect.setAttribute("height", n.h);
+  rect.setAttribute("x", -n.hw);
+  rect.setAttribute("y", -n.hh);
+  rect.setAttribute("rx", 9);
+  rect.setAttribute("fill", SECTIONS[n.section] || "#888");
+  body.appendChild(rect);
+
+  const text = document.createElementNS(SVGNS, "text");
+  text.setAttribute("class", "node-label");
+  text.setAttribute("text-anchor", "middle");
+  const startY = -n.hh + PAD_Y + 10;
+  n.lines.forEach((ln, i) => {
+    const ts = document.createElementNS(SVGNS, "tspan");
+    ts.setAttribute("x", 0);
+    ts.setAttribute("y", startY + i * LINE_H);
+    ts.textContent = ln;
+    text.appendChild(ts);
+  });
+  body.appendChild(text);
+  g.appendChild(body);
+
+  // pin button, top-right corner
+  const pin = document.createElementNS(SVGNS, "g");
+  pin.setAttribute("class", "pin-btn");
+  pin.setAttribute("transform", `translate(${n.hw - 11}, ${-n.hh + 11})`);
+  const pc = document.createElementNS(SVGNS, "circle");
+  pc.setAttribute("r", 9);
+  const pg = document.createElementNS(SVGNS, "text");
+  pg.setAttribute("class", "pin-glyph");
+  pg.setAttribute("text-anchor", "middle");
+  pg.setAttribute("dominant-baseline", "central");
+  pg.setAttribute("y", 1);
+  pg.textContent = "○";
+  pin.appendChild(pc);
+  pin.appendChild(pg);
+  g.appendChild(pin);
+
+  NODE_LAYER.appendChild(g);
+  nodeEls.set(n.id, { g, rect, pin, pinGlyph: pg });
+
+  // interactions
+  body.addEventListener("pointerdown", (ev) => startDrag(ev, n));
+  pin.addEventListener("pointerdown", (ev) => { ev.stopPropagation(); });
+  pin.addEventListener("click", (ev) => { ev.stopPropagation(); togglePin(n); });
+  g.addEventListener("pointerenter", () => setHover(n));
+  g.addEventListener("pointerleave", () => setHover(null));
+});
+
+// ---- Render edge DOM ----
+const edgeEls = [];
+edges.forEach(e => {
+  const line = document.createElementNS(SVGNS, "path");
+  line.setAttribute("class", "edge");
+  line.setAttribute("marker-end", "url(#arrow)");
+  EDGE_LAYER.appendChild(line);
+  edgeEls.push({ e, line });
+});
+
+// ============================================================
+//  Force simulation
+// ============================================================
+let orient = "TB";
+const CFG = {
+  repel: 5200,       // node-node repulsion strength
+  spring: 0.045,     // edge spring stiffness
+  restLen: 150,      // edge rest length
+  hier: 0.65,        // hierarchical (orientation) alignment force
+  layerGap: 130,     // desired separation along orientation axis per edge
+  gravity: 0.010,    // pull toward center
+  damping: 0.86,
+  maxV: 22,
+  collidePad: 12,
+};
+let alpha = 1.0;        // "temperature"; decays over time, reheats on interaction
+const ALPHA_DECAY = 0.992;
+const ALPHA_MIN = 0.02;
+
+function reheat(v = 1.0) { alpha = Math.max(alpha, v); }
+
+function step() {
+  const nodes = NODES;
+  // reset forces
+  for (const n of nodes) { n.ax = 0; n.ay = 0; }
+
+  // repulsion (O(n^2), fine for this size)
+  for (let i = 0; i < nodes.length; i++) {
+    const a = nodes[i];
+    for (let j = i + 1; j < nodes.length; j++) {
+      const b = nodes[j];
+      let dx = a.x - b.x, dy = a.y - b.y;
+      let d2 = dx * dx + dy * dy;
+      if (d2 < 0.01) { dx = (i - j) * 0.1 + 0.5; dy = 0.3; d2 = dx*dx+dy*dy; }
+      const d = Math.sqrt(d2);
+      const f = CFG.repel / d2;
+      const ux = dx / d, uy = dy / d;
+      a.ax += ux * f; a.ay += uy * f;
+      b.ax -= ux * f; b.ay -= uy * f;
+
+      // soft collision to reduce rectangle overlap
+      const minDx = a.hw + b.hw + CFG.collidePad;
+      const minDy = a.hh + b.hh + CFG.collidePad;
+      const ox = minDx - Math.abs(dx);
+      const oy = minDy - Math.abs(dy);
+      if (ox > 0 && oy > 0) {
+        if (ox < oy) {
+          const push = ox * 0.5 * (dx >= 0 ? 1 : -1);
+          a.ax += push * 0.08; b.ax -= push * 0.08;
+        } else {
+          const push = oy * 0.5 * (dy >= 0 ? 1 : -1);
+          a.ay += push * 0.08; b.ay -= push * 0.08;
+        }
+      }
+    }
+  }
+
+  // edge springs + hierarchical alignment
+  for (const e of edges) {
+    const s = e.source, t = e.target;
+    let dx = t.x - s.x, dy = t.y - s.y;
+    let d = Math.sqrt(dx * dx + dy * dy) || 0.01;
+    const diff = (d - CFG.restLen) / d * CFG.spring;
+    const fx = dx * diff, fy = dy * diff;
+    s.ax += fx; s.ay += fy;
+    t.ax -= fx; t.ay -= fy;
+
+    // orientation: target should sit ~layerGap "after" source along the axis.
+    // err > 0 => too far apart; err < 0 => target is before/too close to source.
+    const hk = CFG.hier * 0.5;
+    if (orient === "TB") {
+      const err = (t.y - s.y) - CFG.layerGap;
+      t.ay -= err * hk;   // pull target toward desired offset
+      s.ay += err * hk;   // symmetric reaction on source
+      // gentle cross-axis alignment (stack children under parents)
+      const ex = (t.x - s.x) * 0.008;
+      t.ax -= ex; s.ax += ex;
+    } else {
+      const err = (t.x - s.x) - CFG.layerGap;
+      t.ax -= err * hk;
+      s.ax += err * hk;
+      const ey = (t.y - s.y) * 0.008;
+      t.ay -= ey; s.ay += ey;
+    }
+  }
+
+  // gravity toward center + integrate
+  const cx = W / 2, cy = H / 2;
+  for (const n of nodes) {
+    if (n.fx !== null) { // being dragged
+      n.x = n.fx; n.y = n.fy; n.vx = 0; n.vy = 0; continue;
+    }
+    if (n.pinned) { n.vx = 0; n.vy = 0; continue; }
+
+    n.ax += (cx - n.x) * CFG.gravity;
+    n.ay += (cy - n.y) * CFG.gravity;
+
+    n.vx = (n.vx + n.ax * alpha) * CFG.damping;
+    n.vy = (n.vy + n.ay * alpha) * CFG.damping;
+    // clamp
+    n.vx = Math.max(-CFG.maxV, Math.min(CFG.maxV, n.vx));
+    n.vy = Math.max(-CFG.maxV, Math.min(CFG.maxV, n.vy));
+    n.x += n.vx;
+    n.y += n.vy;
+  }
+
+  if (alpha > ALPHA_MIN) alpha *= ALPHA_DECAY;
+}
+
+// ---- boundary clip of edge to node rectangles ----
+function clipToRect(node, fromX, fromY) {
+  // returns point on node's rectangle border along direction from (fromX,fromY) to node center
+  const dx = node.x - fromX, dy = node.y - fromY;
+  if (dx === 0 && dy === 0) return { x: node.x, y: node.y };
+  const hw = node.hw + 2, hh = node.hh + 2;
+  const scaleX = dx !== 0 ? hw / Math.abs(dx) : Infinity;
+  const scaleY = dy !== 0 ? hh / Math.abs(dy) : Infinity;
+  const s = Math.min(scaleX, scaleY);
+  return { x: node.x - dx * s, y: node.y - dy * s };
+}
+
+function render() {
+  for (const n of NODES) {
+    const el = nodeEls.get(n.id);
+    el.g.setAttribute("transform", `translate(${n.x.toFixed(2)}, ${n.y.toFixed(2)})`);
+  }
+  for (const { e, line } of edgeEls) {
+    const s = e.source, t = e.target;
+    const p1 = clipToRect(s, t.x, t.y);
+    const p2 = clipToRect(t, s.x, s.y);
+    line.setAttribute("d", `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} L ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`);
+  }
+}
+
+function loop() {
+  step();
+  render();
+  requestAnimationFrame(loop);
+}
+
+// ============================================================
+//  Interaction: drag, pin, hover, pan/zoom
+// ============================================================
+let view = { x: 0, y: 0, k: 1 };
+function applyView() {
+  VIEWPORT.setAttribute("transform", `translate(${view.x},${view.y}) scale(${view.k})`);
+}
+function screenToWorld(clientX, clientY) {
+  const rect = SVG.getBoundingClientRect();
+  return {
+    x: (clientX - rect.left - view.x) / view.k,
+    y: (clientY - rect.top - view.y) / view.k,
+  };
+}
+
+let dragging = null;
+function startDrag(ev, n) {
+  ev.preventDefault();
+  ev.stopPropagation();
+  dragging = n;
+  const p = screenToWorld(ev.clientX, ev.clientY);
+  n._grabDx = n.x - p.x;
+  n._grabDy = n.y - p.y;
+  n.fx = n.x; n.fy = n.y;
+  nodeEls.get(n.id).g.classList.add("dragging");
+  reheat(0.9);
+  window.addEventListener("pointermove", onDragMove);
+  window.addEventListener("pointerup", onDragEnd);
+}
+function onDragMove(ev) {
+  if (!dragging) return;
+  const p = screenToWorld(ev.clientX, ev.clientY);
+  dragging.fx = p.x + dragging._grabDx;
+  dragging.fy = p.y + dragging._grabDy;
+  reheat(0.6);
+}
+function onDragEnd() {
+  if (!dragging) return;
+  const n = dragging;
+  nodeEls.get(n.id).g.classList.remove("dragging");
+  if (n.pinned) {
+    // keep it fixed exactly where dropped
+    n.x = n.fx; n.y = n.fy;
+  }
+  n.fx = null; n.fy = null;
+  dragging = null;
+  reheat(0.5);
+  window.removeEventListener("pointermove", onDragMove);
+  window.removeEventListener("pointerup", onDragEnd);
+}
+
+function togglePin(n) {
+  n.pinned = !n.pinned;
+  const el = nodeEls.get(n.id);
+  el.g.classList.toggle("pinned", n.pinned);
+  el.pinGlyph.textContent = n.pinned ? "📌" : "○";
+  if (n.pinned) { n.vx = 0; n.vy = 0; }
+  reheat(0.4);
+}
+
+// hover highlight
+let hovered = null;
+function setHover(n) {
+  hovered = n;
+  if (!n) {
+    NODES.forEach(m => nodeEls.get(m.id).g.classList.remove("dim"));
+    edgeEls.forEach(({ line }) => { line.classList.remove("hi"); line.classList.remove("dim"); line.setAttribute("marker-end", "url(#arrow)"); });
+    return;
+  }
+  const keep = neighbors.get(n.id);
+  NODES.forEach(m => {
+    const on = (m.id === n.id) || keep.has(m.id);
+    nodeEls.get(m.id).g.classList.toggle("dim", !on);
+  });
+  edgeEls.forEach(({ e, line }) => {
+    const on = (e.source.id === n.id || e.target.id === n.id);
+    line.classList.toggle("hi", on);
+    line.classList.toggle("dim", !on);
+    line.setAttribute("marker-end", on ? "url(#arrow-hi)" : "url(#arrow)");
+  });
+}
+
+// ---- Toolbar ----
+document.getElementById("orient").addEventListener("click", (ev) => {
+  const seg = ev.target.closest(".seg");
+  if (!seg) return;
+  document.querySelectorAll("#orient .seg").forEach(s => s.classList.remove("active"));
+  seg.classList.add("active");
+  orient = seg.dataset.orient;
+  reheat(1.0);
+});
+document.getElementById("reheat").addEventListener("click", () => reheat(1.0));
+document.getElementById("unpinAll").addEventListener("click", () => {
+  NODES.forEach(n => {
+    if (n.pinned) {
+      n.pinned = false;
+      const el = nodeEls.get(n.id);
+      el.g.classList.remove("pinned");
+      el.pinGlyph.textContent = "○";
+    }
+  });
+  reheat(0.8);
+});
+document.getElementById("fit").addEventListener("click", fitView);
+
+function fitView() {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const n of NODES) {
+    minX = Math.min(minX, n.x - n.hw);
+    minY = Math.min(minY, n.y - n.hh);
+    maxX = Math.max(maxX, n.x + n.hw);
+    maxY = Math.max(maxY, n.y + n.hh);
+  }
+  const pad = 60;
+  const bw = (maxX - minX) + pad * 2, bh = (maxY - minY) + pad * 2;
+  const k = Math.min(W / bw, H / bh, 1.4);
+  view.k = k;
+  view.x = -minX * k + (W - (maxX - minX) * k) / 2;
+  view.y = -minY * k + (H - (maxY - minY) * k) / 2;
+  applyView();
+}
+
+// ---- Pan & zoom on background ----
+let panning = null;
+SVG.addEventListener("pointerdown", (ev) => {
+  if (ev.target === SVG || ev.target.id === "viewport") {
+    panning = { x: ev.clientX - view.x, y: ev.clientY - view.y };
+    SVG.classList.add("panning");
+  }
+});
+window.addEventListener("pointermove", (ev) => {
+  if (!panning) return;
+  view.x = ev.clientX - panning.x;
+  view.y = ev.clientY - panning.y;
+  applyView();
+});
+window.addEventListener("pointerup", () => { panning = null; SVG.classList.remove("panning"); });
+SVG.addEventListener("wheel", (ev) => {
+  ev.preventDefault();
+  const rect = SVG.getBoundingClientRect();
+  const mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
+  const wx = (mx - view.x) / view.k, wy = (my - view.y) / view.k;
+  const factor = Math.exp(-ev.deltaY * 0.0015);
+  view.k = Math.max(0.25, Math.min(2.5, view.k * factor));
+  view.x = mx - wx * view.k;
+  view.y = my - wy * view.k;
+  applyView();
+}, { passive: false });
+
+window.addEventListener("resize", () => {
+  W = window.innerWidth; H = window.innerHeight;
+  reheat(0.3);
+});
+
+// ---- go ----
+loop();
+// let it settle, then fit
+let settleFrames = 0;
+const settleTimer = setInterval(() => {
+  settleFrames++;
+  if (settleFrames > 6 || alpha <= ALPHA_MIN) { fitView(); clearInterval(settleTimer); }
+}, 250);
+</script>
+</body>
+</html>
