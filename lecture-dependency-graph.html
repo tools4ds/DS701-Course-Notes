@@ -55,6 +55,24 @@
   }
   .section > .rows { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
   .slider { display: inline-flex; align-items: center; gap: 5px; }
+  .chk { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text); cursor: pointer; user-select: none; }
+  .chk input { accent-color: var(--accent); cursor: pointer; }
+
+  #tooltip {
+    position: fixed; z-index: 20; pointer-events: none;
+    max-width: 260px;
+    background: rgba(16,22,38,0.97);
+    color: var(--text);
+    border: 1px solid var(--edge-hi);
+    border-radius: 8px;
+    padding: 7px 9px;
+    font-size: 12px; line-height: 1.35;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  }
+  #tooltip[hidden] { display: none; }
+  #tooltip .tt-path { color: var(--muted); font-size: 10.5px; margin-bottom: 3px; }
+  #tooltip .tt-path b { color: var(--text); font-weight: 600; }
+  #tooltip .tt-topic { font-weight: 600; }
 
   button, .seg {
     font: inherit; font-size: 12px;
@@ -103,6 +121,8 @@
   .edge { stroke: var(--edge); stroke-width: 1.6; fill: none; opacity: 0.75; }
   .edge.hi { stroke: var(--edge-hi); stroke-width: 2.6; opacity: 1; }
   .edge.dim { opacity: 0.12; }
+  .edge-hit { stroke: transparent; stroke-width: 14; fill: none; pointer-events: stroke; cursor: help; }
+  .edge-hit.off { pointer-events: none; cursor: default; }
 
   .node-rect {
     stroke: rgba(255,255,255,0.18);
@@ -166,12 +186,13 @@
         <button id="reheat">Re-layout</button>
         <button id="unpinAll">Unpin all</button>
         <button id="fit">Fit view</button>
+        <label class="chk"><input type="checkbox" id="edgeTips" checked /> Edge tooltips</label>
       </div>
     </div>
   </div>
 
   <div id="legend"><h3>Curriculum area</h3></div>
-  <div id="hintbar">Drag a node to move it · connected nodes follow with spring · click the ○ pin (top-right) to lock a node · scroll to zoom · drag background to pan</div>
+  <div id="hintbar">Drag a node to move it · connected nodes follow with spring · hover an edge for the shared topic · click the ○ pin (top-right) to lock a node · scroll to zoom · drag background to pan</div>
 
   <svg id="svg">
     <defs>
@@ -187,6 +208,8 @@
       <g id="nodes"></g>
     </g>
   </svg>
+
+  <div id="tooltip" hidden></div>
 </div>
 
 <script>
@@ -264,95 +287,97 @@ const NODES = [
   { id: "32-Causal-Inference-II", label: "Causal Inference II", section: "Causal Inference" },
 ];
 
-// ---- Edges: [prerequisite, dependent]  (arrow points prereq -> dependent) ----
+// ---- Edges: [prerequisite, dependent, topic]  (arrow points prereq -> dependent) ----
 // Derived from lecture content: explicit "recall/previously" references, reused
 // concepts, and curricular prerequisites. Direct prerequisites only (no transitive).
+// The 3rd element is the specific concept the dependent lecture draws from the
+// prerequisite (shown as a hover tooltip), decomposed from the dependency analysis.
 const EDGES = [
   // Preliminaries
-  ["01-Intro-to-Python", "02A-Git"],
-  ["01-Intro-to-Python", "02B-Pandas"],
-  ["01-Intro-to-Python", "02C-Sklearn"],
-  ["02B-Pandas", "02C-Sklearn"],
-  ["04-Linear-Algebra-Refresher", "05-Distances-Timeseries"],
+  ["01-Intro-to-Python", "02A-Git", "Python basics / refresher"],
+  ["01-Intro-to-Python", "02B-Pandas", "Python fundamentals (types, syntax)"],
+  ["01-Intro-to-Python", "02C-Sklearn", "Python fundamentals"],
+  ["02B-Pandas", "02C-Sklearn", "pandas DataFrames as model input"],
+  ["04-Linear-Algebra-Refresher", "05-Distances-Timeseries", "vectors, norms & matrix representations"],
 
   // Clustering
-  ["05-Distances-Timeseries", "06-Clustering-I-kmeans"],
-  ["05A-Learning", "06-Clustering-I-kmeans"],
-  ["06-Clustering-I-kmeans", "07-Clustering-II-in-practice"],
-  ["02C-Sklearn", "07-Clustering-II-in-practice"],
-  ["06-Clustering-I-kmeans", "08-Clustering-III-hierarchical"],
-  ["05-Distances-Timeseries", "08-Clustering-III-hierarchical"],
-  ["06-Clustering-I-kmeans", "09-Clustering-IV-GMM-EM"],
-  ["03-Probability-and-Statistics-Refresher", "09-Clustering-IV-GMM-EM"],
-  ["09-Clustering-IV-GMM-EM", "09A-Appendix-Derive-MLE-params-for-gaussian"],
-  ["09-Clustering-IV-GMM-EM", "09B-Appendix-Cov-Matrix-in-MV-Gaussians"],
-  ["09-Clustering-IV-GMM-EM", "09C-Appendix-complete-data-likelihood"],
-  ["09-Clustering-IV-GMM-EM", "09D-Appendix-Derive-the-E-step"],
-  ["09C-Appendix-complete-data-likelihood", "09D-Appendix-Derive-the-E-step"],
+  ["05-Distances-Timeseries", "06-Clustering-I-kmeans", "distance metrics (Euclidean)"],
+  ["05A-Learning", "06-Clustering-I-kmeans", "supervised vs. unsupervised learning framing"],
+  ["06-Clustering-I-kmeans", "07-Clustering-II-in-practice", "the k-means objective & algorithm"],
+  ["02C-Sklearn", "07-Clustering-II-in-practice", "scikit-learn fit/predict workflow"],
+  ["06-Clustering-I-kmeans", "08-Clustering-III-hierarchical", "k-means partitional clustering (contrast)"],
+  ["05-Distances-Timeseries", "08-Clustering-III-hierarchical", "distance metrics for linkage"],
+  ["06-Clustering-I-kmeans", "09-Clustering-IV-GMM-EM", "k-means hard assignment (contrast w/ soft)"],
+  ["03-Probability-and-Statistics-Refresher", "09-Clustering-IV-GMM-EM", "Gaussian distribution & likelihood"],
+  ["09-Clustering-IV-GMM-EM", "09A-Appendix-Derive-MLE-params-for-gaussian", "GMM Gaussian parameters (MLE)"],
+  ["09-Clustering-IV-GMM-EM", "09B-Appendix-Cov-Matrix-in-MV-Gaussians", "covariance matrix in multivariate Gaussians"],
+  ["09-Clustering-IV-GMM-EM", "09C-Appendix-complete-data-likelihood", "GMM generative model & latent variables"],
+  ["09-Clustering-IV-GMM-EM", "09D-Appendix-Derive-the-E-step", "GMM responsibilities / E-step"],
+  ["09C-Appendix-complete-data-likelihood", "09D-Appendix-Derive-the-E-step", "complete-data log-likelihood"],
 
   // Dimensionality Reduction
-  ["04-Linear-Algebra-Refresher", "10-Low-Rank-and-SVD"],
-  ["10-Low-Rank-and-SVD", "11-Dimensionality-Reduction-SVD-II"],
-  ["04-Linear-Algebra-Refresher", "11-Dimensionality-Reduction-SVD-II"],
-  ["10-Low-Rank-and-SVD", "12-Anomaly-Detection-SVD-III"],
-  ["11-Dimensionality-Reduction-SVD-II", "12-Anomaly-Detection-SVD-III"],
+  ["04-Linear-Algebra-Refresher", "10-Low-Rank-and-SVD", "orthonormal bases & matrix rank"],
+  ["10-Low-Rank-and-SVD", "11-Dimensionality-Reduction-SVD-II", "SVD & low-rank approximation"],
+  ["04-Linear-Algebra-Refresher", "11-Dimensionality-Reduction-SVD-II", "eigendecomposition"],
+  ["10-Low-Rank-and-SVD", "12-Anomaly-Detection-SVD-III", "SVD low-rank approximation"],
+  ["11-Dimensionality-Reduction-SVD-II", "12-Anomaly-Detection-SVD-III", "dimensionality reduction & residuals"],
 
   // Classification
-  ["05A-Learning", "13-Learning-From-Data"],
-  ["13-Learning-From-Data", "14-Classification-I-Decision-Trees"],
-  ["03-Probability-and-Statistics-Refresher", "14-Classification-I-Decision-Trees"],
-  ["14-Classification-I-Decision-Trees", "15-Classification-II-kNN"],
-  ["05-Distances-Timeseries", "15-Classification-II-kNN"],
-  ["03-Probability-and-Statistics-Refresher", "15-Classification-II-kNN"],
-  ["14-Classification-I-Decision-Trees", "16-Classification-III-NB-SVM"],
-  ["03-Probability-and-Statistics-Refresher", "16-Classification-III-NB-SVM"],
+  ["05A-Learning", "13-Learning-From-Data", "supervised learning framing"],
+  ["13-Learning-From-Data", "14-Classification-I-Decision-Trees", "generalization, train/test setup"],
+  ["03-Probability-and-Statistics-Refresher", "14-Classification-I-Decision-Trees", "entropy & probability (information gain)"],
+  ["14-Classification-I-Decision-Trees", "15-Classification-II-kNN", "classification & model evaluation"],
+  ["05-Distances-Timeseries", "15-Classification-II-kNN", "distance metrics & feature scaling"],
+  ["03-Probability-and-Statistics-Refresher", "15-Classification-II-kNN", "probability for error / model selection"],
+  ["14-Classification-I-Decision-Trees", "16-Classification-III-NB-SVM", "the classification framework"],
+  ["03-Probability-and-Statistics-Refresher", "16-Classification-III-NB-SVM", "Bayes' rule & conditional probability"],
 
   // Regression
-  ["04-Linear-Algebra-Refresher", "17-Regression-I-Linear"],
-  ["17-Regression-I-Linear", "18-Regression-II-Logistic"],
-  ["14-Classification-I-Decision-Trees", "18A-decision-tree-regression"],
-  ["17-Regression-I-Linear", "18A-decision-tree-regression"],
-  ["18A-decision-tree-regression", "18B-gradient-boosting-methods"],
-  ["14-Classification-I-Decision-Trees", "18B-gradient-boosting-methods"],
-  ["17-Regression-I-Linear", "19-Regression-III-More-Linear"],
-  ["11-Dimensionality-Reduction-SVD-II", "19-Regression-III-More-Linear"],
-  ["14-Classification-I-Decision-Trees", "19-Regression-III-More-Linear"],
+  ["04-Linear-Algebra-Refresher", "17-Regression-I-Linear", "matrix/vector algebra, least squares"],
+  ["17-Regression-I-Linear", "18-Regression-II-Logistic", "the linear regression model"],
+  ["14-Classification-I-Decision-Trees", "18A-decision-tree-regression", "decision trees & splitting"],
+  ["17-Regression-I-Linear", "18A-decision-tree-regression", "regression targets & prediction"],
+  ["18A-decision-tree-regression", "18B-gradient-boosting-methods", "regression trees & random forests"],
+  ["14-Classification-I-Decision-Trees", "18B-gradient-boosting-methods", "decision trees & ensembles"],
+  ["17-Regression-I-Linear", "19-Regression-III-More-Linear", "linear regression & least squares"],
+  ["11-Dimensionality-Reduction-SVD-II", "19-Regression-III-More-Linear", "overfitting & dimensionality"],
+  ["14-Classification-I-Decision-Trees", "19-Regression-III-More-Linear", "overfitting in models"],
 
   // Selected topics: recommenders & networks
-  ["10-Low-Rank-and-SVD", "20-Recommender-Systems-I"],
-  ["11-Dimensionality-Reduction-SVD-II", "20-Recommender-Systems-I"],
-  ["20-Recommender-Systems-I", "20-Recommender-Systems-II"],
-  ["03-Probability-and-Statistics-Refresher", "21-Networks-I"],
-  ["21-Networks-I", "22-Networks-II-Centrality-Clustering"],
-  ["04-Linear-Algebra-Refresher", "22-Networks-II-Centrality-Clustering"],
+  ["10-Low-Rank-and-SVD", "20-Recommender-Systems-I", "SVD / low-rank factorization"],
+  ["11-Dimensionality-Reduction-SVD-II", "20-Recommender-Systems-I", "matrix factorization / dim. reduction"],
+  ["20-Recommender-Systems-I", "20-Recommender-Systems-II", "matrix factorization R ≈ WVᵀ"],
+  ["03-Probability-and-Statistics-Refresher", "21-Networks-I", "power-law / Pareto distributions"],
+  ["21-Networks-I", "22-Networks-II-Centrality-Clustering", "graphs & network basics"],
+  ["04-Linear-Algebra-Refresher", "22-Networks-II-Centrality-Clustering", "eigenvectors (graph Laplacian)"],
 
   // Neural networks
-  ["17-Regression-I-Linear", "23-NN-I-Gradient-Descent"],
-  ["23-NN-I-Gradient-Descent", "24-NN-II-Backprop"],
-  ["18-Regression-II-Logistic", "24-NN-II-Backprop"],
-  ["24-NN-II-Backprop", "25-NN-III-CNNs"],
-  ["23-NN-I-Gradient-Descent", "25-NN-III-CNNs"],
-  ["24-NN-II-Backprop", "29-NN-IV-Scikit-Learn"],
-  ["25-NN-III-CNNs", "29-NN-IV-Scikit-Learn"],
-  ["02C-Sklearn", "29-NN-IV-Scikit-Learn"],
-  ["18-Regression-II-Logistic", "30-NN-consolidated"],
-  ["23-NN-I-Gradient-Descent", "30-NN-consolidated"],
-  ["24-NN-II-Backprop", "30-NN-consolidated"],
-  ["29-NN-IV-Scikit-Learn", "30-NN-consolidated"],
+  ["17-Regression-I-Linear", "23-NN-I-Gradient-Descent", "linear model & squared-error loss"],
+  ["23-NN-I-Gradient-Descent", "24-NN-II-Backprop", "gradient descent"],
+  ["18-Regression-II-Logistic", "24-NN-II-Backprop", "logistic / sigmoid neuron"],
+  ["24-NN-II-Backprop", "25-NN-III-CNNs", "backprop & MLP training"],
+  ["23-NN-I-Gradient-Descent", "25-NN-III-CNNs", "gradient descent → SGD"],
+  ["24-NN-II-Backprop", "29-NN-IV-Scikit-Learn", "MLP architecture & backprop"],
+  ["25-NN-III-CNNs", "29-NN-IV-Scikit-Learn", "training (SGD, batches)"],
+  ["02C-Sklearn", "29-NN-IV-Scikit-Learn", "scikit-learn estimator API"],
+  ["18-Regression-II-Logistic", "30-NN-consolidated", "logistic regression"],
+  ["23-NN-I-Gradient-Descent", "30-NN-consolidated", "gradient descent"],
+  ["24-NN-II-Backprop", "30-NN-consolidated", "backprop & MLP"],
+  ["29-NN-IV-Scikit-Learn", "30-NN-consolidated", "scikit-learn MLP"],
 
   // Time series & NLP
-  ["02B-Pandas", "26-TimeSeries"],
-  ["05-Distances-Timeseries", "26-TimeSeries"],
-  ["24-NN-II-Backprop", "27-RNN"],
-  ["26-TimeSeries", "27-RNN"],
-  ["05-Distances-Timeseries", "28-NLP"],
-  ["07-Clustering-II-in-practice", "28-NLP"],
-  ["27-RNN", "28-NLP"],
-  ["28-NLP", "nlp_packages_overview"],
+  ["02B-Pandas", "26-TimeSeries", "pandas datetime / time-series tooling"],
+  ["05-Distances-Timeseries", "26-TimeSeries", "time-series data & distances"],
+  ["24-NN-II-Backprop", "27-RNN", "backprop & network training"],
+  ["26-TimeSeries", "27-RNN", "sequential / time-series data"],
+  ["05-Distances-Timeseries", "28-NLP", "cosine similarity / distances"],
+  ["07-Clustering-II-in-practice", "28-NLP", "TF-IDF & document vectors"],
+  ["27-RNN", "28-NLP", "RNNs & LSTMs"],
+  ["28-NLP", "nlp_packages_overview", "NLP concepts (tokenization, embeddings, topics)"],
 
   // Causal inference
-  ["17-Regression-I-Linear", "31-Causal-Inference-I"],
-  ["31-Causal-Inference-I", "32-Causal-Inference-II"],
+  ["17-Regression-I-Linear", "31-Causal-Inference-I", "regression as association (not causation)"],
+  ["31-Causal-Inference-I", "32-Causal-Inference-II", "potential outcomes & selection bias"],
 ];
 
 // ============================================================
@@ -384,7 +409,7 @@ NODES.forEach((n, i) => {
 // filter edges to those with valid endpoints (ignore placeholder)
 let edges = EDGES
   .filter(e => nodeById.has(e[0]) && nodeById.has(e[1]))
-  .map(e => ({ source: nodeById.get(e[0]), target: nodeById.get(e[1]) }));
+  .map(e => ({ source: nodeById.get(e[0]), target: nodeById.get(e[1]), topic: e[2] || "" }));
 
 // adjacency for hover highlight
 const neighbors = new Map();
@@ -494,7 +519,16 @@ edges.forEach(e => {
   line.setAttribute("class", "edge");
   line.setAttribute("marker-end", "url(#arrow)");
   EDGE_LAYER.appendChild(line);
-  edgeEls.push({ e, line });
+  // wide, invisible path on top to make the thin edge easy to hover
+  const hit = document.createElementNS(SVGNS, "path");
+  hit.setAttribute("class", "edge-hit");
+  EDGE_LAYER.appendChild(hit);
+  const rec = { e, line, hit };
+  edgeEls.push(rec);
+
+  hit.addEventListener("pointerenter", (ev) => onEdgeEnter(ev, rec));
+  hit.addEventListener("pointermove", (ev) => positionTooltip(ev));
+  hit.addEventListener("pointerleave", () => onEdgeLeave(rec));
 });
 
 // ============================================================
@@ -628,11 +662,13 @@ function render() {
     const el = nodeEls.get(n.id);
     el.g.setAttribute("transform", `translate(${n.x.toFixed(2)}, ${n.y.toFixed(2)})`);
   }
-  for (const { e, line } of edgeEls) {
+  for (const { e, line, hit } of edgeEls) {
     const s = e.source, t = e.target;
     const p1 = clipToRect(s, t.x, t.y);
     const p2 = clipToRect(t, s.x, s.y);
-    line.setAttribute("d", `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} L ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`);
+    const d = `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} L ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+    line.setAttribute("d", d);
+    hit.setAttribute("d", d);
   }
 }
 
@@ -723,6 +759,45 @@ function setHover(n) {
     line.setAttribute("marker-end", on ? "url(#arrow-hi)" : "url(#arrow)");
   });
 }
+
+// ---- Edge tooltips ----
+let edgeTipsOn = true;
+const tooltipEl = document.getElementById("tooltip");
+
+function onEdgeEnter(ev, rec) {
+  if (!edgeTipsOn) return;
+  rec.line.classList.add("hi");
+  rec.line.setAttribute("marker-end", "url(#arrow-hi)");
+  const e = rec.e;
+  const topic = e.topic || "(prerequisite)";
+  tooltipEl.innerHTML =
+    `<div class="tt-path"><b>${escapeHtml(e.source.label)}</b> → <b>${escapeHtml(e.target.label)}</b></div>` +
+    `<div class="tt-topic">${escapeHtml(topic)}</div>`;
+  tooltipEl.hidden = false;
+  positionTooltip(ev);
+}
+function onEdgeLeave(rec) {
+  rec.line.classList.remove("hi");
+  rec.line.setAttribute("marker-end", "url(#arrow)");
+  tooltipEl.hidden = true;
+}
+function positionTooltip(ev) {
+  if (tooltipEl.hidden) return;
+  const pad = 14, w = tooltipEl.offsetWidth, h = tooltipEl.offsetHeight;
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + w > window.innerWidth - 8) x = ev.clientX - w - pad;
+  if (y + h > window.innerHeight - 8) y = ev.clientY - h - pad;
+  tooltipEl.style.left = Math.max(4, x) + "px";
+  tooltipEl.style.top = Math.max(4, y) + "px";
+}
+function escapeHtml(s) {
+  return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+document.getElementById("edgeTips").addEventListener("change", (ev) => {
+  edgeTipsOn = ev.target.checked;
+  edgeEls.forEach(({ hit }) => hit.classList.toggle("off", !edgeTipsOn));
+  if (!edgeTipsOn) tooltipEl.hidden = true;
+});
 
 // ---- Toolbar ----
 document.getElementById("orient").addEventListener("click", (ev) => {
