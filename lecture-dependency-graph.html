@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DS701 Lecture Dependency Graph</title>
+<style>
+  :root {
+    --bg: #0f1420;
+    --panel: #182033;
+    --panel-border: #2a3550;
+    --text: #e7ecf5;
+    --muted: #9aa7c2;
+    --edge: #66748f;
+    --edge-hi: #ffd166;
+    --accent: #4da3ff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+  }
+  #app { position: relative; width: 100vw; height: 100vh; }
+
+  #toolbar {
+    position: absolute; top: 12px; left: 12px; z-index: 10;
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    background: rgba(24,32,51,0.92);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    max-width: calc(100vw - 24px);
+    align-items: stretch;
+  }
+  #toolbar .group { display: flex; gap: 6px; align-items: center; }
+  .title { font-weight: 700; font-size: 14px; margin-right: 2px; letter-spacing: 0.2px; align-self: center; }
+  .hint { color: var(--muted); font-size: 11px; }
+
+  /* light grouping of related controls */
+  .section {
+    display: flex; flex-direction: column; gap: 5px;
+    padding: 5px 8px 6px;
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+  }
+  .section > .cap {
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.7px;
+    color: var(--muted); font-weight: 600; opacity: 0.85;
+  }
+  .section > .rows { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+  .slider { display: inline-flex; align-items: center; gap: 5px; }
+  .chk { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text); cursor: pointer; user-select: none; }
+  .chk input { accent-color: var(--accent); cursor: pointer; }
+
+  #tooltip {
+    position: fixed; z-index: 20; pointer-events: none;
+    max-width: 260px;
+    background: rgba(16,22,38,0.97);
+    color: var(--text);
+    border: 1px solid var(--edge-hi);
+    border-radius: 8px;
+    padding: 7px 9px;
+    font-size: 12px; line-height: 1.35;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  }
+  #tooltip[hidden] { display: none; }
+  #tooltip .tt-path { color: var(--muted); font-size: 10.5px; margin-bottom: 3px; }
+  #tooltip .tt-path b { color: var(--text); font-weight: 600; }
+  #tooltip .tt-topic { font-weight: 600; }
+  #tooltip.node-tip { max-width: 320px; }
+  #tooltip .tt-title { font-weight: 700; border-left: 3px solid #888; padding-left: 7px; margin-bottom: 5px; }
+  #tooltip .tt-outline { max-height: 74vh; overflow: hidden; }
+  #tooltip .tt-h1 { font-weight: 600; margin-top: 4px; }
+  #tooltip .tt-h1:first-child { margin-top: 0; }
+  #tooltip .tt-h2 { color: var(--muted); padding-left: 11px; font-size: 11px; line-height: 1.3; }
+  #tooltip .tt-more { color: var(--muted); font-style: italic; margin-top: 4px; }
+
+  button, .seg {
+    font: inherit; font-size: 12px;
+    color: var(--text);
+    background: #223052;
+    border: 1px solid var(--panel-border);
+    border-radius: 7px;
+    padding: 5px 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  button:hover, .seg:hover { background: #2b3c66; }
+  input[type="range"] { width: 96px; accent-color: var(--accent); cursor: pointer; vertical-align: middle; }
+  .slider-val { width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+  .seg-wrap { display: inline-flex; border: 1px solid var(--panel-border); border-radius: 7px; overflow: hidden; }
+  .seg-wrap .seg { border: none; border-radius: 0; background: #1b2540; }
+  .seg-wrap .seg.active { background: var(--accent); color: #0b1220; font-weight: 700; }
+
+  #legend {
+    position: absolute; top: 12px; right: 12px; z-index: 10;
+    background: rgba(24,32,51,0.92);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    font-size: 12px;
+    max-height: calc(100vh - 24px);
+    overflow: auto;
+  }
+  #legend h3 { margin: 0 0 6px; font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; }
+  #legend .row { display: flex; align-items: center; gap: 8px; padding: 2px 0; cursor: default; }
+  #legend .swatch { width: 12px; height: 12px; border-radius: 3px; flex: 0 0 auto; }
+
+  #hintbar {
+    position: absolute; bottom: 10px; left: 12px; z-index: 10;
+    color: var(--muted); font-size: 11px;
+    background: rgba(24,32,51,0.7);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px; padding: 6px 10px;
+  }
+
+  svg { width: 100%; height: 100%; display: block; cursor: grab; }
+  svg.panning { cursor: grabbing; }
+
+  .edge { stroke: var(--edge); stroke-width: 1.6; fill: none; opacity: 0.75; }
+  .edge.hi { stroke: var(--edge-hi); stroke-width: 2.6; opacity: 1; }
+  .edge.dim { opacity: 0.12; }
+  .edge-hit { stroke: transparent; stroke-width: 14; fill: none; pointer-events: stroke; cursor: help; }
+  .edge-hit.off { pointer-events: none; cursor: default; }
+
+  .node-rect {
+    stroke: rgba(255,255,255,0.18);
+    stroke-width: 1.2;
+    rx: 9;
+  }
+  .node.pinned .node-rect { stroke: var(--edge-hi); stroke-width: 2.2; }
+  .node.dim { opacity: 0.25; }
+  .node-label { fill: #0d1526; font-size: 11px; font-weight: 600; pointer-events: none; }
+  .node-body { cursor: grab; }
+  .node.dragging .node-body { cursor: grabbing; }
+
+  .pin-btn { cursor: pointer; }
+  .pin-btn circle { fill: rgba(13,21,38,0.55); stroke: rgba(255,255,255,0.35); stroke-width: 1; }
+  .pin-btn:hover circle { fill: rgba(13,21,38,0.85); }
+  .pin-glyph { pointer-events: none; font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="toolbar">
+    <span class="title">DS701 · Lecture Dependencies</span>
+
+    <div class="section">
+      <span class="cap">Orientation</span>
+      <div class="rows">
+        <div class="seg-wrap" id="orient">
+          <div class="seg active" data-orient="TB">Top → Bottom</div>
+          <div class="seg" data-orient="LR">Left → Right</div>
+        </div>
+        <label class="slider"><span class="hint">Hierarchy</span>
+          <input type="range" id="hierStrength" min="0" max="2" step="0.05" value="0.65" />
+          <span class="hint slider-val" id="hierStrengthVal">0.65×</span></label>
+        <label class="slider"><span class="hint">Flow spacing</span>
+          <input type="range" id="layerGap" min="40" max="400" step="5" value="130" />
+          <span class="hint slider-val" id="layerGapVal">130</span></label>
+      </div>
+    </div>
+
+    <div class="section">
+      <span class="cap">Forces</span>
+      <div class="rows">
+        <label class="slider"><span class="hint">Spring</span>
+          <input type="range" id="springScale" min="0.3" max="2.5" step="0.05" value="1" />
+          <span class="hint slider-val" id="springVal">1.00×</span></label>
+        <label class="slider"><span class="hint">Repel · same area</span>
+          <input type="range" id="repelIntra" min="0.2" max="12" step="0.1" value="1" />
+          <span class="hint slider-val" id="repelIntraVal">1.00×</span></label>
+        <label class="slider"><span class="hint">Repel · diff area</span>
+          <input type="range" id="repelInter" min="0.2" max="16" step="0.1" value="1.9" />
+          <span class="hint slider-val" id="repelInterVal">1.90×</span></label>
+        <label class="slider"><span class="hint">Center gravity</span>
+          <input type="range" id="gravity" min="0" max="0.05" step="0.001" value="0.01" />
+          <span class="hint slider-val" id="gravityVal">0.010</span></label>
+      </div>
+    </div>
+
+    <div class="section">
+      <span class="cap">Actions</span>
+      <div class="rows">
+        <button id="reheat">Re-layout</button>
+        <button id="unpinAll">Unpin all</button>
+        <button id="fit">Fit view</button>
+        <label class="chk"><input type="checkbox" id="edgeTips" checked /> Edge tooltips</label>
+        <label class="chk"><input type="checkbox" id="nodeTips" checked /> Node tooltips</label>
+      </div>
+    </div>
+  </div>
+
+  <div id="legend"><h3>Curriculum area</h3></div>
+  <div id="hintbar">Drag a node to move it · connected nodes follow with spring · hover an edge for the shared topic · click the ○ pin (top-right) to lock a node · scroll to zoom · drag background to pan</div>
+
+  <svg id="svg">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#66748f"></path>
+      </marker>
+      <marker id="arrow-hi" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#ffd166"></path>
+      </marker>
+    </defs>
+    <g id="viewport">
+      <g id="edges"></g>
+      <g id="nodes"></g>
+    </g>
+  </svg>
+
+  <div id="tooltip" hidden></div>
+</div>
+
+<script src="graph-data.js"></script>
+<script>
+/* ============================================================
+   DS701 lecture dependency graph
+   Hand-rolled force (spring) simulation + SVG.
+   Graph data (nodes, edges, per-lecture headings) is loaded from the
+   separate graph-data.js (see the <script src> above) so it can be
+   reused by other tooling. Everything here is presentation/behavior.
+   ============================================================ */
+
+// ---- Curriculum sections (color coded) ----
+const SECTIONS = {
+  "Introduction":            "#8892a6",
+  "Preliminaries":           "#4da3ff",
+  "Clustering":              "#39c07a",
+  "Dimensionality Reduction":"#c792ea",
+  "Classification":          "#ffab5e",
+  "Regression":              "#ff6b8b",
+  "Neural Networks":         "#f25c5c",
+  "Selected Topics":         "#5ad1d1",
+  "Causal Inference":        "#e6c84a",
+};
+
+// ---- Graph data from graph-data.js (see shapes documented there) ----
+const NODES = GRAPH.nodes;        // { id, label, section }
+const EDGES = GRAPH.edges;        // [ prereqId, dependentId, sharedTopic ]  (arrow prereq -> dependent)
+const HEADINGS = GRAPH.headings;  // { lectureId: [ [level(1|2), text], ... ] }
+
+// ============================================================
+//  Everything below is generic; data above drives it.
+// ============================================================
+const SVG = document.getElementById("svg");
+const VIEWPORT = document.getElementById("viewport");
+const EDGE_LAYER = document.getElementById("edges");
+const NODE_LAYER = document.getElementById("nodes");
+const SVGNS = "http://www.w3.org/2000/svg";
+
+let W = window.innerWidth, H = window.innerHeight;
+
+// ---- Build node index ----
+const nodeById = new Map();
+NODES.forEach((n, i) => {
+  n.index = i;
+  // deterministic-ish initial spread (no Math.random dependence for reproducibility)
+  const ang = (i * 2.399963); // golden angle
+  const rad = 40 + 26 * Math.sqrt(i);
+  n.x = W / 2 + rad * Math.cos(ang);
+  n.y = H / 2 + rad * Math.sin(ang);
+  n.vx = 0; n.vy = 0;
+  n.pinned = false;
+  n.fx = null; n.fy = null; // fixed (drag) target
+  nodeById.set(n.id, n);
+});
+
+// filter edges to those with valid endpoints (ignore placeholder)
+let edges = EDGES
+  .filter(e => nodeById.has(e[0]) && nodeById.has(e[1]))
+  .map(e => ({ source: nodeById.get(e[0]), target: nodeById.get(e[1]), topic: e[2] || "" }));
+
+// adjacency for hover highlight
+const neighbors = new Map();
+NODES.forEach(n => neighbors.set(n.id, new Set()));
+edges.forEach(e => {
+  neighbors.get(e.source.id).add(e.target.id);
+  neighbors.get(e.target.id).add(e.source.id);
+});
+
+// ---- Text wrapping + node sizing ----
+const NODE_W = 158;
+const PAD_X = 10, PAD_Y = 8, LINE_H = 14;
+function wrapLabel(text, maxChars) {
+  const words = text.split(/\s+/);
+  const lines = [];
+  let cur = "";
+  for (const w of words) {
+    if (!cur) { cur = w; }
+    else if ((cur + " " + w).length <= maxChars) { cur += " " + w; }
+    else { lines.push(cur); cur = w; }
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+NODES.forEach(n => {
+  n.lines = wrapLabel(n.label, 22);
+  n.w = NODE_W;
+  n.h = n.lines.length * LINE_H + PAD_Y * 2;
+  n.hw = n.w / 2;
+  n.hh = n.h / 2;
+});
+
+// ---- Build legend ----
+const legend = document.getElementById("legend");
+Object.entries(SECTIONS).forEach(([name, color]) => {
+  const row = document.createElement("div");
+  row.className = "row";
+  row.innerHTML = `<span class="swatch" style="background:${color}"></span><span>${name}</span>`;
+  legend.appendChild(row);
+});
+
+// ---- Render node DOM ----
+const nodeEls = new Map();
+NODES.forEach(n => {
+  const g = document.createElementNS(SVGNS, "g");
+  g.setAttribute("class", "node");
+  g.dataset.id = n.id;
+
+  const body = document.createElementNS(SVGNS, "g");
+  body.setAttribute("class", "node-body");
+
+  const rect = document.createElementNS(SVGNS, "rect");
+  rect.setAttribute("class", "node-rect");
+  rect.setAttribute("width", n.w);
+  rect.setAttribute("height", n.h);
+  rect.setAttribute("x", -n.hw);
+  rect.setAttribute("y", -n.hh);
+  rect.setAttribute("rx", 9);
+  rect.setAttribute("fill", SECTIONS[n.section] || "#888");
+  body.appendChild(rect);
+
+  const text = document.createElementNS(SVGNS, "text");
+  text.setAttribute("class", "node-label");
+  text.setAttribute("text-anchor", "middle");
+  const startY = -n.hh + PAD_Y + 10;
+  n.lines.forEach((ln, i) => {
+    const ts = document.createElementNS(SVGNS, "tspan");
+    ts.setAttribute("x", 0);
+    ts.setAttribute("y", startY + i * LINE_H);
+    ts.textContent = ln;
+    text.appendChild(ts);
+  });
+  body.appendChild(text);
+  g.appendChild(body);
+
+  // pin button, top-right corner
+  const pin = document.createElementNS(SVGNS, "g");
+  pin.setAttribute("class", "pin-btn");
+  pin.setAttribute("transform", `translate(${n.hw - 11}, ${-n.hh + 11})`);
+  const pc = document.createElementNS(SVGNS, "circle");
+  pc.setAttribute("r", 9);
+  const pg = document.createElementNS(SVGNS, "text");
+  pg.setAttribute("class", "pin-glyph");
+  pg.setAttribute("text-anchor", "middle");
+  pg.setAttribute("dominant-baseline", "central");
+  pg.setAttribute("y", 1);
+  pg.textContent = "○";
+  pin.appendChild(pc);
+  pin.appendChild(pg);
+  g.appendChild(pin);
+
+  NODE_LAYER.appendChild(g);
+  nodeEls.set(n.id, { g, rect, pin, pinGlyph: pg });
+
+  // interactions
+  body.addEventListener("pointerdown", (ev) => startDrag(ev, n));
+  body.addEventListener("pointerenter", (ev) => onNodeEnter(ev, n));
+  body.addEventListener("pointermove", (ev) => onNodeMove(ev, n));
+  body.addEventListener("pointerleave", () => onNodeLeave());
+  pin.addEventListener("pointerdown", (ev) => { ev.stopPropagation(); });
+  pin.addEventListener("click", (ev) => { ev.stopPropagation(); togglePin(n); });
+  // hovering the pin must NOT show the node tooltip (keep the pin area clear)
+  pin.addEventListener("pointerenter", () => { overPin = true; hideNodeTip(); });
+  pin.addEventListener("pointerleave", () => { overPin = false; });
+  g.addEventListener("pointerenter", () => setHover(n));
+  g.addEventListener("pointerleave", () => setHover(null));
+});
+
+// ---- Render edge DOM ----
+const edgeEls = [];
+edges.forEach(e => {
+  const line = document.createElementNS(SVGNS, "path");
+  line.setAttribute("class", "edge");
+  line.setAttribute("marker-end", "url(#arrow)");
+  EDGE_LAYER.appendChild(line);
+  // wide, invisible path on top to make the thin edge easy to hover
+  const hit = document.createElementNS(SVGNS, "path");
+  hit.setAttribute("class", "edge-hit");
+  EDGE_LAYER.appendChild(hit);
+  const rec = { e, line, hit };
+  edgeEls.push(rec);
+
+  hit.addEventListener("pointerenter", (ev) => onEdgeEnter(ev, rec));
+  hit.addEventListener("pointermove", (ev) => positionTooltip(ev));
+  hit.addEventListener("pointerleave", () => onEdgeLeave(rec));
+});
+
+// ============================================================
+//  Force simulation
+// ============================================================
+let orient = "TB";
+const CFG = {
+  repel: 5200,       // base node-node repulsion strength
+  spring: 0.045,     // base edge spring stiffness
+  restLen: 150,      // edge rest length
+  damping: 0.86,
+  maxV: 22,
+  collidePad: 12,
+};
+let springScale = 1.0;  // global multiplier on all spring stiffness (slider-controlled)
+let repelIntra = 1.0;   // repulsion multiplier for nodes in the SAME curriculum area
+let repelInter = 1.9;   // repulsion multiplier for nodes in DIFFERENT areas (pushes areas apart)
+let gravity = 0.010;    // pull of every node toward the canvas center (slider-controlled)
+let hierStrength = 0.65; // how strongly edge orientation is enforced (0 = undirected layout)
+let layerGap = 130;     // desired prereq->dependent separation along the orientation axis (px)
+let alpha = 1.0;        // "temperature"; decays over time, reheats on interaction
+const ALPHA_DECAY = 0.992;
+const ALPHA_MIN = 0.02;
+
+function reheat(v = 1.0) { alpha = Math.max(alpha, v); }
+
+function step() {
+  const nodes = NODES;
+  // reset forces
+  for (const n of nodes) { n.ax = 0; n.ay = 0; }
+
+  // repulsion (O(n^2), fine for this size)
+  for (let i = 0; i < nodes.length; i++) {
+    const a = nodes[i];
+    for (let j = i + 1; j < nodes.length; j++) {
+      const b = nodes[j];
+      let dx = a.x - b.x, dy = a.y - b.y;
+      let d2 = dx * dx + dy * dy;
+      if (d2 < 0.01) { dx = (i - j) * 0.1 + 0.5; dy = 0.3; d2 = dx*dx+dy*dy; }
+      const d = Math.sqrt(d2);
+      // nodes in different curriculum areas repel each other more than same-area nodes
+      const areaScale = (a.section === b.section) ? repelIntra : repelInter;
+      const f = CFG.repel * areaScale / d2;
+      const ux = dx / d, uy = dy / d;
+      a.ax += ux * f; a.ay += uy * f;
+      b.ax -= ux * f; b.ay -= uy * f;
+
+      // soft collision to reduce rectangle overlap
+      const minDx = a.hw + b.hw + CFG.collidePad;
+      const minDy = a.hh + b.hh + CFG.collidePad;
+      const ox = minDx - Math.abs(dx);
+      const oy = minDy - Math.abs(dy);
+      if (ox > 0 && oy > 0) {
+        if (ox < oy) {
+          const push = ox * 0.5 * (dx >= 0 ? 1 : -1);
+          a.ax += push * 0.08; b.ax -= push * 0.08;
+        } else {
+          const push = oy * 0.5 * (dy >= 0 ? 1 : -1);
+          a.ay += push * 0.08; b.ay -= push * 0.08;
+        }
+      }
+    }
+  }
+
+  // edge springs + hierarchical alignment
+  for (const e of edges) {
+    const s = e.source, t = e.target;
+    let dx = t.x - s.x, dy = t.y - s.y;
+    let d = Math.sqrt(dx * dx + dy * dy) || 0.01;
+    const diff = (d - CFG.restLen) / d * (CFG.spring * springScale);
+    const fx = dx * diff, fy = dy * diff;
+    s.ax += fx; s.ay += fy;
+    t.ax -= fx; t.ay -= fy;
+
+    // orientation: target should sit ~layerGap "after" source along the axis.
+    // err > 0 => too far apart; err < 0 => target is before/too close to source.
+    const hk = hierStrength * 0.5;
+    if (orient === "TB") {
+      const err = (t.y - s.y) - layerGap;
+      t.ay -= err * hk;   // pull target toward desired offset
+      s.ay += err * hk;   // symmetric reaction on source
+      // gentle cross-axis alignment (stack children under parents)
+      const ex = (t.x - s.x) * 0.008;
+      t.ax -= ex; s.ax += ex;
+    } else {
+      const err = (t.x - s.x) - layerGap;
+      t.ax -= err * hk;
+      s.ax += err * hk;
+      const ey = (t.y - s.y) * 0.008;
+      t.ay -= ey; s.ay += ey;
+    }
+  }
+
+  // gravity toward center + integrate
+  const cx = W / 2, cy = H / 2;
+  for (const n of nodes) {
+    if (n.fx !== null) { // being dragged
+      n.x = n.fx; n.y = n.fy; n.vx = 0; n.vy = 0; continue;
+    }
+    if (n.pinned) { n.vx = 0; n.vy = 0; continue; }
+
+    n.ax += (cx - n.x) * gravity;
+    n.ay += (cy - n.y) * gravity;
+
+    n.vx = (n.vx + n.ax * alpha) * CFG.damping;
+    n.vy = (n.vy + n.ay * alpha) * CFG.damping;
+    // clamp
+    n.vx = Math.max(-CFG.maxV, Math.min(CFG.maxV, n.vx));
+    n.vy = Math.max(-CFG.maxV, Math.min(CFG.maxV, n.vy));
+    n.x += n.vx;
+    n.y += n.vy;
+  }
+
+  if (alpha > ALPHA_MIN) alpha *= ALPHA_DECAY;
+}
+
+// ---- boundary clip of edge to node rectangles ----
+function clipToRect(node, fromX, fromY) {
+  // returns point on node's rectangle border along direction from (fromX,fromY) to node center
+  const dx = node.x - fromX, dy = node.y - fromY;
+  if (dx === 0 && dy === 0) return { x: node.x, y: node.y };
+  const hw = node.hw + 2, hh = node.hh + 2;
+  const scaleX = dx !== 0 ? hw / Math.abs(dx) : Infinity;
+  const scaleY = dy !== 0 ? hh / Math.abs(dy) : Infinity;
+  const s = Math.min(scaleX, scaleY);
+  return { x: node.x - dx * s, y: node.y - dy * s };
+}
+
+function render() {
+  for (const n of NODES) {
+    const el = nodeEls.get(n.id);
+    el.g.setAttribute("transform", `translate(${n.x.toFixed(2)}, ${n.y.toFixed(2)})`);
+  }
+  for (const { e, line, hit } of edgeEls) {
+    const s = e.source, t = e.target;
+    const p1 = clipToRect(s, t.x, t.y);
+    const p2 = clipToRect(t, s.x, s.y);
+    const d = `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} L ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+    line.setAttribute("d", d);
+    hit.setAttribute("d", d);
+  }
+}
+
+function loop() {
+  step();
+  render();
+  requestAnimationFrame(loop);
+}
+
+// ============================================================
+//  Interaction: drag, pin, hover, pan/zoom
+// ============================================================
+let view = { x: 0, y: 0, k: 1 };
+function applyView() {
+  VIEWPORT.setAttribute("transform", `translate(${view.x},${view.y}) scale(${view.k})`);
+}
+function screenToWorld(clientX, clientY) {
+  const rect = SVG.getBoundingClientRect();
+  return {
+    x: (clientX - rect.left - view.x) / view.k,
+    y: (clientY - rect.top - view.y) / view.k,
+  };
+}
+
+let dragging = null;
+function startDrag(ev, n) {
+  ev.preventDefault();
+  ev.stopPropagation();
+  dragging = n;
+  const p = screenToWorld(ev.clientX, ev.clientY);
+  n._grabDx = n.x - p.x;
+  n._grabDy = n.y - p.y;
+  n.fx = n.x; n.fy = n.y;
+  nodeEls.get(n.id).g.classList.add("dragging");
+  reheat(0.9);
+  window.addEventListener("pointermove", onDragMove);
+  window.addEventListener("pointerup", onDragEnd);
+}
+function onDragMove(ev) {
+  if (!dragging) return;
+  const p = screenToWorld(ev.clientX, ev.clientY);
+  dragging.fx = p.x + dragging._grabDx;
+  dragging.fy = p.y + dragging._grabDy;
+  reheat(0.6);
+}
+function onDragEnd() {
+  if (!dragging) return;
+  const n = dragging;
+  nodeEls.get(n.id).g.classList.remove("dragging");
+  if (n.pinned) {
+    // keep it fixed exactly where dropped
+    n.x = n.fx; n.y = n.fy;
+  }
+  n.fx = null; n.fy = null;
+  dragging = null;
+  reheat(0.5);
+  window.removeEventListener("pointermove", onDragMove);
+  window.removeEventListener("pointerup", onDragEnd);
+}
+
+function togglePin(n) {
+  n.pinned = !n.pinned;
+  const el = nodeEls.get(n.id);
+  el.g.classList.toggle("pinned", n.pinned);
+  el.pinGlyph.textContent = n.pinned ? "📌" : "○";
+  if (n.pinned) { n.vx = 0; n.vy = 0; }
+  reheat(0.4);
+}
+
+// hover highlight
+let hovered = null;
+function setHover(n) {
+  hovered = n;
+  if (!n) {
+    NODES.forEach(m => nodeEls.get(m.id).g.classList.remove("dim"));
+    edgeEls.forEach(({ line }) => { line.classList.remove("hi"); line.classList.remove("dim"); line.setAttribute("marker-end", "url(#arrow)"); });
+    return;
+  }
+  const keep = neighbors.get(n.id);
+  NODES.forEach(m => {
+    const on = (m.id === n.id) || keep.has(m.id);
+    nodeEls.get(m.id).g.classList.toggle("dim", !on);
+  });
+  edgeEls.forEach(({ e, line }) => {
+    const on = (e.source.id === n.id || e.target.id === n.id);
+    line.classList.toggle("hi", on);
+    line.classList.toggle("dim", !on);
+    line.setAttribute("marker-end", on ? "url(#arrow-hi)" : "url(#arrow)");
+  });
+}
+
+// ---- Edge tooltips ----
+let edgeTipsOn = true;
+const tooltipEl = document.getElementById("tooltip");
+
+function onEdgeEnter(ev, rec) {
+  if (!edgeTipsOn) return;
+  rec.line.classList.add("hi");
+  rec.line.setAttribute("marker-end", "url(#arrow-hi)");
+  const e = rec.e;
+  const topic = e.topic || "(prerequisite)";
+  tooltipEl.innerHTML =
+    `<div class="tt-path"><b>${escapeHtml(e.source.label)}</b> → <b>${escapeHtml(e.target.label)}</b></div>` +
+    `<div class="tt-topic">${escapeHtml(topic)}</div>`;
+  tooltipEl.classList.remove("node-tip");
+  tooltipEl.dataset.kind = "edge";
+  tooltipEl.hidden = false;
+  positionTooltip(ev);
+}
+function onEdgeLeave(rec) {
+  rec.line.classList.remove("hi");
+  rec.line.setAttribute("marker-end", "url(#arrow)");
+  if (tooltipEl.dataset.kind === "edge") { tooltipEl.hidden = true; delete tooltipEl.dataset.kind; }
+}
+function positionTooltip(ev) {
+  if (tooltipEl.hidden) return;
+  const pad = 14, w = tooltipEl.offsetWidth, h = tooltipEl.offsetHeight;
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + w > window.innerWidth - 8) x = ev.clientX - w - pad;
+  if (y + h > window.innerHeight - 8) y = ev.clientY - h - pad;
+  tooltipEl.style.left = Math.max(4, x) + "px";
+  tooltipEl.style.top = Math.max(4, y) + "px";
+}
+function escapeHtml(s) {
+  return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+document.getElementById("edgeTips").addEventListener("change", (ev) => {
+  edgeTipsOn = ev.target.checked;
+  edgeEls.forEach(({ hit }) => hit.classList.toggle("off", !edgeTipsOn));
+  if (!edgeTipsOn && tooltipEl.dataset.kind === "edge") tooltipEl.hidden = true;
+});
+
+// ---- Node tooltips (lecture section outline: level-1 & level-2 headings) ----
+let nodeTipsOn = true;
+let overPin = false;         // pointer currently over a node's pin control
+const OUTLINE_CAP = 40;      // max heading rows before truncating with "+N more"
+
+function outlineHtml(n) {
+  const heads = HEADINGS[n.id] || [];
+  const shown = heads.slice(0, OUTLINE_CAP);
+  let rows = shown.map(([lvl, text]) =>
+    `<div class="${lvl === 1 ? "tt-h1" : "tt-h2"}">${escapeHtml(text)}</div>`).join("");
+  const extra = heads.length - shown.length;
+  if (extra > 0) rows += `<div class="tt-more">+${extra} more section${extra > 1 ? "s" : ""}…</div>`;
+  if (!heads.length) rows = `<div class="tt-more">no headings found</div>`;
+  const color = SECTIONS[n.section] || "#888";
+  return `<div class="tt-title" style="border-color:${color}">${escapeHtml(n.label)}</div>` +
+         `<div class="tt-outline">${rows}</div>`;
+}
+function showNodeTip(ev, n) {
+  tooltipEl.innerHTML = outlineHtml(n);
+  tooltipEl.dataset.kind = "node";
+  tooltipEl.dataset.id = n.id;
+  tooltipEl.classList.add("node-tip");
+  tooltipEl.hidden = false;
+  positionTooltip(ev);
+}
+function hideNodeTip() {
+  if (tooltipEl.dataset.kind === "node") {
+    tooltipEl.hidden = true;
+    tooltipEl.classList.remove("node-tip");
+    delete tooltipEl.dataset.kind;
+  }
+}
+function onNodeEnter(ev, n) {
+  if (!nodeTipsOn || dragging || overPin) return;
+  showNodeTip(ev, n);
+}
+function onNodeMove(ev, n) {
+  if (!nodeTipsOn || dragging || overPin) { hideNodeTip(); return; }
+  if (tooltipEl.hidden || tooltipEl.dataset.id !== n.id) showNodeTip(ev, n);
+  else positionTooltip(ev);
+}
+function onNodeLeave() { hideNodeTip(); }
+
+document.getElementById("nodeTips").addEventListener("change", (ev) => {
+  nodeTipsOn = ev.target.checked;
+  if (!nodeTipsOn) hideNodeTip();
+});
+
+// ---- Toolbar ----
+document.getElementById("orient").addEventListener("click", (ev) => {
+  const seg = ev.target.closest(".seg");
+  if (!seg) return;
+  document.querySelectorAll("#orient .seg").forEach(s => s.classList.remove("active"));
+  seg.classList.add("active");
+  orient = seg.dataset.orient;
+  reheat(1.0);
+});
+function bindSlider(id, valId, setter, fmt = v => v.toFixed(2) + "×") {
+  const s = document.getElementById(id), v = document.getElementById(valId);
+  const update = () => {
+    const val = parseFloat(s.value);
+    setter(val);
+    v.textContent = fmt(val);
+    reheat(0.7);
+  };
+  s.addEventListener("input", update);
+  update(); // sync label + state to initial slider value
+}
+bindSlider("springScale", "springVal", v => springScale = v);
+bindSlider("repelIntra", "repelIntraVal", v => repelIntra = v);
+bindSlider("repelInter", "repelInterVal", v => repelInter = v);
+bindSlider("gravity", "gravityVal", v => gravity = v, v => v.toFixed(3));
+bindSlider("hierStrength", "hierStrengthVal", v => hierStrength = v);
+bindSlider("layerGap", "layerGapVal", v => layerGap = v, v => v.toFixed(0));
+document.getElementById("reheat").addEventListener("click", () => reheat(1.0));
+document.getElementById("unpinAll").addEventListener("click", () => {
+  NODES.forEach(n => {
+    if (n.pinned) {
+      n.pinned = false;
+      const el = nodeEls.get(n.id);
+      el.g.classList.remove("pinned");
+      el.pinGlyph.textContent = "○";
+    }
+  });
+  reheat(0.8);
+});
+document.getElementById("fit").addEventListener("click", fitView);
+
+function fitView() {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const n of NODES) {
+    minX = Math.min(minX, n.x - n.hw);
+    minY = Math.min(minY, n.y - n.hh);
+    maxX = Math.max(maxX, n.x + n.hw);
+    maxY = Math.max(maxY, n.y + n.hh);
+  }
+  const pad = 60;
+  const bw = (maxX - minX) + pad * 2, bh = (maxY - minY) + pad * 2;
+  const k = Math.min(W / bw, H / bh, 1.4);
+  view.k = k;
+  view.x = -minX * k + (W - (maxX - minX) * k) / 2;
+  view.y = -minY * k + (H - (maxY - minY) * k) / 2;
+  applyView();
+}
+
+// ---- Pan & zoom on background ----
+let panning = null;
+SVG.addEventListener("pointerdown", (ev) => {
+  if (ev.target === SVG || ev.target.id === "viewport") {
+    panning = { x: ev.clientX - view.x, y: ev.clientY - view.y };
+    SVG.classList.add("panning");
+  }
+});
+window.addEventListener("pointermove", (ev) => {
+  if (!panning) return;
+  view.x = ev.clientX - panning.x;
+  view.y = ev.clientY - panning.y;
+  applyView();
+});
+window.addEventListener("pointerup", () => { panning = null; SVG.classList.remove("panning"); });
+SVG.addEventListener("wheel", (ev) => {
+  ev.preventDefault();
+  const rect = SVG.getBoundingClientRect();
+  const mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
+  const wx = (mx - view.x) / view.k, wy = (my - view.y) / view.k;
+  const factor = Math.exp(-ev.deltaY * 0.0015);
+  view.k = Math.max(0.25, Math.min(2.5, view.k * factor));
+  view.x = mx - wx * view.k;
+  view.y = my - wy * view.k;
+  applyView();
+}, { passive: false });
+
+window.addEventListener("resize", () => {
+  W = window.innerWidth; H = window.innerHeight;
+  reheat(0.3);
+});
+
+// ---- go ----
+loop();
+// let it settle, then fit
+let settleFrames = 0;
+const settleTimer = setInterval(() => {
+  settleFrames++;
+  if (settleFrames > 6 || alpha <= ALPHA_MIN) { fitView(); clearInterval(settleTimer); }
+}, 250);
+</script>
+</body>
+</html>
