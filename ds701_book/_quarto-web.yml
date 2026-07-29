@@ -46,6 +46,8 @@ project:
     - 28-NLP.qmd
     - 29-NN-IV-Scikit-Learn.qmd
     - 30-NN-consolidated.qmd
+    - 31-Causal-Inference-I.qmd
+    - 32-Causal-Inference-II.qmd
     - nlp_packages_overview.qmd
 
 resources:
@@ -121,6 +123,10 @@ website:
         - 27-RNN.qmd
         - 28-NLP.qmd
         - nlp_packages_overview.qmd
+    - section: "Causal Inference"
+      contents:
+        - 31-Causal-Inference-I.qmd
+        - 32-Causal-Inference-II.qmd
 
 # bibliography: references.bib
 

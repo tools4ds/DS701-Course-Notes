@@ -34,6 +34,8 @@ qmd_files=(
   "28-NLP.qmd"
   "29-NN-IV-Scikit-Learn.qmd"
   "30-NN-consolidated.qmd"
+  "31-Causal-Inference-I.qmd"
+  "32-Causal-Inference-II.qmd"
 )
 
 # Check if jupyter_notebooks directory exists, if not, create it

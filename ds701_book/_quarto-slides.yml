@@ -41,6 +41,8 @@ project:
     - nlp_packages_overview.qmd
     - 29-NN-IV-Scikit-Learn.qmd
     - 30-NN-consolidated.qmd
+    - 31-Causal-Inference-I.qmd
+    - 32-Causal-Inference-II.qmd
 
 resources:
   - figs/NN-figs/conv-demo/index.html
