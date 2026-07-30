@@ -1,7 +1,7 @@
 project:
   type: website
   output-dir: _site
-  pre-render: print_quarto_config.py
+  pre-render: scripts/print_quarto_config.py
   render:
     - index.qmd
     - 00-Class-Introduction.qmd

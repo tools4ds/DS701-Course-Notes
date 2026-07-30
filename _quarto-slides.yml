@@ -1,6 +1,6 @@
 project:
   output-dir: _revealjs
-  pre-render: print_quarto_config.py
+  pre-render: scripts/print_quarto_config.py
   render:
     - 00-Class-Introduction.qmd
     - 01-Intro-to-Python.qmd
