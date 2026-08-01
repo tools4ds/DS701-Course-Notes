@@ -4,7 +4,7 @@ jupyter: python3
 bibliography: references.bib
 ---
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/32-Causal-Inference-II.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/32-Causal-Inference-II.ipynb)
 
 In [Causal Inference I](31-Causal-Inference-I.qmd) we saw that the naive difference in
 means equals the true effect *plus selection bias*, and that **randomization** removes that

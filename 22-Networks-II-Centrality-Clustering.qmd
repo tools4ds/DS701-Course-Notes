@@ -20,7 +20,7 @@ import laUtilities as ut
 
 # Overview
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/22-Networks-II-Centrality-Clustering.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/22-Networks-II-Centrality-Clustering.ipynb)
 
 We previously introduced the concept of a graph to describe networks. To further analyze networks we will discuss network centrality and clustering.
 

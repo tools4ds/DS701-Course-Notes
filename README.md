@@ -37,16 +37,25 @@ type:
 
 along with a base `_quarto.yml` configuration.
 
+## Repository Layout
+
+The Quarto project root is the repository root. The lecture `.qmd` files live
+there alongside the `_quarto-*.yml` configurations, with supporting content in
+subdirectories:
+
+* `scripts/` — Python helper modules used by the lectures (`laUtilities.py`,
+  `slideUtilities.py`, `recommender_*.py`) and build utilities
+  (`print_quarto_config.py`, `strip-tags-with-profile.py`)
+* `jupyter_notebooks/` — generated notebooks backing the *Open in Colab* badges
+* `figs/`, `data/`, `drawio/` — figures, datasets and diagram sources
+* `lecture-graph/` — lecture dependency graph visualization
+* `grading-utils/` — self-contained grade computation notebook and spreadsheets
 
 ## Building the Site Locally
 
 > Tested with Quarto 1.5.55 on MacOS Sonoma 14.5.
 
-To build the site you need to be in the `ds701_book` directory. 
-
-```sh
-cd ds701_book
-```
+All build commands are run from the repository root.
 
 Since the site contains many lectures you may need to set the following
 environment variable using the terminal command:
@@ -58,7 +67,7 @@ export QUARTO_DENO_V8_OPTIONS=--stack-size=8192
 Once this environment variable has been set you can render the entire site using the terminal commands:
 
 ```sh
-# From ds701_book/ dir
+# From the repository root
 quarto render
 ```
 
@@ -70,7 +79,7 @@ To preview and individual chapter using VSCode, open that chapter's qmd file in
 VSCode and run `Shift-Command-K` in the terminal or click on the preview icon
 on the upper right of the code window,.
 
-Alternatively you can run `quarto preview` from a terminal prompt in the `ds701_book` directory.
+Alternatively you can run `quarto preview` from a terminal prompt at the repository root.
 To exit preview, hit `Ctl-c` in the same terminal window.
 
 ## Rendering Slides
@@ -79,11 +88,11 @@ To render slides for each lecture run
 ```sh
 quarto render --profile slides
 ```
-from `ds701_book/`. The resulting slides are writtein to `_revealjs` which
+from the repository root. The resulting slides are writtein to `_revealjs` which
 is ignored by git.
 
 Any easy way to select slides to preview is to open the folder in a browser
-such as `file:///<path-to-project-parent-folder>/DS701-Course-Notes/ds701_book/_revealjs/`.
+such as `file:///<path-to-project-parent-folder>/DS701-Course-Notes/_revealjs/`.
 Then you can just click on one of the `.html` files to view the slides.
 
 You can render just one slide with a command like
@@ -96,7 +105,7 @@ quarto render 05-Distances-Timeseries.qmd --profile slides
 To strip the slides for presentation, run
 
 ```sh
-./strip-tags-with-profile.py 11-Dimensionality-Reduction-SVD-II.qmd --profile slides
+./scripts/strip-tags-with-profile.py 11-Dimensionality-Reduction-SVD-II.qmd --profile slides
 ```
 
 This will create a new file `11-Dimensionality-Reduction-SVD-II-stripped.qmd` in the same directory.
@@ -110,7 +119,7 @@ TODO: The script for jupyter notebook creation could run this first so all the d
 To create PDFs from the reveal.js slides, you can use
 [decktape](https://github.com/astefanutti/decktape).
 
-For example, from `ds701_book`, run
+For example, from the repository root, run
 
 ```bash
 decktape _revealjs/04-Linear-Algebra-Refresher.html 04-Linear-Algebra-Refresher.pdf
@@ -119,8 +128,8 @@ decktape _revealjs/04-Linear-Algebra-Refresher.html 04-Linear-Algebra-Refresher.
 ## Creating Jupyter Notebooks
 
 To create Jupyter notebook versions of each of the lecture
-notes, run `./cmd-cnvt-to-jupyter.sh` from the `ds701_book`
-folder. It renders the Jupyter notebooks into the `jupyter_notebooks` folder
+notes, run `./cmd-cnvt-to-jupyter.sh` from the repository
+root. It renders the Jupyter notebooks into the `jupyter_notebooks` folder
 if the associated .qmd file has been modified.
 
 > Whenever you change in any `.qmd` file that has python in it, re-run
@@ -145,7 +154,7 @@ we use Quarto's support for [citations](https://quarto.org/docs/authoring/citati
 in the BibTeX format.
 
 For bibtex citations, add entries to 
-[`ds701_book/references.bib`](./ds701_book/references.bib) and cite them as
+[`references.bib`](./references.bib) and cite them as
 directed Quarto [citations](https://quarto.org/docs/authoring/citations.html).
 
 As stated in the Quarto documentation, the list of works will be placed at the

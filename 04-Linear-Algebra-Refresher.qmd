@@ -7,7 +7,7 @@ jupyter: python3
 
 ## Introduction to linear algebra
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/04-Linear-Algebra-Refresher.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/04-Linear-Algebra-Refresher.ipynb)
 
 Linear algebra is the branch of mathematics involving vectors and matrices. In particular, how vectors are transformed.  Knowledge of linear algebra is essential in data science. 
 

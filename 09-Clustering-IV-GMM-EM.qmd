@@ -6,7 +6,7 @@ fig-align: center
 
 ## From Hard to Soft Clustering
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/09-Clustering-IV-GMM-EM.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/09-Clustering-IV-GMM-EM.ipynb)
 
 ```{python}
 #| echo: false

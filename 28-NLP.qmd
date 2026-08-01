@@ -4,7 +4,7 @@ jupyter: python3
 bibliography: references.bib
 ---
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/28-NLP.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/28-NLP.ipynb)
 
 Natural language processing (NLP) is a subfield of artificial intelligence that allows computers to understand, process, and manipulate human language.
 

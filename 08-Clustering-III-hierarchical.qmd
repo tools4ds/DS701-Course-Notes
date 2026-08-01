@@ -6,7 +6,7 @@ fig-align: center
 
 ## Moving away from strict partitions
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/08-Clustering-III-hierarchical.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/08-Clustering-III-hierarchical.ipynb)
 
 ```{python}
 import numpy as np
