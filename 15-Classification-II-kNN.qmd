@@ -6,7 +6,7 @@ fig-align: center
 
 ## Introduction 
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/15-Classification-II-kNN.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/15-Classification-II-kNN.ipynb)
 
 ```{python}
 #| echo: false

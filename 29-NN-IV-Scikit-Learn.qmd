@@ -5,7 +5,7 @@ jupyter: python3
 
 ## Introduction
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/29-NN-IV-Scikit-Learn.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/29-NN-IV-Scikit-Learn.ipynb)
 
 ```{python}
 #| code-fold: true

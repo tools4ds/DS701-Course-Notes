@@ -5,7 +5,7 @@ jupyter: python3
 
 ## Introduction
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/24-NN-II-Backprop.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/24-NN-II-Backprop.ipynb)
 
 ```{python}
 #| echo: false

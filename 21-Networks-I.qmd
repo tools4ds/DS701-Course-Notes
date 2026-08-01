@@ -4,7 +4,7 @@ jupyter: python3
 ---
 
 # Networks
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/21-Networks-I.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/21-Networks-I.ipynb)
 
 ```{python}
 #| echo: false

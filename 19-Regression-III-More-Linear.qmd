@@ -28,7 +28,7 @@ np.random.seed(9876789)
 ```
 # Overfitting
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/19-Regression-III-More-Linear.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/19-Regression-III-More-Linear.ipynb)
 
 We have referenced the concept of overfitting previously in our [decision tree](14-Classification-I-Decision-Trees.qmd) and [dimensionality reduction](11-Dimensionality-Reduction-SVD-II.qmd) lectures.
 

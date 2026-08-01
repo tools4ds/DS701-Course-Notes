@@ -8,7 +8,7 @@ nocite: |
 
 ## Outline
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/14-Classification-I-Decision-Trees.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/14-Classification-I-Decision-Trees.ipynb)
 
 - Build a decision tree manually
 - Look at single and collective impurity measures

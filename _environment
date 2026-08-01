@@ -1,0 +1,5 @@
+# Environment variables applied by Quarto to every render of this project.
+# The lecture .qmd files import helper modules (laUtilities, slideUtilities,
+# recommender_*) as top-level modules, but those modules live in scripts/.
+# Putting scripts/ on PYTHONPATH keeps those imports resolvable.
+PYTHONPATH=scripts

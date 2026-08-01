@@ -6,7 +6,7 @@ nocite: |
   @novembre2008genes, @strang2022introduction
 ---
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/11-Dimensionality-Reduction-SVD-II.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/11-Dimensionality-Reduction-SVD-II.ipynb)
 
 We previously learned how to use the SVD as a tool for constructing low-rank matrices.
 
@@ -1060,6 +1060,6 @@ This asymmetry is what makes t-SNE effective!
 
 ## In-Class Exercise: Dimensionality Reduction with PCA and t-SNE
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/class_activity_notebooks/11-InClass-Exercise-Dimensionality-Reduction.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/class_activity_notebooks/11-InClass-Exercise-Dimensionality-Reduction.ipynb)
 
 ---

@@ -18,7 +18,7 @@ from torch.utils.data import DataLoader, Dataset
 from IPython.display import Image
 ```
 
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/ds701_book/jupyter_notebooks/27-RNN.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tools4ds/DS701-Course-Notes/blob/main/jupyter_notebooks/27-RNN.ipynb)
 
 We introduce recurrent neural networks (RNNs) which is a neural network architecture used for machine learning on sequential data.
 
