@@ -470,6 +470,11 @@ class three_d_figure:
         # first find the limits of x and y for grid creation
         # the limits will occur along the eigenvectors of the QF
         e, v = np.linalg.eig(qf_mat)
+        # np.linalg.eig hands back complex dtype even when every eigenvalue is
+        # real, as it is for the symmetric QFs plotted here.  Drop the (zero)
+        # imaginary parts -- otherwise they propagate into the grid coordinates
+        # and matplotlib rejects them.
+        e, v = np.real_if_close(e), np.real_if_close(v)
 
         # we will build a grid on which we'll evaluate the QF.
         # to draw the boundary of the surface precisely,
@@ -710,6 +715,11 @@ class three_d_figure:
         # first find the limits of x and y for grid creation
         # the limits will occur along the eigenvectors of the QF
         e, v = np.linalg.eig(qf_mat)
+        # np.linalg.eig hands back complex dtype even when every eigenvalue is
+        # real, as it is for the symmetric QFs plotted here.  Drop the (zero)
+        # imaginary parts -- otherwise they propagate into the grid coordinates
+        # and matplotlib rejects them.
+        e, v = np.real_if_close(e), np.real_if_close(v)
 
         # we will build a grid on which we'll evaluate the QF.
         # to draw the boundary of the surface precisely,

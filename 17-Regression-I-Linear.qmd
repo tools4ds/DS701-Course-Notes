@@ -191,6 +191,7 @@ For example, we may look at these points and decide to model them using a line.
 ax = plt.figure(figsize = (5, 5)).add_subplot()
 centerAxes(ax)
 line = np.array([1, 0.5])
+np.random.seed(1)
 xlin = -10.0 + 20.0 * np.random.random(100)
 ylin = line[0] + (line[1] * xlin) + np.random.randn(100)
 ax.plot(xlin, ylin, 'ro', markersize = 4)
@@ -207,6 +208,7 @@ ax = plt.figure(figsize = (5, 5)).add_subplot()
 centerAxes(ax)
 quad = np.array([1, 3, 0.5])
 std = 8.0
+np.random.seed(1)
 xquad = -10.0 + 20.0 * np.random.random(100)
 yquad = quad[0] + (quad[1] * xquad) + (quad[2] * xquad * xquad) + std * np.random.randn(100)
 ax.plot(xquad, yquad, 'ro', markersize = 4)
@@ -224,6 +226,7 @@ ax = plt.figure(figsize = (5, 5)).add_subplot()
 centerAxes(ax)
 log = np.array([1, 4])  
 std = 1.5
+np.random.seed(1)
 xlog = 10.0 * np.random.random(100)
 ylog = log[0] + log[1] * np.log(xlog) + std * np.random.randn(100)
 ax.plot(xlog, ylog, 'ro', markersize=4)
@@ -284,6 +287,7 @@ __parameter__ vector $\mathbf{\beta}.$
 ax = plt.figure(figsize = (5, 5)).add_subplot()
 centerAxes(ax)
 line = np.array([1, 0.5])
+np.random.seed(1)
 xlin = -10.0 + 20.0 * np.random.random(100)
 ylin = line[0] + (line[1] * xlin) + np.random.randn(100)
 ax.plot(xlin, ylin, 'ro', markersize = 4)
@@ -544,6 +548,7 @@ finding the $\mathbf{\beta}$ that determines the least-squares line.
 ax = plt.figure(figsize = (5, 5)).add_subplot()
 centerAxes(ax)
 line = np.array([1, 0.5])
+np.random.seed(1)
 xlin = -10.0 + 20.0 * np.random.random(100)
 ylin = line[0] + (line[1] * xlin) + np.random.randn(100)
 ax.plot(xlin, ylin, 'ro', markersize = 4)
@@ -669,6 +674,7 @@ sort of parabola instead of a straight line.
 ax = plt.figure(figsize = (5, 5)).add_subplot()
 centerAxes(ax)
 quad = np.array([1, 3, 0.5])
+np.random.seed(1)
 xquad = -10.0 + 20.0 * np.random.random(100)
 yquad = quad[0] + (quad[1] * xquad) + (quad[2] * xquad * xquad) + 2*np.random.randn(100)
 ax.plot(xquad, yquad, 'ro', markersize = 4)
@@ -886,6 +892,7 @@ u = [-4.0, 3.0, 1.0]
 npts = 50
 
 # set locations of points that fall within x,y
+np.random.seed(1)
 xc = -7.0 + 14.0 * np.random.random(npts)
 yc = -7.0 + 14.0 * np.random.random(npts)
 A = np.array([u,v]).T
