@@ -152,7 +152,7 @@ To make this easier to analyze, let's work with the (negative) log probability o
 ```{python}
 #| slideshow: {slide_type: fragment}
 import math
-log_prob_data = [-math.log(x) for x in prob_data]
+log_prob_data = [-math.log(x.item()) for x in prob_data]
 plt.plot(data, log_prob_data, 'o')
 _ = plt.xlim([-4.5,4.5])
 ```
@@ -215,7 +215,7 @@ _ = plt.ylim([-10,10])
 theta = np.linspace(0,2*math.pi,500)
 coords = np.array([np.sin(theta), np.cos(theta)])
 cov = np.array([[1., 0.75],[0.75, 3]])
-lam, evec = np.linalg.eig(cov)
+lam, evec = np.linalg.eigh(cov)
 c = evec @ np.diag(np.sqrt(lam))
 coords = 3 * c @ coords
 plt.plot(data[:-2,0],data[:-2,1],'o',markersize=3,color='b')

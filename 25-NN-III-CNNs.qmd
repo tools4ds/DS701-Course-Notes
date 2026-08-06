@@ -75,6 +75,10 @@ import matplotlib.pyplot as plt
 # Generate 12 evenly spaced x values between 1 and 4
 x = np.linspace(1, 4, 12)
 
+# seed once here so the figures are reproducible across renders; the
+# resampling cell below intentionally draws from the continuing stream
+np.random.seed(1)
+
 # Add normally distributed noise to the x values
 x += np.random.normal(0, 1.0, 12)
 

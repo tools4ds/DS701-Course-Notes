@@ -845,7 +845,8 @@ The support vectors are circled.
 ```{python}
 #| fig-align: center
 # Extract classes 1 and 2
-X, y = X[np.in1d(y, [1, 2])], y[np.in1d(y, [1, 2])]
+mask = np.isin(y, [1, 2])
+X, y = X[mask], y[mask]
 
 plot_estimator(svc, X, y)
 plt.xlabel('Alcohol')

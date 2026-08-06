@@ -1239,8 +1239,10 @@ k = 2
 football
 #
 # Compute the eigenvectors of its Laplacian
+# the Laplacian is symmetric, so use eigh -- it returns real
+# eigenvalues/eigenvectors, already in increasing order
 L = nx.laplacian_matrix(football).todense()
-w, v = np.linalg.eig(L)
+w, v = np.linalg.eigh(L)
 v = np.array(v)
 # 
 # scale each eigenvector by its eigenvalue
@@ -1305,8 +1307,10 @@ k = 3
 #
 #
 # Compute the eigenvectors of its Laplacian
+# the Laplacian is symmetric, so use eigh -- it returns real
+# eigenvalues/eigenvectors, already in increasing order
 L = nx.laplacian_matrix(football).todense()
-w, v = np.linalg.eig(L)
+w, v = np.linalg.eigh(L)
 v = np.array(v)
 # 
 # scale each eigenvector by its eigenvalue
@@ -1367,8 +1371,10 @@ To evaluate this question we can use Adjusted Rand Index.
 import sklearn.metrics as metrics
 #
 # Compute the eigenvectors of its Laplacian
+# the Laplacian is symmetric, so use eigh -- it returns real
+# eigenvalues/eigenvectors, already in increasing order
 L = nx.laplacian_matrix(football).todense()
-w, v = np.linalg.eig(L)
+w, v = np.linalg.eigh(L)
 v = np.array(v)
 # 
 # scale each eigenvector by its eigenvalue
